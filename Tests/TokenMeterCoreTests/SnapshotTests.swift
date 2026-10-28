@@ -60,3 +60,12 @@ final class SnapshotStoreTests: XCTestCase {
         XCTAssertEqual(store.read(), snapshot)
     }
 }
+
+final class LimitSettingsTests: XCTestCase {
+    func testWindowsCarryTheProviderSpecificLimit() {
+        let limits = LimitSettings(claudeSession: 10, claudeWeek: 70, chatgptSession: nil, chatgptWeek: 5)
+        XCTAssertEqual(limits.windows(for: .claude).map(\.tokenLimit), [10, 70])
+        XCTAssertEqual(limits.windows(for: .chatgpt).map(\.tokenLimit), [nil, 5])
+        XCTAssertEqual(limits.windows(for: .claude).map(\.name), ["5h", "7d"])
+    }
+}
