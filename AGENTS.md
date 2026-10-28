@@ -12,8 +12,7 @@ Gate: `pnpm run check`. Spike: `swift run tokenmeter-probe`.
 
 ## Open decisions
 
-- **Claude remaining quota** — no local source found yet; until one is, it is `estimated` from a
-  user-set limit or `consumptionOnly`.
+- **Claude remaining quota** — comes from the status line (ADR 0005); stale until a session runs.
 - **Host app and widget extension** — the Xcode project, App Group and signing team.
 
 ## Topic index (`.agents/doc/`)

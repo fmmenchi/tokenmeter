@@ -20,9 +20,9 @@ sidebar_position: 2
 
 ## Window semantics
 
-| Source     | Window | Quota                                                                   |
-| ---------- | ------ | ----------------------------------------------------------------------- |
-| Codex logs | 5h, 7d | `reported` when `rate_limits` primary/secondary is present              |
-| Claude     | 5h, 7d | `reported` from the status line (ADR 0005), else `estimated`, else none |
+| Source     | Window | Quota                                                      |
+| ---------- | ------ | ---------------------------------------------------------- |
+| Codex logs | 5h, 7d | `reported` when `rate_limits` primary/secondary is present |
+| Claude     | 5h, 7d | `reported` from the status line (ADR 0005), else none      |
 
 Token totals include cache reads, which dominate the count; they measure traffic, not plan cost.

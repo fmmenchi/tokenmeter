@@ -23,5 +23,5 @@ See [Architecture](./architecture.md).
 
 Plan limits are not expressed in tokens and neither provider publishes an API for them.
 A remaining-quota figure is shown only when it comes from the provider's own logs
-(`reported`) or from a limit you configured (`estimated`). Otherwise the widget shows
+(`reported`), or inferred after a reset (`reset`). Otherwise the widget shows
 consumption only. See [ADR 0002](./adr/0002-metric-and-data-sources.md).

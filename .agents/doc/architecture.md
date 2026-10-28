@@ -14,7 +14,7 @@ Where things go. The decisions behind them are in `docs/adr/`.
 Rules:
 
 - The widget extension only renders a `Snapshot`; collection lives in the host app (ADR 0001).
-- A remaining-quota figure must carry its `source` (`reported`, `estimated`, `consumptionOnly`).
-  Never show a percentage the code cannot attribute to a provider log or a user-set limit.
+- A remaining-quota figure must carry its `source` (`reported`, `reset`, `consumptionOnly`).
+  Never show a percentage the code cannot attribute to a provider log or a reset window (ADR 0007).
 - Provider log formats are not contracts. Decode tolerantly (optional fields, skip bad lines)
   and add a test with the exact shape that broke.

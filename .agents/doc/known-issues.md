@@ -35,9 +35,3 @@ while Claude Code renders its status line (ADR 0005). If the bars for Claude are
 
 The first collection after launch reads every log touched in 7 days (about 9 s for 7.5 GB, release
 build). Later refreshes read only appended bytes (ADR 0004). Do not call the readers on the main thread.
-
-## `SettingsLink` does nothing from the menu bar
-
-**Symptom:** the Limits button does not open anything.
-**Cause:** the app is `LSUIElement`, so it is never frontmost, and the `Settings` scene does not open from a `MenuBarExtra`.
-**Do:** use a `Window` scene and open it with `openWindow` after `NSApplication.shared.activate`.
