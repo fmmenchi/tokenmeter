@@ -10,3 +10,4 @@ apps/docusaurus/build/
 apps/docusaurus/.docusaurus/
 Local.xcconfig
 *.xcodeproj/
+dist/
