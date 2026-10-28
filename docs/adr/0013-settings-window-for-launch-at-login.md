@@ -13,7 +13,9 @@ settings surface.
 The panel has a **Settings…** button that opens a small window with the **Launch at login** switch.
 The window is a `Window` scene, not the `Settings` scene: `SettingsLink` does not open from a
 menu-bar-only app, which is what made the old Limits button fail. The button activates the app
-first, because an accessory app is never frontmost.
+first, because an accessory app is never frontmost. Activating was not enough on its own: the button
+also switches the app to a regular one while the window is open, and `SettingsView` returns it to
+accessory when it disappears.
 
 ## Consequences
 
