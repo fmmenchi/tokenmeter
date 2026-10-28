@@ -15,6 +15,7 @@ extension WindowUsage {
         switch source {
         case .reported: resetText.map { "resets \($0)" } ?? "reported"
         case .estimated: "estimate"
+        case .reset: "window reset · not used since"
         case .consumptionOnly: "no quota · \(tokens.output.compactTokens) out"
         }
     }
