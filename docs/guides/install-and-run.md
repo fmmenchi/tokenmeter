@@ -52,13 +52,26 @@ The app has no Dock icon and no window: look for the gauge icon in the menu bar 
 open the panel. Without a team the app still runs, but the panel warns that the widget cannot read
 the snapshot.
 
-## Step 4: Keep it running
+## Step 4: Install it and let it start at login
 
-The app does not start at login. Add it under **System Settings, General, Login Items**.
+To keep the app after cleaning the build folder, build the zip ([Package and
+Distribute](./package-and-distribute.md)) and copy the app to `/Applications`:
 
-:::caution[Not tested]
-Copying `TokenMeter.app` to `/Applications` before adding it to Login Items, so it survives
-cleaning the build folder, was not tried here. Only running it from the build folder was.
+```bash
+./scripts/package.sh
+ditto -x -k dist/TokenMeter-*.zip /tmp/tokenmeter
+ditto /tmp/tokenmeter/TokenMeter.app /Applications/TokenMeter.app
+open /Applications/TokenMeter.app
+```
+
+The app **registers itself to start at login the first time it runs**
+([ADR 0011](../adr/0011-launch-at-login.md)). You will see it under System Settings, General, Login
+Items. The panel has a **Launch at login** switch; if you turn it off the app never turns it back
+on. Run the copy in `/Applications`: the registration belongs to the copy that registered it.
+
+:::info[Verified]
+The zip's app, copied to `/Applications`, starts from there with a valid signature and the widget
+registered at that path.
 :::
 
 ## Check from the terminal

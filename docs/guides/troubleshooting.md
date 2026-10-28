@@ -27,12 +27,13 @@ app; if both are wrong, it is in the data.
 
 ## App and widget
 
-| Symptom                                             | Cause                                                       | Fix                                                                                                  |
-| :-------------------------------------------------- | :---------------------------------------------------------- | :--------------------------------------------------------------------------------------------------- |
-| Panel warns "No App Group"                          | No signing team in `Local.xcconfig`.                        | Set `DEVELOPMENT_TEAM` ([Install and Run](./install-and-run.md)), regenerate and rebuild.            |
-| Widget says "Open tokenmeter once to publish usage" | The app is not running, or it could not write the snapshot. | Start the app. If it persists, check the App Group entitlement is in the signed build.               |
-| No gauge icon in the menu bar                       | The app is not running, or the icon is in the overflow.     | `pgrep -fl TokenMeter`; relaunch; check menu-bar overflow.                                           |
-| First launch takes several seconds to show data     | The first read scans a week of logs.                        | Expected; later refreshes read only new bytes ([ADR 0004](../adr/0004-incremental-log-scanning.md)). |
+| Symptom                                             | Cause                                                                                  | Fix                                                                                                                              |
+| :-------------------------------------------------- | :------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------- |
+| Panel warns "No App Group"                          | No signing team in `Local.xcconfig`.                                                   | Set `DEVELOPMENT_TEAM` ([Install and Run](./install-and-run.md)), regenerate and rebuild.                                        |
+| Widget says "Open tokenmeter once to publish usage" | The app is not running, or it could not write the snapshot.                            | Start the app. If it persists, check the App Group entitlement is in the signed build.                                           |
+| No gauge icon in the menu bar                       | The app is not running, or the icon is in the overflow.                                | `pgrep -fl TokenMeter`; relaunch; check menu-bar overflow.                                                                       |
+| The app does not start after a restart              | It never registered, you turned the switch off, or you ran a copy from a build folder. | Run the copy in `/Applications` and check the **Launch at login** switch in the panel and System Settings, General, Login Items. |
+| First launch takes several seconds to show data     | The first read scans a week of logs.                                                   | Expected; later refreshes read only new bytes ([ADR 0004](../adr/0004-incremental-log-scanning.md)).                             |
 
 :::caution[Personal Team]
 Free Personal Teams may not support App Groups on macOS. The signed build here carried the group
