@@ -13,7 +13,7 @@ sandboxed and cannot read `~/.claude` or `~/.codex`; the host app can, if it is 
   two log trees. It refreshes every 60 seconds, writes `snapshot.json` into the App Group
   container `group.com.fmmenchi.tokenmeter` and asks WidgetKit to reload.
 - The **widget extension** is sandboxed, reads only that file, and renders it.
-- Token limits for `estimated` windows are user settings stored in the App Group `UserDefaults`.
+- ~~Token limits for `estimated` windows are user settings~~ — removed by ADR 0009.
 - The Xcode project is generated from `project.yml` by XcodeGen; the `.xcodeproj` is not committed.
 - The signing team is not committed: `Local.xcconfig` (git-ignored, template in
   `Local.xcconfig.example`) sets `DEVELOPMENT_TEAM`.
