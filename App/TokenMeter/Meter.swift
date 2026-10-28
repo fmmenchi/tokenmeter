@@ -7,6 +7,7 @@ import WidgetKit
 @Observable
 final class Meter {
     private(set) var snapshot: Snapshot?
+    private(set) var isRefreshing = false
     var limits: LimitSettings {
         didSet { saveLimits(); Task { await refresh() } }
     }
@@ -36,6 +37,9 @@ final class Meter {
     }
 
     func refresh() async {
+        guard !isRefreshing else { return }
+        isRefreshing = true
+        defer { isRefreshing = false }
         let collector = collector
         let limits = limits
         let result = await Task.detached { collector.snapshot(limits: limits) }.value
