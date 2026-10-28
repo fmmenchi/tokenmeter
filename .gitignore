@@ -8,3 +8,5 @@ node_modules/
 .DS_Store
 apps/docusaurus/build/
 apps/docusaurus/.docusaurus/
+Local.xcconfig
+*.xcodeproj/

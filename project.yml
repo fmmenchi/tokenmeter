@@ -1,0 +1,54 @@
+name: TokenMeter
+options:
+  bundleIdPrefix: com.fmmenchi
+  deploymentTarget:
+    macOS: "14.0"
+configFiles:
+  Debug: Config/Base.xcconfig
+  Release: Config/Base.xcconfig
+packages:
+  TokenMeterCore:
+    path: .
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    CODE_SIGN_STYLE: Automatic
+targets:
+  TokenMeter:
+    type: application
+    platform: macOS
+    sources: [App/TokenMeter, Shared]
+    dependencies:
+      - package: TokenMeterCore
+      - target: TokenMeterWidget
+    entitlements:
+      path: App/TokenMeter/TokenMeter.entitlements
+      properties:
+        com.apple.security.application-groups: [group.com.fmmenchi.tokenmeter]
+        com.apple.security.app-sandbox: false
+    info:
+      path: App/TokenMeter/Info.plist
+      properties:
+        LSUIElement: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.fmmenchi.tokenmeter
+  TokenMeterWidget:
+    type: app-extension
+    platform: macOS
+    sources: [Widget/TokenMeterWidget, Shared]
+    dependencies:
+      - package: TokenMeterCore
+    entitlements:
+      path: Widget/TokenMeterWidget/TokenMeterWidget.entitlements
+      properties:
+        com.apple.security.application-groups: [group.com.fmmenchi.tokenmeter]
+        com.apple.security.app-sandbox: true
+    info:
+      path: Widget/TokenMeterWidget/Info.plist
+      properties:
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.fmmenchi.tokenmeter.widget

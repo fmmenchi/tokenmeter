@@ -1,0 +1,2 @@
+// Optional per-machine overrides (git-ignored): DEVELOPMENT_TEAM. See Local.xcconfig.example.
+#include? "../Local.xcconfig"
