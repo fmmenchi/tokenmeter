@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 enum SettingsWindow {
@@ -18,5 +19,6 @@ struct SettingsView: View {
         .formStyle(.grouped)
         .frame(width: 380)
         .padding()
+        .onDisappear { NSApplication.shared.setActivationPolicy(.accessory) }
     }
 }

@@ -34,7 +34,9 @@ struct MenuContent: View {
                 }
                 .disabled(meter.isRefreshing)
                 Button("Settings…") {
-                    // An accessory app is never frontmost; without this the window opens behind.
+                    // An accessory app cannot show a regular window in front: become a regular app
+                    // while Settings is open (SettingsView puts it back on disappear).
+                    NSApplication.shared.setActivationPolicy(.regular)
                     NSApplication.shared.activate(ignoringOtherApps: true)
                     openWindow(id: SettingsWindow.id)
                 }
