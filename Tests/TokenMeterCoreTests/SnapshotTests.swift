@@ -44,3 +44,19 @@ final class SnapshotTests: XCTestCase {
         XCTAssertEqual(b.windows[0].source, .consumptionOnly)
     }
 }
+
+final class SnapshotStoreTests: XCTestCase {
+    func testRoundTripAndMissingFile() throws {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("\(UUID().uuidString).json")
+        addTeardownBlock { try? FileManager.default.removeItem(at: url) }
+        let store = SnapshotStore(url: url)
+        XCTAssertNil(store.read())
+
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        let snapshot = Snapshot(generatedAt: now, providers: [
+            SnapshotBuilder.providerSnapshot(provider: .claude, events: [], windows: [.session], now: now),
+        ])
+        try store.write(snapshot)
+        XCTAssertEqual(store.read(), snapshot)
+    }
+}
