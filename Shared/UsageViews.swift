@@ -39,28 +39,41 @@ extension Int {
     }
 }
 
+/// A thick, filled bar. SwiftUI's `ProgressView` collapses to a hairline in menus and widgets.
+struct QuotaBar: View {
+    let fraction: Double?
+    let tint: Color
+
+    var body: some View {
+        GeometryReader { proxy in
+            ZStack(alignment: .leading) {
+                Capsule().fill(Color.primary.opacity(0.15))
+                if let fraction {
+                    Capsule().fill(tint)
+                        .frame(width: max(proxy.size.height, proxy.size.width * min(max(fraction, 0), 1)))
+                }
+            }
+        }
+        .frame(height: 10)
+    }
+}
+
 struct WindowRow: View {
     let usage: WindowUsage
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            HStack(spacing: 8) {
-                Text(usage.window.name == "7d" ? "Week" : "5h")
-                    .font(.caption.monospaced()).foregroundStyle(.secondary)
-                    .frame(width: 36, alignment: .leading)
-                // Always drawn: an empty bar means "quota unknown", not "nothing left".
-                ProgressView(value: usage.remainingFraction ?? 0)
-                    .tint(tint)
-                    .opacity(usage.remainingFraction == nil ? 0.35 : 1)
-                Text(usage.remainingText).font(.caption.bold().monospacedDigit())
-                    .frame(width: 40, alignment: .trailing)
+        VStack(alignment: .leading, spacing: 3) {
+            HStack(alignment: .firstTextBaseline) {
+                Text(usage.window.name == "7d" ? "Weekly" : "5 hours").font(.caption.weight(.medium))
+                Spacer()
+                Text(usage.remainingFraction == nil ? "unknown" : "\(usage.remainingText) left")
+                    .font(.caption.bold().monospacedDigit())
             }
-            Text(usage.detailText).font(.caption2).foregroundStyle(.secondary).padding(.leading, 44)
+            QuotaBar(fraction: usage.remainingFraction, tint: tint)
+            Text(usage.detailText).font(.caption2).foregroundStyle(.secondary)
         }
     }
-}
 
-extension WindowRow {
     var tint: Color {
         guard let fraction = usage.remainingFraction else { return .gray }
         return fraction < 0.15 ? .red : fraction < 0.4 ? .orange : .green
@@ -71,8 +84,8 @@ struct ProviderBlock: View {
     let snapshot: ProviderSnapshot
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(snapshot.provider.title).font(.caption.weight(.semibold))
+        VStack(alignment: .leading, spacing: 8) {
+            Text(snapshot.provider.title).font(.subheadline.weight(.semibold))
             ForEach(snapshot.windows, id: \.window.name) { WindowRow(usage: $0) }
         }
     }
