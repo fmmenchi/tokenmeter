@@ -28,13 +28,17 @@ extension WindowUsage {
         return minutes >= 1440 ? "\(minutes / 1440)d ago" : minutes >= 60 ? "\(minutes / 60)h ago" : "\(max(minutes, 1))m ago"
     }
 
+    /// Input + output tokens seen in the window. Cache reads are left out: they are ~98% of the
+    /// raw total and say nothing about plan use.
+    var tokensText: String { "\((tokens.input + tokens.output).compactTokens) tokens" }
+
     var detailText: String {
         switch source {
         case .reported where isStale:
-            "last seen \(observedAgoText ?? "a while ago") · may have dropped since"
-        case .reported: resetText.map { "resets \($0)" } ?? "reported"
+            "\(tokensText) · seen \(observedAgoText ?? "a while ago") · may be lower"
+        case .reported: [tokensText, resetText.map { "resets \($0)" }].compactMap { $0 }.joined(separator: " · ")
         case .reset: "window reset · not used since"
-        case .consumptionOnly: "no quota · \(tokens.output.compactTokens) out"
+        case .consumptionOnly: "no quota · \(tokensText)"
         }
     }
 
