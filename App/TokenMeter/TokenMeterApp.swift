@@ -1,10 +1,6 @@
 import SwiftUI
 import TokenMeterCore
 
-enum LimitsWindow {
-    static let id = "limits"
-}
-
 @main
 struct TokenMeterApp: App {
     @State private var meter = Meter()
@@ -17,10 +13,5 @@ struct TokenMeterApp: App {
         }
         .menuBarExtraStyle(.window)
 
-        // A plain window, not `Settings`: SettingsLink does not open from a menu-bar-only app.
-        Window("Limits", id: LimitsWindow.id) {
-            SettingsView(meter: meter)
-        }
-        .windowResizability(.contentSize)
     }
 }

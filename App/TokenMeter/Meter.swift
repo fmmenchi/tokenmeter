@@ -8,21 +8,11 @@ import WidgetKit
 final class Meter {
     private(set) var snapshot: Snapshot?
     private(set) var isRefreshing = false
-    var limits: LimitSettings {
-        didSet { saveLimits(); Task { await refresh() } }
-    }
-
-    private let defaults = UserDefaults(suiteName: SnapshotStore.appGroup) ?? .standard
     private let collector = Collector()
     private let store = SnapshotStore.appGroupStore()
     private var timer: Timer?
 
     init() {
-        limits = LimitSettings(
-            claudeSession: defaults.object(forKey: "claudeSession") as? Int,
-            claudeWeek: defaults.object(forKey: "claudeWeek") as? Int,
-            chatgptSession: defaults.object(forKey: "chatgptSession") as? Int,
-            chatgptWeek: defaults.object(forKey: "chatgptWeek") as? Int)
         Task { await refresh() }
         timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
             Task { @MainActor in await self?.refresh() }
@@ -41,19 +31,11 @@ final class Meter {
         isRefreshing = true
         defer { isRefreshing = false }
         let collector = collector
-        let limits = limits
-        let result = await Task.detached { collector.snapshot(limits: limits) }.value
+        let result = await Task.detached { collector.snapshot() }.value
         snapshot = result
         if let store {
             try? store.write(result)
             WidgetCenter.shared.reloadAllTimelines()
-        }
-    }
-
-    private func saveLimits() {
-        for (key, value) in [("claudeSession", limits.claudeSession), ("claudeWeek", limits.claudeWeek),
-                             ("chatgptSession", limits.chatgptSession), ("chatgptWeek", limits.chatgptWeek)] {
-            if let value { defaults.set(value, forKey: key) } else { defaults.removeObject(forKey: key) }
         }
     }
 

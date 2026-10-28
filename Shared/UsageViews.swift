@@ -14,8 +14,8 @@ extension WindowUsage {
         return Date().timeIntervalSince(observedAt) > Self.staleAfter
     }
 
-    /// True when the figure is old, inferred or estimated rather than a fresh provider reading.
-    var isApproximate: Bool { isStale || source == .reset || source == .estimated }
+    /// True when the figure is old, inferred  rather than a fresh provider reading.
+    var isApproximate: Bool { isStale || source == .reset }
 
     var remainingText: String {
         guard let remainingFraction else { return "—" }
@@ -33,7 +33,6 @@ extension WindowUsage {
         case .reported where isStale:
             "last seen \(observedAgoText ?? "a while ago") · may have dropped since"
         case .reported: resetText.map { "resets \($0)" } ?? "reported"
-        case .estimated: "estimate"
         case .reset: "window reset · not used since"
         case .consumptionOnly: "no quota · \(tokens.output.compactTokens) out"
         }
