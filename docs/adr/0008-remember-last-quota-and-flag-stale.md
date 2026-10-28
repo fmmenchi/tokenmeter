@@ -13,7 +13,7 @@ overstates what is known: usage since then can only have raised it.
 - Every reported quota carries `observedAt`: the status-line file's modification time for Claude,
   the log event's timestamp for Codex. The snapshot keeps it per window.
 - A reported quota older than 10 minutes is **stale**. The UI keeps showing it, dimmed, with a
-  `~` before the figure and the text "last seen 3h ago, may have dropped since".
+  `~` before the figure and the text "seen 3h ago · may be lower".
 - A `reset` window (ADR 0007) is dimmed and shown with `~` as well: it is inferred.
 - At render time `WindowUsage.resolved(at:)` turns any reported figure whose `resets_at` has passed
   into a full, inferred `reset` window and drops its observation. The widget timeline gets an
