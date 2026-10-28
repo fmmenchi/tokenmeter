@@ -44,8 +44,8 @@ final class ReaderTests: XCTestCase {
 
         XCTAssertEqual(result.events.count, 2, "an unchanged counter must not produce an event")
         XCTAssertEqual(result.events.map(\.tokens.total).reduce(0, +), 330)
-        XCTAssertEqual(result.latestQuota?.usedPercent, 42.5)
-        XCTAssertEqual(result.latestQuota?.windowMinutes, 300)
+        XCTAssertEqual(result.latestQuotas.map(\.usedPercent), [42.5])
+        XCTAssertEqual(result.latestQuotas.map(\.windowMinutes), [300])
     }
 
     func testIncrementalReadPicksUpAppendsAndIgnoresPartialLine() throws {
@@ -71,5 +71,19 @@ final class ReaderTests: XCTestCase {
         try finish.write(contentsOf: Data("\n".utf8))
         try finish.close()
         XCTAssertEqual(reader.events(since: epoch).map(\.tokens.output), [1, 2, 4])
+    }
+
+    func testClaudeQuotaReadsBothWindowsAndDropsExpired() throws {
+        let dir = try tempDir()
+        let file = dir.appendingPathComponent("claude-statusline.json")
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        let json = #"{"cwd":"/x","rate_limits":{"five_hour":{"used_percentage":23.5,"resets_at":1800003600},"seven_day":{"used_percentage":61,"resets_at":1799990000}}}"#
+        try json.write(to: file, atomically: true, encoding: .utf8)
+
+        let quotas = ClaudeQuotaReader(file: file).quotas(now: now)
+
+        XCTAssertEqual(quotas.map(\.windowMinutes), [300], "the 7d window already reset")
+        XCTAssertEqual(quotas.first?.usedPercent, 23.5)
+        XCTAssertEqual(ClaudeQuotaReader(file: dir.appendingPathComponent("missing.json")).quotas(now: now), [])
     }
 }

@@ -36,9 +36,9 @@ final class SnapshotTests: XCTestCase {
         let live = ReportedQuota(usedPercent: 30, windowMinutes: 300, resetsAt: now.addingTimeInterval(600))
         let stale = ReportedQuota(usedPercent: 30, windowMinutes: 300, resetsAt: now.addingTimeInterval(-600))
         let a = SnapshotBuilder.providerSnapshot(provider: .chatgpt, events: [], windows: [.session],
-                                                 reported: live, now: now)
+                                                 reported: [live], now: now)
         let b = SnapshotBuilder.providerSnapshot(provider: .chatgpt, events: [], windows: [.session],
-                                                 reported: stale, now: now)
+                                                 reported: [stale], now: now)
         XCTAssertEqual(a.windows[0].remainingFraction ?? -1, 0.7, accuracy: 1e-9)
         XCTAssertEqual(a.windows[0].source, .reported)
         XCTAssertEqual(b.windows[0].source, .consumptionOnly)
