@@ -8,11 +8,14 @@ import WidgetKit
 final class Meter {
     private(set) var snapshot: Snapshot?
     private(set) var isRefreshing = false
+    private(set) var launchAtLogin = false
     private let collector = Collector()
     private let store = SnapshotStore.appGroupStore()
     private var timer: Timer?
 
     init() {
+        LaunchAtLogin.enableOnFirstRun()
+        launchAtLogin = LaunchAtLogin.isEnabled
         Task { await refresh() }
         timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
             Task { @MainActor in await self?.refresh() }
@@ -40,4 +43,10 @@ final class Meter {
     }
 
     var widgetCanRead: Bool { store != nil }
+
+    func setLaunchAtLogin(_ enabled: Bool) {
+        try? LaunchAtLogin.set(enabled)
+        // Show what macOS actually did: registration can fail for some signatures.
+        launchAtLogin = LaunchAtLogin.isEnabled
+    }
 }

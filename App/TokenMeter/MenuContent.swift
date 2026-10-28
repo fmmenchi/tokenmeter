@@ -24,6 +24,10 @@ struct MenuContent: View {
                 Text("No App Group: set DEVELOPMENT_TEAM in Local.xcconfig for the widget.")
                     .font(.caption2).foregroundStyle(.orange)
             }
+            Toggle("Launch at login", isOn: Binding(
+                get: { meter.launchAtLogin },
+                set: { meter.setLaunchAtLogin($0) }))
+                .toggleStyle(.switch).controlSize(.small)
             Divider()
             HStack {
                 Button {
