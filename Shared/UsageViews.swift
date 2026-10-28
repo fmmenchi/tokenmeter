@@ -6,13 +6,32 @@ extension Provider {
 }
 
 extension WindowUsage {
+    /// A reported figure older than this no longer counts as live (ADR 0008).
+    static let staleAfter: TimeInterval = 10 * 60
+
+    var isStale: Bool {
+        guard source == .reported, let observedAt else { return false }
+        return Date().timeIntervalSince(observedAt) > Self.staleAfter
+    }
+
+    /// True when the figure is old, inferred or estimated rather than a fresh provider reading.
+    var isApproximate: Bool { isStale || source == .reset || source == .estimated }
+
     var remainingText: String {
         guard let remainingFraction else { return "—" }
-        return "\(Int((remainingFraction * 100).rounded()))%"
+        return "\(isApproximate ? "~" : "")\(Int((remainingFraction * 100).rounded()))%"
+    }
+
+    var observedAgoText: String? {
+        guard let observedAt else { return nil }
+        let minutes = Int(Date().timeIntervalSince(observedAt) / 60)
+        return minutes >= 1440 ? "\(minutes / 1440)d ago" : minutes >= 60 ? "\(minutes / 60)h ago" : "\(max(minutes, 1))m ago"
     }
 
     var detailText: String {
         switch source {
+        case .reported where isStale:
+            "last seen \(observedAgoText ?? "a while ago") · may be higher now"
         case .reported: resetText.map { "resets \($0)" } ?? "reported"
         case .estimated: "estimate"
         case .reset: "window reset · not used since"
@@ -87,7 +106,7 @@ struct ProviderBlock: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(snapshot.provider.title).font(.subheadline.weight(.semibold))
-            ForEach(snapshot.windows, id: \.window.name) { WindowRow(usage: $0) }
+            ForEach(snapshot.windows, id: \.window.name) { WindowRow(usage: $0.resolved(at: Date())) }
         }
     }
 }
