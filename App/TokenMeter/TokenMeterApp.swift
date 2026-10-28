@@ -13,5 +13,11 @@ struct TokenMeterApp: App {
         }
         .menuBarExtraStyle(.window)
 
+        // A plain window, not `Settings`: SettingsLink does not open from a menu-bar-only app.
+        Window("Settings", id: SettingsWindow.id) {
+            SettingsView(meter: meter)
+        }
+        .windowResizability(.contentSize)
+
     }
 }

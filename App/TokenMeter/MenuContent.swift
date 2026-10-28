@@ -3,6 +3,7 @@ import TokenMeterCore
 
 struct MenuContent: View {
     let meter: Meter
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -24,10 +25,6 @@ struct MenuContent: View {
                 Text("No App Group: set DEVELOPMENT_TEAM in Local.xcconfig for the widget.")
                     .font(.caption2).foregroundStyle(.orange)
             }
-            Toggle("Launch at login", isOn: Binding(
-                get: { meter.launchAtLogin },
-                set: { meter.setLaunchAtLogin($0) }))
-                .toggleStyle(.switch).controlSize(.small)
             Divider()
             HStack {
                 Button {
@@ -36,6 +33,11 @@ struct MenuContent: View {
                     if meter.isRefreshing { ProgressView().controlSize(.small) } else { Text("Refresh") }
                 }
                 .disabled(meter.isRefreshing)
+                Button("Settings…") {
+                    // An accessory app is never frontmost; without this the window opens behind.
+                    NSApplication.shared.activate(ignoringOtherApps: true)
+                    openWindow(id: SettingsWindow.id)
+                }
                 Spacer()
                 Button("Quit") { NSApplication.shared.terminate(nil) }
             }
