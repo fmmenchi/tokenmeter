@@ -109,7 +109,14 @@ struct ProviderBlock: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(snapshot.provider.title).font(.subheadline.weight(.semibold))
+            HStack(spacing: 6) {
+                Text(snapshot.provider.title).font(.subheadline.weight(.semibold))
+                if let plan = snapshot.plan {
+                    Text(plan).font(.caption2.weight(.medium))
+                        .padding(.horizontal, 6).padding(.vertical, 1)
+                        .background(Capsule().fill(Color.primary.opacity(0.12)))
+                }
+            }
             ForEach(snapshot.windows, id: \.window.name) { WindowRow(usage: $0.resolved(at: Date())) }
         }
     }
