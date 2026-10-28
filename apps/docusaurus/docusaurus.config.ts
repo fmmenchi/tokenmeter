@@ -7,7 +7,8 @@ const config: Config = {
   url: 'https://fmmenchi.github.io',
   baseUrl: '/tokenmeter/',
   onBrokenLinks: 'throw',
-  markdown: { hooks: { onBrokenMarkdownLinks: 'throw' } },
+  markdown: { mermaid: true, hooks: { onBrokenMarkdownLinks: 'throw' } },
+  themes: ['@docusaurus/theme-mermaid'],
   presets: [
     [
       'classic',
