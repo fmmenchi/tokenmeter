@@ -96,3 +96,24 @@ final class ResolvedTests: XCTestCase {
     }
 }
 
+final class PlanNameTests: XCTestCase {
+    func testClaudeLabels() {
+        XCTAssertEqual(PlanName.claude(organizationType: "claude_max", rateLimitTier: "default_claude_max_20x"), "Max 20x")
+        XCTAssertEqual(PlanName.claude(organizationType: "claude_max", rateLimitTier: "default_claude_max_5x"), "Max 5x")
+        XCTAssertEqual(PlanName.claude(organizationType: "claude_max", rateLimitTier: nil), "Max")
+        XCTAssertEqual(PlanName.claude(organizationType: "claude_pro", rateLimitTier: nil), "Pro")
+        XCTAssertEqual(PlanName.claude(organizationType: "claude_something_new", rateLimitTier: nil), "Something New")
+        XCTAssertNil(PlanName.claude(organizationType: nil, rateLimitTier: nil))
+    }
+
+    func testChatGPTLabel() {
+        XCTAssertEqual(PlanName.chatgpt(planType: "team"), "Team")
+        XCTAssertEqual(PlanName.chatgpt(planType: "plus"), "Plus")
+        XCTAssertNil(PlanName.chatgpt(planType: nil))
+    }
+
+    func testPlanIsCarriedIntoTheSnapshot() {
+        let snap = SnapshotBuilder.providerSnapshot(provider: .claude, events: [], windows: [.session], plan: "Max 20x")
+        XCTAssertEqual(snap.plan, "Max 20x")
+    }
+}

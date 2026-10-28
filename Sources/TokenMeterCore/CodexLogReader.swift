@@ -10,6 +10,7 @@ public final class CodexLogReader: @unchecked Sendable {
         var previous = TokenCounts()
         var events: [UsageEvent] = []
         var quotas: [Int: (Date, ReportedQuota)] = [:]
+        var plan: (Date, String)?
     }
 
     private let lock = NSLock()
@@ -24,6 +25,8 @@ public final class CodexLogReader: @unchecked Sendable {
         public var events: [UsageEvent]
         /// Most recent non-null provider-reported quota, if any log carried one.
         public var latestQuotas: [ReportedQuota]
+        /// Raw `plan_type` of the most recent event that carried one.
+        public var latestPlanType: String?
     }
 
     private struct Line: Decodable {
@@ -46,6 +49,7 @@ public final class CodexLogReader: @unchecked Sendable {
                 }
                 let primary: Window?
                 let secondary: Window?
+                let plan_type: String?
             }
             let type: String?
             let info: Info?
@@ -67,6 +71,7 @@ public final class CodexLogReader: @unchecked Sendable {
 
         var events: [UsageEvent] = []
         var quotas: [Int: (Date, ReportedQuota)] = [:]
+        var plan: (Date, String)?
         for file in files {
             var state = states[file] ?? FileState()
             let (lines, next) = LogFiles.newLines(in: file, from: state.offset, containing: marker)
@@ -102,14 +107,19 @@ public final class CodexLogReader: @unchecked Sendable {
                         usedPercent: used, windowMinutes: minutes,
                         resetsAt: window.resets_at.map { Date(timeIntervalSince1970: $0) }, observedAt: date))
                 }
+                if let type = line.payload?.rate_limits?.plan_type, state.plan == nil || date > state.plan!.0 {
+                    state.plan = (date, type)
+                }
             }
             state.events.removeAll { $0.date < since }
             states[file] = state
             events += state.events
+            if let candidate = state.plan, plan == nil || candidate.0 > plan!.0 { plan = candidate }
             for (minutes, candidate) in state.quotas where quotas[minutes] == nil || candidate.0 > quotas[minutes]!.0 {
                 quotas[minutes] = candidate
             }
         }
-        return Result(events: events.sorted { $0.date < $1.date }, latestQuotas: quotas.values.map(\.1).sorted { ($0.windowMinutes ?? 0) < ($1.windowMinutes ?? 0) })
+        return Result(events: events.sorted { $0.date < $1.date }, latestQuotas: quotas.values.map(\.1).sorted { ($0.windowMinutes ?? 0) < ($1.windowMinutes ?? 0) },
+                      latestPlanType: plan?.1)
     }
 }

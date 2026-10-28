@@ -55,6 +55,14 @@ public struct WindowUsage: Codable, Equatable, Sendable {
 public struct ProviderSnapshot: Codable, Equatable, Sendable {
     public let provider: Provider
     public let windows: [WindowUsage]
+    /// Subscription label such as "Max 20x"; nil when the CLI recorded none (ADR 0012).
+    public let plan: String?
+
+    public init(provider: Provider, windows: [WindowUsage], plan: String? = nil) {
+        self.provider = provider
+        self.windows = windows
+        self.plan = plan
+    }
 }
 
 public struct Snapshot: Codable, Equatable, Sendable {
@@ -76,6 +84,7 @@ public enum SnapshotBuilder {
         events: [UsageEvent],
         windows: [WindowSpec],
         reported: [ReportedQuota] = [],
+        plan: String? = nil,
         now: Date = Date()
     ) -> ProviderSnapshot {
         let usages = windows.map { spec -> WindowUsage in
@@ -101,6 +110,6 @@ public enum SnapshotBuilder {
             return WindowUsage(window: spec, tokens: tokens, remainingFraction: nil,
                                source: .consumptionOnly, resetsAt: nil, observedAt: nil)
         }
-        return ProviderSnapshot(provider: provider, windows: usages)
+        return ProviderSnapshot(provider: provider, windows: usages, plan: plan)
     }
 }

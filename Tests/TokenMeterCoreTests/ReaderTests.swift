@@ -85,4 +85,20 @@ final class ReaderTests: XCTestCase {
         XCTAssertEqual(quotas.first?.usedPercent, 23.5)
         XCTAssertEqual(ClaudeQuotaReader(file: dir.appendingPathComponent("missing.json")).quotas(), [])
     }
+
+    func testClaudePlanReadsOnlyThePlanFields() throws {
+        let dir = try tempDir()
+        let file = dir.appendingPathComponent("claude.json")
+        let json = #"{"oauthAccount":{"emailAddress":"x@y.z","organizationType":"claude_max","organizationRateLimitTier":"default_claude_max_20x"}}"#
+        try json.write(to: file, atomically: true, encoding: .utf8)
+        XCTAssertEqual(ClaudePlanReader(file: file).plan(), "Max 20x")
+        XCTAssertNil(ClaudePlanReader(file: dir.appendingPathComponent("missing.json")).plan())
+    }
+
+    func testCodexPlanTypeIsReturned() throws {
+        let dir = try tempDir()
+        let line = #"{"timestamp":"2026-10-28T10:00:00.000Z","type":"event_msg","payload":{"type":"token_count","info":{"total_token_usage":{"input_tokens":1,"output_tokens":1}},"rate_limits":{"primary":null,"secondary":null,"plan_type":"team"}}}"#
+        try (line + "\n").write(to: dir.appendingPathComponent("rollout-a.jsonl"), atomically: true, encoding: .utf8)
+        XCTAssertEqual(CodexLogReader(root: dir).read(since: epoch).latestPlanType, "team")
+    }
 }
