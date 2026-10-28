@@ -66,7 +66,7 @@ open /Applications/TokenMeter.app
 
 The app **registers itself to start at login the first time it runs**
 ([ADR 0011](../adr/0011-launch-at-login.md)). You will see it under System Settings, General, Login
-Items. The panel has a **Launch at login** switch; if you turn it off the app never turns it back
+Items. **Settings…** in the panel has a **Launch at login** switch; if you turn it off the app never turns it back
 on. Run the copy in `/Applications`: the registration belongs to the copy that registered it.
 
 :::info[Verified]
