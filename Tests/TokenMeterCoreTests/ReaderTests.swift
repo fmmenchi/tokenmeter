@@ -18,7 +18,7 @@ final class ReaderTests: XCTestCase {
             #"{"type":"assistant","timestamp":"2026-10-28T10:00:01.000Z","requestId":"r1","message":{"id":"m1","usage":{"input_tokens":2,"output_tokens":50,"cache_read_input_tokens":100,"cache_creation_input_tokens":5}}}"#,
             #"{"type":"user","timestamp":"2026-10-28T10:00:02.000Z","message":{"id":"x"}}"#,
             "not json",
-        ].joined(separator: "\n")
+        ].joined(separator: "\n") + "\n"
         try lines.write(to: dir.appendingPathComponent("s.jsonl"), atomically: true, encoding: .utf8)
 
         let events = ClaudeLogReader(root: dir).events(since: epoch)
@@ -37,7 +37,7 @@ final class ReaderTests: XCTestCase {
             line("2026-10-28T10:01:00.000Z", input: 100, cached: 40, out: 10, limits: "null"),
             line("2026-10-28T10:02:00.000Z", input: 300, cached: 140, out: 30,
                  limits: #"{"primary":{"used_percent":42.5,"window_minutes":300,"resets_at":1793000000}}"#),
-        ].joined(separator: "\n")
+        ].joined(separator: "\n") + "\n"
         try lines.write(to: dir.appendingPathComponent("rollout-a.jsonl"), atomically: true, encoding: .utf8)
 
         let result = CodexLogReader(root: dir).read(since: epoch)
@@ -46,5 +46,30 @@ final class ReaderTests: XCTestCase {
         XCTAssertEqual(result.events.map(\.tokens.total).reduce(0, +), 330)
         XCTAssertEqual(result.latestQuota?.usedPercent, 42.5)
         XCTAssertEqual(result.latestQuota?.windowMinutes, 300)
+    }
+
+    func testIncrementalReadPicksUpAppendsAndIgnoresPartialLine() throws {
+        let dir = try tempDir()
+        let file = dir.appendingPathComponent("s.jsonl")
+        func message(_ id: String, out: Int) -> String {
+            // Distinct seconds keep the sort order deterministic.
+            #"{"type":"assistant","timestamp":"2026-10-28T10:00:0\#(out).000Z","message":{"id":"\#(id)","usage":{"output_tokens":\#(out)}}}"#
+        }
+        try (message("a", out: 1) + "\n").write(to: file, atomically: true, encoding: .utf8)
+        let reader = ClaudeLogReader(root: dir)
+        XCTAssertEqual(reader.events(since: epoch).map(\.tokens.output), [1])
+
+        let handle = try FileHandle(forWritingTo: file)
+        try handle.seekToEnd()
+        // Second message is complete; the third is still being written (no newline yet).
+        try handle.write(contentsOf: Data((message("b", out: 2) + "\n" + message("c", out: 4)).utf8))
+        try handle.close()
+        XCTAssertEqual(reader.events(since: epoch).map(\.tokens.output), [1, 2])
+
+        let finish = try FileHandle(forWritingTo: file)
+        try finish.seekToEnd()
+        try finish.write(contentsOf: Data("\n".utf8))
+        try finish.close()
+        XCTAssertEqual(reader.events(since: epoch).map(\.tokens.output), [1, 2, 4])
     }
 }
