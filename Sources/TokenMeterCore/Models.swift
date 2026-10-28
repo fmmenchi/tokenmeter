@@ -43,10 +43,13 @@ public struct ReportedQuota: Codable, Equatable, Sendable {
     public let usedPercent: Double
     public let windowMinutes: Int?
     public let resetsAt: Date?
+    /// When the provider reported this value (not when it was read).
+    public let observedAt: Date?
 
-    public init(usedPercent: Double, windowMinutes: Int?, resetsAt: Date?) {
+    public init(usedPercent: Double, windowMinutes: Int?, resetsAt: Date?, observedAt: Date? = nil) {
         self.usedPercent = usedPercent
         self.windowMinutes = windowMinutes
         self.resetsAt = resetsAt
+        self.observedAt = observedAt
     }
 }

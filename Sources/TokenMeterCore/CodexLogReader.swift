@@ -100,7 +100,7 @@ public final class CodexLogReader: @unchecked Sendable {
                           state.quotas[minutes] == nil || date > state.quotas[minutes]!.0 else { continue }
                     state.quotas[minutes] = (date, ReportedQuota(
                         usedPercent: used, windowMinutes: minutes,
-                        resetsAt: window.resets_at.map { Date(timeIntervalSince1970: $0) }))
+                        resetsAt: window.resets_at.map { Date(timeIntervalSince1970: $0) }, observedAt: date))
                 }
             }
             state.events.removeAll { $0.date < since }
