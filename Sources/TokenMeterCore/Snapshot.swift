@@ -23,6 +23,9 @@ public struct WindowUsage: Codable, Equatable, Sendable {
         case reported
         /// Consumed tokens against a user-configured limit.
         case estimated
+        /// The last reported window has expired and nothing was used since: it is full again.
+        /// Inferred, not reported (ADR 0007).
+        case reset
         /// Consumption only; no remaining quota can be stated.
         case consumptionOnly
     }
@@ -73,6 +76,13 @@ public enum SnapshotBuilder {
                 return WindowUsage(window: spec, tokens: tokens,
                                    remainingFraction: max(0, 1 - reported.usedPercent / 100),
                                    source: .reported, resetsAt: reported.resetsAt)
+            }
+            if tokens.total == 0, reported.contains(where: {
+                guard let minutes = $0.windowMinutes, abs(Double(minutes) * 60 - spec.duration) < 60 else { return false }
+                return $0.resetsAt.map { $0 <= now } ?? false
+            }) {
+                return WindowUsage(window: spec, tokens: tokens, remainingFraction: 1,
+                                   source: .reset, resetsAt: nil)
             }
             if let limit = spec.tokenLimit, limit > 0 {
                 return WindowUsage(window: spec, tokens: tokens,

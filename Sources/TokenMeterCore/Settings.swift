@@ -43,7 +43,7 @@ public struct Collector: Sendable {
         let providers = [
             SnapshotBuilder.providerSnapshot(
                 provider: .claude, events: claude.events(since: since),
-                windows: limits.windows(for: .claude), reported: claudeQuota.quotas(now: now), now: now),
+                windows: limits.windows(for: .claude), reported: claudeQuota.quotas(), now: now),
             SnapshotBuilder.providerSnapshot(
                 provider: .chatgpt, events: codexResult.events,
                 windows: limits.windows(for: .chatgpt), reported: codexResult.latestQuotas, now: now),

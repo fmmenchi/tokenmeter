@@ -16,7 +16,7 @@ func line(_ p: ProviderSnapshot) {
 }
 
 let claude = ClaudeLogReader().events(since: since)
-line(SnapshotBuilder.providerSnapshot(provider: .claude, events: claude, windows: windows, reported: ClaudeQuotaReader().quotas(now: now), now: now))
+line(SnapshotBuilder.providerSnapshot(provider: .claude, events: claude, windows: windows, reported: ClaudeQuotaReader().quotas(), now: now))
 
 let codex = CodexLogReader().read(since: since)
 line(SnapshotBuilder.providerSnapshot(provider: .chatgpt, events: codex.events, windows: windows,

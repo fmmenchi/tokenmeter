@@ -26,14 +26,14 @@ public struct ClaudeQuotaReader: Sendable {
         (try? FileManager.default.attributesOfItem(atPath: file.path))?[.modificationDate] as? Date
     }
 
-    public func quotas(now: Date = Date()) -> [ReportedQuota] {
+    /// Expired windows are kept: the snapshot decides what an expired window means (ADR 0007).
+    public func quotas() -> [ReportedQuota] {
         guard let data = try? Data(contentsOf: file),
               let limits = (try? JSONDecoder().decode(Input.self, from: data))?.rate_limits else { return [] }
         let windows: [(Input.Window?, Int)] = [(limits.five_hour, 300), (limits.seven_day, 10_080)]
         return windows.compactMap { window, minutes in
             guard let window, let used = window.used_percentage else { return nil }
             let resets = window.resets_at.map { Date(timeIntervalSince1970: $0) }
-            if let resets, resets <= now { return nil }
             return ReportedQuota(usedPercent: used, windowMinutes: minutes, resetsAt: resets)
         }
     }
