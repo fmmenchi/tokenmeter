@@ -29,19 +29,19 @@ below. The `pre-push` hook enforces it.
 
 Conventional commits, one concern each. The `commit-msg` hook runs commitlint.
 
-| Type       | Use for                                          |
-| :--------- | :----------------------------------------------- |
-| `feat`     | A new capability.                                |
-| `fix`      | A bug fix.                                       |
-| `perf`     | A speed or memory improvement.                   |
-| `refactor` | A change with no behaviour change.               |
-| `test`     | Tests only.                                      |
-| `docs`     | Documentation and ADRs.                          |
-| `build`    | Build system, dependencies, project generation.  |
-| `ci`       | Workflows.                                       |
-| `style`    | Formatting only.                                 |
-| `chore`    | Everything else.                                 |
-| `revert`   | Reverting a commit.                              |
+| Type       | Use for                                         |
+| :--------- | :---------------------------------------------- |
+| `feat`     | A new capability.                               |
+| `fix`      | A bug fix.                                      |
+| `perf`     | A speed or memory improvement.                  |
+| `refactor` | A change with no behaviour change.              |
+| `test`     | Tests only.                                     |
+| `docs`     | Documentation and ADRs.                         |
+| `build`    | Build system, dependencies, project generation. |
+| `ci`       | Workflows.                                      |
+| `style`    | Formatting only.                                |
+| `chore`    | Everything else.                                |
+| `revert`   | Reverting a commit.                             |
 
 The list lives in `tools/commit/types.mjs`, shared by commitlint and the branch check.
 
@@ -57,25 +57,25 @@ failing gate gets fixed; `--no-verify` is not used.
 
 ## What CI runs
 
-| Job       | Runner   | Does                                                                                   |
-| :-------- | :------- | :------------------------------------------------------------------------------------- |
-| `swift`   | macOS    | `swift build`, `swift test`, then generates the project and builds the app with signing off. |
-| `web`     | Ubuntu   | Prettier check and the Docusaurus build.                                               |
-| `commits` | Ubuntu   | commitlint over the pull request's commits.                                            |
+| Job       | Runner | Does                                                                                         |
+| :-------- | :----- | :------------------------------------------------------------------------------------------- |
+| `swift`   | macOS  | `swift build`, `swift test`, then generates the project and builds the app with signing off. |
+| `web`     | Ubuntu | Prettier check and the Docusaurus build.                                                     |
+| `commits` | Ubuntu | commitlint over the pull request's commits.                                                  |
 
 On `main`, `docs.yml` deploys this site to GitHub Pages when `docs/` or `apps/docusaurus/` change.
 
 ## Project layout
 
-| Path                         | What                                                  |
-| :--------------------------- | :---------------------------------------------------- |
-| `Sources/TokenMeterCore`     | Readers, window maths, snapshot. No UI.               |
+| Path                         | What                                                      |
+| :--------------------------- | :-------------------------------------------------------- |
+| `Sources/TokenMeterCore`     | Readers, window maths, snapshot. No UI.                   |
 | `Tests/TokenMeterCoreTests`  | XCTest; fixtures go to a temp folder, never to real logs. |
-| `App/`, `Widget/`, `Shared/` | The app, the widget and the views they share.         |
-| `project.yml`                | XcodeGen definition of the Xcode project.             |
-| `docs/`                      | This site's content, ADRs included.                   |
-| `apps/docusaurus/`           | The site itself.                                      |
-| `.agents/doc/`               | Rules for AI coding agents working in the repo.       |
+| `App/`, `Widget/`, `Shared/` | The app, the widget and the views they share.             |
+| `project.yml`                | XcodeGen definition of the Xcode project.                 |
+| `docs/`                      | This site's content, ADRs included.                       |
+| `apps/docusaurus/`           | The site itself.                                          |
+| `.agents/doc/`               | Rules for AI coding agents working in the repo.           |
 
 :::tip[Provider log formats are not contracts]
 Decode tolerantly: optional fields, skip lines that do not parse, and add a test with the exact
