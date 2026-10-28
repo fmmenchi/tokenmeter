@@ -21,6 +21,11 @@ public struct ClaudeQuotaReader: Sendable {
         let rate_limits: Limits?
     }
 
+    /// Modification time of the status-line file, i.e. how fresh the quota is.
+    public func updatedAt() -> Date? {
+        (try? FileManager.default.attributesOfItem(atPath: file.path))?[.modificationDate] as? Date
+    }
+
     public func quotas(now: Date = Date()) -> [ReportedQuota] {
         guard let data = try? Data(contentsOf: file),
               let limits = (try? JSONDecoder().decode(Input.self, from: data))?.rate_limits else { return [] }

@@ -43,6 +43,14 @@ public struct ProviderSnapshot: Codable, Equatable, Sendable {
 public struct Snapshot: Codable, Equatable, Sendable {
     public let generatedAt: Date
     public let providers: [ProviderSnapshot]
+    /// When the Claude status line last wrote its quota; nil if it never did.
+    public let claudeQuotaUpdatedAt: Date?
+
+    public init(generatedAt: Date, providers: [ProviderSnapshot], claudeQuotaUpdatedAt: Date? = nil) {
+        self.generatedAt = generatedAt
+        self.providers = providers
+        self.claudeQuotaUpdatedAt = claudeQuotaUpdatedAt
+    }
 }
 
 public enum SnapshotBuilder {

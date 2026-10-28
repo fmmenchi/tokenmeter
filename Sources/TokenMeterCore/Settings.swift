@@ -40,13 +40,14 @@ public struct Collector: Sendable {
     public func snapshot(limits: LimitSettings, now: Date = Date()) -> Snapshot {
         let since = now.addingTimeInterval(-WindowSpec.week.duration)
         let codexResult = codex.read(since: since)
-        return Snapshot(generatedAt: now, providers: [
+        let providers = [
             SnapshotBuilder.providerSnapshot(
                 provider: .claude, events: claude.events(since: since),
                 windows: limits.windows(for: .claude), reported: claudeQuota.quotas(now: now), now: now),
             SnapshotBuilder.providerSnapshot(
                 provider: .chatgpt, events: codexResult.events,
                 windows: limits.windows(for: .chatgpt), reported: codexResult.latestQuotas, now: now),
-        ])
+        ]
+        return Snapshot(generatedAt: now, providers: providers, claudeQuotaUpdatedAt: claudeQuota.updatedAt())
     }
 }
