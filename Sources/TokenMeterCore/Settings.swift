@@ -28,10 +28,13 @@ public struct LimitSettings: Equatable, Sendable {
 public struct Collector: Sendable {
     public var claude: ClaudeLogReader
     public var codex: CodexLogReader
+    public var claudeQuota: ClaudeQuotaReader
 
-    public init(claude: ClaudeLogReader = ClaudeLogReader(), codex: CodexLogReader = CodexLogReader()) {
+    public init(claude: ClaudeLogReader = ClaudeLogReader(), codex: CodexLogReader = CodexLogReader(),
+                claudeQuota: ClaudeQuotaReader = ClaudeQuotaReader()) {
         self.claude = claude
         self.codex = codex
+        self.claudeQuota = claudeQuota
     }
 
     public func snapshot(limits: LimitSettings, now: Date = Date()) -> Snapshot {
@@ -40,10 +43,10 @@ public struct Collector: Sendable {
         return Snapshot(generatedAt: now, providers: [
             SnapshotBuilder.providerSnapshot(
                 provider: .claude, events: claude.events(since: since),
-                windows: limits.windows(for: .claude), now: now),
+                windows: limits.windows(for: .claude), reported: claudeQuota.quotas(now: now), now: now),
             SnapshotBuilder.providerSnapshot(
                 provider: .chatgpt, events: codexResult.events,
-                windows: limits.windows(for: .chatgpt), reported: codexResult.latestQuota, now: now),
+                windows: limits.windows(for: .chatgpt), reported: codexResult.latestQuotas, now: now),
         ])
     }
 }

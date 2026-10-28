@@ -16,9 +16,9 @@ func line(_ p: ProviderSnapshot) {
 }
 
 let claude = ClaudeLogReader().events(since: since)
-line(SnapshotBuilder.providerSnapshot(provider: .claude, events: claude, windows: windows, now: now))
+line(SnapshotBuilder.providerSnapshot(provider: .claude, events: claude, windows: windows, reported: ClaudeQuotaReader().quotas(now: now), now: now))
 
 let codex = CodexLogReader().read(since: since)
 line(SnapshotBuilder.providerSnapshot(provider: .chatgpt, events: codex.events, windows: windows,
-                                      reported: codex.latestQuota, now: now))
-print("codex reported quota:", codex.latestQuota.map { "\($0.usedPercent)% used" } ?? "none in logs")
+                                      reported: codex.latestQuotas, now: now))
+print("codex reported quotas:", codex.latestQuotas.map { "\($0.windowMinutes ?? 0)m \($0.usedPercent)% used" })

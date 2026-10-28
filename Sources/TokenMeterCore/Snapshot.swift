@@ -50,7 +50,7 @@ public enum SnapshotBuilder {
         provider: Provider,
         events: [UsageEvent],
         windows: [WindowSpec],
-        reported: ReportedQuota? = nil,
+        reported: [ReportedQuota] = [],
         now: Date = Date()
     ) -> ProviderSnapshot {
         let usages = windows.map { spec -> WindowUsage in
@@ -58,9 +58,10 @@ public enum SnapshotBuilder {
             let tokens = events.lazy.filter { $0.date >= start && $0.date <= now }
                 .reduce(TokenCounts()) { $0 + $1.tokens }
 
-            if let reported, let minutes = reported.windowMinutes,
-               abs(Double(minutes) * 60 - spec.duration) < 60,
-               reported.resetsAt.map({ $0 > now }) ?? true {
+            if let reported = reported.first(where: {
+                guard let minutes = $0.windowMinutes, abs(Double(minutes) * 60 - spec.duration) < 60 else { return false }
+                return $0.resetsAt.map { $0 > now } ?? true
+            }) {
                 return WindowUsage(window: spec, tokens: tokens,
                                    remainingFraction: max(0, 1 - reported.usedPercent / 100),
                                    source: .reported, resetsAt: reported.resetsAt)

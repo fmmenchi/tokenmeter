@@ -9,7 +9,7 @@ public final class CodexLogReader: @unchecked Sendable {
         /// Counters are cumulative per session: events are the deltas between them.
         var previous = TokenCounts()
         var events: [UsageEvent] = []
-        var quota: (Date, ReportedQuota)?
+        var quotas: [Int: (Date, ReportedQuota)] = [:]
     }
 
     private let lock = NSLock()
@@ -23,7 +23,7 @@ public final class CodexLogReader: @unchecked Sendable {
     public struct Result: Sendable {
         public var events: [UsageEvent]
         /// Most recent non-null provider-reported quota, if any log carried one.
-        public var latestQuota: ReportedQuota?
+        public var latestQuotas: [ReportedQuota]
     }
 
     private struct Line: Decodable {
@@ -66,7 +66,7 @@ public final class CodexLogReader: @unchecked Sendable {
         states = states.filter { files.contains($0.key) }
 
         var events: [UsageEvent] = []
-        var quota: (Date, ReportedQuota)?
+        var quotas: [Int: (Date, ReportedQuota)] = [:]
         for file in files {
             var state = states[file] ?? FileState()
             let (lines, next) = LogFiles.newLines(in: file, from: state.offset, containing: marker)
@@ -95,18 +95,21 @@ public final class CodexLogReader: @unchecked Sendable {
                     }
                 }
 
-                if let window = line.payload?.rate_limits?.primary, let used = window.used_percent,
-                   state.quota == nil || date > state.quota!.0 {
-                    state.quota = (date, ReportedQuota(
-                        usedPercent: used, windowMinutes: window.window_minutes,
+                for window in [line.payload?.rate_limits?.primary, line.payload?.rate_limits?.secondary] {
+                    guard let window, let used = window.used_percent, let minutes = window.window_minutes,
+                          state.quotas[minutes] == nil || date > state.quotas[minutes]!.0 else { continue }
+                    state.quotas[minutes] = (date, ReportedQuota(
+                        usedPercent: used, windowMinutes: minutes,
                         resetsAt: window.resets_at.map { Date(timeIntervalSince1970: $0) }))
                 }
             }
             state.events.removeAll { $0.date < since }
             states[file] = state
             events += state.events
-            if let candidate = state.quota, quota == nil || candidate.0 > quota!.0 { quota = candidate }
+            for (minutes, candidate) in state.quotas where quotas[minutes] == nil || candidate.0 > quotas[minutes]!.0 {
+                quotas[minutes] = candidate
+            }
         }
-        return Result(events: events.sorted { $0.date < $1.date }, latestQuota: quota?.1)
+        return Result(events: events.sorted { $0.date < $1.date }, latestQuotas: quotas.values.map(\.1).sorted { ($0.windowMinutes ?? 0) < ($1.windowMinutes ?? 0) })
     }
 }
