@@ -2,7 +2,7 @@ name: TokenMeter
 options:
   bundleIdPrefix: com.fmmenchi
   deploymentTarget:
-    macOS: "14.0"
+    macOS: '14.0'
 configFiles:
   Debug: Config/Base.xcconfig
   Release: Config/Base.xcconfig
@@ -11,7 +11,7 @@ packages:
     path: .
 settings:
   base:
-    SWIFT_VERSION: "6.0"
+    SWIFT_VERSION: '6.0'
     CODE_SIGN_STYLE: Automatic
 targets:
   TokenMeter:
