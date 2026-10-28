@@ -1,8 +1,19 @@
 import Foundation
 
 /// Reads Codex CLI rollouts (`~/.codex/sessions/**/rollout-*.jsonl`), the ChatGPT-plan side.
-public struct CodexLogReader: Sendable {
+public final class CodexLogReader: @unchecked Sendable {
     public let root: URL
+
+    private struct FileState {
+        var offset: UInt64 = 0
+        /// Counters are cumulative per session: events are the deltas between them.
+        var previous = TokenCounts()
+        var events: [UsageEvent] = []
+        var quota: (Date, ReportedQuota)?
+    }
+
+    private let lock = NSLock()
+    private var states: [URL: FileState] = [:]
 
     public init(root: URL = FileManager.default.homeDirectoryForCurrentUser
         .appendingPathComponent(".codex/sessions")) {
@@ -45,18 +56,26 @@ public struct CodexLogReader: Sendable {
         let payload: Payload?
     }
 
+    private let marker = Data(#""token_count""#.utf8)
+
     public func read(since: Date) -> Result {
+        lock.lock()
+        defer { lock.unlock() }
+        let decoder = JSONDecoder()
+        let files = LogFiles.jsonl(under: root, modifiedSince: since)
+        states = states.filter { files.contains($0.key) }
+
         var events: [UsageEvent] = []
         var quota: (Date, ReportedQuota)?
-        let decoder = JSONDecoder()
-
-        for file in LogFiles.jsonl(under: root, modifiedSince: since) {
-            // Counters are cumulative per session: turn them into per-event deltas.
-            var previous = TokenCounts()
-            LogFiles.forEachLine(in: file) { data in
+        for file in files {
+            var state = states[file] ?? FileState()
+            let (lines, next) = LogFiles.newLines(in: file, from: state.offset, containing: marker)
+            if next < state.offset { state = FileState() }
+            state.offset = next
+            for data in lines {
                 guard let line = try? decoder.decode(Line.self, from: data),
                       line.type == "event_msg", line.payload?.type == "token_count",
-                      let stamp = line.timestamp, let date = LogDate.parse(stamp) else { return }
+                      let stamp = line.timestamp, let date = LogDate.parse(stamp) else { continue }
 
                 if let usage = line.payload?.info?.total_token_usage {
                     let cached = usage.cached_input_tokens ?? 0
@@ -66,23 +85,27 @@ public struct CodexLogReader: Sendable {
                         cacheRead: cached,
                         cacheWrite: usage.cache_write_input_tokens ?? 0)
                     let delta = TokenCounts(
-                        input: max(current.input - previous.input, 0),
-                        output: max(current.output - previous.output, 0),
-                        cacheRead: max(current.cacheRead - previous.cacheRead, 0),
-                        cacheWrite: max(current.cacheWrite - previous.cacheWrite, 0))
-                    previous = current
-                    if delta.total > 0, date >= since {
-                        events.append(UsageEvent(provider: .chatgpt, date: date, tokens: delta))
+                        input: max(current.input - state.previous.input, 0),
+                        output: max(current.output - state.previous.output, 0),
+                        cacheRead: max(current.cacheRead - state.previous.cacheRead, 0),
+                        cacheWrite: max(current.cacheWrite - state.previous.cacheWrite, 0))
+                    state.previous = current
+                    if delta.total > 0 {
+                        state.events.append(UsageEvent(provider: .chatgpt, date: date, tokens: delta))
                     }
                 }
 
                 if let window = line.payload?.rate_limits?.primary, let used = window.used_percent,
-                   quota == nil || date > quota!.0 {
-                    quota = (date, ReportedQuota(
+                   state.quota == nil || date > state.quota!.0 {
+                    state.quota = (date, ReportedQuota(
                         usedPercent: used, windowMinutes: window.window_minutes,
                         resetsAt: window.resets_at.map { Date(timeIntervalSince1970: $0) }))
                 }
             }
+            state.events.removeAll { $0.date < since }
+            states[file] = state
+            events += state.events
+            if let candidate = state.quota, quota == nil || candidate.0 > quota!.0 { quota = candidate }
         }
         return Result(events: events.sorted { $0.date < $1.date }, latestQuota: quota?.1)
     }
