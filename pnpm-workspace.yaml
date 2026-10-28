@@ -1,2 +1,5 @@
 packages:
   - apps/*
+# core-js postinstall only prints a funding banner; building it is not needed.
+allowBuilds:
+  core-js: false

@@ -1,0 +1,22 @@
+{
+  "name": "@tokenmeter/docusaurus",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "docusaurus start",
+    "build": "docusaurus build",
+    "typecheck": "tsc"
+  },
+  "dependencies": {
+    "@docusaurus/core": "^3.9.0",
+    "@docusaurus/preset-classic": "^3.9.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@docusaurus/module-type-aliases": "^3.9.0",
+    "@docusaurus/tsconfig": "^3.9.0",
+    "@docusaurus/types": "^3.9.0",
+    "typescript": "~5.9.0"
+  }
+}

@@ -6,3 +6,5 @@
 DerivedData/
 node_modules/
 .DS_Store
+apps/docusaurus/build/
+apps/docusaurus/.docusaurus/
