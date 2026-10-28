@@ -3,7 +3,9 @@
   "collapsible": true,
   "label": "\ud83e\udded Decisions",
   "link": {
-    "type": "generated-index"
+    "type": "generated-index",
+    "slug": "/adr",
+    "description": "Why each structural choice was made. A decision is written here before the code."
   },
   "position": 4
 }
