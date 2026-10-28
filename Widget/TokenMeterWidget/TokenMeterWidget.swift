@@ -15,7 +15,13 @@ struct UsageProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<UsageEntry>) -> Void) {
-        completion(Timeline(entries: [entry()], policy: .after(.now.addingTimeInterval(15 * 60))))
+        let current = entry()
+        // One extra entry at each reset time, so a bar flips to "reset" when its window ends
+        // instead of waiting for the next refresh.
+        let resets = (current.snapshot?.providers.flatMap(\.windows).compactMap(\.resetsAt) ?? [])
+            .filter { $0 > .now && $0 < .now.addingTimeInterval(24 * 3600) }
+        let later = Set(resets).sorted().map { UsageEntry(date: $0, snapshot: current.snapshot) }
+        completion(Timeline(entries: [current] + later, policy: .after(.now.addingTimeInterval(15 * 60))))
     }
 
     private func entry() -> UsageEntry {
