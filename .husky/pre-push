@@ -1,0 +1,11 @@
+# Semantic branch names, checked on the refs actually being pushed (stdin: "<local ref> <local sha> <remote ref> <remote sha>").
+null_sha=0000000000000000000000000000000000000000
+while read -r local_ref local_sha remote_ref remote_sha; do
+  [ "$local_sha" = "$null_sha" ] && continue
+  case "$remote_ref" in
+    refs/heads/*) node tools/commit/check-branch-name.mjs "${remote_ref#refs/heads/}" || exit 1 ;;
+  esac
+done
+
+# The repository's own gate.
+pnpm run check

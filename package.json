@@ -1,0 +1,23 @@
+{
+  "name": "tokenmeter",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "packageManager": "pnpm@11.25.0",
+  "scripts": {
+    "prepare": "husky",
+    "swift:build": "swift build",
+    "swift:test": "swift test",
+    "format:check": "prettier --check \"**/*.{md,mjs,json,yml}\" --ignore-path .prettierignore",
+    "check": "pnpm run format:check && pnpm run swift:test && pnpm run docs:build",
+    "docs:start": "pnpm --dir apps/docusaurus start",
+    "docs:build": "pnpm --dir apps/docusaurus build"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
+    "cz-conventional-changelog": "^3.3.0",
+    "husky": "^9.1.7",
+    "prettier": "^3.8.0"
+  }
+}

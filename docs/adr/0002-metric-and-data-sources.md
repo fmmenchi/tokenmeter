@@ -15,9 +15,9 @@ Sources, in order of preference:
 
 1. **Local logs.**
    - Claude Code: `~/.claude/projects/*/*.jsonl`, `usage` objects per message.
-     *Verified:* input, output and cache token fields are present.
+     _Verified:_ input, output and cache token fields are present.
    - Codex CLI (ChatGPT plan): `~/.codex/sessions/**/rollout-*.jsonl`.
-     *Not verified:* `rate_limits` was `null` in every sample checked.
+     _Not verified:_ `rate_limits` was `null` in every sample checked.
 2. **Provider endpoints** only if a spike confirms one is usable without scraping browser cookies.
 3. **Rejected:** reading claude.ai / chatgpt.com through browser session cookies (fragile, ToS risk).
 
