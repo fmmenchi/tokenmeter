@@ -3,26 +3,20 @@ import Foundation
 public struct WindowSpec: Codable, Equatable, Sendable {
     public let name: String
     public let duration: TimeInterval
-    /// User-configured token budget for the window. Plan limits are not published in tokens,
-    /// so a nil limit means "unknown": only consumption is shown, never a remaining quota.
-    public let tokenLimit: Int?
 
-    public init(name: String, duration: TimeInterval, tokenLimit: Int?) {
+    public init(name: String, duration: TimeInterval) {
         self.name = name
         self.duration = duration
-        self.tokenLimit = tokenLimit
     }
 
-    public static let session = WindowSpec(name: "5h", duration: 5 * 3600, tokenLimit: nil)
-    public static let week = WindowSpec(name: "7d", duration: 7 * 24 * 3600, tokenLimit: nil)
+    public static let session = WindowSpec(name: "5h", duration: 5 * 3600)
+    public static let week = WindowSpec(name: "7d", duration: 7 * 24 * 3600)
 }
 
 public struct WindowUsage: Codable, Equatable, Sendable {
     public enum Source: String, Codable, Sendable {
         /// Percentage reported by the provider in its own logs.
         case reported
-        /// Consumed tokens against a user-configured limit.
-        case estimated
         /// The last reported window has expired and nothing was used since: it is full again.
         /// Inferred, not reported (ADR 0007).
         case reset
@@ -49,7 +43,7 @@ public struct WindowUsage: Codable, Equatable, Sendable {
         self.observedAt = observedAt
     }
 
-    /// The window as it reads at `now`. A reported or estimated figure whose reset time has
+    /// The window as it reads at `now`. A reported figure whose reset time has
     /// passed is no longer valid, however old the snapshot: it reads as reset (ADR 0007/0008).
     public func resolved(at now: Date) -> WindowUsage {
         guard source == .reported, let resetsAt, resetsAt <= now else { return self }
@@ -103,11 +97,6 @@ public enum SnapshotBuilder {
             }) {
                 return WindowUsage(window: spec, tokens: tokens, remainingFraction: 1,
                                    source: .reset, resetsAt: nil, observedAt: nil)
-            }
-            if let limit = spec.tokenLimit, limit > 0 {
-                return WindowUsage(window: spec, tokens: tokens,
-                                   remainingFraction: max(0, 1 - Double(tokens.total) / Double(limit)),
-                                   source: .estimated, resetsAt: nil, observedAt: nil)
             }
             return WindowUsage(window: spec, tokens: tokens, remainingFraction: nil,
                                source: .consumptionOnly, resetsAt: nil, observedAt: nil)

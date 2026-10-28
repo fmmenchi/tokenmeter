@@ -24,14 +24,6 @@ final class SnapshotTests: XCTestCase {
         XCTAssertEqual(snap.windows[0].source, .consumptionOnly)
     }
 
-    func testConfiguredLimitGivesEstimate() {
-        let spec = WindowSpec(name: "5h", duration: 5 * 3600, tokenLimit: 100)
-        let snap = SnapshotBuilder.providerSnapshot(
-            provider: .claude, events: [event(hoursAgo: 1, tokens: 25)], windows: [spec], now: now)
-        XCTAssertEqual(snap.windows[0].remainingFraction, 0.75)
-        XCTAssertEqual(snap.windows[0].source, .estimated)
-    }
-
     func testReportedQuotaWinsAndIgnoresExpiredWindow() {
         let live = ReportedQuota(usedPercent: 30, windowMinutes: 300, resetsAt: now.addingTimeInterval(600))
         let stale = ReportedQuota(usedPercent: 30, windowMinutes: 300, resetsAt: now.addingTimeInterval(-600))
@@ -72,14 +64,6 @@ final class SnapshotStoreTests: XCTestCase {
     }
 }
 
-final class LimitSettingsTests: XCTestCase {
-    func testWindowsCarryTheProviderSpecificLimit() {
-        let limits = LimitSettings(claudeSession: 10, claudeWeek: 70, chatgptSession: nil, chatgptWeek: 5)
-        XCTAssertEqual(limits.windows(for: .claude).map(\.tokenLimit), [10, 70])
-        XCTAssertEqual(limits.windows(for: .chatgpt).map(\.tokenLimit), [nil, 5])
-        XCTAssertEqual(limits.windows(for: .claude).map(\.name), ["5h", "7d"])
-    }
-}
 
 final class ObservedAtTests: XCTestCase {
     func testObservedAtIsCarriedToTheWindow() {
