@@ -3,6 +3,7 @@ import TokenMeterCore
 
 struct MenuContent: View {
     let meter: Meter
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -32,7 +33,11 @@ struct MenuContent: View {
                     if meter.isRefreshing { ProgressView().controlSize(.small) } else { Text("Refresh") }
                 }
                 .disabled(meter.isRefreshing)
-                SettingsLink { Text("Limits…") }
+                Button("Limits…") {
+                    // An accessory app is never frontmost; without this the window opens behind.
+                    NSApplication.shared.activate(ignoringOtherApps: true)
+                    openWindow(id: LimitsWindow.id)
+                }
                 Spacer()
                 Button("Quit") { NSApplication.shared.terminate(nil) }
             }
