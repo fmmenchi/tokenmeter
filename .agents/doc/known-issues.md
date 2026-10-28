@@ -24,3 +24,14 @@ value may belong to a window that has since reset.
 
 `pnpm install` fails with `ERR_PNPM_IGNORED_BUILDS` for a new package with a postinstall.
 Decide in `pnpm-workspace.yaml` under `allowBuilds`; do not approve blindly.
+
+## Only the primary Codex window is read
+
+`CodexLogReader` parses `rate_limits.primary` only. The weekly window (`secondary`) is not read,
+so the 7d row of ChatGPT is `consumptionOnly` unless the user sets a limit. Not yet verified
+against a populated log.
+
+## A first scan is slow
+
+The first collection after launch reads every log touched in 7 days (about 9 s for 7.5 GB, release
+build). Later refreshes read only appended bytes (ADR 0004). Do not call the readers on the main thread.
