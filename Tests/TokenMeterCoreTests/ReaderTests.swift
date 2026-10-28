@@ -73,17 +73,16 @@ final class ReaderTests: XCTestCase {
         XCTAssertEqual(reader.events(since: epoch).map(\.tokens.output), [1, 2, 4])
     }
 
-    func testClaudeQuotaReadsBothWindowsAndDropsExpired() throws {
+    func testClaudeQuotaReadsBothWindows() throws {
         let dir = try tempDir()
         let file = dir.appendingPathComponent("claude-statusline.json")
-        let now = Date(timeIntervalSince1970: 1_800_000_000)
         let json = #"{"cwd":"/x","rate_limits":{"five_hour":{"used_percentage":23.5,"resets_at":1800003600},"seven_day":{"used_percentage":61,"resets_at":1799990000}}}"#
         try json.write(to: file, atomically: true, encoding: .utf8)
 
-        let quotas = ClaudeQuotaReader(file: file).quotas(now: now)
+        let quotas = ClaudeQuotaReader(file: file).quotas()
 
-        XCTAssertEqual(quotas.map(\.windowMinutes), [300], "the 7d window already reset")
+        XCTAssertEqual(quotas.map(\.windowMinutes), [300, 10_080])
         XCTAssertEqual(quotas.first?.usedPercent, 23.5)
-        XCTAssertEqual(ClaudeQuotaReader(file: dir.appendingPathComponent("missing.json")).quotas(now: now), [])
+        XCTAssertEqual(ClaudeQuotaReader(file: dir.appendingPathComponent("missing.json")).quotas(), [])
     }
 }

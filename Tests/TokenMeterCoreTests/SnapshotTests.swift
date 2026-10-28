@@ -41,7 +41,17 @@ final class SnapshotTests: XCTestCase {
                                                  reported: [stale], now: now)
         XCTAssertEqual(a.windows[0].remainingFraction ?? -1, 0.7, accuracy: 1e-9)
         XCTAssertEqual(a.windows[0].source, .reported)
-        XCTAssertEqual(b.windows[0].source, .consumptionOnly)
+        XCTAssertEqual(b.windows[0].source, .reset, "expired window with no use is full again")
+        XCTAssertEqual(b.windows[0].remainingFraction, 1)
+    }
+
+    func testExpiredWindowWithUseSinceStaysUnknown() {
+        let stale = ReportedQuota(usedPercent: 30, windowMinutes: 300, resetsAt: now.addingTimeInterval(-600))
+        let snap = SnapshotBuilder.providerSnapshot(
+            provider: .chatgpt, events: [event(hoursAgo: 1, tokens: 5)], windows: [.session],
+            reported: [stale], now: now)
+        XCTAssertEqual(snap.windows[0].source, .consumptionOnly)
+        XCTAssertNil(snap.windows[0].remainingFraction)
     }
 }
 
