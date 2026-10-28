@@ -25,11 +25,11 @@ value may belong to a window that has since reset.
 `pnpm install` fails with `ERR_PNPM_IGNORED_BUILDS` for a new package with a postinstall.
 Decide in `pnpm-workspace.yaml` under `allowBuilds`; do not approve blindly.
 
-## Only the primary Codex window is read
+## Claude quota is only as fresh as the last status-line render
 
-`CodexLogReader` parses `rate_limits.primary` only. The weekly window (`secondary`) is not read,
-so the 7d row of ChatGPT is `consumptionOnly` unless the user sets a limit. Not yet verified
-against a populated log.
+`~/.tokenmeter/claude-statusline.json` is written by `scripts/claude-statusline.sh`, which runs only
+while Claude Code renders its status line (ADR 0005). If the bars for Claude are empty, check that
+`statusLine` in `~/.claude/settings.json` points at the script and that a session has run since.
 
 ## A first scan is slow
 
