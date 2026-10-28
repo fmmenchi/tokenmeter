@@ -1,0 +1,50 @@
+import XCTest
+@testable import TokenMeterCore
+
+final class ReaderTests: XCTestCase {
+    private func tempDir() throws -> URL {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+        addTeardownBlock { try? FileManager.default.removeItem(at: url) }
+        return url
+    }
+
+    private let epoch = Date(timeIntervalSince1970: 0)
+
+    func testClaudeKeepsLastUsagePerStreamedMessage() throws {
+        let dir = try tempDir()
+        let lines = [
+            #"{"type":"assistant","timestamp":"2026-10-28T10:00:00.000Z","requestId":"r1","message":{"id":"m1","usage":{"input_tokens":2,"output_tokens":10,"cache_read_input_tokens":100,"cache_creation_input_tokens":5}}}"#,
+            #"{"type":"assistant","timestamp":"2026-10-28T10:00:01.000Z","requestId":"r1","message":{"id":"m1","usage":{"input_tokens":2,"output_tokens":50,"cache_read_input_tokens":100,"cache_creation_input_tokens":5}}}"#,
+            #"{"type":"user","timestamp":"2026-10-28T10:00:02.000Z","message":{"id":"x"}}"#,
+            "not json",
+        ].joined(separator: "\n")
+        try lines.write(to: dir.appendingPathComponent("s.jsonl"), atomically: true, encoding: .utf8)
+
+        let events = ClaudeLogReader(root: dir).events(since: epoch)
+
+        XCTAssertEqual(events.count, 1)
+        XCTAssertEqual(events[0].tokens, TokenCounts(input: 2, output: 50, cacheRead: 100, cacheWrite: 5))
+    }
+
+    func testCodexTurnsCumulativeCountersIntoDeltasAndReadsQuota() throws {
+        let dir = try tempDir()
+        func line(_ ts: String, input: Int, cached: Int, out: Int, limits: String) -> String {
+            #"{"timestamp":"\#(ts)","type":"event_msg","payload":{"type":"token_count","info":{"total_token_usage":{"input_tokens":\#(input),"cached_input_tokens":\#(cached),"output_tokens":\#(out)}},"rate_limits":\#(limits)}}"#
+        }
+        let lines = [
+            line("2026-10-28T10:00:00.000Z", input: 100, cached: 40, out: 10, limits: "null"),
+            line("2026-10-28T10:01:00.000Z", input: 100, cached: 40, out: 10, limits: "null"),
+            line("2026-10-28T10:02:00.000Z", input: 300, cached: 140, out: 30,
+                 limits: #"{"primary":{"used_percent":42.5,"window_minutes":300,"resets_at":1793000000}}"#),
+        ].joined(separator: "\n")
+        try lines.write(to: dir.appendingPathComponent("rollout-a.jsonl"), atomically: true, encoding: .utf8)
+
+        let result = CodexLogReader(root: dir).read(since: epoch)
+
+        XCTAssertEqual(result.events.count, 2, "an unchanged counter must not produce an event")
+        XCTAssertEqual(result.events.map(\.tokens.total).reduce(0, +), 330)
+        XCTAssertEqual(result.latestQuota?.usedPercent, 42.5)
+        XCTAssertEqual(result.latestQuota?.windowMinutes, 300)
+    }
+}
