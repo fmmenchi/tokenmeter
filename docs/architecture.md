@@ -12,8 +12,11 @@ sidebar_position: 2
 ```
 
 - **TokenMeterCore** (Swift package): log readers, window aggregation, `Snapshot`.
-- **Host app** (planned): owns collection, writes the snapshot to the App Group container.
-- **Widget extension** (planned): renders the latest snapshot only; WidgetKit cannot run long work.
+- **Host app** (`App/TokenMeter`): menu-bar only, not sandboxed; refreshes every 60 s, writes the
+  snapshot to the App Group container and reloads WidgetKit timelines (ADR 0003).
+- **Widget extension** (`Widget/TokenMeterWidget`): sandboxed; renders the latest snapshot only.
+- **Shared** (`Shared/`): SwiftUI rows compiled into both targets.
+- Log readers scan incrementally per file (ADR 0004).
 
 ## Window semantics
 

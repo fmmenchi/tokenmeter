@@ -13,8 +13,11 @@ Early. What exists today:
 
 - `TokenMeterCore`: reads Claude Code and Codex CLI logs and builds per-window usage.
 - `tokenmeter-probe`: prints that usage to the terminal (`swift run tokenmeter-probe`).
+- A menu-bar app and a WidgetKit extension, generated with XcodeGen (`xcodegen generate`).
+  Copy `Local.xcconfig.example` to `Local.xcconfig` and set your team so the widget can read the
+  App Group.
 
-The widget and menu-bar app are not built yet; see [Architecture](./architecture.md).
+See [Architecture](./architecture.md).
 
 ## Honest limits
 
