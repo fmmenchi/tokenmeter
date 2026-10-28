@@ -31,7 +31,7 @@ extension WindowUsage {
     var detailText: String {
         switch source {
         case .reported where isStale:
-            "last seen \(observedAgoText ?? "a while ago") · may be higher now"
+            "last seen \(observedAgoText ?? "a while ago") · may have dropped since"
         case .reported: resetText.map { "resets \($0)" } ?? "reported"
         case .estimated: "estimate"
         case .reset: "window reset · not used since"
@@ -90,6 +90,7 @@ struct WindowRow: View {
                     .font(.caption.bold().monospacedDigit())
             }
             QuotaBar(fraction: usage.remainingFraction, tint: tint)
+                .opacity(usage.isApproximate ? 0.5 : 1)
             Text(usage.detailText).font(.caption2).foregroundStyle(.secondary)
         }
     }
