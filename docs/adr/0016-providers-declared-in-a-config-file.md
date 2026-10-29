@@ -1,6 +1,6 @@
 # ADR 0016 — Extra providers declared in a config file
 
-Status: accepted (2026-10-29)
+Status: accepted (2026-10-29); the built-ins staying native is superseded by [ADR 0017](./0017-every-provider-through-the-config.md)
 
 ## Context
 
