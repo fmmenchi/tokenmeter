@@ -17,6 +17,8 @@ struct SettingsView: View {
                 .font(.caption).foregroundStyle(.secondary)
         }
         .formStyle(.grouped)
+        .scrollDisabled(true)
+        .fixedSize(horizontal: false, vertical: true)
         .frame(width: 380)
         .padding()
         .onDisappear { NSApplication.shared.setActivationPolicy(.accessory) }
