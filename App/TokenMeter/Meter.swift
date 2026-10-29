@@ -10,6 +10,9 @@ final class Meter {
     private(set) var snapshot: Snapshot?
     private(set) var isRefreshing = false
     private(set) var launchAtLogin = false
+    private(set) var autoSetUpClaude = UserDefaults.standard.object(forKey: Meter.autoSetUpKey) as? Bool ?? true
+    private(set) var claudeStatusLine: ClaudeStatusLine.Outcome?
+    private static let autoSetUpKey = "autoSetUpClaudeStatusLine"
     private let collector = Collector()
     private let store = SnapshotStore.appGroupStore()
     private var timer: Timer?
@@ -18,6 +21,7 @@ final class Meter {
     init() {
         LaunchAtLogin.enableOnFirstRun()
         launchAtLogin = LaunchAtLogin.isEnabled
+        setUpClaudeStatusLine()
         Task { await refresh() }
         timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
             Task { @MainActor in await self?.refresh() }
@@ -49,6 +53,25 @@ final class Meter {
     }
 
     var widgetCanRead: Bool { store != nil }
+
+    func setAutoSetUpClaude(_ enabled: Bool) {
+        autoSetUpClaude = enabled
+        UserDefaults.standard.set(enabled, forKey: Self.autoSetUpKey)
+        setUpClaudeStatusLine()
+    }
+
+    /// ADR 0024: only while the switch is on, at every launch and when it is turned on.
+    private func setUpClaudeStatusLine() {
+        guard autoSetUpClaude else { claudeStatusLine = nil; return }
+        guard let url = Bundle.main.url(forResource: "claude-statusline", withExtension: "sh"),
+              let script = try? Data(contentsOf: url) else { return }
+        do {
+            claudeStatusLine = try ClaudeStatusLine.setUp(script: script)
+        } catch {
+            claudeStatusLine = nil
+            Self.log.error("Could not set up the Claude status line: \(error.localizedDescription, privacy: .public)")
+        }
+    }
 
     func setLaunchAtLogin(_ enabled: Bool) {
         try? LaunchAtLogin.set(enabled)

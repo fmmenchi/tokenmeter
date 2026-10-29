@@ -17,7 +17,11 @@ targets:
   TokenMeter:
     type: application
     platform: macOS
-    sources: [App/TokenMeter, Shared]
+    sources:
+      - App/TokenMeter
+      - Shared
+      - path: scripts/claude-statusline.sh
+        buildPhase: resources
     dependencies:
       - package: TokenMeterCore
       - target: TokenMeterWidget
