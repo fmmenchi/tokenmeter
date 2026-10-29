@@ -1,10 +1,6 @@
 import SwiftUI
 import TokenMeterCore
 
-extension Provider {
-    var title: String { self == .claude ? "Claude" : "ChatGPT" }
-}
-
 extension WindowUsage {
     /// A reported figure older than this no longer counts as live (ADR 0008).
     static let staleAfter: TimeInterval = 10 * 60
@@ -110,7 +106,7 @@ struct ProviderBlock: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 6) {
-                Text(snapshot.provider.title).font(.subheadline.weight(.semibold))
+                Text(snapshot.title).font(.subheadline.weight(.semibold))
                 if let plan = snapshot.plan {
                     Text(plan).font(.caption2.weight(.medium))
                         .padding(.horizontal, 6).padding(.vertical, 1)

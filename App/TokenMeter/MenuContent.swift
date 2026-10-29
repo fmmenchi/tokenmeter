@@ -11,10 +11,12 @@ struct MenuContent: View {
                 ForEach(snapshot.providers, id: \.provider) { ProviderBlock(snapshot: $0) }
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Read \(snapshot.generatedAt, style: .relative) ago")
-                    if let quotaAge = snapshot.claudeQuotaUpdatedAt {
-                        Text("Claude quota from \(quotaAge, style: .relative) ago")
-                    } else {
-                        Text("Claude quota: status line has not run yet")
+                    ForEach(snapshot.providers, id: \.provider) { provider in
+                        if let quotaAge = provider.quotaUpdatedAt {
+                            Text("\(provider.title) quota from \(quotaAge, style: .relative) ago")
+                        } else if let hint = provider.setupHint {
+                            Text(hint)
+                        }
                     }
                 }
                 .font(.caption2).foregroundStyle(.secondary)
