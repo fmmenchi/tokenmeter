@@ -18,8 +18,10 @@ The master is drawn in SwiftUI by `tools/icon/main.swift` (`swift tools/icon/mai
 and scaled with `sips` to the sizes the set needs; the PNGs are committed, so a build needs no
 extra step.
 
-The menu-bar item keeps the SF Symbol `gauge.with.dots.needle.50percent`: it already is a gauge,
-it follows the light and dark menu bar, and a coloured icon would not.
+The menu-bar item draws the same gauge (`App/TokenMeter/MenuBarIcon.swift`) as a monochrome template
+image: a dim track, a full arc to 68%, the needle and the hub. It follows the light and dark menu
+bar, which a coloured icon would not. It first used the SF Symbol `gauge.with.dots.needle.50percent`;
+that looked unrelated to the app icon, so it was replaced.
 
 ## Consequences
 

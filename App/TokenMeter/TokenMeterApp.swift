@@ -9,7 +9,11 @@ struct TokenMeterApp: App {
         MenuBarExtra {
             MenuContent(meter: meter)
         } label: {
-            Label(meter.menuBarTitle, systemImage: "gauge.with.dots.needle.50percent")
+            Label {
+                Text(meter.menuBarTitle)
+            } icon: {
+                Image(nsImage: MenuBarIcon.image)
+            }
         }
         .menuBarExtraStyle(.window)
 
