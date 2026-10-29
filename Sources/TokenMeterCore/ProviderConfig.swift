@@ -15,20 +15,30 @@ public struct ProviderConfigFile: Decodable, Sendable {
     /// Nil when the file does not exist; throws when it exists but cannot be used.
     public static func load(from url: URL = defaultURL) throws -> ProviderConfigFile? {
         guard FileManager.default.fileExists(atPath: url.path) else { return nil }
+        return try decode(Data(contentsOf: url), origin: url.path)
+    }
+
+    /// The providers the app ships with (ADR 0017): the same format as the user's file.
+    public static func builtIn() -> ProviderConfigFile {
+        // A constant checked by a test: failing here is a bug in the app, not a user error.
+        try! decode(Data(DefaultProviders.json.utf8), origin: "built-in providers")
+    }
+
+    static func decode(_ data: Data, origin: String) throws -> ProviderConfigFile {
         let file: ProviderConfigFile
         do {
-            file = try JSONDecoder().decode(ProviderConfigFile.self, from: Data(contentsOf: url))
+            file = try JSONDecoder().decode(ProviderConfigFile.self, from: data)
         } catch {
-            throw Failure(description: "\(url.path): \(error)")
+            throw Failure(description: "\(origin): \(error)")
         }
-        guard file.version == 1 else { throw Failure(description: "\(url.path): unsupported version \(file.version)") }
+        guard file.version == 1 else { throw Failure(description: "\(origin): unsupported version \(file.version)") }
         var seen = Set<String>()
         for provider in file.providers {
             guard !provider.id.isEmpty, seen.insert(provider.id).inserted else {
-                throw Failure(description: "\(url.path): provider id \"\(provider.id)\" is empty or repeated")
+                throw Failure(description: "\(origin): provider id \"\(provider.id)\" is empty or repeated")
             }
             guard !provider.windows.isEmpty, provider.windows.allSatisfy({ $0 > 0 }) else {
-                throw Failure(description: "\(url.path): \"\(provider.id)\" needs windows in minutes")
+                throw Failure(description: "\(origin): \"\(provider.id)\" needs windows in minutes")
             }
         }
         return file
@@ -107,5 +117,17 @@ public struct ProviderConfig: Decodable, Sendable {
     public struct Plan: Decodable, Sendable {
         public let file: String?
         public let path: String
+        /// Removed from the start of the raw value before it is capitalised.
+        public let stripPrefix: String?
+        /// Ordered rules; the first match wins. With none, the raw value is capitalised.
+        public let labels: [Label]?
+
+        public struct Label: Decodable, Sendable {
+            /// Where to look; the plan's own `path` when absent.
+            public let path: String?
+            public let contains: String?
+            public let equals: String?
+            public let label: String
+        }
     }
 }

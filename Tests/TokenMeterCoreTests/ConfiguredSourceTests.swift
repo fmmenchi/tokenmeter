@@ -28,7 +28,7 @@ final class ConfiguredSourceTests: XCTestCase {
         """
     }
 
-    func testConfigEquivalentToClaudeGivesTheSameEventsAndQuota() throws {
+    func testConfigReadsEventsAndQuotaFromAFile() throws {
         let dir = try tempDir()
         let lines = [
             #"{"type":"assistant","timestamp":"2026-10-28T10:00:00.000Z","requestId":"r1","message":{"id":"m1","usage":{"input_tokens":2,"output_tokens":10,"cache_read_input_tokens":100,"cache_creation_input_tokens":5}}}"#,
@@ -43,15 +43,13 @@ final class ConfiguredSourceTests: XCTestCase {
             .write(to: quota, atomically: true, encoding: .utf8)
 
         let configured = try source(claudeConfig(logs: dir, quota: quota)).read(since: epoch)
-        let native = ClaudeLogReader(root: dir).events(since: epoch)
 
-        XCTAssertEqual(configured.events.map(\.date), native.map(\.date))
-        XCTAssertEqual(configured.events.map(\.tokens), native.map(\.tokens))
-        XCTAssertEqual(configured.quotas, ClaudeQuotaReader(file: quota).quotas())
+        XCTAssertEqual(configured.events.map(\.tokens.output), [50, 7])
+        XCTAssertEqual(configured.quotas.map(\.usedPercent), [23.5, 61])
         XCTAssertNotNil(configured.quotaUpdatedAt)
     }
 
-    func testConfigEquivalentToCodexGivesTheSameEventsQuotaAndPlan() throws {
+    func testConfigReadsCumulativeUsageAndQuotaFromTheLog() throws {
         let dir = try tempDir()
         func line(_ ts: String, input: Int, cached: Int, out: Int, limits: String) -> String {
             #"{"timestamp":"\#(ts)","type":"event_msg","payload":{"type":"token_count","info":{"total_token_usage":{"input_tokens":\#(input),"cached_input_tokens":\#(cached),"output_tokens":\#(out)}},"rate_limits":\#(limits)}}"#
@@ -77,11 +75,10 @@ final class ConfiguredSourceTests: XCTestCase {
         """
 
         let configured = try source(config).read(since: epoch)
-        let native = CodexLogReader(root: dir).read(since: epoch)
 
-        XCTAssertEqual(configured.events.map(\.tokens), native.events.map(\.tokens))
-        XCTAssertEqual(configured.quotas, native.latestQuotas)
-        XCTAssertEqual(configured.plan, PlanName.chatgpt(planType: native.latestPlanType))
+        XCTAssertEqual(configured.events.map(\.tokens.total), [110, 220])
+        XCTAssertEqual(configured.quotas.map(\.usedPercent), [42.5, 9])
+        XCTAssertEqual(configured.plan, "Team")
     }
 
     func testIncrementalReadKeepsCumulativeStateAcrossReads() throws {
@@ -116,7 +113,6 @@ final class ConfiguredSourceTests: XCTestCase {
         let events = try source(claudeConfig(logs: dir, quota: dir.appendingPathComponent("none.json"))).read(since: epoch).events
 
         XCTAssertEqual(events.map(\.tokens.output), [9], "no requestId: the id alone still merges the two lines")
-        XCTAssertEqual(events.count, ClaudeLogReader(root: dir).events(since: epoch).count)
     }
 
     func testWindowLabelsAndMissingFilesAreHandled() throws {
@@ -141,16 +137,32 @@ final class ConfiguredSourceTests: XCTestCase {
         XCTAssertThrowsError(try ProviderConfigFile.load(from: url))
     }
 
-    func testStandardAppendsConfiguredProvidersAndNeverShadowsBuiltIns() throws {
+    func testStandardAppendsNewProvidersAndLetsAnIdReplaceABuiltIn() throws {
         let dir = try tempDir()
         let url = dir.appendingPathComponent("providers.json")
-        try #"{"version":1,"providers":[{"id":"gemini","title":"Gemini","windows":[300]},{"id":"claude","title":"Fake","windows":[60]}]}"#
+        try #"{"version":1,"providers":[{"id":"gemini","title":"Gemini","windows":[300]},{"id":"claude","title":"Mine","windows":[60]}]}"#
             .write(to: url, atomically: true, encoding: .utf8)
-        let sources = Providers.standard(config: url)
+        let sources = Providers.standard(config: url, home: dir)
         XCTAssertEqual(sources.map(\.info.provider.rawValue), ["claude", "chatgpt", "gemini"])
-        XCTAssertEqual(sources[0].info.title, "Claude")
+        XCTAssertEqual(sources[0].info.title, "Mine", "an entry with a built-in id replaces it whole")
+        XCTAssertEqual(sources[0].info.windows.map(\.name), ["1h"])
 
         try "broken".write(to: url, atomically: true, encoding: .utf8)
-        XCTAssertEqual(Providers.standard(config: url).count, 2, "a broken file leaves the built-ins alone")
+        let fallback = Providers.standard(config: url, home: dir)
+        XCTAssertEqual(fallback.map(\.info.title), ["Claude", "ChatGPT"], "a broken file leaves the built-ins alone")
+    }
+
+    func testPlanRulesPickTheFirstMatchAndFallBackToTheCapitalisedValue() throws {
+        let spec = try JSONDecoder().decode(ProviderConfig.Plan.self, from: Data("""
+        {"path":"a.type","stripPrefix":"x_","labels":[
+          {"path":"a.tier","contains":"big","label":"Big"},{"equals":"x_one","label":"One"}]}
+        """.utf8))
+        func label(_ json: String) -> String? {
+            ConfiguredSource.planLabel(spec, in: (try? JSONSerialization.jsonObject(with: Data(json.utf8))) as? [String: Any] ?? [:])
+        }
+        XCTAssertEqual(label(#"{"a":{"type":"x_one","tier":"BIG_ONE"}}"#), "Big", "rules run in order, case-insensitively")
+        XCTAssertEqual(label(#"{"a":{"type":"X_ONE"}}"#), "One")
+        XCTAssertEqual(label(#"{"a":{"type":"x_new_plan"}}"#), "New Plan")
+        XCTAssertNil(label(#"{"a":{}}"#))
     }
 }

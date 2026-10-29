@@ -4,6 +4,7 @@ import Foundation
 public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
     public let info: ProviderInfo
     private let config: ProviderConfig
+    private let home: URL
 
     private struct FileState {
         var offset: UInt64 = 0
@@ -18,8 +19,9 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
     private var states: [URL: FileState] = [:]
     private let marker: Data
 
-    public init(_ config: ProviderConfig) {
+    public init(_ config: ProviderConfig, home: URL = FileManager.default.homeDirectoryForCurrentUser) {
         self.config = config
+        self.home = home
         info = ProviderInfo(
             provider: Provider(rawValue: config.id), title: config.title,
             windows: config.windows.map { WindowSpec(name: Self.label(minutes: $0), duration: TimeInterval($0) * 60) },
@@ -49,7 +51,7 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
 
         if let spec = config.quota {
             if let file = spec.file {
-                let url = Self.expand(file)
+                let url = expand(file)
                 let observed = (try? FileManager.default.attributesOfItem(atPath: url.path))?[.modificationDate] as? Date
                 reading.quotaUpdatedAt = observed
                 if let root = Self.object(at: url) {
@@ -63,10 +65,9 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
 
         if let spec = config.plan {
             if let file = spec.file {
-                reading.plan = Self.object(at: Self.expand(file)).flatMap { Self.string(Self.value(spec.path, in: $0)) }
-                    .map(PlanName.prettified)
+                reading.plan = Self.object(at: expand(file)).flatMap { Self.planLabel(spec, in: $0) }
             } else {
-                reading.plan = plan.map { PlanName.prettified($0.1) }
+                reading.plan = plan?.1
             }
         }
         return reading
@@ -76,7 +77,7 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
 
     private func scan(_ log: ProviderConfig.Log, since: Date)
         -> (events: [UsageEvent], quotas: [Int: (Date, ReportedQuota)], plan: (Date, String)?) {
-        let files = LogFiles.jsonl(under: Self.expand(log.root), modifiedSince: since)
+        let files = LogFiles.jsonl(under: expand(log.root), modifiedSince: since)
         states = states.filter { files.contains($0.key) }
 
         var events: [UsageEvent] = []
@@ -101,9 +102,9 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
                         state.quotas[minutes] = (date, reported)
                     }
                 }
-                if let spec = config.plan, spec.file == nil, let raw = Self.string(Self.value(spec.path, in: root)),
+                if let spec = config.plan, spec.file == nil, let label = Self.planLabel(spec, in: root),
                    state.plan == nil || date > state.plan!.0 {
-                    state.plan = (date, raw)
+                    state.plan = (date, label)
                 }
             }
             state.byKey = state.byKey.filter { $0.value.date >= since }
@@ -188,7 +189,22 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
         (try? Data(contentsOf: url)).flatMap { (try? JSONSerialization.jsonObject(with: $0)) as? [String: Any] }
     }
 
-    static func expand(_ path: String) -> URL {
-        URL(fileURLWithPath: (path as NSString).expandingTildeInPath)
+    /// `~` is the home this source was given, so tests can run the real configuration in a temp dir.
+    private func expand(_ path: String) -> URL {
+        if path == "~" { return home }
+        if path.hasPrefix("~/") { return home.appendingPathComponent(String(path.dropFirst(2))) }
+        return URL(fileURLWithPath: path)
+    }
+
+    /// The first matching rule's label, else the raw value capitalised (ADR 0017).
+    static func planLabel(_ spec: ProviderConfig.Plan, in root: [String: Any]) -> String? {
+        for rule in spec.labels ?? [] {
+            guard let seen = string(value(rule.path ?? spec.path, in: root))?.lowercased() else { continue }
+            if let equals = rule.equals, seen == equals.lowercased() { return rule.label }
+            if let contains = rule.contains, seen.contains(contains.lowercased()) { return rule.label }
+        }
+        guard var raw = string(value(spec.path, in: root)) else { return nil }
+        if let prefix = spec.stripPrefix, raw.lowercased().hasPrefix(prefix.lowercased()) { raw.removeFirst(prefix.count) }
+        return PlanName.prettified(raw)
     }
 }
