@@ -25,7 +25,8 @@ empty and grey, and only token counts show. ChatGPT needs no setup.
 It copies `claude-statusline.sh` to `~/.tokenmeter/` (every time, so the copy is current) and sets
 `statusLine` in `~/.claude/settings.json` to point at it. It changes only that key, writes
 `settings.json.tokenmeter.bak` first, and does nothing if it is already set. If you already have a
-different status line it leaves it alone and exits with status 2
+different status line it leaves it alone and exits with status 2. Without Claude Code (no `~/.claude`)
+it does nothing and creates nothing
 ([ADR 0019](../adr/0019-install-sets-up-the-claude-status-line.md)); then see the box below.
 
 By hand, the setting is:

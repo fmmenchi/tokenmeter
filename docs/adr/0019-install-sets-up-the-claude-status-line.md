@@ -20,7 +20,9 @@ An installer does it. `scripts/install.sh` builds the app, installs it in `/Appl
 - writes `settings.json.tokenmeter.bak` before changing the file, and touches nothing but the
   `statusLine` key;
 - is idempotent: a second run reports "already set" and changes nothing;
-- does not touch an unreadable settings file.
+- does not touch an unreadable settings file;
+- does nothing, and says so, when Claude Code is not installed (no `~/.claude`): it never creates
+  another tool's folder. Without `python3` it prints the one line to add by hand.
 
 **The app does not do this on its own.** Editing another tool's settings from a background app, with
 nobody asking, is a persistent change to something the user did not hand over. The installer is run
