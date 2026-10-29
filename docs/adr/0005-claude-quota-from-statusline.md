@@ -24,6 +24,9 @@ the window and its `resets_at` has not passed.
 - The file only updates while Claude Code is running and rendering its status line. Between
   sessions the last values stand until their `resets_at`, then the window falls back to
   `consumptionOnly` or an estimate.
+- The `statusLine` points at a copy in `~/.tokenmeter/`, not at the checkout: a command that names a
+  repository path stops writing, silently, when the repository moves. The cost is that the copy must
+  be refreshed by hand when the script changes.
 - Installing it edits the user-level `~/.claude/settings.json` `statusLine`; an existing status
   line must be wrapped, not replaced.
 - Codex gets the same treatment: both `primary` and `secondary` windows are read from its logs.

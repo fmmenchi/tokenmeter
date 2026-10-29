@@ -16,16 +16,24 @@ empty and grey, and only token counts show. ChatGPT needs no setup.
 
 ## Step 1: Add the status line
 
-Edit `~/.claude/settings.json` and add, with the absolute path of your checkout:
+Copy the script out of the checkout, so that moving or renaming the repository cannot break it:
+
+```bash
+cp scripts/claude-statusline.sh ~/.tokenmeter/claude-statusline.sh
+chmod +x ~/.tokenmeter/claude-statusline.sh
+```
+
+Then edit `~/.claude/settings.json` and add, with your own home directory:
 
 ```json
 "statusLine": {
   "type": "command",
-  "command": "/absolute/path/to/tokenmeter/scripts/claude-statusline.sh"
+  "command": "/Users/you/.tokenmeter/claude-statusline.sh"
 }
 ```
 
-To undo it, delete those lines.
+To undo it, delete those lines. The copy does not follow the repository: if
+`scripts/claude-statusline.sh` changes, copy it again.
 
 :::warning[You already have a status line?]
 Wrap it instead of replacing it. Your command must keep printing its own text, and the script has
