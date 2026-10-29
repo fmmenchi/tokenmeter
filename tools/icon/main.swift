@@ -29,16 +29,16 @@ struct Gauge: View {
         Base(colors: [Color(red: 0.14, green: 0.16, blue: 0.30), Color(red: 0.05, green: 0.06, blue: 0.14)]) {
             ZStack {
                 Circle().trim(from: 0, to: 0.75).rotation(.degrees(135))
-                    .stroke(.white.opacity(0.14), style: StrokeStyle(lineWidth: 78, lineCap: .round))
-                    .frame(width: 500, height: 500)
+                    .stroke(.white.opacity(0.14), style: StrokeStyle(lineWidth: 100, lineCap: .round))
+                    .frame(width: 640, height: 640)
                 Circle().trim(from: 0, to: 0.75 * 0.68).rotation(.degrees(135))
                     .stroke(AngularGradient(colors: [red, orange, green], center: .center, startAngle: .degrees(135), endAngle: .degrees(405)),
-                            style: StrokeStyle(lineWidth: 78, lineCap: .round))
-                    .frame(width: 500, height: 500)
-                Capsule().fill(.white).frame(width: 30, height: 210).offset(y: -105)
+                            style: StrokeStyle(lineWidth: 100, lineCap: .round))
+                    .frame(width: 640, height: 640)
+                Capsule().fill(.white).frame(width: 38, height: 270).offset(y: -135)
                     .rotationEffect(.degrees(-135 + 270 * 0.68))
-                Circle().fill(.white).frame(width: 74, height: 74)
-            }.offset(y: 20)
+                Circle().fill(.white).frame(width: 96, height: 96)
+            }.offset(y: 26)
         }
     }
 }
