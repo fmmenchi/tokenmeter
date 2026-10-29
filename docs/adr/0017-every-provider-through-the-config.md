@@ -1,6 +1,6 @@
 # ADR 0017 — Every provider goes through the config
 
-Status: accepted (2026-10-29)
+Status: accepted (2026-10-29); the built-in-and-override rule is superseded by [ADR 0018](./0018-the-config-file-is-the-only-source.md)
 
 ## Context
 
