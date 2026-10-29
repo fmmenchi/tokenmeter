@@ -2,7 +2,11 @@ import Foundation
 
 /// Reads and writes the snapshot the host app hands to the widget.
 public struct SnapshotStore: Sendable {
-    public static let appGroup = "group.com.fmmenchi.tokenmeter.app"
+    /// The App Group id, put in the Info.plist at build time as `<TeamID>.tokenmeter` (ADR 0023);
+    /// nil in a process that has none (the probe, the tests).
+    public static var appGroup: String? {
+        Bundle.main.object(forInfoDictionaryKey: "AppGroupIdentifier") as? String
+    }
 
     public let url: URL
 
@@ -12,7 +16,8 @@ public struct SnapshotStore: Sendable {
 
     /// The App Group container location, or nil when the process has no App Group entitlement.
     public static func appGroupStore() -> SnapshotStore? {
-        FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroup)
+        guard let appGroup else { return nil }
+        return FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroup)
             .map { SnapshotStore(url: $0.appendingPathComponent("snapshot.json")) }
     }
 

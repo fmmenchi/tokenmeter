@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import OSLog
 import TokenMeterCore
 import WidgetKit
 
@@ -12,6 +13,7 @@ final class Meter {
     private let collector = Collector()
     private let store = SnapshotStore.appGroupStore()
     private var timer: Timer?
+    private static let log = Logger(subsystem: "com.fmmenchi.tokenmeter.app", category: "snapshot")
 
     init() {
         LaunchAtLogin.enableOnFirstRun()
@@ -37,8 +39,12 @@ final class Meter {
         let result = await Task.detached { collector.snapshot() }.value
         snapshot = result
         if let store {
-            try? store.write(result)
-            WidgetCenter.shared.reloadAllTimelines()
+            do {
+                try store.write(result)
+                WidgetCenter.shared.reloadAllTimelines()
+            } catch {
+                Self.log.error("Could not write \(store.url.path, privacy: .public): \(error.localizedDescription, privacy: .public)")
+            }
         }
     }
 
