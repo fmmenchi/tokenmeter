@@ -18,6 +18,13 @@ left, as a bar for the 5-hour window and one for the weekly window.
 - A WidgetKit widget with the same bars on the desktop.
 - Claude and ChatGPT out of the box, and [more providers from a JSON file](./guides/configure-providers.md).
 
+## What it looks like
+
+![The menu-bar panel: a 5-hour and a weekly bar for Claude (Max 20x) and for ChatGPT (Team), with tokens, time to reset and when each reading was taken](./assets/panel.png)
+
+The panel as it looks on a Mac with both CLIs installed: a stale reading is dimmed and marked
+`~`, as the weekly ChatGPT bar is. [Reading the Bars](./reference/bars.md) explains every state.
+
 ## What it needs
 
 - macOS 14 or later, Xcode, XcodeGen and an Apple signing team.

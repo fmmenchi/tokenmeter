@@ -66,6 +66,8 @@ It runs [Package and Distribute](./package-and-distribute.md), copies the app, s
 `statusLine` in `~/.claude/settings.json` at it. If you already have another status line, it is left
 alone and the script says so: see [Enable the Claude Quota](./enable-claude-quota.md).
 
+![The Settings window with the Launch at login switch on](../assets/settings.png)
+
 The app **registers itself to start at login the first time it runs**
 ([ADR 0011](../adr/0011-launch-at-login.md)). You will see it under System Settings, General, Login
 Items. **Settings…** in the panel has a **Launch at login** switch; if you turn it off the app never

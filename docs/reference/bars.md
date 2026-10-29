@@ -50,6 +50,8 @@ apps, and it does not match how the plans count.
 
 ## The panel
 
+![The menu-bar panel with its two providers, the three read-age lines and the Refresh, Settings and Quit buttons](../assets/panel.png)
+
 | Element                                     | Meaning                                                                                                               |
 | :------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------- |
 | `Read 12 seconds ago`                       | When the app last read the files.                                                                                     |
