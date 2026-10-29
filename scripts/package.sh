@@ -11,7 +11,8 @@ app=".build/release/Build/Products/Release/TokenMeter.app"
 version=$(git describe --tags --always --dirty 2>/dev/null || echo dev)
 mkdir -p dist
 zip="dist/TokenMeter-$version.zip"
-rm -f "$zip"
+# One zip only, so `dist/TokenMeter-*.zip` in the docs names the build just made.
+rm -f dist/TokenMeter-*.zip
 ditto -c -k --keepParent "$app" "$zip"
 
 echo "$zip"
