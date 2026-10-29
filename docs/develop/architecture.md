@@ -64,8 +64,8 @@ any age of the snapshot, so a stale file never shows a stale percentage as curre
 
 The widget cannot read your logs, so the host app does the collecting and the widget renders what it
 finds in `snapshot.json`, inside the App Group container
-`group.com.fmmenchi.tokenmeter.app` ([ADR 0003](../adr/0003-host-app-widget-and-app-group.md),
-[0020](../adr/0020-bundle-identifiers-under-the-paid-team.md)). The app is unsandboxed because it reads
+`<TeamID>.tokenmeter` ([ADR 0003](../adr/0003-host-app-widget-and-app-group.md),
+[0023](../adr/0023-team-prefixed-app-group.md)). The app is unsandboxed because it reads
 other tools' files; the widget is sandboxed. An App Group needs a signing team, which is why a build
 needs `DEVELOPMENT_TEAM` in `Local.xcconfig`.
 

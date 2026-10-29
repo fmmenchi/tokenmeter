@@ -66,11 +66,11 @@ let one = Collector(sources: [mySource]).snapshot(now: date) // your own list, f
 
 ## Sharing with the widget
 
-| Symbol                            | Does                                                           |
-| :-------------------------------- | :------------------------------------------------------------- |
-| `SnapshotStore.appGroup`          | The App Group id, `group.com.fmmenchi.tokenmeter.app`.         |
-| `SnapshotStore.appGroupStore()`   | The store in the App Group container, or `nil` without a team. |
-| `store.write(_:)`, `store.read()` | Write and read `snapshot.json`.                                |
+| Symbol                            | Does                                                                            |
+| :-------------------------------- | :------------------------------------------------------------------------------ |
+| `SnapshotStore.appGroup`          | The App Group id from the Info.plist, `<TeamID>.tokenmeter`; `nil` without one. |
+| `SnapshotStore.appGroupStore()`   | The store in the App Group container, or `nil` without a team.                  |
+| `store.write(_:)`, `store.read()` | Write and read `snapshot.json`.                                                 |
 
 ## Extending
 

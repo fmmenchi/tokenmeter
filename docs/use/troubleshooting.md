@@ -36,10 +36,10 @@ app; if both are wrong, it is in the data.
 | First launch takes several seconds to show data     | The first read scans a week of logs.                                                   | Expected; later refreshes read only new bytes ([ADR 0004](../adr/0004-incremental-log-scanning.md)).                            |
 
 :::caution[App Group]
-Whether the widget actually reads the snapshot was not confirmed under either a Personal Team or
-the paid team: the signed app carries the group entitlement and macOS creates the container, but
-`snapshot.json` was not seen in it. If the widget stays empty with the app running, check
-`~/Library/Group Containers/group.com.fmmenchi.tokenmeter.app/` for that file first.
+The app writes `snapshot.json` into `~/Library/Group Containers/<TeamID>.tokenmeter/`
+([ADR 0023](../adr/0023-team-prefixed-app-group.md)); that was confirmed. Whether the widget reads it
+on the desktop was not. If the widget stays empty with the app running, look for a line starting
+`Could not write` in Console (subsystem `com.fmmenchi.tokenmeter.app`) first.
 :::
 
 ## Build

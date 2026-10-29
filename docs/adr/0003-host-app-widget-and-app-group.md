@@ -11,7 +11,7 @@ sandboxed and cannot read `~/.claude` or `~/.codex`; the host app can, if it is 
 
 - The **host app** is a menu-bar-only app (`LSUIElement`), **not sandboxed**, so it can read the
   two log trees. It refreshes every 60 seconds, writes `snapshot.json` into the App Group
-  container `group.com.fmmenchi.tokenmeter.app` and asks WidgetKit to reload.
+  container `<TeamID>.tokenmeter` ([ADR 0023](./0023-team-prefixed-app-group.md)) and asks WidgetKit to reload.
 - The **widget extension** is sandboxed, reads only that file, and renders it.
 - ~~Token limits for `estimated` windows are user settings~~ — removed by ADR 0009.
 - The Xcode project is generated from `project.yml` by XcodeGen; the `.xcodeproj` is not committed.
