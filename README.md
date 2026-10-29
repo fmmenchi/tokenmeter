@@ -1,14 +1,34 @@
 # tokenmeter
 
-A macOS widget and menu-bar item showing how much of your Claude and ChatGPT plan quota is left.
+A macOS menu-bar app and widget showing how much of your **Claude** and **ChatGPT** plan quota is left.
 
-**Status:** early. The log-reading core and a terminal probe work; the widget app is not built yet.
+![The menu-bar panel with a 5-hour and a weekly bar per provider](./docs/assets/panel.png)
+
+**Documentation: <https://fmmenchi.github.io/tokenmeter/>**
+
+## Quick start
+
+You need macOS 14 or later, Xcode, [XcodeGen](https://github.com/yonaskolb/XcodeGen) and an Apple signing team. Set your team once, then install:
 
 ```sh
-swift test                      # core tests
-swift run tokenmeter-probe      # per-window usage from local Claude Code and Codex logs
-pnpm install && pnpm run docs:start
+cp Local.xcconfig.example Local.xcconfig   # put your team ID in it
+./scripts/install.sh                       # builds, installs in /Applications, sets up the Claude status line
 ```
 
-Quota is shown only when a provider log reports it or you set a limit; otherwise only consumption.
-See the [docs](./docs/intro.md), [AGENTS.md](./AGENTS.md) for how we work, and `docs/adr/` for decisions.
+It reads only files Claude Code and the Codex CLI leave on your machine: no credentials, no network.
+
+## Where to go next
+
+| I want to…                            | Read                                                                                        |
+| :------------------------------------ | :------------------------------------------------------------------------------------------ |
+| install it and keep it running        | [Install and Run](https://fmmenchi.github.io/tokenmeter/guides/install-and-run)             |
+| see the Claude quota                  | [Enable the Claude Quota](https://fmmenchi.github.io/tokenmeter/guides/enable-claude-quota) |
+| understand a bar, a colour or the `~` | [Reading the Bars](https://fmmenchi.github.io/tokenmeter/reference/bars)                    |
+| add another AI tool from a JSON file  | [Configure Providers](https://fmmenchi.github.io/tokenmeter/guides/configure-providers)     |
+| know why it works this way            | [Decisions (ADRs)](https://fmmenchi.github.io/tokenmeter/adr)                               |
+
+The same pages are the Markdown files in [`docs/`](./docs); `pnpm install && pnpm run docs:start` serves them locally.
+
+## Working on it
+
+`pnpm run check` is the gate (formatting, `swift test`, the helper scripts' tests and the docs build). [AGENTS.md](./AGENTS.md) says how changes are made.
