@@ -41,7 +41,7 @@ Unlike the panel, the probe prints the raw token total including cache reads.
 | `~/.claude/projects/**/*.jsonl`                                          | Claude Code                                   | the app and the probe      |
 | `~/.codex/sessions/**/rollout-*.jsonl`                                   | Codex CLI                                     | the app and the probe      |
 | `~/.claude.json`                                                         | Claude Code                                   | the app (plan only)        |
-| `~/.tokenmeter/providers.json`                                           | you (optional)                                | the app and the probe      |
+| `~/.tokenmeter/providers.json`                                           | the app on first run, then you                | the app and the probe      |
 | `~/.tokenmeter/claude-statusline.sh`                                     | you, a copy of `scripts/claude-statusline.sh` | Claude Code (`statusLine`) |
 | `~/.tokenmeter/claude-statusline.json`                                   | `claude-statusline.sh`                        | the app and the probe      |
 | `~/Library/Group Containers/group.com.fmmenchi.tokenmeter/snapshot.json` | the app                                       | the widget                 |

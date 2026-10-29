@@ -66,8 +66,8 @@ Every 60 seconds, and whenever the panel opens, the app:
 1. **Reads the logs incrementally.** Each file is parsed once and only newly appended, complete
    lines are read afterwards ([ADR 0004](../adr/0004-incremental-log-scanning.md)).
 2. **Reads the quotas.** Claude's from the status-line file, Codex's from `rate_limits` in its logs.
-   Both providers are declared in the same JSON format, and `~/.tokenmeter/providers.json` can add
-   more ([ADR 0017](../adr/0017-every-provider-through-the-config.md)).
+   Providers are the entries of `~/.tokenmeter/providers.json`, all treated alike, Claude and
+   ChatGPT included ([ADR 0018](../adr/0018-the-config-file-is-the-only-source.md)).
 3. **Builds a window per provider and length** (`5h`, `7d`): tokens inside the window, plus the
    matching reported quota if there is one.
 4. **Writes `snapshot.json`** to the App Group and asks WidgetKit to reload.

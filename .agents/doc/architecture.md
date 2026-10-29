@@ -15,8 +15,9 @@ Rules:
 
 - The widget extension only renders a `Snapshot`; collection lives in the host app (ADR 0001).
 - Every provider is a `ProviderSource` assembled in `Providers.standard()` (ADR 0015). Claude and
-  ChatGPT are JSON in `DefaultProviders.swift`, run by `ConfiguredSource` like any entry of the user's
-  `~/.tokenmeter/providers.json` (ADR 0016, 0017); write Swift only for a log the format cannot say.
+  ChatGPT are two entries of `~/.tokenmeter/providers.json`, which is the only source and which the
+  app seeds from `DefaultProviders.swift` on first run (ADR 0016-0018). All entries run as
+  `ConfiguredSource`; write Swift only for a log the format cannot say.
   Window maths, bars and refresh are common and never name a provider.
 - A remaining-quota figure must carry its `source` (`reported`, `reset`, `consumptionOnly`).
   Never show a percentage the code cannot attribute to a provider log or a reset window (ADR 0007).
