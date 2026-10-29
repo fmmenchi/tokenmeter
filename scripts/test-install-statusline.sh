@@ -9,6 +9,10 @@ newhome() { mktemp -d; }
 cmd() { python3 -c "import json,sys;print(json.load(open(sys.argv[1])).get('statusLine',{}).get('command',''))" "$1"; }
 
 h=$(newhome)
+check "no Claude at all: exit 0" "$(run "$h")" 0
+check "no Claude at all: nothing created" "$(ls -A "$h" | grep -v '^out.txt$' | wc -l | tr -d ' ')" 0
+
+h=$(newhome); mkdir -p "$h/.claude"
 check "no settings: exit 0" "$(run "$h")" 0
 check "no settings: file created with the status line" "$(cmd "$h/.claude/settings.json")" "$h/.tokenmeter/claude-statusline.sh"
 check "script copied and executable" "$([ -x "$h/.tokenmeter/claude-statusline.sh" ] && echo yes)" yes
@@ -35,5 +39,14 @@ h=$(newhome); mkdir -p "$h/.claude"
 printf 'not json' > "$h/.claude/settings.json"
 check "invalid settings: exit 1" "$(run "$h")" 1
 check "invalid settings: untouched" "$(cat "$h/.claude/settings.json")" "not json"
+
+# No python3 on the PATH: the script must still finish and leave settings.json alone.
+h=$(newhome); mkdir -p "$h/.claude" "$h/bin"
+echo '{"model":"sonnet"}' > "$h/.claude/settings.json"
+for tool in dirname cp mkdir chmod cat printf; do ln -s "$(command -v $tool)" "$h/bin/$tool" 2>/dev/null; done
+PATH="$h/bin" HOME="$h" /bin/sh "$here/install-statusline.sh" >"$h/out.txt" 2>&1
+check "no python3: exit 0" "$?" 0
+check "no python3: settings untouched" "$(cat "$h/.claude/settings.json")" '{"model":"sonnet"}'
+check "no python3: says what to do by hand" "$(grep -c 'by hand' "$h/out.txt")" 1
 
 exit $fail

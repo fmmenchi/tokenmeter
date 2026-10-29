@@ -1,20 +1,30 @@
 #!/bin/sh
 # Installs the Claude Code status line for tokenmeter (ADR 0019): copies the script to ~/.tokenmeter and
 # points `statusLine` in ~/.claude/settings.json at it, only when no other status line is set.
-# Exit status: 0 done or already done, 2 another status line is set (left alone), 1 failure.
+# Without Claude Code (no ~/.claude) there is nothing to set up and nothing is created.
+# Exit status: 0 done, already done or nothing to do, 2 another status line is set (left alone), 1 failure.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 dest="$HOME/.tokenmeter/claude-statusline.sh"
 settings="$HOME/.claude/settings.json"
+
+if [ ! -d "$HOME/.claude" ]; then
+  echo "Claude Code not found (no ~/.claude): status line not set up"
+  exit 0
+fi
 
 mkdir -p "$HOME/.tokenmeter"
 cp "$here/claude-statusline.sh" "$dest"
 chmod +x "$dest"
 
 if [ ! -f "$settings" ]; then
-  mkdir -p "$HOME/.claude"
   printf '{\n  "statusLine": {\n    "type": "command",\n    "command": "%s"\n  }\n}\n' "$dest" > "$settings"
   echo "created $settings with the status line"
+  exit 0
+fi
+
+if ! command -v python3 >/dev/null 2>&1; then
+  echo "python3 not found: set \"statusLine\" to $dest in $settings by hand (docs/guides/enable-claude-quota.md)"
   exit 0
 fi
 
