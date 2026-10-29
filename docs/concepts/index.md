@@ -39,7 +39,7 @@ flowchart LR
   claudeLogs["~/.claude/projects/**.jsonl"] --> core
   statusline["~/.tokenmeter/claude-statusline.json"] --> core
   codexLogs["~/.codex/sessions/**.jsonl"] --> core
-  core["TokenMeterCore<br/>readers + SnapshotBuilder"] --> app["Host app<br/>menu-bar, every 60 s"]
+  core["TokenMeterCore<br/>provider sources + SnapshotBuilder"] --> app["Host app<br/>menu-bar, every 60 s"]
   app --> panel["Menu-bar panel"]
   app --> snap[("snapshot.json<br/>App Group")]
   snap --> widget["Widget extension<br/>WidgetKit"]
@@ -49,12 +49,12 @@ flowchart LR
 
 | Piece                  | Path                           | Role                                                                                              |
 | :--------------------- | :----------------------------- | :------------------------------------------------------------------------------------------------ |
-| **TokenMeterCore**     | `Sources/TokenMeterCore`       | Swift package: log readers, window maths, `Snapshot`, the snapshot store. No UI.                  |
+| **TokenMeterCore**     | `Sources/TokenMeterCore`       | Swift package: provider sources, window maths, `Snapshot`, the snapshot store. No UI.             |
 | **Probe**              | `Sources/tokenmeter-probe`     | Terminal tool printing the same windows. A spike, not a product surface.                          |
 | **Host app**           | `App/TokenMeter`               | Menu-bar only, **not sandboxed** so it can read the logs. Writes the snapshot, reloads WidgetKit. |
 | **Widget extension**   | `Widget/TokenMeterWidget`      | **Sandboxed**. Reads the snapshot and renders it.                                                 |
 | **Shared views**       | `Shared`                       | The bar and rows, compiled into both targets so they look the same.                               |
-| **Status-line script** | `scripts/claude-statusline.sh` | Persists Claude Code's `rate_limits` for the readers.                                             |
+| **Status-line script** | `scripts/claude-statusline.sh` | Persists Claude Code's `rate_limits` for the Claude source.                                       |
 
 The split is [ADR 0001](../adr/0001-stack-swiftui-widgetkit.md) and
 [ADR 0003](../adr/0003-host-app-widget-and-app-group.md).
@@ -66,6 +66,8 @@ Every 60 seconds, and whenever the panel opens, the app:
 1. **Reads the logs incrementally.** Each file is parsed once and only newly appended, complete
    lines are read afterwards ([ADR 0004](../adr/0004-incremental-log-scanning.md)).
 2. **Reads the quotas.** Claude's from the status-line file, Codex's from `rate_limits` in its logs.
+   Both providers are declared in the same JSON format, and `~/.tokenmeter/providers.json` can add
+   more ([ADR 0017](../adr/0017-every-provider-through-the-config.md)).
 3. **Builds a window per provider and length** (`5h`, `7d`): tokens inside the window, plus the
    matching reported quota if there is one.
 4. **Writes `snapshot.json`** to the App Group and asks WidgetKit to reload.

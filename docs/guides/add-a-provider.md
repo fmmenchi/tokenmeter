@@ -49,7 +49,7 @@ That is the only place providers are assembled: `Collector`, the probe and the p
 ## Step 3: Test and check
 
 Write a fixture with the exact shape of the tool's logs in a temp directory and test the source
-against it, as the reader tests do. Then run the gate and the probe:
+against it, as the provider tests do. Then run the gate and the probe:
 
 ```bash
 pnpm run check

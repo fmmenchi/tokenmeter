@@ -24,24 +24,28 @@ Every command, script, file and data shape in one place.
 The probe output looks like:
 
 ```text
-claude
-  5h: 240227064 tokens (in 3060, out 819312, cache r/w 235696117/3708575) — 95% left [reported]
-chatgpt
+Claude (Max 20x)
+  5h: 575663908 tokens (in 4200, out 1230025, cache r/w 568384240/6045443) — 75% left [reported]
+  7d: 5104412950 tokens (in 70299, out 12975652, cache r/w 5024475829/66891170) — 67% left [reported]
+ChatGPT (Team)
   5h: 0 tokens (in 0, out 0, cache r/w 0/0) — 100% left [reset]
-codex reported quotas: ["300m 99.0% used", "10080m 47.0% used"]
+  7d: 302342293 tokens (in 9344986, out 524475, cache r/w 292472832/0) — 53% left [reported]
 ```
 
 Unlike the panel, the probe prints the raw token total including cache reads.
 
 ## Files
 
-| Path                                                                     | Written by                     | Read by               |
-| :----------------------------------------------------------------------- | :----------------------------- | :-------------------- |
-| `~/.claude/projects/**/*.jsonl`                                          | Claude Code                    | the app and the probe |
-| `~/.codex/sessions/**/rollout-*.jsonl`                                   | Codex CLI                      | the app and the probe |
-| `~/.tokenmeter/claude-statusline.json`                                   | `scripts/claude-statusline.sh` | the app and the probe |
-| `~/Library/Group Containers/group.com.fmmenchi.tokenmeter/snapshot.json` | the app                        | the widget            |
-| `Local.xcconfig`                                                         | you (git-ignored)              | the Xcode build       |
+| Path                                                                     | Written by                                    | Read by                    |
+| :----------------------------------------------------------------------- | :-------------------------------------------- | :------------------------- |
+| `~/.claude/projects/**/*.jsonl`                                          | Claude Code                                   | the app and the probe      |
+| `~/.codex/sessions/**/rollout-*.jsonl`                                   | Codex CLI                                     | the app and the probe      |
+| `~/.claude.json`                                                         | Claude Code                                   | the app (plan only)        |
+| `~/.tokenmeter/providers.json`                                           | you (optional)                                | the app and the probe      |
+| `~/.tokenmeter/claude-statusline.sh`                                     | you, a copy of `scripts/claude-statusline.sh` | Claude Code (`statusLine`) |
+| `~/.tokenmeter/claude-statusline.json`                                   | `claude-statusline.sh`                        | the app and the probe      |
+| `~/Library/Group Containers/group.com.fmmenchi.tokenmeter/snapshot.json` | the app                                       | the widget                 |
+| `Local.xcconfig`                                                         | you (git-ignored)                             | the Xcode build            |
 
 ## The snapshot
 

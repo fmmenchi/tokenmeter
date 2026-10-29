@@ -16,6 +16,7 @@ left, as a bar for the 5-hour window and one for the weekly window.
 - Tokens used under each bar.
 - A clear difference between a **fresh** reading, a **stale** one and an **inferred** reset.
 - A WidgetKit widget with the same bars on the desktop.
+- Claude and ChatGPT out of the box, and [more providers from a JSON file](./guides/configure-providers.md).
 
 ## What it needs
 
@@ -25,9 +26,10 @@ left, as a bar for the 5-hour window and one for the weekly window.
 No credentials and no network: tokenmeter only reads files those tools leave on your machine.
 
 :::caution[Status]
-Early. Verified: the log readers, the quota for both providers, the bars and the menu-bar app
-starting. **Not verified**: the widget on the desktop end to end, and the panel's look on screen
-(it was checked only in rendered previews). See [Troubleshooting](./guides/troubleshooting.md).
+Early. Verified: the providers read from real logs, the quota for both, the bars, the panel and the
+Settings window opened on screen, and the app registered to start at login. **Not verified**: the
+widget on the desktop end to end, a real reboot with launch at login, and the GitHub Pages deploy.
+See [Troubleshooting](./guides/troubleshooting.md).
 :::
 
 ## 🚀 Guides
@@ -35,7 +37,10 @@ starting. **Not verified**: the widget on the desktop end to end, and the panel'
 1. [Install and Run](./guides/install-and-run.md): build the app and keep it in the menu bar.
 2. [Enable the Claude Quota](./guides/enable-claude-quota.md): one setting in Claude Code.
 3. [Add the Widget](./guides/add-the-widget.md): the bars on the desktop.
-4. [Troubleshooting](./guides/troubleshooting.md) and [Contribute](./guides/contribute.md).
+4. [Package and Distribute](./guides/package-and-distribute.md): a zip of the app.
+5. [Configure Providers](./guides/configure-providers.md): another AI tool, from a JSON file.
+6. [Add a Provider](./guides/add-a-provider.md): the same, in Swift, when the file cannot say it.
+7. [Troubleshooting](./guides/troubleshooting.md) and [Contribute](./guides/contribute.md).
 
 ## 🛠 Reference
 
