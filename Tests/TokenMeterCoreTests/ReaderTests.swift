@@ -1,7 +1,7 @@
 import XCTest
 @testable import TokenMeterCore
 
-/// The built-in providers (ADR 0017) run end to end against a temporary home directory.
+/// The seed providers (ADR 0018) run end to end against a temporary home directory.
 final class ReaderTests: XCTestCase {
     private var home: URL!
 
@@ -131,8 +131,8 @@ final class ReaderTests: XCTestCase {
         XCTAssertNil(try plan(""))
     }
 
-    func testBuiltInProvidersDecodeAndComeInOrder() {
-        let providers = ProviderConfigFile.builtIn().providers
+    func testSeedDecodesAndHoldsClaudeThenChatGPT() {
+        let providers = ProviderConfigFile.seed().providers
         XCTAssertEqual(providers.map(\.id), ["claude", "chatgpt"])
     }
 }

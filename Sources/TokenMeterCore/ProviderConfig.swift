@@ -18,10 +18,19 @@ public struct ProviderConfigFile: Decodable, Sendable {
         return try decode(Data(contentsOf: url), origin: url.path)
     }
 
-    /// The providers the app ships with (ADR 0017): the same format as the user's file.
-    public static func builtIn() -> ProviderConfigFile {
+    /// Claude and ChatGPT as the file first holds them (ADR 0018). A starting point, never merged over
+    /// what the user has.
+    public static func seed() -> ProviderConfigFile {
         // A constant checked by a test: failing here is a bug in the app, not a user error.
-        try! decode(Data(DefaultProviders.json.utf8), origin: "built-in providers")
+        try! decode(Data(DefaultProviders.json.utf8), origin: "seed providers")
+    }
+
+    /// Creates the file from the seed; an existing file is left alone.
+    @discardableResult
+    public static func writeSeed(to url: URL = defaultURL) -> Bool {
+        guard !FileManager.default.fileExists(atPath: url.path) else { return false }
+        try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        return (try? Data((DefaultProviders.json + "\n").utf8).write(to: url, options: .withoutOverwriting)) != nil
     }
 
     static func decode(_ data: Data, origin: String) throws -> ProviderConfigFile {

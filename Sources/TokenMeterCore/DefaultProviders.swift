@@ -1,4 +1,4 @@
-/// The providers the app ships with, in the same format as `~/.tokenmeter/providers.json` (ADR 0017).
+/// The seed of `~/.tokenmeter/providers.json`: what the file holds the first time (ADR 0017, 0018).
 /// A string constant rather than a resource: nothing to lose in the widget bundle.
 enum DefaultProviders {
     static let json = #"""

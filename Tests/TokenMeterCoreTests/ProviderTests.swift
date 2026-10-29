@@ -52,7 +52,10 @@ final class ProviderTests: XCTestCase {
         XCTAssertNil(snapshot.providers[1].quotaUpdatedAt)
     }
 
-    func testStandardListHoldsClaudeThenChatGPT() {
-        XCTAssertEqual(Providers.standard().map(\.info.provider), [.claude, .chatgpt])
+    func testStandardListHoldsClaudeThenChatGPT() throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        addTeardownBlock { try? FileManager.default.removeItem(at: dir) }
+        let sources = Providers.standard(config: dir.appendingPathComponent("providers.json"), home: dir)
+        XCTAssertEqual(sources.map(\.info.provider), [.claude, .chatgpt])
     }
 }

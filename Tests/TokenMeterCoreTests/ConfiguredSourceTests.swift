@@ -137,19 +137,39 @@ final class ConfiguredSourceTests: XCTestCase {
         XCTAssertThrowsError(try ProviderConfigFile.load(from: url))
     }
 
-    func testStandardAppendsNewProvidersAndLetsAnIdReplaceABuiltIn() throws {
+    func testMissingFileIsCreatedFromTheSeedAndThenReadLikeAnyOther() throws {
+        let dir = try tempDir()
+        let url = dir.appendingPathComponent("sub/providers.json")
+
+        XCTAssertEqual(Providers.standard(config: url, home: dir).map(\.info.title), ["Claude", "ChatGPT"])
+        XCTAssertEqual(try ProviderConfigFile.load(from: url)?.providers.map(\.id), ["claude", "chatgpt"],
+                       "the first run wrote the file")
+
+        try #"{"version":1,"providers":[{"id":"gemini","title":"Gemini","windows":[300]}]}"#
+            .write(to: url, atomically: true, encoding: .utf8)
+        XCTAssertEqual(Providers.standard(config: url, home: dir).map(\.info.title), ["Gemini"],
+                       "the file is the only source: no Claude unless it is in the file")
+    }
+
+    func testFileOrderIsPanelOrderAndAnyEntryCanBeEdited() throws {
         let dir = try tempDir()
         let url = dir.appendingPathComponent("providers.json")
-        try #"{"version":1,"providers":[{"id":"gemini","title":"Gemini","windows":[300]},{"id":"claude","title":"Mine","windows":[60]}]}"#
+        try #"{"version":1,"providers":[{"id":"chatgpt","title":"Mine","windows":[60]},{"id":"claude","title":"Claude","windows":[300]}]}"#
             .write(to: url, atomically: true, encoding: .utf8)
         let sources = Providers.standard(config: url, home: dir)
-        XCTAssertEqual(sources.map(\.info.provider.rawValue), ["claude", "chatgpt", "gemini"])
-        XCTAssertEqual(sources[0].info.title, "Mine", "an entry with a built-in id replaces it whole")
+        XCTAssertEqual(sources.map(\.info.provider.rawValue), ["chatgpt", "claude"])
+        XCTAssertEqual(sources[0].info.title, "Mine")
         XCTAssertEqual(sources[0].info.windows.map(\.name), ["1h"])
+    }
 
+    func testBrokenFileIsKeptAndTheSeedRunsInItsPlace() throws {
+        let dir = try tempDir()
+        let url = dir.appendingPathComponent("providers.json")
         try "broken".write(to: url, atomically: true, encoding: .utf8)
-        let fallback = Providers.standard(config: url, home: dir)
-        XCTAssertEqual(fallback.map(\.info.title), ["Claude", "ChatGPT"], "a broken file leaves the built-ins alone")
+
+        XCTAssertEqual(Providers.standard(config: url, home: dir).map(\.info.title), ["Claude", "ChatGPT"])
+        XCTAssertEqual(try String(contentsOf: url, encoding: .utf8), "broken", "never overwrite what the user wrote")
+        XCTAssertFalse(ProviderConfigFile.writeSeed(to: url), "an existing file is left alone")
     }
 
     func testPlanRulesPickTheFirstMatchAndFallBackToTheCapitalisedValue() throws {

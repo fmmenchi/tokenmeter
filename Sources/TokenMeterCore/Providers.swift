@@ -1,22 +1,20 @@
 import Foundation
 
-/// The one list of providers: those the app ships with, then the user's `providers.json`, which adds
-/// new ones and replaces a built-in with the same id (ADR 0015, 0016, 0017).
+/// The one list of providers: exactly the entries of `providers.json`, all treated alike (ADR 0018).
 public enum Providers {
     /// Fresh sources each call: they keep per-file scanning state.
     public static func standard(
         config: URL = ProviderConfigFile.defaultURL,
         home: URL = FileManager.default.homeDirectoryForCurrentUser
     ) -> [any ProviderSource] {
-        var merged = ProviderConfigFile.builtIn().providers
-        // A broken file adds nothing and leaves the built-ins alone; the probe prints why.
-        for provider in ((try? ProviderConfigFile.load(from: config)) ?? nil)?.providers ?? [] {
-            if let index = merged.firstIndex(where: { $0.id == provider.id }) {
-                merged[index] = provider
-            } else {
-                merged.append(provider)
-            }
+        let providers: [ProviderConfig]
+        if let file = try? ProviderConfigFile.load(from: config) {
+            providers = file.providers
+        } else {
+            // Missing: create it. Broken: leave it for the user and run on the seed; the probe says why.
+            ProviderConfigFile.writeSeed(to: config)
+            providers = ProviderConfigFile.seed().providers
         }
-        return merged.map { ConfiguredSource($0, home: home) }
+        return providers.map { ConfiguredSource($0, home: home) }
     }
 }
