@@ -10,16 +10,19 @@ Every command, script, file and data shape in one place.
 
 ## Commands
 
-| Command                      | What it does                                                         |
-| :--------------------------- | :------------------------------------------------------------------- |
-| `swift build`                | Builds `TokenMeterCore` and the probe.                               |
-| `swift test`                 | Runs the core tests (XCTest).                                        |
-| `swift run tokenmeter-probe` | Prints each provider's windows with tokens and remaining quota.      |
-| `xcodegen generate`          | Regenerates `TokenMeter.xcodeproj` from `project.yml`.               |
-| `pnpm install`               | Installs the Node tooling (commitlint, husky, Prettier, Docusaurus). |
-| `pnpm run check`             | The gate: Prettier check, `swift test`, Docusaurus build.            |
-| `pnpm run docs:start`        | Serves this site locally with hot reload.                            |
-| `pnpm run docs:build`        | Builds the site; broken links fail the build.                        |
+| Command                           | What it does                                                             |
+| :-------------------------------- | :----------------------------------------------------------------------- |
+| `swift build`                     | Builds `TokenMeterCore` and the probe.                                   |
+| `swift test`                      | Runs the core tests (XCTest).                                            |
+| `swift run tokenmeter-probe`      | Prints each provider's windows with tokens and remaining quota.          |
+| `xcodegen generate`               | Regenerates `TokenMeter.xcodeproj` from `project.yml`.                   |
+| `pnpm install`                    | Installs the Node tooling (commitlint, husky, Prettier, Docusaurus).     |
+| `pnpm run check`                  | The gate: Prettier check, `swift test`, Docusaurus build.                |
+| `pnpm run docs:start`             | Serves this site locally with hot reload.                                |
+| `pnpm run docs:build`             | Builds the site; broken links fail the build.                            |
+| `./scripts/install.sh`            | Builds the app, installs it in `/Applications`, sets up the status line. |
+| `./scripts/install-statusline.sh` | Only the Claude status line: copies the script, sets `statusLine`.       |
+| `pnpm run scripts:test`           | Tests the status-line installer on throwaway home directories.           |
 
 The probe output looks like:
 
@@ -36,16 +39,16 @@ Unlike the panel, the probe prints the raw token total including cache reads.
 
 ## Files
 
-| Path                                                                     | Written by                                    | Read by                    |
-| :----------------------------------------------------------------------- | :-------------------------------------------- | :------------------------- |
-| `~/.claude/projects/**/*.jsonl`                                          | Claude Code                                   | the app and the probe      |
-| `~/.codex/sessions/**/rollout-*.jsonl`                                   | Codex CLI                                     | the app and the probe      |
-| `~/.claude.json`                                                         | Claude Code                                   | the app (plan only)        |
-| `~/.tokenmeter/providers.json`                                           | the app on first run, then you                | the app and the probe      |
-| `~/.tokenmeter/claude-statusline.sh`                                     | you, a copy of `scripts/claude-statusline.sh` | Claude Code (`statusLine`) |
-| `~/.tokenmeter/claude-statusline.json`                                   | `claude-statusline.sh`                        | the app and the probe      |
-| `~/Library/Group Containers/group.com.fmmenchi.tokenmeter/snapshot.json` | the app                                       | the widget                 |
-| `Local.xcconfig`                                                         | you (git-ignored)                             | the Xcode build            |
+| Path                                                                     | Written by                      | Read by                    |
+| :----------------------------------------------------------------------- | :------------------------------ | :------------------------- |
+| `~/.claude/projects/**/*.jsonl`                                          | Claude Code                     | the app and the probe      |
+| `~/.codex/sessions/**/rollout-*.jsonl`                                   | Codex CLI                       | the app and the probe      |
+| `~/.claude.json`                                                         | Claude Code                     | the app (plan only)        |
+| `~/.tokenmeter/providers.json`                                           | the app on first run, then you  | the app and the probe      |
+| `~/.tokenmeter/claude-statusline.sh`                                     | `scripts/install-statusline.sh` | Claude Code (`statusLine`) |
+| `~/.tokenmeter/claude-statusline.json`                                   | `claude-statusline.sh`          | the app and the probe      |
+| `~/Library/Group Containers/group.com.fmmenchi.tokenmeter/snapshot.json` | the app                         | the widget                 |
+| `Local.xcconfig`                                                         | you (git-ignored)               | the Xcode build            |
 
 ## The snapshot
 

@@ -39,6 +39,9 @@ account to use is a decision for the owner of the project. A release workflow is
 in CI until those secrets exist, because it could not be tested without them.
 :::
 
+To build, install and set up the status line in one go, use `./scripts/install.sh`
+([Install and Run](./install-and-run.md)).
+
 ## Related
 
 - [Install and Run](./install-and-run.md)

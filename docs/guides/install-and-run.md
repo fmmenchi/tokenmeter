@@ -54,20 +54,23 @@ the snapshot.
 
 ## Step 4: Install it and let it start at login
 
-To keep the app after cleaning the build folder, build the zip ([Package and
-Distribute](./package-and-distribute.md)) and copy the app to `/Applications`:
+One command builds the app, installs it in `/Applications` and sets up the Claude status line
+([ADR 0019](../adr/0019-install-sets-up-the-claude-status-line.md)):
 
 ```bash
-./scripts/package.sh
-ditto -x -k dist/TokenMeter-*.zip /tmp/tokenmeter
-ditto /tmp/tokenmeter/TokenMeter.app /Applications/TokenMeter.app
-open /Applications/TokenMeter.app
+./scripts/install.sh
 ```
+
+It runs [Package and Distribute](./package-and-distribute.md), copies the app, starts it, and runs
+`scripts/install-statusline.sh`, which puts `claude-statusline.sh` in `~/.tokenmeter/` and points
+`statusLine` in `~/.claude/settings.json` at it. If you already have another status line, it is left
+alone and the script says so: see [Enable the Claude Quota](./enable-claude-quota.md).
 
 The app **registers itself to start at login the first time it runs**
 ([ADR 0011](../adr/0011-launch-at-login.md)). You will see it under System Settings, General, Login
-Items. **Settings…** in the panel has a **Launch at login** switch; if you turn it off the app never turns it back
-on. Run the copy in `/Applications`: the registration belongs to the copy that registered it.
+Items. **Settings…** in the panel has a **Launch at login** switch; if you turn it off the app never
+turns it back on. Run the copy in `/Applications`: the registration belongs to the copy that
+registered it.
 
 :::info[Verified]
 The zip's app, copied to `/Applications`, starts from there with a valid signature and the widget
