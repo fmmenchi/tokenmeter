@@ -35,10 +35,11 @@ app; if both are wrong, it is in the data.
 | The app does not start after a restart              | It never registered, you turned the switch off, or you ran a copy from a build folder. | Run the copy in `/Applications` and check the **Launch at login** switch in Settings and System Settings, General, Login Items. |
 | First launch takes several seconds to show data     | The first read scans a week of logs.                                                   | Expected; later refreshes read only new bytes ([ADR 0004](../adr/0004-incremental-log-scanning.md)).                            |
 
-:::caution[Personal Team]
-Free Personal Teams may not support App Groups on macOS. The signed build here carried the group
-entitlement, but whether the widget actually reads the snapshot under a Personal Team was not
-confirmed. If the widget stays empty with the app running, that is the first thing to suspect.
+:::caution[App Group]
+Whether the widget actually reads the snapshot was not confirmed under either a Personal Team or
+the paid team: the signed app carries the group entitlement and macOS creates the container, but
+`snapshot.json` was not seen in it. If the widget stays empty with the app running, check
+`~/Library/Group Containers/group.com.fmmenchi.tokenmeter.app/` for that file first.
 :::
 
 ## Build

@@ -19,7 +19,11 @@ the Claude quota and the desktop widget are the next two guides.
 - [XcodeGen](https://github.com/yonaskolb/XcodeGen): `brew install xcodegen`.
 - An Apple signing team. The widget reads the snapshot through an App Group, and an App Group
   needs a team ([ADR 0003](../adr/0003-host-app-widget-and-app-group.md)). A free Personal Team
-  was enough on the machine this was built on.
+  builds and runs, but its provisioning profile lasts seven days: rerun `./scripts/install.sh` to
+  renew it. The paid Apple Developer Program gives a profile that lasts a year
+  ([ADR 0020](../adr/0020-bundle-identifiers-under-the-paid-team.md)). The bundle identifiers are
+  `com.fmmenchi.tokenmeter.app` and `.app.widget`; one that another team already registered cannot
+  be registered by yours, so a fork changes them in `project.yml`.
 - Claude Code and/or the Codex CLI: both providers are read from what those tools leave on disk.
 
 ## Step 1: Set your team

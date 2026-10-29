@@ -13,7 +13,7 @@ Gate: `pnpm run check`. Spike: `swift run tokenmeter-probe`.
 ## Open decisions
 
 - **Claude remaining quota** — comes from the status line (ADR 0005); stale until a session runs.
-- **Host app and widget extension** — the Xcode project, App Group and signing team.
+- **Notarized release** — signing works, the first Apple notarization is pending (ADR 0021); the widget on a notarized build is unverified.
 
 ## Topic index (`.agents/doc/`)
 

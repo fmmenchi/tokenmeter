@@ -1,6 +1,6 @@
 # ADR 0010 — Distribute a prebuilt app
 
-Status: accepted (2026-10-28); notarized distribution deferred
+Status: accepted (2026-10-28); notarized distribution done by [ADR 0021](./0021-developer-id-signing-and-notarization.md)
 
 ## Context
 
@@ -25,3 +25,5 @@ A release workflow is added only once the signing secrets exist, so that it can 
 
 - `dist/` is git-ignored; the zip is an artifact, not a source file.
 - Until Developer ID exists, "download and open" works for the person who built it only.
+- Update (2026-10-29): the paid team and the Developer ID certificate exist; signing and
+  notarization are in ADR 0021. The release workflow is still not written.
