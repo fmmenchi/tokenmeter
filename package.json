@@ -8,8 +8,9 @@
     "prepare": "husky",
     "swift:build": "swift build",
     "swift:test": "swift test",
+    "scripts:test": "sh scripts/test-install-statusline.sh",
     "format:check": "prettier --check \"**/*.{md,mjs,json,yml}\" --ignore-path .prettierignore",
-    "check": "pnpm run format:check && pnpm run swift:test && pnpm run docs:build",
+    "check": "pnpm run format:check && pnpm run swift:test && pnpm run scripts:test && pnpm run docs:build",
     "docs:start": "pnpm --dir apps/docusaurus start",
     "docs:build": "pnpm --dir apps/docusaurus build"
   },

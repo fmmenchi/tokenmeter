@@ -35,6 +35,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm run format:check
+      - run: pnpm run scripts:test
       - run: pnpm run docs:build
 
   commits:
