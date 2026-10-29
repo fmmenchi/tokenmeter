@@ -29,8 +29,8 @@ Once a release exists, the steps will be:
 ## After the first launch
 
 - The app registers itself to **start at login**. You can turn that off in Settings, from the panel.
-- **Claude quota**: set up the status line once, see [Enable the Claude Quota](./enable-claude-quota.md).
-  Without it the Claude bars show tokens used but not what is left.
+- **Claude quota**: the app sets up Claude's status line itself at every launch when Claude Code is
+  installed ([Enable the Claude Quota](./enable-claude-quota.md)). Without it the Claude bars show tokens used but not what is left.
 - **Widget**: [Add the Widget](./add-the-widget.md).
 
 ## Uninstall

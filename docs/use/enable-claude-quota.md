@@ -11,23 +11,29 @@ Switch on the one setting that lets tokenmeter see your Claude plan limits.
 ## Intent
 
 Claude's transcripts carry tokens, not plan limits. The limits come from Claude Code's **status
-line**, which has to be pointed at a small script once. Without this step the Claude bars stay
-empty and grey, and only token counts show. ChatGPT needs no setup.
+line**, which has to be pointed at a small script. Without it the Claude bars stay empty and grey,
+and only token counts show. ChatGPT needs no setup.
 
-## Step 1: Add the status line
+## Step 1: Let the app do it, or do it yourself
 
-`./scripts/install.sh` does this for you. To do only this step:
+**The app does it.** At every launch, if Claude Code is installed (`~/.claude` exists), tokenmeter
+copies the script to `~/.tokenmeter/` and sets `statusLine` in `~/.claude/settings.json`. If you
+install Claude Code after tokenmeter, the next launch picks it up. It never replaces a status line
+you already have, writes `settings.json.tokenmeter.bak` before changing the file, and leaves an
+unreadable file alone ([ADR 0024](../adr/0024-the-app-sets-up-the-claude-status-line.md)). The Settings
+window says what it did, and its switch **Set up the Claude quota automatically** turns this off.
+
+**Doing it yourself.** When building from source, `./scripts/install.sh` runs this step before the app
+opens. To do only this step:
 
 ```bash
 ./scripts/install-statusline.sh
 ```
 
-It copies `claude-statusline.sh` to `~/.tokenmeter/` (every time, so the copy is current) and sets
-`statusLine` in `~/.claude/settings.json` to point at it. It changes only that key, writes
-`settings.json.tokenmeter.bak` first, and does nothing if it is already set. If you already have a
-different status line it leaves it alone and exits with status 2. Without Claude Code (no `~/.claude`)
-it does nothing and creates nothing
-([ADR 0019](../adr/0019-install-sets-up-the-claude-status-line.md)); then see the box below.
+It does what the app does: copies the script, sets only the `statusLine` key, writes the backup first,
+and does nothing if it is already set. If you already have a different status line it leaves it alone
+and exits with status 2. Without Claude Code it creates nothing
+([ADR 0019](../adr/0019-install-sets-up-the-claude-status-line.md)).
 
 By hand, the setting is:
 
@@ -38,7 +44,7 @@ By hand, the setting is:
 }
 ```
 
-To undo it, delete those lines.
+To undo it, delete those lines and turn the Settings switch off, or the next launch sets it again.
 
 :::warning[You already have a status line?]
 Wrap it instead of replacing it. Your command must keep printing its own text, and the script has

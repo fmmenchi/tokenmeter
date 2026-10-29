@@ -39,7 +39,9 @@ If you do not use one of the two tools, its entry stays empty; the other keeps w
 - It does not send messages to a model, so it does not use up your plan. It only reads files that
   already exist.
 - The one thing it adds to Claude Code is a status line that **writes a small file** and prints the
-  word `tokenmeter` in Claude Code's status bar. That runs on your Mac and uses no tokens.
+  word `tokenmeter` in Claude Code's status bar. The app sets it up for you when Claude Code is
+  installed, only if you have no status line of your own, and you can switch that off in Settings.
+  It runs on your Mac and uses no tokens.
 
 What it uses is a little CPU while it reads: the first read after launch scans a week of logs and can
 take several seconds; later reads only look at new lines, once a minute.
