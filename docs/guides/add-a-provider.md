@@ -6,7 +6,8 @@ sidebar_position: 7
 
 # Add a Provider
 
-Teach tokenmeter to read another AI tool, in one source type and one line.
+Teach tokenmeter to read another AI tool, in one source type and one line. If its logs fit a JSON
+description, [Configure Providers](./configure-providers.md) needs no Swift at all.
 
 ## Intent
 

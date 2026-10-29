@@ -70,7 +70,8 @@ The format is JSON with dotted paths and nothing else: no expressions, no script
 - **`windows`:** lengths in minutes; the label is derived (`300` → `5h`, `10080` → `7d`).
 - **`log`:** a folder of `.jsonl` files. `contains` is a cheap byte filter applied before decoding,
   `where` keeps the lines whose paths equal the given strings, `timestamp` is an ISO 8601 path.
-- **`usage`:** `perEvent` makes each line an event (optionally deduplicated, last wins);
+- **`usage`:** `perEvent` makes each line an event (optionally deduplicated by the `dedupeBy` paths the line has,
+  last wins; a line with none of them is never merged);
   `cumulative` makes an event the positive difference to the previous line of the same file. A token
   field is a path, or `{ "path": …, "minus": … }` for a difference.
 - **`quota` and `plan`:** read from a `file`, or, when `file` is absent, from the log lines (the
@@ -87,5 +88,9 @@ A broken file adds no providers and does not stop the built-in ones; the probe p
   subtraction) is a `ProviderSource` in Swift, and that is fine.
 - The file is data from the user's own disk, read-only: it names files to read, never commands to
   run.
-- `ConfiguredSource` decodes lines generically, so it is slower than the native readers; the
-  built-ins are the proof of that cost, measured in the change that implemented this.
+- `ConfiguredSource` decodes lines generically. Measured on Fabio's real Claude logs (7 days, 7.5 GB,
+  debug build) with a configuration equivalent to the native reader: **19,600 events and identical
+  token totals** for both; first scan 20 s against 18 s, incremental read 0.12 s against 0.16 s.
+  The first comparison differed by nine events: the native reader deduplicates by `message.id` even
+  when `requestId` is missing, which the first version of `dedupeBy` did not. That is now the rule
+  above, with a test.
