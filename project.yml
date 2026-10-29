@@ -24,7 +24,8 @@ targets:
     entitlements:
       path: App/TokenMeter/TokenMeter.entitlements
       properties:
-        com.apple.security.application-groups: [group.com.fmmenchi.tokenmeter]
+        com.apple.security.application-groups:
+          [group.com.fmmenchi.tokenmeter.app]
         com.apple.security.app-sandbox: false
     info:
       path: App/TokenMeter/Info.plist
@@ -32,7 +33,7 @@ targets:
         LSUIElement: true
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.fmmenchi.tokenmeter
+        PRODUCT_BUNDLE_IDENTIFIER: com.fmmenchi.tokenmeter.app
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
   TokenMeterWidget:
     type: app-extension
@@ -43,7 +44,8 @@ targets:
     entitlements:
       path: Widget/TokenMeterWidget/TokenMeterWidget.entitlements
       properties:
-        com.apple.security.application-groups: [group.com.fmmenchi.tokenmeter]
+        com.apple.security.application-groups:
+          [group.com.fmmenchi.tokenmeter.app]
         com.apple.security.app-sandbox: true
     info:
       path: Widget/TokenMeterWidget/Info.plist
@@ -52,4 +54,4 @@ targets:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.fmmenchi.tokenmeter.widget
+        PRODUCT_BUNDLE_IDENTIFIER: com.fmmenchi.tokenmeter.app.widget

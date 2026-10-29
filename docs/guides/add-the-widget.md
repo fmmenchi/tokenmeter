@@ -16,7 +16,7 @@ all the time.
 ## Step 1: Make sure the app is running
 
 The widget is sandboxed and cannot read your logs. The app reads them and writes a snapshot into
-the App Group container `group.com.fmmenchi.tokenmeter`; the widget only draws it. If the app is
+the App Group container `group.com.fmmenchi.tokenmeter.app`; the widget only draws it. If the app is
 not running the widget keeps showing the last snapshot.
 
 ## Step 2: Add it

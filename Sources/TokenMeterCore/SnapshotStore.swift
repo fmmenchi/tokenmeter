@@ -2,7 +2,7 @@ import Foundation
 
 /// Reads and writes the snapshot the host app hands to the widget.
 public struct SnapshotStore: Sendable {
-    public static let appGroup = "group.com.fmmenchi.tokenmeter"
+    public static let appGroup = "group.com.fmmenchi.tokenmeter.app"
 
     public let url: URL
 
