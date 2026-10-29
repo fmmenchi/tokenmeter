@@ -40,7 +40,7 @@ public protocol ProviderSource: Sendable {
 - **`ProviderReading`** (per read): usage `events`, provider-reported `quotas`, the `plan` label and
   `quotaUpdatedAt`. How a source finds and parses its files is its own business.
 
-**One place:** `Providers.standard` (`Sources/TokenMeterCore/Providers.swift`) is the only list.
+**One place:** `Providers.standard()` (`Sources/TokenMeterCore/Providers.swift`) is the only list.
 Adding a provider is a source type plus one line there; `Collector`, the probe and the panel iterate
 it and do not name a provider.
 

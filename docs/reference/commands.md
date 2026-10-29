@@ -47,12 +47,15 @@ Unlike the panel, the probe prints the raw token total including cache reads.
 
 `snapshot.json` is what the widget renders. Dates are ISO 8601.
 
-| Field                   | Type                | Description                                     |
-| :---------------------- | :------------------ | :---------------------------------------------- |
-| `generatedAt`           | date                | When the app built the snapshot.                |
-| `claudeQuotaUpdatedAt`  | date, optional      | When the status line last wrote Claude's quota. |
-| `providers[].provider`  | `claude`, `chatgpt` |                                                 |
-| `providers[].windows[]` | array               | One entry per window, `5h` then `7d`.           |
+| Field                        | Type           | Description                                                       |
+| :--------------------------- | :------------- | :---------------------------------------------------------------- |
+| `generatedAt`                | date           | When the app built the snapshot.                                  |
+| `providers[].provider`       | string         | The provider id, for example `claude` or `chatgpt`.               |
+| `providers[].title`          | string         | Display name. Older snapshots lack it and show the id.            |
+| `providers[].plan`           | string, option | Subscription label such as `Max 20x`.                             |
+| `providers[].quotaUpdatedAt` | date, optional | When the provider's quota was last written.                       |
+| `providers[].setupHint`      | string, option | Shown while no quota has been seen.                               |
+| `providers[].windows[]`      | array          | One entry per window the provider declares, `5h` then `7d` today. |
 
 Each window:
 

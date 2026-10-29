@@ -14,6 +14,8 @@ Where things go. The decisions behind them are in `docs/adr/`.
 Rules:
 
 - The widget extension only renders a `Snapshot`; collection lives in the host app (ADR 0001).
+- Every provider is a `ProviderSource` listed in `Providers.standard()` (ADR 0015). Window maths,
+  bars and refresh are common and never name a provider; per-provider facts go in `ProviderInfo`.
 - A remaining-quota figure must carry its `source` (`reported`, `reset`, `consumptionOnly`).
   Never show a percentage the code cannot attribute to a provider log or a reset window (ADR 0007).
 - Provider log formats are not contracts. Decode tolerantly (optional fields, skip bad lines)
