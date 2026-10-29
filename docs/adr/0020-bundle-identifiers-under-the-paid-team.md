@@ -22,6 +22,8 @@ New identifiers, chosen once and kept, because notarized builds and the App Grou
 
 The widget identifier keeps the app's as its prefix, which an embedded extension requires.
 
+Update: the App Group name was changed again by [ADR 0023](./0023-team-prefixed-app-group.md).
+
 ## Consequences
 
 - The snapshot moves to `~/Library/Group Containers/group.com.fmmenchi.tokenmeter.app/`. The app
