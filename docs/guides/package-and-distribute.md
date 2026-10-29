@@ -25,19 +25,35 @@ It generates the project, builds the Release app, and writes `dist/TokenMeter-<v
 
 ## Step 2: Know what the signature allows
 
-| Signed with                      | Runs on                                    | Widget                              |
-| :------------------------------- | :----------------------------------------- | :---------------------------------- |
-| Personal Team (the default here) | The Mac that built it. Others get blocked. | Needs the App Group, not confirmed. |
-| Developer ID, notarized          | Any Mac, with a double click.              | Yes, in principle.                  |
+| Signed with                      | Runs on                                    | Widget                                  |
+| :------------------------------- | :----------------------------------------- | :-------------------------------------- |
+| Personal Team (the default here) | The Mac that built it. Others get blocked. | Needs the App Group, not confirmed.     |
+| Developer ID, notarized          | Any Mac, with a double click.              | Not yet confirmed on a notarized build. |
 
 The zip built here is signed with a development certificate and Gatekeeper rejects it
 (`spctl -a -vv` says `rejected`), so it is not yet something to hand to someone else.
 
-:::caution[Developer ID is not set up]
-Opening on any Mac needs a paid Developer ID certificate and notarization credentials. Which Apple
-account to use is a decision for the owner of the project. A release workflow is deliberately not
-in CI until those secrets exist, because it could not be tested without them.
-:::
+## Step 3: Sign for other Macs and notarize
+
+This needs the paid Apple Developer Program, a `Developer ID Application` certificate in your login
+keychain (Xcode → Settings → Accounts → Manage Certificates) and notarization credentials
+([ADR 0021](../adr/0021-developer-id-signing-and-notarization.md)). Store the credentials once; the
+command asks for an app-specific password from your Apple account, so nothing is written in a file:
+
+```bash
+xcrun notarytool store-credentials tokenmeter-notary
+```
+
+Then, for each release:
+
+```bash
+./scripts/sign-release.sh   # archive, export signed with Developer ID, zip
+./scripts/notarize.sh       # submit to Apple, wait, staple, check with spctl
+```
+
+`sign-release.sh` alone gives a zip that is signed but that Gatekeeper still calls
+`Unnotarized Developer ID`. Only the zip left by `notarize.sh` opens with a double click anywhere.
+A release workflow in CI is not written until the same credentials exist as repository secrets.
 
 To build, install and set up the status line in one go, use `./scripts/install.sh`
 ([Install and Run](./install-and-run.md)).

@@ -29,7 +29,7 @@ The panel as it looks on a Mac with both CLIs installed: a stale reading is dimm
 
 **To run it:** macOS 14 or later, and Claude Code and/or the Codex CLI, since both providers are read from the files those tools leave on your machine.
 
-**To build it** (the only way today): Xcode, XcodeGen and an Apple signing team, because the widget reads its data through an App Group. A prebuilt download that is signed with a Developer ID and notarized would need none of these three; it is planned and not done yet ([ADR 0010](./adr/0010-distribute-a-prebuilt-app.md)). The zip you can build yourself runs only on the Mac that built it.
+**To build it** (the only way today): Xcode, XcodeGen and an Apple signing team, because the widget reads its data through an App Group. A prebuilt download that is signed with a Developer ID and notarized would need none of these three: the scripts exist ([ADR 0021](./adr/0021-developer-id-signing-and-notarization.md)), a notarized build is not published yet. The zip you can build yourself runs only on the Mac that built it.
 
 No credentials and no network: tokenmeter only reads files those tools leave on your machine.
 
