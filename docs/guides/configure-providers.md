@@ -10,8 +10,10 @@ Add another AI tool to the panel by describing its files, without writing Swift 
 
 ## Intent
 
-Show a provider next to Claude and ChatGPT from a JSON file. Claude and ChatGPT stay built in;
-the file adds more ([ADR 0016](../adr/0016-providers-declared-in-a-config-file.md)). A tool whose
+Show a provider next to Claude and ChatGPT from a JSON file. Claude and ChatGPT are declared the same
+way, inside the app; your file adds more or replaces one of them
+([ADR 0016](../adr/0016-providers-declared-in-a-config-file.md),
+[ADR 0017](../adr/0017-every-provider-through-the-config.md)). A tool whose
 logs need a rule the file cannot say is a [source in Swift](./add-a-provider.md) instead.
 
 ## Prerequisites
@@ -63,21 +65,21 @@ The paths in the example are placeholders: replace them with the ones your tool 
 
 ## Reference
 
-| Field               | Meaning                                                                                                                                                         |
-| :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`, `title`       | Unique id and the name on the panel. An id of a built-in provider is ignored.                                                                                   |
-| `windows`           | Window lengths in minutes: `300` is `5h`, `10080` is `7d`, anything else shows `45m`.                                                                           |
-| `setupHint`         | Line shown while no quota has been seen.                                                                                                                        |
-| `log.root`          | Folder scanned for `.jsonl` files. `~` is expanded.                                                                                                             |
-| `log.contains`      | Optional text a line must contain. Cheap: applied before decoding. Use it on big logs.                                                                          |
-| `log.where`         | Optional. Paths that must equal the given strings for a line to count.                                                                                          |
-| `log.timestamp`     | Path of an ISO 8601 timestamp.                                                                                                                                  |
-| `usage.mode`        | `perEvent`: each line is usage. `cumulative`: usage is the growth since the previous line.                                                                      |
-| `usage.dedupeBy`    | Paths whose values identify a message logged more than once; the last line wins.                                                                                |
-| `usage.tokens`      | `input`, `output`, `cacheRead`, `cacheWrite`: a path, or `{ "path": …, "minus": … }`.                                                                           |
-| `quota.file`        | JSON file holding the quota. Absent: the quota is read from the log lines.                                                                                      |
-| `quota.windows[]`   | `usedPercent` path; optional `resetsAt` (seconds since 1970, or `"resetsAtFormat": "iso8601"`); `minutes` or `minutesPath`; `at` names the object holding them. |
-| `plan.file`, `path` | Where the plan string is. Absent `file`: read from the log lines.                                                                                               |
+| Field                                          | Meaning                                                                                                                                                                                                       |
+| :--------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `id`, `title`                                  | Unique id and the name on the panel. An id of a built-in provider (`claude`, `chatgpt`) replaces it whole.                                                                                                    |
+| `windows`                                      | Window lengths in minutes: `300` is `5h`, `10080` is `7d`, anything else shows `45m`.                                                                                                                         |
+| `setupHint`                                    | Line shown while no quota has been seen.                                                                                                                                                                      |
+| `log.root`                                     | Folder scanned for `.jsonl` files. `~` is expanded.                                                                                                                                                           |
+| `log.contains`                                 | Optional text a line must contain. Cheap: applied before decoding. Use it on big logs.                                                                                                                        |
+| `log.where`                                    | Optional. Paths that must equal the given strings for a line to count.                                                                                                                                        |
+| `log.timestamp`                                | Path of an ISO 8601 timestamp.                                                                                                                                                                                |
+| `usage.mode`                                   | `perEvent`: each line is usage. `cumulative`: usage is the growth since the previous line.                                                                                                                    |
+| `usage.dedupeBy`                               | Paths whose values identify a message logged more than once; the last line wins.                                                                                                                              |
+| `usage.tokens`                                 | `input`, `output`, `cacheRead`, `cacheWrite`: a path, or `{ "path": …, "minus": … }`.                                                                                                                         |
+| `quota.file`                                   | JSON file holding the quota. Absent: the quota is read from the log lines.                                                                                                                                    |
+| `quota.windows[]`                              | `usedPercent` path; optional `resetsAt` (seconds since 1970, or `"resetsAtFormat": "iso8601"`); `minutes` or `minutesPath`; `at` names the object holding them.                                               |
+| `plan.file`, `path`, `stripPrefix`, `labels[]` | Where the plan string is; absent `file`: the log lines. `labels` are ordered rules (`path`, `contains` or `equals`, `label`), the first match wins; otherwise the value, minus `stripPrefix`, is capitalised. |
 
 Paths are dotted keys (`message.usage.input_tokens`). There are no arrays and no expressions.
 
@@ -94,3 +96,9 @@ broken file never hides Claude and ChatGPT.
 
 - [Add a Provider](./add-a-provider.md)
 - [Data Sources](../reference/data-sources.md)
+
+## See how Claude and ChatGPT are declared
+
+They use this same format. Their entries are the `json` constant in
+`Sources/TokenMeterCore/DefaultProviders.swift`: copy one into your file, change its `id` to keep it
+beside the original, or keep the `id` to replace it.

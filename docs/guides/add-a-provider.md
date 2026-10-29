@@ -6,8 +6,9 @@ sidebar_position: 7
 
 # Add a Provider
 
-Teach tokenmeter to read another AI tool, in one source type and one line. If its logs fit a JSON
-description, [Configure Providers](./configure-providers.md) needs no Swift at all.
+Teach tokenmeter to read another AI tool. If its logs fit a JSON description,
+[Configure Providers](./configure-providers.md) needs no Swift at all; this guide is for the ones that
+do not.
 
 ## Intent
 
@@ -42,8 +43,8 @@ the source's own business.
 
 ## Step 2: List it
 
-Add the source to `Providers.standard()` in `Sources/TokenMeterCore/Providers.swift`. That list is
-the only place providers are named: `Collector`, the probe and the panel iterate it.
+Append the source to the list `Providers.standard()` builds in `Sources/TokenMeterCore/Providers.swift`.
+That is the only place providers are assembled: `Collector`, the probe and the panel iterate it.
 
 ## Step 3: Test and check
 

@@ -19,7 +19,7 @@ the two CLIs leave on your machine.
 **Quota.** Claude Code pipes a JSON document to its status-line command. When the API reports the
 limits, it contains `rate_limits.five_hour` and `rate_limits.seven_day`, each with
 `used_percentage` and `resets_at`. `scripts/claude-statusline.sh` saves that document to
-`~/.tokenmeter/claude-statusline.json`, and `ClaudeQuotaReader` reads the two windows from it. See
+`~/.tokenmeter/claude-statusline.json`, and the built-in Claude entry reads the two windows from it. See
 [ADR 0005](../adr/0005-claude-quota-from-statusline.md).
 
 The file is only rewritten while a Claude Code session is rendering its status line. Between
