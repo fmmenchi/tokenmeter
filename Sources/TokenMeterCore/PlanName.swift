@@ -17,8 +17,11 @@ public enum PlanName {
     }
 
     public static func chatgpt(planType: String?) -> String? {
-        planType.map { prettify($0) }
+        planType.map { prettified($0) }
     }
+
+    /// `team_plus` becomes `Team Plus`: the label for a plan the code has no rule for.
+    public static func prettified(_ raw: String) -> String { prettify(raw) }
 
     private static func prettify(_ raw: String) -> String {
         raw.split(separator: "_").map { $0.prefix(1).uppercased() + $0.dropFirst() }.joined(separator: " ")

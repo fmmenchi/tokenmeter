@@ -39,10 +39,13 @@ public struct CodexSource: ProviderSource {
     }
 }
 
-/// The one list of providers. Adding one is a `ProviderSource` and a line here (ADR 0015).
+/// The one list of providers: the built-in ones, then those in `providers.json` (ADR 0015, 0016).
 public enum Providers {
     /// Fresh sources each call: the log readers keep per-file state.
-    public static func standard() -> [any ProviderSource] {
-        [ClaudeSource(), CodexSource()]
+    public static func standard(config: URL = ProviderConfigFile.defaultURL) -> [any ProviderSource] {
+        let builtIn: [any ProviderSource] = [ClaudeSource(), CodexSource()]
+        let known = Set(builtIn.map(\.info.provider))
+        let extra = ((try? ProviderConfigFile.load(from: config)) ?? nil)?.providers ?? []
+        return builtIn + extra.filter { !known.contains(Provider(rawValue: $0.id)) }.map(ConfiguredSource.init)
     }
 }

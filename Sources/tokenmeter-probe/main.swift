@@ -1,6 +1,7 @@
 import Foundation
 import TokenMeterCore
 
+do { _ = try ProviderConfigFile.load() } catch { print("providers.json ignored: \(error)") }
 let snapshot = Collector().snapshot()
 for p in snapshot.providers {
     print(p.title + (p.plan.map { " (\($0))" } ?? ""))
