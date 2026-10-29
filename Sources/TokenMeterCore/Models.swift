@@ -1,8 +1,25 @@
 import Foundation
 
-public enum Provider: String, Codable, Sendable, CaseIterable {
-    case claude
-    case chatgpt
+/// Which provider a reading belongs to: an id, so a new provider does not change this type.
+/// Encoded as the bare string (`"claude"`), as the enum it replaced was.
+public struct Provider: RawRepresentable, Hashable, Codable, Sendable {
+    public let rawValue: String
+
+    public init(rawValue: String) {
+        self.rawValue = rawValue
+    }
+
+    public init(from decoder: any Decoder) throws {
+        rawValue = try decoder.singleValueContainer().decode(String.self)
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(rawValue)
+    }
+
+    public static let claude = Provider(rawValue: "claude")
+    public static let chatgpt = Provider(rawValue: "chatgpt")
 }
 
 public struct TokenCounts: Codable, Equatable, Sendable {

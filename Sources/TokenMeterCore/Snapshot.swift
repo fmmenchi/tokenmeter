@@ -54,37 +54,61 @@ public struct WindowUsage: Codable, Equatable, Sendable {
 
 public struct ProviderSnapshot: Codable, Equatable, Sendable {
     public let provider: Provider
+    /// Display name; falls back to the provider id for a snapshot written before it existed.
+    public let title: String
     public let windows: [WindowUsage]
     /// Subscription label such as "Max 20x"; nil when the CLI recorded none (ADR 0012).
     public let plan: String?
+    /// When the provider's quota was last written; nil if it never was.
+    public let quotaUpdatedAt: Date?
+    /// Shown while no quota has been seen; nil when the provider has nothing to set up (ADR 0015).
+    public let setupHint: String?
 
-    public init(provider: Provider, windows: [WindowUsage], plan: String? = nil) {
+    public init(provider: Provider, title: String? = nil, windows: [WindowUsage], plan: String? = nil,
+                quotaUpdatedAt: Date? = nil, setupHint: String? = nil) {
         self.provider = provider
+        self.title = title ?? provider.rawValue
         self.windows = windows
         self.plan = plan
+        self.quotaUpdatedAt = quotaUpdatedAt
+        self.setupHint = setupHint
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case provider, title, windows, plan, quotaUpdatedAt, setupHint
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        let provider = try c.decode(Provider.self, forKey: .provider)
+        self.init(provider: provider, title: try c.decodeIfPresent(String.self, forKey: .title),
+                  windows: try c.decode([WindowUsage].self, forKey: .windows),
+                  plan: try c.decodeIfPresent(String.self, forKey: .plan),
+                  quotaUpdatedAt: try c.decodeIfPresent(Date.self, forKey: .quotaUpdatedAt),
+                  setupHint: try c.decodeIfPresent(String.self, forKey: .setupHint))
     }
 }
 
 public struct Snapshot: Codable, Equatable, Sendable {
     public let generatedAt: Date
     public let providers: [ProviderSnapshot]
-    /// When the Claude status line last wrote its quota; nil if it never did.
-    public let claudeQuotaUpdatedAt: Date?
 
-    public init(generatedAt: Date, providers: [ProviderSnapshot], claudeQuotaUpdatedAt: Date? = nil) {
+    public init(generatedAt: Date, providers: [ProviderSnapshot]) {
         self.generatedAt = generatedAt
         self.providers = providers
-        self.claudeQuotaUpdatedAt = claudeQuotaUpdatedAt
     }
 }
 
 public enum SnapshotBuilder {
     public static func providerSnapshot(
         provider: Provider,
+        title: String? = nil,
         events: [UsageEvent],
         windows: [WindowSpec],
         reported: [ReportedQuota] = [],
         plan: String? = nil,
+        quotaUpdatedAt: Date? = nil,
+        setupHint: String? = nil,
         now: Date = Date()
     ) -> ProviderSnapshot {
         let usages = windows.map { spec -> WindowUsage in
@@ -110,6 +134,7 @@ public enum SnapshotBuilder {
             return WindowUsage(window: spec, tokens: tokens, remainingFraction: nil,
                                source: .consumptionOnly, resetsAt: nil, observedAt: nil)
         }
-        return ProviderSnapshot(provider: provider, windows: usages, plan: plan)
+        return ProviderSnapshot(provider: provider, title: title, windows: usages, plan: plan,
+                                quotaUpdatedAt: quotaUpdatedAt, setupHint: setupHint)
     }
 }

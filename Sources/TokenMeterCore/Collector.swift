@@ -1,33 +1,22 @@
 import Foundation
 
-/// Collects both providers into one snapshot.
+/// Collects every provider into one snapshot. It names no provider (ADR 0015).
 public struct Collector: Sendable {
-    public var claude: ClaudeLogReader
-    public var codex: CodexLogReader
-    public var claudeQuota: ClaudeQuotaReader
-    public var claudePlan: ClaudePlanReader
+    public var sources: [any ProviderSource]
 
-    public init(claude: ClaudeLogReader = ClaudeLogReader(), codex: CodexLogReader = CodexLogReader(),
-                claudeQuota: ClaudeQuotaReader = ClaudeQuotaReader(),
-                claudePlan: ClaudePlanReader = ClaudePlanReader()) {
-        self.claude = claude
-        self.codex = codex
-        self.claudeQuota = claudeQuota
-        self.claudePlan = claudePlan
+    public init(sources: [any ProviderSource] = Providers.standard()) {
+        self.sources = sources
     }
 
     public func snapshot(now: Date = Date()) -> Snapshot {
         let since = now.addingTimeInterval(-WindowSpec.week.duration)
-        let codexResult = codex.read(since: since)
-        let providers = [
-            SnapshotBuilder.providerSnapshot(
-                provider: .claude, events: claude.events(since: since),
-                windows: [.session, .week], reported: claudeQuota.quotas(), plan: claudePlan.plan(), now: now),
-            SnapshotBuilder.providerSnapshot(
-                provider: .chatgpt, events: codexResult.events,
-                windows: [.session, .week], reported: codexResult.latestQuotas,
-                plan: PlanName.chatgpt(planType: codexResult.latestPlanType), now: now),
-        ]
-        return Snapshot(generatedAt: now, providers: providers, claudeQuotaUpdatedAt: claudeQuota.updatedAt())
+        let providers = sources.map { source -> ProviderSnapshot in
+            let reading = source.read(since: since)
+            return SnapshotBuilder.providerSnapshot(
+                provider: source.info.provider, title: source.info.title, events: reading.events,
+                windows: source.info.windows, reported: reading.quotas, plan: reading.plan,
+                quotaUpdatedAt: reading.quotaUpdatedAt, setupHint: source.info.setupHint, now: now)
+        }
+        return Snapshot(generatedAt: now, providers: providers)
     }
 }
