@@ -1,7 +1,7 @@
 ---
 title: Configure Providers
 sidebar_label: Configure Providers
-sidebar_position: 8
+sidebar_position: 5
 ---
 
 # Configure Providers
@@ -15,7 +15,7 @@ Show a provider next to Claude and ChatGPT by adding an entry to one JSON file. 
 Claude and ChatGPT are two entries the app writes the first time it runs, and you can edit, reorder
 or remove them like any other ([ADR 0018](../adr/0018-the-config-file-is-the-only-source.md),
 [ADR 0016](../adr/0016-providers-declared-in-a-config-file.md)). A tool whose logs need a rule the
-file cannot say is a [source in Swift](./add-a-provider.md) instead.
+file cannot say is a [source in Swift](../develop/add-a-provider.md) instead.
 
 ## Prerequisites
 
@@ -97,8 +97,8 @@ file is never overwritten: the app runs on Claude and ChatGPT for that run until
 
 ## Related
 
-- [Add a Provider](./add-a-provider.md)
-- [Data Sources](../reference/data-sources.md)
+- [Add a Provider](../develop/add-a-provider.md)
+- [Data Sources](../develop/data-sources.md)
 
 ## Claude and ChatGPT are entries too
 

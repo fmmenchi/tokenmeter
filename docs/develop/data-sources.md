@@ -1,7 +1,7 @@
 ---
 title: Data Sources
 sidebar_label: Data Sources
-sidebar_position: 1
+sidebar_position: 5
 ---
 
 # Data sources
@@ -61,5 +61,5 @@ logs and took about 9 seconds for 7.5 GB; it runs off the main thread.
 
 ## Related
 
-- [Enable the Claude Quota](../guides/enable-claude-quota.md)
-- [Reading the Bars](./bars.md)
+- [Enable the Claude Quota](../use/enable-claude-quota.md)
+- [Reading the Bars](../use/bars.md)

@@ -19,13 +19,13 @@ It reads only files Claude Code and the Codex CLI leave on your machine: no cred
 
 ## Where to go next
 
-| I want to…                            | Read                                                                                        |
-| :------------------------------------ | :------------------------------------------------------------------------------------------ |
-| install it and keep it running        | [Install and Run](https://fmmenchi.github.io/tokenmeter/guides/install-and-run)             |
-| see the Claude quota                  | [Enable the Claude Quota](https://fmmenchi.github.io/tokenmeter/guides/enable-claude-quota) |
-| understand a bar, a colour or the `~` | [Reading the Bars](https://fmmenchi.github.io/tokenmeter/reference/bars)                    |
-| add another AI tool from a JSON file  | [Configure Providers](https://fmmenchi.github.io/tokenmeter/guides/configure-providers)     |
-| know why it works this way            | [Decisions (ADRs)](https://fmmenchi.github.io/tokenmeter/adr)                               |
+| I want to…                            | Read                                                                                     |
+| :------------------------------------ | :--------------------------------------------------------------------------------------- |
+| install it and keep it running        | [Install and Run](https://fmmenchi.github.io/tokenmeter/develop/build-and-run)           |
+| see the Claude quota                  | [Enable the Claude Quota](https://fmmenchi.github.io/tokenmeter/use/enable-claude-quota) |
+| understand a bar, a colour or the `~` | [Reading the Bars](https://fmmenchi.github.io/tokenmeter/use/bars)                       |
+| add another AI tool from a JSON file  | [Configure Providers](https://fmmenchi.github.io/tokenmeter/use/configure-providers)     |
+| know why it works this way            | [Decisions (ADRs)](https://fmmenchi.github.io/tokenmeter/adr)                            |
 
 The same pages are the Markdown files in [`docs/`](./docs); `pnpm install && pnpm run docs:start` serves them locally.
 

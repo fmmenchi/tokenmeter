@@ -1,7 +1,7 @@
 ---
 title: Add the Widget
 sidebar_label: Add the Widget
-sidebar_position: 3
+sidebar_position: 4
 ---
 
 # Add the Widget
@@ -38,5 +38,5 @@ has not been seen running end to end. If it says "Open tokenmeter once to publis
 
 ## Related
 
-- [Install and Run](./install-and-run.md)
-- [Architecture](../concepts/index.md)
+- [Install and Run](../develop/build-and-run.md)
+- [Architecture](../develop/concepts.md)

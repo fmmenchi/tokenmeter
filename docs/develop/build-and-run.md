@@ -68,7 +68,7 @@ One command builds the app, installs it in `/Applications` and sets up the Claud
 It runs [Package and Distribute](./package-and-distribute.md), copies the app, starts it, and runs
 `scripts/install-statusline.sh`, which puts `claude-statusline.sh` in `~/.tokenmeter/` and points
 `statusLine` in `~/.claude/settings.json` at it. If you already have another status line, it is left
-alone and the script says so: see [Enable the Claude Quota](./enable-claude-quota.md).
+alone and the script says so: see [Enable the Claude Quota](../use/enable-claude-quota.md).
 
 ![The Settings window with the Launch at login switch on](../assets/settings.png)
 
@@ -94,6 +94,6 @@ numbers you expect and the panel does not, the problem is in the app, not in the
 
 ## Related
 
-- [Enable the Claude Quota](./enable-claude-quota.md)
-- [Add the Widget](./add-the-widget.md)
-- [Troubleshooting](./troubleshooting.md)
+- [Enable the Claude Quota](../use/enable-claude-quota.md)
+- [Add the Widget](../use/add-the-widget.md)
+- [Troubleshooting](../use/troubleshooting.md)

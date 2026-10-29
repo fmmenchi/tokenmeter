@@ -1,7 +1,7 @@
 ---
 title: Reading the Bars
 sidebar_label: Bars
-sidebar_position: 2
+sidebar_position: 6
 ---
 
 # Reading the Bars
@@ -52,17 +52,17 @@ apps, and it does not match how the plans count.
 
 ![The menu-bar panel with its two providers, the three read-age lines and the Refresh, Settings and Quit buttons](../assets/panel.png)
 
-| Element                                     | Meaning                                                                                                               |
-| :------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------- |
-| `Read 12 seconds ago`                       | When the app last read the files.                                                                                     |
-| `Claude quota from 3 hours ago`             | When the status line last wrote Claude's quota.                                                                       |
-| `Claude quota: status line has not run yet` | The status line is not set up or no session has run. See [Enable the Claude Quota](../guides/enable-claude-quota.md). |
-| Orange warning about the App Group          | No signing team: the widget cannot read the snapshot.                                                                 |
-| **Refresh**                                 | Re-reads now and shows a spinner while it works.                                                                      |
+| Element                                     | Meaning                                                                                                       |
+| :------------------------------------------ | :------------------------------------------------------------------------------------------------------------ |
+| `Read 12 seconds ago`                       | When the app last read the files.                                                                             |
+| `Claude quota from 3 hours ago`             | When the status line last wrote Claude's quota.                                                               |
+| `Claude quota: status line has not run yet` | The status line is not set up or no session has run. See [Enable the Claude Quota](./enable-claude-quota.md). |
+| Orange warning about the App Group          | No signing team: the widget cannot read the snapshot.                                                         |
+| **Refresh**                                 | Re-reads now and shows a spinner while it works.                                                              |
 
 The panel also refreshes by itself whenever it opens. The menu-bar item itself is the gauge icon.
 
 ## Related
 
-- [Data Sources](./data-sources.md)
-- [Troubleshooting](../guides/troubleshooting.md)
+- [Data Sources](../develop/data-sources.md)
+- [Troubleshooting](./troubleshooting.md)

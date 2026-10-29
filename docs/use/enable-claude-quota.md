@@ -1,7 +1,7 @@
 ---
 title: Enable the Claude Quota
 sidebar_label: Enable Claude Quota
-sidebar_position: 2
+sidebar_position: 3
 ---
 
 # Enable the Claude Quota
@@ -62,11 +62,11 @@ You should see a `five_hour` and a `seven_day` entry with `used_percentage` and 
 
 :::tip[Only while Claude Code runs]
 The file is rewritten only while a session renders its status line. Between sessions the last
-values stay and the panel shows how old they are; see [Reading the Bars](../reference/bars.md).
+values stay and the panel shows how old they are; see [Reading the Bars](./bars.md).
 :::
 
 ## Related
 
-- [Data Sources](../reference/data-sources.md)
+- [Data Sources](../develop/data-sources.md)
 - [ADR 0005: Claude quota from the status line](../adr/0005-claude-quota-from-statusline.md)
 - [ADR 0006: No polling of provider endpoints](../adr/0006-no-polling-of-provider-endpoints.md)

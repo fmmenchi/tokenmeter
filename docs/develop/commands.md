@@ -1,7 +1,7 @@
 ---
 title: Commands and Files
 sidebar_label: Commands and Files
-sidebar_position: 3
+sidebar_position: 7
 ---
 
 # Commands and Files
@@ -79,5 +79,5 @@ Each window:
 
 ## Related
 
-- [Reading the Bars](./bars.md)
+- [Reading the Bars](../use/bars.md)
 - [Data Sources](./data-sources.md)

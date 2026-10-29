@@ -10,7 +10,7 @@ picked the gauge.
 ## Decision
 
 The icon is a dark rounded square with a dial: a green, orange and red arc and a white needle. The
-arc colours repeat the thresholds of the bars ([Bars](../reference/bars.md)). It is the
+arc colours repeat the thresholds of the bars ([Bars](../use/bars.md)). It is the
 `AppIcon` set in `App/TokenMeter/Assets.xcassets`, wired by `ASSETCATALOG_COMPILER_APPICON_NAME` in
 `project.yml`.
 

@@ -1,7 +1,7 @@
 ---
 title: Package and Distribute
 sidebar_label: Package and Distribute
-sidebar_position: 4
+sidebar_position: 8
 ---
 
 # Package and Distribute
@@ -56,9 +56,9 @@ Then, for each release:
 A release workflow in CI is not written until the same credentials exist as repository secrets.
 
 To build, install and set up the status line in one go, use `./scripts/install.sh`
-([Install and Run](./install-and-run.md)).
+([Install and Run](./build-and-run.md)).
 
 ## Related
 
-- [Install and Run](./install-and-run.md)
+- [Install and Run](./build-and-run.md)
 - [Contribute](./contribute.md)

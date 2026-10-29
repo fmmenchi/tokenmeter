@@ -16,14 +16,14 @@ left, as a bar for the 5-hour window and one for the weekly window.
 - Tokens used under each bar.
 - A clear difference between a **fresh** reading, a **stale** one and an **inferred** reset.
 - A WidgetKit widget with the same bars on the desktop.
-- Claude and ChatGPT out of the box, and [more providers from a JSON file](./guides/configure-providers.md).
+- Claude and ChatGPT out of the box, and [more providers from a JSON file](./use/configure-providers.md).
 
 ## What it looks like
 
 ![The menu-bar panel: a 5-hour and a weekly bar for Claude (Max 20x) and for ChatGPT (Team), with tokens, time to reset and when each reading was taken](./assets/panel.png)
 
 The panel as it looks on a Mac with both CLIs installed: a stale reading is dimmed and marked
-`~`, as the weekly ChatGPT bar is. [Reading the Bars](./reference/bars.md) explains every state.
+`~`, as the weekly ChatGPT bar is. [Reading the Bars](./use/bars.md) explains every state.
 
 ## What it needs
 
@@ -35,28 +35,36 @@ No credentials and no network: tokenmeter only reads files those tools leave on 
 
 :::caution[Status]
 Early. Verified: the providers read from real logs, the quota for both, the bars, the panel and the
-Settings window opened on screen, and the app registered to start at login. **Not verified**: the
-widget on the desktop end to end, a real reboot with launch at login, and the GitHub Pages deploy.
-See [Troubleshooting](./guides/troubleshooting.md).
+Settings window opened on screen, the app registered to start at login, and the signed build with
+the paid team. **Not verified**: the widget on the desktop end to end, a real reboot with launch at
+login, and a notarized build. See [Troubleshooting](./use/troubleshooting.md).
 :::
 
-## 🚀 Guides
+## 👤 Use it
 
-1. [Install and Run](./guides/install-and-run.md): build the app and keep it in the menu bar.
-2. [Enable the Claude Quota](./guides/enable-claude-quota.md): one setting in Claude Code.
-3. [Add the Widget](./guides/add-the-widget.md): the bars on the desktop.
-4. [Package and Distribute](./guides/package-and-distribute.md): a zip of the app.
-5. [Configure Providers](./guides/configure-providers.md): another AI tool, from a JSON file.
-6. [Add a Provider](./guides/add-a-provider.md): the same, in Swift, when the file cannot say it.
-7. [Troubleshooting](./guides/troubleshooting.md) and [Contribute](./guides/contribute.md).
+For someone who wants the bars and does not build software.
 
-## 🛠 Reference
+1. [What tokenmeter does](./use/what-it-does.md): what it shows, what it reads, and that it costs no credits.
+2. [Install](./use/install.md): the app on the menu bar.
+3. [Enable the Claude Quota](./use/enable-claude-quota.md): one setting in Claude Code.
+4. [Add the Widget](./use/add-the-widget.md): the bars on the desktop.
+5. [Reading the Bars](./use/bars.md): colours, the four states, the `~`.
+6. [Configure Providers](./use/configure-providers.md): another AI tool, from a JSON file.
+7. [Troubleshooting](./use/troubleshooting.md).
 
-- [Reading the Bars](./reference/bars.md): colours, the four states, the `~`.
-- [Data Sources](./reference/data-sources.md): where each number comes from and what is not seen.
-- [Commands and Files](./reference/commands.md): commands, paths and the snapshot format.
+## 🛠 Develop it
 
-## 🏗 Concepts
+For someone who builds, extends or ships it.
 
-- [Concepts](./concepts/index.md): the philosophy, the architecture and how a window gets its state.
-- [Decisions](./adr): the ADRs behind each choice.
+1. [Build and Run](./develop/build-and-run.md): Xcode, XcodeGen, a signing team.
+2. [Architecture](./develop/architecture.md) and [Core API](./develop/core-api.md): the pieces, the data flow, the public types.
+3. [Concepts](./develop/concepts.md): the philosophy and how a window gets its state.
+4. [Data Sources](./develop/data-sources.md): where each number comes from and what is not seen.
+5. [Add a Provider](./develop/add-a-provider.md): in Swift, when the JSON file cannot say it.
+6. [Commands and Files](./develop/commands.md): commands, paths and the snapshot format.
+7. [Package and Distribute](./develop/package-and-distribute.md): Developer ID signing and notarization.
+8. [Contribute](./develop/contribute.md).
+
+## 🧭 Decisions
+
+[The ADRs](./adr) record why each structural choice was made, written before the code.

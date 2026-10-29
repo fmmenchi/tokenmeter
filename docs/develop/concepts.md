@@ -1,7 +1,7 @@
 ---
 title: Concepts
 sidebar_label: 🏗️ Concepts
-sidebar_position: 3
+sidebar_position: 4
 ---
 
 # Core Concepts
@@ -89,6 +89,6 @@ outlives its window ([ADR 0007](../adr/0007-expired-window-reads-as-reset.md),
 
 ## Related
 
-- [Reading the Bars](../reference/bars.md)
-- [Data Sources](../reference/data-sources.md)
+- [Reading the Bars](../use/bars.md)
+- [Data Sources](./data-sources.md)
 - [Decisions](../adr)

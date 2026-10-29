@@ -24,7 +24,7 @@ if [ ! -f "$settings" ]; then
 fi
 
 if ! command -v python3 >/dev/null 2>&1; then
-  echo "python3 not found: set \"statusLine\" to $dest in $settings by hand (docs/guides/enable-claude-quota.md)"
+  echo "python3 not found: set \"statusLine\" to $dest in $settings by hand (docs/use/enable-claude-quota.md)"
   exit 0
 fi
 
@@ -43,7 +43,7 @@ if current == wanted:
     print("status line already set")
 elif current is not None:
     print(f"another status line is set ({current.get('command', current)}); left alone.")
-    print("Wrap it so it also pipes its input to the tokenmeter script: see docs/guides/enable-claude-quota.md")
+    print("Wrap it so it also pipes its input to the tokenmeter script: see docs/use/enable-claude-quota.md")
     sys.exit(2)
 else:
     shutil.copy(path, path + ".tokenmeter.bak")

@@ -1,13 +1,13 @@
 ---
 title: Add a Provider
 sidebar_label: Add a Provider
-sidebar_position: 7
+sidebar_position: 6
 ---
 
 # Add a Provider
 
 Teach tokenmeter to read another AI tool. If its logs fit a JSON description,
-[Configure Providers](./configure-providers.md) needs no Swift at all; this guide is for the ones that
+[Configure Providers](../use/configure-providers.md) needs no Swift at all; this guide is for the ones that
 do not.
 
 ## Intent
@@ -60,5 +60,5 @@ The probe prints each provider's windows from the same `Collector` the app uses.
 
 ## Related
 
-- [Data Sources](../reference/data-sources.md)
+- [Data Sources](./data-sources.md)
 - [Contribute](./contribute.md)
