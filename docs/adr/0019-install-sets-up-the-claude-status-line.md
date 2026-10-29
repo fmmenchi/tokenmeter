@@ -1,6 +1,6 @@
 # ADR 0019 — The installer sets up the Claude status line
 
-Status: accepted (2026-10-29)
+Status: accepted (2026-10-29); the "app does not do this on its own" rule is amended by [ADR 0024](./0024-the-app-sets-up-the-claude-status-line.md)
 
 ## Context
 
