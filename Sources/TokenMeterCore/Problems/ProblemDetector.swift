@@ -9,3 +9,24 @@ public enum ProblemDetector {
         return (general + providers.flatMap { $0 }).filter { seen.insert($0.id).inserted }
     }
 }
+
+extension ProblemDetector {
+    /// The problems of the app and of each configured provider's integration. A provider whose `integration` names
+    /// nothing the app knows is itself a `general` problem, not a crash (ADR 0031).
+    public static func detect(general: [Problem], providers: [ProviderConfig], integrations: Integrations,
+                              context: ProblemContext) -> [Problem] {
+        var unknown: [Problem] = []
+        var found: [[Problem]] = []
+        for provider in providers {
+            guard let name = provider.integration else { continue }
+            guard let integration = integrations[name] else {
+                unknown.append(Problem(id: "general.integration.\(provider.id)", topic: Problem.general,
+                                       message: "Integration not found for \(provider.title)",
+                                       detail: "providers.json asks for \"\(name)\", which this version does not have."))
+                continue
+            }
+            found.append(integration.problems(in: context))
+        }
+        return merge(general: general + unknown, providers: found)
+    }
+}
