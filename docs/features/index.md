@@ -19,9 +19,9 @@ are [ADRs](../adr), and its overview links them.
 
 ## In design and build
 
-| Feature | Date | Pages |
-| :------ | :--- | :---- |
-| _None._ |      |       |
+| Feature                                                                                                                          | Date       | Pages                                                                                                                                                                            |
+| :------------------------------------------------------------------------------------------------------------------------------- | :--------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Hide a provider](./2026-10-30-provider-visibility/index.md): an eye button takes a provider's card off the panel and the widget | 2026-10-30 | [Overview](./2026-10-30-provider-visibility/index.md), [Proposal](./2026-10-30-provider-visibility/proposal.md), [Implementation plan](./2026-10-30-provider-visibility/plan.md) |
 
 ## The pattern: from idea to implemented
 
