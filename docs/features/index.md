@@ -18,9 +18,9 @@ are [ADRs](../adr), and its overview links them.
 
 ## In design and build
 
-| Feature                                                                       | Date       | Pages                                                                                                          |
-| :---------------------------------------------------------------------------- | :--------- | :------------------------------------------------------------------------------------------------------------- |
-| [Problems](./problems/index.md): the app tells what is wrong and offers a fix | 2026-10-30 | [Overview](./problems/index.md), [Proposal](./problems/proposal.md), [Implementation plan](./problems/plan.md) |
+| Feature                                                                                                    | Date       | Pages                                                                                                                                                                      |
+| :--------------------------------------------------------------------------------------------------------- | :--------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Alerts with a fix](./2026-10-30-alerts-with-a-fix/index.md): the app tells what is wrong and offers a fix | 2026-10-30 | [Overview](./2026-10-30-alerts-with-a-fix/index.md), [Proposal](./2026-10-30-alerts-with-a-fix/proposal.md), [Implementation plan](./2026-10-30-alerts-with-a-fix/plan.md) |
 
 ## How a feature is written
 
@@ -32,7 +32,7 @@ are [ADRs](../adr), and its overview links them.
 
 - **The proposal keeps the screenshot.** The design is drawn in a canvas that is deleted once the code is in, so the page,
   with its pictures, is what stays.
-- **Order.** A feature's folder is `docs/features/<name>/`. Its `_category_.json` carries a `position` of 99999999
+- **Order.** A feature's folder is `docs/features/<yyyy-mm-dd>-<name>/` and its sidebar label is the feature's title, not the name of a concept in the code. Its `_category_.json` carries a `position` of 99999999
   minus its date as `YYYYMMDD`, so the sidebar lists the newest first without renumbering the others.
 - **Status.** A feature is listed under _In design and build_ until its code is in; then its overview says so and it
   moves to _Implemented_, with the date it was implemented.

@@ -70,7 +70,7 @@ For someone who builds, extends or ships it.
 The things tokenmeter does, newest first, each with an overview, its proposal (with its screens) and its implementation plan.
 
 1. [How a feature is written](./features/index.md).
-2. [Problems](./features/problems/index.md): the app tells what is wrong and offers a fix (proposed).
+2. [Alerts with a fix](./features/2026-10-30-alerts-with-a-fix/index.md): the app tells what is wrong and offers a fix (in design).
 
 ## 🧭 Decisions
 

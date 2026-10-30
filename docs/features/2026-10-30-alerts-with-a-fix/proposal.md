@@ -1,10 +1,10 @@
 ---
-title: Problems, proposal
+title: Alerts with a fix, proposal
 sidebar_label: Proposal
 sidebar_position: 2
 ---
 
-# Problems: proposal
+# Alerts with a fix, proposal
 
 The design that was chosen from four variants. It was drawn as a canvas of artboards in Claude, which is deleted once
 the feature is implemented; this page is what stays. The decisions behind it are in

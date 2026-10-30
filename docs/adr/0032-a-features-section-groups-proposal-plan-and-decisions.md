@@ -24,8 +24,9 @@ parts:
 still in design and build, and says how a feature is written. A feature's folder holds an `index.md` (the overview), the
 `proposal.md` and the `plan.md`. The proposal contains a **screenshot of the design that was chosen**, because the
 canvas it was drawn in is deleted once the code is in. Order is carried by the `position` of each folder's
-`_category_.json`: 99999999 minus the date as `YYYYMMDD`. The first feature is Problems, whose plan moved here from
-`develop/`. The word "design" in the section means the proposal, not a separate document.
+`_category_.json`: 99999999 minus the date as `YYYYMMDD`. A feature's folder is `docs/features/<yyyy-mm-dd>-<name>/` and its label in the sidebar is the feature's title (not the
+name of a concept in the code). The first feature is **Alerts with a fix**, called _problems_ in the code, whose plan moved
+here from `develop/`. The word "design" in the section means the proposal, not a separate document.
 
 ## Consequences
 

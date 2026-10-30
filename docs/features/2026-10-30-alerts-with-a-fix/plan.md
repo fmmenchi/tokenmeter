@@ -1,10 +1,10 @@
 ---
-title: Problems, implementation plan
+title: Alerts with a fix, implementation plan
 sidebar_label: Implementation plan
 sidebar_position: 3
 ---
 
-# Problems: the implementation plan
+# Alerts with a fix, implementation plan
 
 How the app will detect problems, show them and fix them, and the order in which it gets built. Nothing here is
 written yet: the decisions are [ADR 0030](../../adr/0030-problems-with-a-topic-and-a-fix.md) (what a problem is, how it
@@ -259,7 +259,7 @@ step 8).
 
 ## Related
 
-- [Problems: proposal](./proposal.md) and [overview](./index.md)
+- [Proposal](./proposal.md) and [overview](./index.md)
 - [Architecture](../../develop/architecture.md) and [Core API](../../develop/core-api.md)
 - [Add a Provider](../../develop/add-a-provider.md): the integration is an extension of it
 - [ADR 0030](../../adr/0030-problems-with-a-topic-and-a-fix.md) and [ADR 0031](../../adr/0031-problems-come-from-the-app-and-from-provider-integrations.md)
