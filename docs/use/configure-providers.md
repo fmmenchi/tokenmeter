@@ -95,6 +95,19 @@ swift run tokenmeter-probe
 The probe lists every provider in the file and prints why the file was ignored if it was. A broken
 file is never overwritten: the app runs on Claude and ChatGPT for that run until you fix it.
 
+## Arrange the cards
+
+Each provider is a card in the panel and in the widget. In **Settings, Providers**:
+
+- **Drag** a provider to move its card. The medium widget shows one card fully, so the first card is the one you see
+  there.
+- **Choose the windows** a card shows: **5 hours**, **Weekly** or **Both** (a provider with other windows lists them
+  instead). **Both** is the default, and one window always stays.
+- The percentage in the menu bar counts only the windows you show.
+
+The order and the choice are kept by the app, per provider, and never written to `providers.json`. A provider you add
+goes last. Both the light and the dark appearance are respected.
+
 ## Related
 
 - [Add a Provider](../develop/add-a-provider.md)

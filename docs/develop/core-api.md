@@ -85,6 +85,19 @@ What the app tells the person is a `Problem`, not a string
 an unknown id is a `general` problem, not a crash. An existing file whose `claude` entry lacks the field gets it once,
 with a backup ([ADR 0033](../adr/0033-add-the-claude-integration-to-an-existing-providers-file.md)).
 
+## Display preferences
+
+The order of the cards and the windows each shows are preferences of the app, not of `providers.json`
+([ADR 0035](../adr/0035-provider-cards-order-and-windows-are-preferences.md)).
+
+| Type                         | What it is                                                                                      |
+| :--------------------------- | :---------------------------------------------------------------------------------------------- |
+| `DisplayPreferences`         | `order`, `windows(for:)` (nil means every window), `setOrder`, `setWindows`, and `ordered(_:)`. |
+| `DefaultsDisplayPreferences` | Keeps them in the app's defaults, by provider id.                                               |
+| `Snapshot.applying(_:)`      | Orders the providers and drops the hidden windows; a choice that matches none shows them all.   |
+
+The app applies them when it writes the snapshot, so the widget draws what it is given.
+
 ## Sharing with the widget
 
 | Symbol                            | Does                                                                            |
