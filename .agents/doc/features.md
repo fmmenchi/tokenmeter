@@ -27,7 +27,8 @@ The label is the feature's title in the user's words, never the name of a concep
 2. **Delete the other variants only when Fabio asks**, each time; it is permanent. No history of proposals is kept.
 3. **Write the feature's folder** from the chosen design: `index.md` (status: in design) and `proposal.md` with a
    screenshot.
-4. **ADR before the plan, plan before the code.** Status `proposed`, then `accepted` when Fabio confirms.
+4. **ADR before the plan, plan before the code.** Status `proposed`, then `accepted` when Fabio confirms. Every plan
+   ends with a close step (item 6) written as its own row: it is never left implied.
 5. **Build it** with the `design-import` skill, one commit per step of the plan, three files at most, the gate green.
    `pnpm run check` does not build the app or the widget: also run `xcodebuild`, and look at the result on screen.
 6. **When the code is in:** run `design-export` so the Views match the code, set the status, move the row to
