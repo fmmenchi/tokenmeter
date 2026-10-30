@@ -1,6 +1,6 @@
 # ADR 0028 — A skill to keep the widget and Figma aligned
 
-Status: accepted (2026-10-30), reworked the same day from one skill into three
+Status: superseded by [ADR 0029](./0029-design-in-artifacts-instead-of-figma.md) (2026-10-30); it was reworked the same day from one skill into three
 
 ## Context
 
