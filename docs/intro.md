@@ -65,6 +65,13 @@ For someone who builds, extends or ships it.
 7. [Package and Distribute](./develop/package-and-distribute.md): Developer ID signing and notarization.
 8. [Contribute](./develop/contribute.md).
 
+## 🧩 Features
+
+One folder per feature, with its proposal, its implementation plan and the decisions behind it.
+
+1. [How a feature is written](./features/index.md).
+2. [Problems](./features/problems/index.md): the app tells what is wrong and offers a fix (proposed).
+
 ## 🧭 Decisions
 
 [The ADRs](./adr) record why each structural choice was made, written before the code.
