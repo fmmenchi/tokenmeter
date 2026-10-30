@@ -100,11 +100,17 @@ The warning colour and the system secondary text miss the 4.5:1 contrast the des
 colours, kept as the app draws them). The chip's count is in the primary text colour for that reason, and the icon
 always comes with a number or a message, never alone.
 
-## Open
+## Settled, and what changed when it was built
 
-- Whether **Restore original** stays in Settings when the status line is wrapped.
-- Whether the widget counts the `general` problems, or only the menu-bar total does.
-- How long Dismiss lasts: until the message changes, or until the next launch.
+- **Restore original** stays in Settings, shown when the status line is wrapped.
+- The widget counts only a provider's own problems; the `general` ones count in the menu-bar total and show in the panel.
+- **Dismiss** lasts until the message changes.
+- **The menu bar shows `12%  ▲ 3` as text, not a chip.** The menu bar draws text and an image, so the colour and the
+  background of the drawn chip are not possible there.
+- **Done** reads `Done: <message> is fixed.`, and shows only until the next check, which is almost at once.
+- **Learn more** shows the problem's own explanation, then what the fix does, then the guide link. Only a problem with no
+  explanation falls back to "There is no automatic fix for this one."
+- **The banners follow the order of the code:** the `general` ones first, then each provider's.
 
 ## Related
 

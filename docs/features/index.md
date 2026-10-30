@@ -12,15 +12,15 @@ are [ADRs](../adr), and its overview links them.
 
 ## Implemented
 
-| Feature                                               | Date | Pages |
-| :---------------------------------------------------- | :--- | :---- |
-| _None yet._ A feature moves here when its code is in. |      |       |
-
-## In design and build
-
 | Feature                                                                                                    | Date       | Pages                                                                                                                                                                      |
 | :--------------------------------------------------------------------------------------------------------- | :--------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [Alerts with a fix](./2026-10-30-alerts-with-a-fix/index.md): the app tells what is wrong and offers a fix | 2026-10-30 | [Overview](./2026-10-30-alerts-with-a-fix/index.md), [Proposal](./2026-10-30-alerts-with-a-fix/proposal.md), [Implementation plan](./2026-10-30-alerts-with-a-fix/plan.md) |
+
+## In design and build
+
+| Feature | Date | Pages |
+| :------ | :--- | :---- |
+| _None._ |      |       |
 
 ## The pattern: from idea to implemented
 
