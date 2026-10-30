@@ -18,9 +18,9 @@ are [ADRs](../adr), and its overview links them.
 
 ## In design and build
 
-| Feature | Date | Pages |
-| :------ | :--- | :---- |
-| _None._ |      |       |
+| Feature                                                                                                            | Date       | Pages                                                                                                                                                             |
+| :----------------------------------------------------------------------------------------------------------------- | :--------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Provider cards](./2026-10-30-provider-cards/index.md): a card per provider, the windows you choose, in your order | 2026-10-30 | [Overview](./2026-10-30-provider-cards/index.md), [Proposal](./2026-10-30-provider-cards/proposal.md), [Implementation plan](./2026-10-30-provider-cards/plan.md) |
 
 ## The pattern: from idea to implemented
 
