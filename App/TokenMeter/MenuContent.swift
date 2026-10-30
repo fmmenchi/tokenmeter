@@ -34,7 +34,7 @@ struct MenuContent: View {
             Divider()
             HStack {
                 Button {
-                    Task { await meter.refresh() }
+                    Task { await meter.refresh(userInitiated: true) }
                 } label: {
                     if meter.isRefreshing { ProgressView().controlSize(.small) } else { Text("Refresh") }
                 }

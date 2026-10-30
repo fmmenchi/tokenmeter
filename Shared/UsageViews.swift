@@ -73,6 +73,7 @@ extension Int {
 struct QuotaBar: View {
     let fraction: Double?
     let tint: Color
+    var height: CGFloat = 10
 
     var body: some View {
         GeometryReader { proxy in
@@ -84,7 +85,7 @@ struct QuotaBar: View {
                 }
             }
         }
-        .frame(height: 10)
+        .frame(height: height)
     }
 }
 
@@ -105,9 +106,34 @@ struct WindowRow: View {
         }
     }
 
+    var tint: Color { usage.tint }
+}
+
+extension WindowUsage {
     var tint: Color {
-        guard let fraction = usage.remainingFraction else { return .gray }
-        return fraction < 0.15 ? .red : fraction < 0.4 ? .orange : .green
+        guard let remainingFraction else { return .gray }
+        return remainingFraction < 0.15 ? .red : remainingFraction < 0.4 ? .orange : .green
+    }
+}
+
+/// A model's limit, a part of the window of the same length: one compact line under it (ADR 0034). The share of the
+/// week and the reset are in the help text, so the line stays one line.
+struct ScopedWindowRow: View {
+    let usage: WindowUsage
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Text(usage.window.scope ?? "").font(.caption.weight(.medium)).lineLimit(1)
+                .frame(minWidth: 34, alignment: .leading)
+            QuotaBar(fraction: usage.remainingFraction, tint: usage.tint, height: 6)
+                .opacity(usage.isApproximate ? 0.5 : 1)
+            Text(usage.remainingFraction == nil ? "unknown" : "\(usage.remainingText) left")
+                .font(.caption.bold().monospacedDigit()).frame(minWidth: 54, alignment: .trailing)
+        }
+        .padding(.leading, 12)
+        .help([ "Part of \(WindowSpec(name: usage.window.name, duration: 0).label)",
+                usage.resetText.map { "resets \($0)" }, usage.isApproximate ? usage.observedAgoText.map { "seen \($0)" } : nil ]
+            .compactMap { $0 }.joined(separator: " · "))
     }
 }
 
@@ -127,7 +153,13 @@ struct ProviderBlock: View {
                 }
                 if problemCount > 0 { NoticeChip(count: problemCount) }
             }
-            ForEach(snapshot.windows, id: \.window.id) { WindowRow(usage: $0.resolved(at: Date())) }
+            ForEach(snapshot.windows, id: \.window.id) { window in
+                if window.window.scope == nil {
+                    WindowRow(usage: window.resolved(at: Date()))
+                } else {
+                    ScopedWindowRow(usage: window.resolved(at: Date()))
+                }
+            }
         }
     }
 }

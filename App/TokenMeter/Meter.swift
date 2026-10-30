@@ -26,6 +26,8 @@ final class Meter {
     private var detected: [Problem] = []
     private var providers: [ProviderConfig] = []
     private var lastDetection: Date?
+    private var lastUsageRefresh: Date?
+    private var isRefreshingUsage = false
     private var base: Snapshot?
     private let dismissals = DefaultsDismissals()
     private let preferences = DefaultsDisplayPreferences()
@@ -52,7 +54,7 @@ final class Meter {
         return problems.isEmpty ? percent : "\(percent)  ▲ \(problems.count)"
     }
 
-    func refresh() async {
+    func refresh(userInitiated: Bool = false) async {
         guard !isRefreshing else { return }
         isRefreshing = true
         defer { isRefreshing = false }
@@ -60,14 +62,43 @@ final class Meter {
         detectProblemsIfDue()
         base = await Task.detached { collector.snapshot() }.value
         publish()
+        refreshClaudeUsageIfDue(force: userInitiated)
+    }
+
+    /// ADR 0034: Claude Code writes a copy of the usage, including each model's limit, when it runs `/usage`. Ask it to,
+    /// on a slow timer and when the person refreshes, in the background and only while the Claude quota switch is on.
+    /// Claude Code reads its own credentials; tokenmeter handles none.
+    private func refreshClaudeUsageIfDue(force: Bool) {
+        guard autoSetUpClaude, !isRefreshingUsage else { return }
+        if !force, let last = lastUsageRefresh, Date().timeIntervalSince(last) < 900 { return }
+        isRefreshingUsage = true
+        lastUsageRefresh = Date()
+        Task(priority: .utility) {
+            let outcome = await Task.detached(priority: .utility) { ClaudeUsageRefresh.refresh() }.value
+            isRefreshingUsage = false
+            if outcome == .refreshed { await refresh() }
+            else { Self.log.info("Claude usage not refreshed: \(String(describing: outcome), privacy: .public)") }
+        }
     }
 
     /// A provider as Settings lists it: every window it has, and which of them its card shows (ADR 0035).
     struct CardProvider: Identifiable {
+        /// A model's limit, a part of the window named `parent`: a switch of its own in Settings (ADR 0034).
+        struct Model: Identifiable {
+            let id: String
+            let label: String
+            let parent: String
+            /// What the switch says it is part of, for example "Weekly".
+            let parentLabel: String
+        }
+
         let id: String
         let title: String
+        /// The provider's own windows, by id, in order.
         let windows: [String]
+        let models: [Model]
         let shown: Set<String>
+        let shownModels: Set<String>
         /// False when the person hid the provider: its card is not drawn and its row is dimmed.
         let isShown: Bool
     }
@@ -85,11 +116,19 @@ final class Meter {
         let visible = shownIDs.isEmpty ? Set(ids.prefix(1)) : Set(shownIDs)
         return ids.compactMap { id in
             guard let provider = all.first(where: { $0.provider.rawValue == id }) else { return nil }
-            let names = provider.windows.map(\.window.name)
-            let chosen = preferences.windows(for: id).map { $0.intersection(names) }
-            return CardProvider(id: id, title: provider.title, windows: names,
-                                shown: chosen.flatMap { $0.isEmpty ? nil : $0 } ?? Set(names),
-                                isShown: visible.contains(id))
+            let own = provider.windows.map(\.window).filter { $0.scope == nil }
+            let models = provider.windows.map(\.window).filter { $0.scope != nil }.map {
+                CardProvider.Model(id: $0.id, label: $0.scope ?? $0.name, parent: $0.name,
+                                   parentLabel: WindowSpec(name: $0.name, duration: 0).label)
+            }
+            let ownIDs = own.map(\.id)
+            let chosen = preferences.windows(for: id)
+            let chosenOwn = chosen.map { $0.intersection(ownIDs) }
+            return CardProvider(
+                id: id, title: provider.title, windows: ownIDs, models: models,
+                shown: chosenOwn.flatMap { $0.isEmpty ? nil : $0 } ?? Set(ownIDs),
+                shownModels: chosen.map { $0.intersection(models.map(\.id)) } ?? Set(models.map(\.id)),
+                isShown: visible.contains(id))
         }
     }
 
@@ -119,10 +158,10 @@ final class Meter {
     }
 
     /// One window always stays: an empty choice is ignored.
-    func setShownWindows(_ windows: Set<String>, for provider: String) {
-        guard !windows.isEmpty else { return }
-        let all = Set(cardProviders.first { $0.id == provider }?.windows ?? [])
-        preferences.setWindows(windows == all ? nil : windows, for: provider)
+    func setShownWindows(_ windows: Set<String>, models: Set<String>, for provider: String) {
+        guard !windows.isEmpty, let card = cardProviders.first(where: { $0.id == provider }) else { return }
+        let everything = windows == Set(card.windows) && models == Set(card.models.map(\.id))
+        preferences.setWindows(everything ? nil : windows.union(models), for: provider)
         publish()
     }
 

@@ -52,7 +52,8 @@ struct SettingsView: View {
                         provider: provider, isFirst: index == 0, isLast: index == meter.cardProviders.count - 1,
                         isDropTarget: dropTarget == provider.id,
                         canHide: !provider.isShown || meter.cardProviders.filter(\.isShown).count > 1,
-                        onChange: { meter.setShownWindows($0, for: provider.id) },
+                        onChange: { meter.setShownWindows($0, models: provider.shownModels, for: provider.id) },
+                        onChangeModels: { meter.setShownWindows(provider.shown, models: $0, for: provider.id) },
                         onMove: { meter.moveProvider(provider.id, by: $0) },
                         onToggleShown: { meter.setProviderShown(!provider.isShown, for: provider.id) },
                         onDragStart: { dragging = provider.id })
@@ -82,6 +83,7 @@ private struct ProviderRow: View {
     let isDropTarget: Bool
     let canHide: Bool
     let onChange: (Set<String>) -> Void
+    let onChangeModels: (Set<String>) -> Void
     let onMove: (Int) -> Void
     let onToggleShown: () -> Void
     let onDragStart: () -> Void
@@ -117,14 +119,34 @@ private struct ProviderRow: View {
                 .pickerStyle(.segmented).labelsHidden()
                 .disabled(!provider.isShown).opacity(provider.isShown ? 1 : 0.45)
             } else if provider.windows.count > 2 {
-                Menu("Windows") {
-                    ForEach(provider.windows, id: \.self) { name in
+                ForEach(provider.windows, id: \.self) { name in
+                    HStack {
+                        Text(WindowSpec(name: name, duration: 0).label)
+                        Spacer()
                         Toggle(WindowSpec(name: name, duration: 0).label, isOn: Binding(
                             get: { provider.shown.contains(name) },
                             set: { on in onChange(on ? provider.shown.union([name]) : provider.shown.subtracting([name])) }))
+                            .labelsHidden().toggleStyle(.switch)
                     }
+                    .disabled(!provider.isShown).opacity(provider.isShown ? 1 : 0.45)
                 }
-                .fixedSize()
+            }
+            ForEach(provider.models) { model in
+                HStack {
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(model.label)
+                        Text("Part of \(model.parentLabel): shown only with it").font(.caption2).foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Toggle("Show the \(model.label) limit", isOn: Binding(
+                        get: { provider.shownModels.contains(model.id) },
+                        set: { on in
+                            onChangeModels(on ? provider.shownModels.union([model.id]) : provider.shownModels.subtracting([model.id]))
+                        }))
+                        .labelsHidden().toggleStyle(.switch)
+                        .disabled(!provider.shown.contains(model.parent))
+                }
+                .padding(.leading, 12)
                 .disabled(!provider.isShown).opacity(provider.isShown ? 1 : 0.45)
             }
         }
