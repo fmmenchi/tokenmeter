@@ -29,6 +29,21 @@ A **problem** replaces the notice string:
   loses focus. The widget shows no action: it only counts.
 - **Dismiss** hides a problem by its `id` until its message changes; the choice is stored in the app's defaults.
 
+### Actions
+
+A problem has **at most one fix**, and always Dismiss. The fixes are a closed set, and each kind has one label, so the
+label comes from the kind and is not stored in the problem:
+
+| Kind             | Button     | What it does                                          | After it                               |
+| :--------------- | :--------- | :---------------------------------------------------- | :------------------------------------- |
+| `wrapStatusLine` | Wrap it    | runs `ClaudeStatusLine.wrap` now                      | the problem leaves at the next check   |
+| `guide(path)`    | Learn more | opens a docs page in the browser                      | nothing changes, the banner stays      |
+| Dismiss (always) | Dismiss    | hides this problem by its `id`, in the app's defaults | it returns only if its message changes |
+
+A fix has four states: **ready**, **running** (its buttons are disabled and the label reads "Wrapping…"), **failed** (the
+error replaces the detail, the button reads "Try again", nothing was changed) and **done** (a quiet line, then the banner
+goes). A guide has no states. Fix all and Re-check are not part of the chosen design.
+
 ## Open
 
 - Whether **Restore original** stays in Settings (when the status line is wrapped) or moves into the panel.
