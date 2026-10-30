@@ -41,12 +41,20 @@ struct SettingsView: View {
                 }
             }
             Section("Providers") {
-                Text("Drag a provider to reorder its card. Choose the windows each card shows.")
+                Text("Drag a provider, or use the arrows, to reorder its card. Choose the windows each card shows.")
                     .font(.caption).foregroundStyle(.secondary)
-                ForEach(meter.cardProviders) { provider in
-                    ProviderRow(provider: provider) { meter.setShownWindows($0, for: provider.id) }
+                ForEach(Array(meter.cardProviders.enumerated()), id: \.element.id) { index, provider in
+                    ProviderRow(
+                        provider: provider, isFirst: index == 0, isLast: index == meter.cardProviders.count - 1,
+                        onChange: { meter.setShownWindows($0, for: provider.id) },
+                        onMove: { meter.moveProvider(provider.id, by: $0) })
+                        .draggable(provider.id)
+                        .dropDestination(for: String.self) { ids, _ in
+                            guard let id = ids.first else { return false }
+                            meter.moveProvider(id, onto: provider.id)
+                            return true
+                        }
                 }
-                .onMove { meter.moveProviders(from: $0, to: $1) }
                 Text("The percentage in the menu bar counts only the windows you show.")
                     .font(.caption).foregroundStyle(.secondary)
             }
@@ -64,14 +72,22 @@ struct SettingsView: View {
 /// than two are a menu of checkmarks, so any window of any provider can be chosen (ADR 0035).
 private struct ProviderRow: View {
     let provider: Meter.CardProvider
+    let isFirst: Bool
+    let isLast: Bool
     let onChange: (Set<String>) -> Void
+    let onMove: (Int) -> Void
 
     private static let all = "all"
 
     var body: some View {
         HStack {
+            Image(systemName: "line.3.horizontal").foregroundStyle(.tertiary).accessibilityHidden(true)
             Text(provider.title)
             Spacer()
+            Button { onMove(-1) } label: { Image(systemName: "chevron.up") }
+                .buttonStyle(.borderless).disabled(isFirst).accessibilityLabel("Move \(provider.title) up")
+            Button { onMove(1) } label: { Image(systemName: "chevron.down") }
+                .buttonStyle(.borderless).disabled(isLast).accessibilityLabel("Move \(provider.title) down")
             if provider.windows.count == 2 {
                 Picker(provider.title, selection: Binding(
                     get: { provider.shown.count == provider.windows.count ? Self.all : provider.shown.first ?? Self.all },

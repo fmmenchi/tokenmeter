@@ -82,9 +82,20 @@ final class Meter {
         }
     }
 
-    func moveProviders(from source: IndexSet, to destination: Int) {
+    /// Moves a provider's card one place up or down.
+    func moveProvider(_ id: String, by offset: Int) {
         var ids = cardProviders.map(\.id)
-        ids.move(fromOffsets: source, toOffset: destination)
+        guard let from = ids.firstIndex(of: id), ids.indices.contains(from + offset) else { return }
+        ids.swapAt(from, from + offset)
+        preferences.setOrder(ids)
+        publish()
+    }
+
+    /// Drops a provider's card on another: it takes that card's place, and the ones in between shift.
+    func moveProvider(_ id: String, onto target: String) {
+        var ids = cardProviders.map(\.id)
+        guard id != target, let from = ids.firstIndex(of: id), let to = ids.firstIndex(of: target) else { return }
+        ids.insert(ids.remove(at: from), at: to)
         preferences.setOrder(ids)
         publish()
     }
