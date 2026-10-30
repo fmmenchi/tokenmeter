@@ -71,7 +71,10 @@ final class Meter {
     }
 
     /// The providers in the person's order, from the full reading, so Settings can offer windows that are hidden.
-    var cardProviders: [CardProvider] {
+    /// Stored, and set by `publish()`, so a change of order or windows redraws Settings at once.
+    private(set) var cardProviders: [CardProvider] = []
+
+    private func makeCardProviders() -> [CardProvider] {
         let all = base?.providers ?? []
         return preferences.ordered(all.map(\.provider.rawValue)).compactMap { id in
             guard let provider = all.first(where: { $0.provider.rawValue == id }) else { return nil }
@@ -112,6 +115,7 @@ final class Meter {
     private func publish() {
         guard let base else { return }
         problems = dismissals.visible(detected)
+        cardProviders = makeCardProviders()
         let result = base.applying(preferences).with(problems: problems)
         snapshot = result
         if let store {
