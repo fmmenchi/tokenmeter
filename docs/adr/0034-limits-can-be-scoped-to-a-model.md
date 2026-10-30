@@ -1,6 +1,6 @@
 # ADR 0034 — Limits can be scoped to a model, for every provider
 
-Status: proposed (2026-10-30); extends [ADR 0007](./0007-expired-window-reads-as-reset.md), [ADR 0015](./0015-provider-contract.md) and [ADR 0016](./0016-providers-declared-in-a-config-file.md)
+Status: rejected (2026-10-30), not built: the only source without credentials can be days old, and a stale per-model bar says nothing; extends [ADR 0007](./0007-expired-window-reads-as-reset.md), [ADR 0015](./0015-provider-contract.md) and [ADR 0016](./0016-providers-declared-in-a-config-file.md)
 
 ## Context
 
@@ -28,6 +28,13 @@ says that a window applies to a model.
   Claude Code's last fetch, and nothing in the status line refreshes it.
 - It reads no credential: it is a cache of figures, and tokenmeter already reads another part of the same file for the
   plan ([ADR 0012](./0012-show-the-plan-name.md)).
+
+## Why it was rejected
+
+The local copy of the usage response is only as fresh as Claude Code's last usage fetch (15 days old on the author's Mac),
+so a per-model bar would be a figure nobody can trust, and the fresh one needs a login token that tokenmeter does not
+handle. Fabio decided it does not make sense to show it. The design below stays on record for the day a source
+reports a per-model limit that tokenmeter can read without credentials, for any model.
 
 ## Decision
 
