@@ -1,6 +1,6 @@
 # ADR 0026 — Warn when a project overrides the status line
 
-Status: accepted (2026-10-30); builds on [ADR 0025](./0025-wrap-an-existing-claude-status-line.md)
+Status: accepted (2026-10-30); builds on [ADR 0025](./0025-wrap-an-existing-claude-status-line.md); the warning also reaches the widget and the panel ([ADR 0027](./0027-notices-in-the-snapshot.md))
 
 ## Context
 
