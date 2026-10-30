@@ -11,25 +11,30 @@ one widget that is far more than the job needs.
 
 ## Decision
 
-Three small skills, one file each, in `.claude/skills/` of this repository so they are versioned with
-the views they describe. No subagents, no scripts.
+Three small skills, one file each, in `.claude/skills/` of this repository so they are versioned with the
+views they describe. No subagents, no scripts. They are a simplified version of the Figma skills of
+Fabio's work repository (a proposal skill, an import skill and a design-system export skill): the same
+principles, without its references, record files and design-sync gates.
 
-- **`figma-proposal`** reads the SwiftUI views, the states in the docs and, if a Figma link is given,
-  the Figma file. It writes a proposal of ten lines at most (direction, what is created or changed, what
-  is not touched, differences, what is unknown) and **waits for a yes**. A correction revises it, a no
-  ends it, and a yes covers that proposal only.
-- **`figma-export`** (code to Figma) builds the views the proposal names and their states in Figma. It runs only
-  after a yes, and takes every value from the code at that moment, never from a copy.
-- **`figma-import`** (Figma to code) changes the SwiftUI views for the differences the proposal listed.
-  A design that needs data the snapshot lacks stops there: it needs an ADR.
-- **Two sections in the Figma file.** **Views** is what the code looks like now, written only by
-  `figma-export`. **Proposals** is what could change, written only by `figma-proposal`, additive, one set
-  of frames per proposal. An implemented proposal is exported to Views and marked `✓` in Proposals.
-- **No fixed list of views.** There are the widget, Settings and the panel today and there will be more, so
-  `figma-proposal` finds the views in the source and says which it takes in scope and which it leaves.
-- The code is the source: when the two disagree and nobody says otherwise, Figma is the copy.
-- The Figma work itself is done with the Figma skills already installed (`figma-use`,
-  `figma-generate-design`, `figma-swiftui`, `figma-design-to-code`).
+- **Three sections on the Figma page.** **Views** is what the code looks like now, **Proposals** is what
+  could change, **Archive** holds what an import replaced.
+- **`figma-proposal`** is the designer's agent. It writes **only in Proposals**, as frames
+  `Proposal · <area> · <date>`, starting from a copy of the Views frames. Four rules: design in
+  Proposals; build from the code's components and variables; never detach an instance; keep the
+  names, and never delete a state. A request that breaks a rule is refused with a route that does not.
+  It ends with a drafted request to import, which it never runs.
+- **`figma-import`** is the developer's agent. It needs an approved proposal, maps the design to the code
+  **by what each thing is** (component and variant, not position or layer name), sorts each difference
+  as design-owned, code-owned or a question, asks once, implements, runs the gates (`pnpm run check`
+  and `xcodebuild`), then promotes in Figma: replaced frames to Archive, approved frames **copied** into
+  Views, a `Handoff` frame. Proposals stays untouched as the record. A need for new data stops it: ADR first.
+- **`figma-export`** is code to Figma, on an explicit request only: the first copy, or a named change. It
+  writes only in Views, in place, never redraws, asks on a conflicting edit, and reads back and
+  screenshots what it wrote.
+- **The design decides** composition, spacing, copy, colours and states; **the code decides** data,
+  what a state means, timing and example numbers. **Approval is Fabio's.**
+- **No fixed list of views**: the skills find them in the source.
+- The Figma work is done with the Figma skills already installed (`figma-use`, `figma-design-to-code`...).
 
 ## Consequences
 
