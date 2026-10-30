@@ -141,7 +141,19 @@ public struct ProviderConfig: Decodable, Sendable {
         public let windows: [Window]
 
         public struct Window: Decodable, Sendable {
-            public enum TimeFormat: String, Decodable, Sendable { case epochSeconds, iso8601 }
+            public enum TimeFormat: String, Decodable, Sendable { case epochSeconds, epochMilliseconds, iso8601 }
+            /// A file of its own for this window, instead of the quota's.
+            public let file: String?
+            /// A path to a list of limits: one window for each entry that matches `where`, with the paths below read inside
+            /// the entry (ADR 0034). Without it the window is the one object at `at`.
+            public let each: String?
+            /// Fields an entry of `each` must equal, by path inside the entry.
+            public let `where`: [String: String]?
+            /// With `each`, the path inside an entry of what the limit applies to, such as a model's name.
+            public let scope: String?
+            /// Where the file says when its figures were fetched, from the file's root; the file's age when absent.
+            public let observedAt: String?
+            public let observedAtFormat: TimeFormat?
             /// The object holding the fields below; the line or file root when absent.
             public let at: String?
             public let usedPercent: String

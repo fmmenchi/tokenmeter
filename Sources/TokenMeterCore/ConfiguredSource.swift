@@ -50,17 +50,19 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
         }
 
         if let spec = config.quota {
+            let plain = spec.windows.filter { $0.each == nil }
             if let file = spec.file {
                 let url = expand(file)
                 let observed = (try? FileManager.default.attributesOfItem(atPath: url.path))?[.modificationDate] as? Date
                 reading.quotaUpdatedAt = observed
                 if let root = Self.object(at: url) {
-                    reading.quotas = spec.windows.compactMap { Self.quota($0, in: root, observedAt: observed) }
+                    reading.quotas = plain.compactMap { Self.quota($0, in: root, observedAt: observed) }
                 }
             } else {
                 reading.quotas = quotas.values.map(\.1).sorted { ($0.windowMinutes ?? 0) < ($1.windowMinutes ?? 0) }
                 reading.quotaUpdatedAt = reading.quotas.compactMap(\.observedAt).max()
             }
+            reading.quotas += spec.windows.filter { $0.each != nil }.flatMap { listed($0, quotaFile: spec.file) }
         }
 
         if let spec = config.plan {
@@ -71,6 +73,25 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
             }
         }
         return reading
+    }
+
+    /// The limits of a list in a file: one for each entry that matches, with what it applies to (ADR 0034).
+    private func listed(_ window: ProviderConfig.Quota.Window, quotaFile: String?) -> [ReportedQuota] {
+        guard let file = window.file ?? quotaFile, let list = window.each else { return [] }
+        let url = expand(file)
+        guard let root = Self.object(at: url), let entries = Self.value(list, in: root) as? [[String: Any]] else { return [] }
+        let modified = (try? FileManager.default.attributesOfItem(atPath: url.path))?[.modificationDate] as? Date
+        let observed = window.observedAt.flatMap { Self.value($0, in: root) }.flatMap { raw -> Date? in
+            guard let number = (raw as? NSNumber)?.doubleValue else { return nil }
+            return Date(timeIntervalSince1970: window.observedAtFormat == .epochMilliseconds ? number / 1000 : number)
+        } ?? modified
+        return entries.compactMap { entry in
+            guard (window.where ?? [:]).allSatisfy({ Self.string(Self.value($0.key, in: entry)) == $0.value }),
+                  let reported = Self.quota(window, in: entry, observedAt: observed) else { return nil }
+            let scope = window.scope.flatMap { Self.string(Self.value($0, in: entry)) }
+            return ReportedQuota(usedPercent: reported.usedPercent, windowMinutes: reported.windowMinutes,
+                                 resetsAt: reported.resetsAt, observedAt: observed, scope: scope)
+        }
     }
 
     // MARK: Log scanning
@@ -95,7 +116,7 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
                 else { continue }
                 if let usage = config.usage { record(usage, root, date, into: &state) }
                 if let quota = config.quota, quota.file == nil {
-                    for window in quota.windows {
+                    for window in quota.windows where window.each == nil {
                         guard let reported = Self.quota(window, in: root, observedAt: date),
                               let minutes = reported.windowMinutes,
                               state.quotas[minutes] == nil || date > state.quotas[minutes]!.0 else { continue }
