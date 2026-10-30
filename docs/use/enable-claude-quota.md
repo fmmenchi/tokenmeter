@@ -59,6 +59,28 @@ By hand, your command must keep printing its own text and pass the same JSON on 
 command with it removes whatever you see there now.
 :::
 
+### A project has its own status line
+
+Claude Code gives a project's settings (`.claude/settings.json`, `.claude/settings.local.json`)
+priority over `~/.claude/settings.json`. A project that sets its own `statusLine` replaces the one
+tokenmeter set, so the Claude quota stops being written while a session runs there. The quota belongs
+to the account, so a session in another project refreshes it, but if you only work in that project the
+bars stay frozen.
+
+At every launch tokenmeter looks, read only, at the projects you used in the last 30 days and
+shows a warning in Settings naming the ones that override it
+([ADR 0026](../adr/0026-warn-when-a-project-overrides-the-status-line.md)). It never writes to a
+project: a tracked `.claude/settings.json` would carry a path from your home into a shared repository.
+To fix one, make that project's command also pipe its input to the tokenmeter script. In
+`.claude/settings.local.json`, which git ignores, that is:
+
+```json
+"statusLine": {
+  "type": "command",
+  "command": "input=$(cat); printf '%s' \"$input\" | ~/.tokenmeter/claude-statusline.sh >/dev/null; printf '%s' \"$input\" | <your command>"
+}
+```
+
 ## Step 2: Trigger it
 
 Send any message in a Claude Code session. The script writes
