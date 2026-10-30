@@ -2,12 +2,18 @@
 title: Problems
 sidebar_label: Overview
 sidebar_position: 1
+date: 2026-10-30
 ---
 
 # Problems
 
 The app tells you what is wrong, for each AI tool it reads or for itself, and, when it can, fixes it from the menu-bar
-panel. Status: **proposed**, nothing is built yet.
+panel.
+
+|        |                                 |
+| :----- | :------------------------------ |
+| Date   | 2026-10-30                      |
+| Status | in design: nothing is built yet |
 
 ## Intent
 

@@ -67,7 +67,7 @@ For someone who builds, extends or ships it.
 
 ## 🧩 Features
 
-One folder per feature, with its proposal, its implementation plan and the decisions behind it.
+The things tokenmeter does, newest first, each with an overview, its proposal (with its screens) and its implementation plan.
 
 1. [How a feature is written](./features/index.md).
 2. [Problems](./features/problems/index.md): the app tells what is wrong and offers a fix (proposed).

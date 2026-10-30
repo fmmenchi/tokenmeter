@@ -2,9 +2,5 @@
   "collapsed": false,
   "collapsible": true,
   "label": "🧩 Features",
-  "link": {
-    "type": "generated-index",
-    "description": "One page group per feature: its proposal, its implementation plan and the decisions behind it."
-  },
   "position": 3
 }

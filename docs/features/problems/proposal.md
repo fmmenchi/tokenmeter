@@ -14,6 +14,13 @@ the feature is implemented; this page is what stays. The decisions behind it are
 
 A short, compact signal on the small surfaces, and the place to read and fix on the panel.
 
+## The proposal
+
+![The chosen proposal: the menu bar with the gauge, the percentage and a chip with the total, the widget with a chip with the count next to Claude, and the panel with one banner per problem](./proposal-overview.png)
+
+The menu bar, the widget and the panel, as drawn. The chip is the same on all three; the panel adds one banner per
+problem, each with its topic, its actions and **Learn more**.
+
 ## Where it shows
 
 ```mermaid
@@ -74,6 +81,8 @@ stateDiagram-v2
 - **Done**: a quiet line ("Done: your status line now feeds tokenmeter."), then the banner goes.
 
 Fix all and Re-check are not part of this design.
+
+![The states of a banner: a fix ready, with Learn more open, running, failed and done, and a problem with no fix with Learn more open](./proposal-actions.png)
 
 ## Examples used in the design
 
