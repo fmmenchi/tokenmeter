@@ -33,8 +33,20 @@ Fabio says otherwise.
 - **Differences**: one line each, the value in the code against the value in Figma, when both exist.
 - **Unknown**: what could not be read (no link, a Figma that does not answer, a view not found).
 
-## 3. The gate
+## 3. In Figma: the Proposals section
 
-Only an explicit yes goes on, to `figma-export` or `figma-import` as the direction says. A correction
+The Figma file has two sections, and this skill owns the second:
+
+- **Views**: what the code looks like now. Written only by `figma-export`.
+- **Proposals**: what could change. With a Figma link, draw each proposed design here as frames named
+  `Proposal <yyyy-mm-dd> · <view> · <title>`, built with `figma-use` (load it first). Create the section
+  if it is missing. It is additive: never edit or delete another proposal, and never touch **Views**.
+
+Write the text proposal first, naming the frames; then draw them. The drawing is only the proposal, so it
+is allowed before the yes, and it is the only thing that is.
+
+## 4. The gate
+
+Only an explicit yes goes on, to `figma-export` or `figma-import` as the direction says; the yes names the proposal frames it covers. A correction
 revises the proposal and asks again. A no ends it. A yes covers that proposal only; the next change
 needs its own.
