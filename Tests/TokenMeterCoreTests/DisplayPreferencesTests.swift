@@ -14,6 +14,12 @@ final class DisplayPreferencesTests: XCTestCase {
 
         preferences.setWindows(nil, for: "chatgpt")
         XCTAssertNil(preferences.windows(for: "chatgpt"), "clearing the choice shows every window again")
+
+        XCTAssertEqual(preferences.hidden, [])
+        preferences.setHidden(true, for: "chatgpt")
+        XCTAssertEqual(preferences.hidden, ["chatgpt"])
+        preferences.setHidden(false, for: "chatgpt")
+        XCTAssertEqual(preferences.hidden, [])
     }
 
     func testMemoryKeepsWhatIsSet() { check(MemoryDisplayPreferences()) }
@@ -27,7 +33,9 @@ final class DisplayPreferencesTests: XCTestCase {
         let first = DefaultsDisplayPreferences(defaults: defaults)
         first.setOrder(["b", "a"])
         first.setWindows(["5h", "7d"], for: "a")
+        first.setHidden(true, for: "a")
         let second = DefaultsDisplayPreferences(defaults: defaults)
+        XCTAssertEqual(second.hidden, ["a"])
         XCTAssertEqual(second.order, ["b", "a"])
         XCTAssertEqual(second.windows(for: "a"), ["5h", "7d"])
     }

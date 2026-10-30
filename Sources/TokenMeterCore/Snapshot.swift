@@ -116,11 +116,15 @@ public struct Snapshot: Codable, Equatable, Sendable {
 }
 
 extension Snapshot {
-    /// The snapshot as the person wants to see it: providers in their order, and for each only the windows they chose
-    /// (ADR 0035). A provider whose choice matches none of its windows shows them all: one always stays.
+    /// The snapshot as the person wants to see it: providers in their order, hidden ones left out, and for each only the
+    /// windows they chose (ADR 0035, 0036). A provider whose choice matches none of its windows shows them all, and one
+    /// provider always stays: if every provider is hidden, the first in order is shown.
     public func applying(_ preferences: any DisplayPreferences) -> Snapshot {
         let order = preferences.ordered(providers.map(\.provider.rawValue))
-        let shown = order.compactMap { id in providers.first { $0.provider.rawValue == id } }.map { provider -> ProviderSnapshot in
+        let hidden = preferences.hidden
+        let kept = order.filter { !hidden.contains($0) }
+        let shownIDs = kept.isEmpty ? Array(order.prefix(1)) : kept
+        let shown = shownIDs.compactMap { id in providers.first { $0.provider.rawValue == id } }.map { provider -> ProviderSnapshot in
             guard let chosen = preferences.windows(for: provider.provider.rawValue) else { return provider }
             let windows = provider.windows.filter { chosen.contains($0.window.name) }
             guard !windows.isEmpty else { return provider }

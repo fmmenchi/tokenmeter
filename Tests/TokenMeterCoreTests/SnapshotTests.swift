@@ -154,4 +154,40 @@ final class PlanNameTests: XCTestCase {
         preferences.setOrder(["gone", "claude"])
         XCTAssertEqual(snapshot.applying(preferences).providers.map(\.title), ["claude"])
     }
+
+    func testApplyingLeavesOutAHiddenProviderButKeepsItsProblems() {
+        let problem = Problem(id: "chatgpt.x", topic: "chatgpt", message: "m")
+        let snapshot = Snapshot(generatedAt: Date(timeIntervalSince1970: 0),
+                                providers: [shown("claude"), shown("chatgpt")], problems: [problem])
+        let preferences = MemoryDisplayPreferences()
+        preferences.setHidden(true, for: "chatgpt")
+
+        let result = snapshot.applying(preferences)
+        XCTAssertEqual(result.providers.map(\.title), ["claude"])
+        XCTAssertEqual(result.problems, [problem], "a hidden provider's problems still concern the person")
+    }
+
+    func testApplyingAlwaysKeepsOneProvider() {
+        let snapshot = Snapshot(generatedAt: Date(timeIntervalSince1970: 0), providers: [shown("claude"), shown("chatgpt")])
+        let preferences = MemoryDisplayPreferences()
+        preferences.setOrder(["chatgpt", "claude"])
+        preferences.setHidden(true, for: "claude")
+        preferences.setHidden(true, for: "chatgpt")
+        XCTAssertEqual(snapshot.applying(preferences).providers.map(\.title), ["chatgpt"],
+                       "when every provider is hidden the first in order stays")
+    }
+
+    func testAHiddenProviderKeepsItsPlaceAndItsChoiceOfWindows() {
+        let snapshot = Snapshot(generatedAt: Date(timeIntervalSince1970: 0), providers: [shown("claude"), shown("chatgpt")])
+        let preferences = MemoryDisplayPreferences()
+        preferences.setOrder(["chatgpt", "claude"])
+        preferences.setWindows(["7d"], for: "chatgpt")
+        preferences.setHidden(true, for: "chatgpt")
+        XCTAssertEqual(snapshot.applying(preferences).providers.map(\.title), ["claude"])
+
+        preferences.setHidden(false, for: "chatgpt")
+        let result = snapshot.applying(preferences)
+        XCTAssertEqual(result.providers.map(\.title), ["chatgpt", "claude"])
+        XCTAssertEqual(result.providers[0].windows.map(\.window.name), ["7d"])
+    }
 }
