@@ -12,9 +12,22 @@ final class Meter {
     private(set) var launchAtLogin = false
     private(set) var autoSetUpClaude = UserDefaults.standard.object(forKey: Meter.autoSetUpKey) as? Bool ?? true
     private(set) var claudeStatusLine: ClaudeStatusLine.Outcome?
-    /// ADR 0026: projects whose own settings replace the status line. Read only; nothing is written.
-    private(set) var projectOverrides: [ProjectStatusLines.Override] = []
-    private var lastProjectCheck: Date?
+    /// The problems the person has not hidden (ADR 0030); the panel draws these and the snapshot carries them.
+    private(set) var problems: [Problem] = []
+    /// Interface state of the fixes being run, by problem id. Not in the model or the snapshot (the plan of the feature).
+    private(set) var fixStates: [String: FixState] = [:]
+
+    enum FixState: Equatable {
+        case running
+        case failed(String)
+        case done
+    }
+
+    private var detected: [Problem] = []
+    private var providers: [ProviderConfig] = []
+    private var lastDetection: Date?
+    private var base: Snapshot?
+    private let dismissals = DefaultsDismissals()
     private static let autoSetUpKey = "autoSetUpClaudeStatusLine"
     private let collector = Collector()
     private let store = SnapshotStore.appGroupStore()
@@ -43,9 +56,16 @@ final class Meter {
         isRefreshing = true
         defer { isRefreshing = false }
         let collector = collector
-        checkProjectOverridesIfDue()
-        let notice = ProjectStatusLines.notice(for: projectOverrides)
-        let result = await Task.detached { collector.snapshot() }.value.with(notices: notice.map { [$0] } ?? [])
+        detectProblemsIfDue()
+        base = await Task.detached { collector.snapshot() }.value
+        publish()
+    }
+
+    /// Puts the visible problems on the latest reading and gives it to the widget.
+    private func publish() {
+        guard let base else { return }
+        problems = dismissals.visible(detected)
+        let result = base.with(problems: problems)
         snapshot = result
         if let store {
             do {
@@ -65,56 +85,104 @@ final class Meter {
         setUpClaudeStatusLine()
     }
 
-    /// ADR 0025: only on the user's click, never at launch.
-    func wrapClaudeStatusLine() { changeClaudeStatusLine { try ClaudeStatusLine.wrap(script: $0) } }
-
-    func restoreClaudeStatusLine() { changeClaudeStatusLine { _ in try ClaudeStatusLine.restore() } }
-
-    private func changeClaudeStatusLine<Result>(_ change: (Data) throws -> Result) {
-        guard let url = Bundle.main.url(forResource: "claude-statusline", withExtension: "sh"),
-              let script = try? Data(contentsOf: url) else { return }
+    /// Restore original stays in Settings (ADR 0030); the wrap itself is a fix in the panel.
+    func restoreClaudeStatusLine() {
         do {
-            _ = try change(script)
+            _ = try ClaudeStatusLine.restore()
         } catch {
-            Self.log.error("Could not change the Claude status line: \(error.localizedDescription, privacy: .public)")
+            Self.log.error("Could not restore the Claude status line: \(error.localizedDescription, privacy: .public)")
         }
         setUpClaudeStatusLine()
+        detectProblems()
+    }
+
+    /// Until the panel shows the banners (next step of the plan); then the fix in the panel replaces it.
+    func wrapClaudeStatusLine() {
+        guard let script = claudeScript else { return }
+        do {
+            _ = try ClaudeStatusLine.wrap(script: script)
+        } catch {
+            Self.log.error("Could not wrap the Claude status line: \(error.localizedDescription, privacy: .public)")
+        }
+        setUpClaudeStatusLine()
+    }
+
+    private var claudeScript: Data? {
+        Bundle.main.url(forResource: "claude-statusline", withExtension: "sh").flatMap { try? Data(contentsOf: $0) }
     }
 
     /// ADR 0024: only while the switch is on, at every launch and when it is turned on.
     private func setUpClaudeStatusLine() {
         guard autoSetUpClaude else { claudeStatusLine = nil; return }
-        guard let url = Bundle.main.url(forResource: "claude-statusline", withExtension: "sh"),
-              let script = try? Data(contentsOf: url) else { return }
+        guard let script = claudeScript else { return }
         do {
             claudeStatusLine = try ClaudeStatusLine.setUp(script: script)
         } catch {
             claudeStatusLine = nil
             Self.log.error("Could not set up the Claude status line: \(error.localizedDescription, privacy: .public)")
         }
-        checkProjectOverrides()
+        detectProblems()
     }
 
-    /// ADR 0027: in the background at utility priority, at most every 10 minutes between status line changes.
-    private func checkProjectOverridesIfDue() {
-        if let last = lastProjectCheck, Date().timeIntervalSince(last) < 600 { return }
-        checkProjectOverrides()
+    private func makeIntegrations() -> Integrations {
+        Integrations([ClaudeIntegration(script: claudeScript, enabled: autoSetUpClaude)])
     }
 
-    private func checkProjectOverrides() {
-        switch claudeStatusLine {
-        case .set, .alreadySet, .wrapped:
-            lastProjectCheck = Date()
-            Task(priority: .utility) {
-                let found = await Task.detached(priority: .utility) { ProjectStatusLines.overrides() }.value
-                projectOverrides = found
-                if let current = snapshot {
-                    snapshot = current.with(notices: ProjectStatusLines.notice(for: found).map { [$0] } ?? [])
-                }
-            }
-        default:
-            projectOverrides = []
+    /// ADR 0027: in the background at utility priority, at most every 10 minutes between changes.
+    private func detectProblemsIfDue() {
+        if let last = lastDetection, Date().timeIntervalSince(last) < 600 { return }
+        detectProblems()
+    }
+
+    private func detectProblems() {
+        lastDetection = Date()
+        let hasAppGroup = store != nil
+        let integrations = makeIntegrations()
+        Task(priority: .utility) {
+            let (found, configured) = await Task.detached(priority: .utility) {
+                // A file that cannot be used falls back to the seed, as the collector does (ADR 0018).
+                let configured = ((try? ProviderConfigFile.load()) ?? nil)?.providers ?? ProviderConfigFile.seed().providers
+                let found = ProblemDetector.detect(
+                    general: AppProblems.check(hasAppGroup: hasAppGroup), providers: configured,
+                    integrations: integrations, context: ProblemContext())
+                return (found, configured)
+            }.value
+            detected = found
+            providers = configured
+            for (id, state) in fixStates where state == .done { fixStates[id] = nil }
+            publish()
         }
+    }
+
+    /// The button and the text of Learn more for a problem's fix; nil when it has none.
+    func fixDescriptor(for problem: Problem) -> FixDescriptor? {
+        FixRunner.descriptor(for: problem, providers: providers, integrations: makeIntegrations())
+    }
+
+    /// Runs the fix of a problem; the banner goes at the next check once the problem is gone.
+    func runFix(_ problem: Problem) {
+        guard fixStates[problem.id] != .running else { return }
+        fixStates[problem.id] = .running
+        let providers = providers
+        let integrations = makeIntegrations()
+        Task {
+            let result = await Task.detached {
+                FixRunner.run(problem, providers: providers, integrations: integrations, context: ProblemContext())
+            }.value
+            switch result {
+            case .done:
+                fixStates[problem.id] = .done
+                setUpClaudeStatusLine()
+            case .failed(let reason):
+                fixStates[problem.id] = .failed(reason)
+            }
+        }
+    }
+
+    func dismiss(_ problem: Problem) {
+        dismissals.hide(problem)
+        fixStates[problem.id] = nil
+        publish()
     }
 
     func setLaunchAtLogin(_ enabled: Bool) {

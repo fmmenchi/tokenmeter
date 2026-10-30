@@ -34,10 +34,6 @@ struct SettingsView: View {
                 set: { meter.setAutoSetUpClaude($0) }))
             Text(claudeStatusText)
                 .font(.caption).foregroundStyle(.secondary)
-            if let notice = ProjectStatusLines.notice(for: meter.projectOverrides) {
-                Text("Warning: \(notice). Wrap it in that project: see the guide.")
-                    .font(.caption).foregroundStyle(.orange)
-            }
             if meter.autoSetUpClaude {
                 switch meter.claudeStatusLine {
                 case .otherStatusLine: Button("Wrap it") { meter.wrapClaudeStatusLine() }
