@@ -1,6 +1,6 @@
 # ADR 0031 — Problems come from the app and from provider integrations
 
-Status: proposed (2026-10-30); builds on [ADR 0030](./0030-problems-with-a-topic-and-a-fix.md) and on
+Status: accepted (2026-10-30); builds on [ADR 0030](./0030-problems-with-a-topic-and-a-fix.md) and on
 [ADR 0015](./0015-provider-contract.md) to [0018](./0018-the-config-file-is-the-only-source.md)
 
 ## Context

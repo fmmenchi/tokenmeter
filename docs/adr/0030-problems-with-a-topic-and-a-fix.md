@@ -1,6 +1,6 @@
 # ADR 0030 — Problems with a topic and an optional fix
 
-Status: proposed (2026-10-30); replaces the notices of [ADR 0027](./0027-notices-in-the-snapshot.md)
+Status: accepted (2026-10-30); replaces the notices of [ADR 0027](./0027-notices-in-the-snapshot.md)
 
 ## Context
 
@@ -56,11 +56,11 @@ A fix has four states: **ready**, **running** (its buttons are disabled and the 
 error replaces the detail, the button reads "Try again", nothing was changed) and **done** (a quiet line, then the banner
 goes). Fix all and Re-check are not part of the chosen design.
 
-## Open
+## Settled while building
 
-- Whether **Restore original** stays in Settings (when the status line is wrapped) or moves into the panel.
-- Whether the widget counts only a provider's problems, or the menu bar's total as well, for the `general` ones.
-- How long Dismiss lasts: until the message changes, or until the next launch.
+- **Restore original** stays in Settings, shown when the status line is wrapped.
+- The `general` problems count in the menu bar total and in the panel; the widget counts only a provider's own.
+- **Dismiss** lasts until the problem's message changes, and is kept in the app's defaults.
 
 ## Consequences
 

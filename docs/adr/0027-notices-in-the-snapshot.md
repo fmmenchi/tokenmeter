@@ -1,6 +1,6 @@
 # ADR 0027 — Notices in the snapshot, and a light background check
 
-Status: accepted (2026-10-30); amends [ADR 0026](./0026-warn-when-a-project-overrides-the-status-line.md)
+Status: superseded by [ADR 0030](./0030-problems-with-a-topic-and-a-fix.md) (2026-10-30); amended [ADR 0026](./0026-warn-when-a-project-overrides-the-status-line.md)
 
 ## Context
 
