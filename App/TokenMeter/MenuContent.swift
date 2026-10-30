@@ -20,6 +20,7 @@ struct MenuContent: View {
                     }
                 }
                 .font(.caption2).foregroundStyle(.secondary)
+                ForEach(snapshot.notices, id: \.self) { Text($0).font(.caption2).foregroundStyle(.orange) }
             } else {
                 ProgressView()
             }

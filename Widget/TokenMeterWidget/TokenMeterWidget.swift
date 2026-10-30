@@ -37,6 +37,9 @@ struct UsageWidgetView: View {
             VStack(alignment: .leading, spacing: 10) {
                 ForEach(snapshot.providers, id: \.provider) { ProviderBlock(snapshot: $0) }
                 Spacer(minLength: 0)
+                ForEach(snapshot.notices, id: \.self) {
+                    Text($0).font(.caption2).foregroundStyle(.orange).lineLimit(2)
+                }
                 Text(snapshot.generatedAt, style: .relative).font(.caption2).foregroundStyle(.secondary)
             }
         } else {

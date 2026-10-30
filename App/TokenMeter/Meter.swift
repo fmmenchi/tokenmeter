@@ -14,6 +14,7 @@ final class Meter {
     private(set) var claudeStatusLine: ClaudeStatusLine.Outcome?
     /// ADR 0026: projects whose own settings replace the status line. Read only; nothing is written.
     private(set) var projectOverrides: [ProjectStatusLines.Override] = []
+    private var lastProjectCheck: Date?
     private static let autoSetUpKey = "autoSetUpClaudeStatusLine"
     private let collector = Collector()
     private let store = SnapshotStore.appGroupStore()
@@ -42,7 +43,9 @@ final class Meter {
         isRefreshing = true
         defer { isRefreshing = false }
         let collector = collector
-        let result = await Task.detached { collector.snapshot() }.value
+        checkProjectOverridesIfDue()
+        let notice = ProjectStatusLines.notice(for: projectOverrides)
+        let result = await Task.detached { collector.snapshot() }.value.with(notices: notice.map { [$0] } ?? [])
         snapshot = result
         if let store {
             do {
@@ -92,12 +95,22 @@ final class Meter {
         checkProjectOverrides()
     }
 
+    /// ADR 0027: in the background at utility priority, at most every 10 minutes between status line changes.
+    private func checkProjectOverridesIfDue() {
+        if let last = lastProjectCheck, Date().timeIntervalSince(last) < 600 { return }
+        checkProjectOverrides()
+    }
+
     private func checkProjectOverrides() {
         switch claudeStatusLine {
         case .set, .alreadySet, .wrapped:
-            Task {
-                let found = await Task.detached { ProjectStatusLines.overrides() }.value
+            lastProjectCheck = Date()
+            Task(priority: .utility) {
+                let found = await Task.detached(priority: .utility) { ProjectStatusLines.overrides() }.value
                 projectOverrides = found
+                if let current = snapshot {
+                    snapshot = current.with(notices: ProjectStatusLines.notice(for: found).map { [$0] } ?? [])
+                }
             }
         default:
             projectOverrides = []
