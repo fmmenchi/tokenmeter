@@ -45,20 +45,22 @@ struct SettingsView: View {
                 }
             }
             Section("Providers") {
-                Text("Drag a provider, or use the arrows, to reorder its card. Choose the windows each card shows.")
+                Text("Drag a provider, or use the arrows, to reorder its card. Hide one to take its card off the panel and the widget. Choose the windows each card shows.")
                     .font(.caption).foregroundStyle(.secondary)
                 ForEach(Array(meter.cardProviders.enumerated()), id: \.element.id) { index, provider in
                     ProviderRow(
                         provider: provider, isFirst: index == 0, isLast: index == meter.cardProviders.count - 1,
                         isDropTarget: dropTarget == provider.id,
+                        canHide: !provider.isShown || meter.cardProviders.filter(\.isShown).count > 1,
                         onChange: { meter.setShownWindows($0, for: provider.id) },
                         onMove: { meter.moveProvider(provider.id, by: $0) },
+                        onToggleShown: { meter.setProviderShown(!provider.isShown, for: provider.id) },
                         onDragStart: { dragging = provider.id })
                         .onDrop(of: [.plainText], delegate: ProviderDropDelegate(
                             target: provider.id, dragging: $dragging, dropTarget: $dropTarget,
                             move: { meter.moveProvider($0, onto: $1) }))
                 }
-                Text("The percentage in the menu bar counts only the windows you show.")
+                Text("The percentage in the menu bar counts only the providers and windows you show.")
                     .font(.caption).foregroundStyle(.secondary)
             }
         }
@@ -78,8 +80,10 @@ private struct ProviderRow: View {
     let isFirst: Bool
     let isLast: Bool
     let isDropTarget: Bool
+    let canHide: Bool
     let onChange: (Set<String>) -> Void
     let onMove: (Int) -> Void
+    let onToggleShown: () -> Void
     let onDragStart: () -> Void
 
     private static let all = "all"
@@ -95,12 +99,13 @@ private struct ProviderRow: View {
                         Text(provider.title).padding(.horizontal, 10).padding(.vertical, 4)
                             .background(RoundedRectangle(cornerRadius: 6).fill(.background))
                     }
-                Text(provider.title).lineLimit(1).layoutPriority(1)
+                Text(provider.title).lineLimit(1).layoutPriority(1).opacity(provider.isShown ? 1 : 0.45)
                 Spacer()
                 Button { onMove(-1) } label: { Image(systemName: "chevron.up") }
                     .buttonStyle(.borderless).disabled(isFirst).accessibilityLabel("Move \(provider.title) up")
                 Button { onMove(1) } label: { Image(systemName: "chevron.down") }
                     .buttonStyle(.borderless).disabled(isLast).accessibilityLabel("Move \(provider.title) down")
+                VisibilityButton(provider: provider.title, isShown: provider.isShown, isEnabled: canHide, action: onToggleShown)
             }
             if provider.windows.count == 2 {
                 Picker(provider.title, selection: Binding(
@@ -110,6 +115,7 @@ private struct ProviderRow: View {
                     Text("Both").tag(Self.all)
                 }
                 .pickerStyle(.segmented).labelsHidden()
+                .disabled(!provider.isShown).opacity(provider.isShown ? 1 : 0.45)
             } else if provider.windows.count > 2 {
                 Menu("Windows") {
                     ForEach(provider.windows, id: \.self) { name in
@@ -119,6 +125,7 @@ private struct ProviderRow: View {
                     }
                 }
                 .fixedSize()
+                .disabled(!provider.isShown).opacity(provider.isShown ? 1 : 0.45)
             }
         }
         .padding(isDropTarget ? 6 : 0)

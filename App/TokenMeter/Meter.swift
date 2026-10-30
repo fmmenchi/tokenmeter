@@ -68,6 +68,8 @@ final class Meter {
         let title: String
         let windows: [String]
         let shown: Set<String>
+        /// False when the person hid the provider: its card is not drawn and its row is dimmed.
+        let isShown: Bool
     }
 
     /// The providers in the person's order, from the full reading, so Settings can offer windows that are hidden.
@@ -76,12 +78,18 @@ final class Meter {
 
     private func makeCardProviders() -> [CardProvider] {
         let all = base?.providers ?? []
-        return preferences.ordered(all.map(\.provider.rawValue)).compactMap { id in
+        let ids = preferences.ordered(all.map(\.provider.rawValue))
+        let hidden = preferences.hidden
+        // One provider always stays: when every one is hidden, the first in order is shown (Snapshot.applying).
+        let shownIDs = ids.filter { !hidden.contains($0) }
+        let visible = shownIDs.isEmpty ? Set(ids.prefix(1)) : Set(shownIDs)
+        return ids.compactMap { id in
             guard let provider = all.first(where: { $0.provider.rawValue == id }) else { return nil }
             let names = provider.windows.map(\.window.name)
             let chosen = preferences.windows(for: id).map { $0.intersection(names) }
             return CardProvider(id: id, title: provider.title, windows: names,
-                                shown: chosen.flatMap { $0.isEmpty ? nil : $0 } ?? Set(names))
+                                shown: chosen.flatMap { $0.isEmpty ? nil : $0 } ?? Set(names),
+                                isShown: visible.contains(id))
         }
     }
 
@@ -100,6 +108,13 @@ final class Meter {
         guard id != target, let from = ids.firstIndex(of: id), let to = ids.firstIndex(of: target) else { return }
         ids.insert(ids.remove(at: from), at: to)
         preferences.setOrder(ids)
+        publish()
+    }
+
+    /// Hides or shows a provider's card. The last shown provider cannot be hidden.
+    func setProviderShown(_ shown: Bool, for provider: String) {
+        guard shown || cardProviders.filter(\.isShown).contains(where: { $0.id != provider }) else { return }
+        preferences.setHidden(!shown, for: provider)
         publish()
     }
 
