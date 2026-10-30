@@ -1,6 +1,6 @@
 # ADR 0035 — Provider cards: order and visible windows are preferences
 
-Status: proposed (2026-10-30); narrows [ADR 0018](./0018-the-config-file-is-the-only-source.md) for the order in which providers are shown
+Status: accepted (2026-10-30); narrows [ADR 0018](./0018-the-config-file-is-the-only-source.md) for the order in which providers are shown
 
 ## Context
 
@@ -32,7 +32,7 @@ makes each provider a card, with a choice of windows and an order set in Setting
 
 - The widget's order follows the person, which is the practical reason to reorder: the medium widget shows the first card.
 - A preference for a provider that leaves `providers.json` stays in the defaults and does nothing; no cleanup is needed.
-- The design system defines only the light appearance; it gains a dark theme with the close of this feature, with the
-  macOS system dark values marked assumed.
-- Not verified: dragging in a `List` of an app that lives in the menu bar; the widget in the dark appearance on the
-  desktop.
+- The design system now defines a dark theme beside the light one, with the macOS system dark values marked assumed.
+- The reorder is a drag of the row's handle and two arrows, because a `List`'s own move gesture does not work in a grouped
+  `Form` on macOS.
+- Not verified: the widget in the dark appearance on the desktop.

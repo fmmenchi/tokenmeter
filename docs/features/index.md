@@ -12,15 +12,16 @@ are [ADRs](../adr), and its overview links them.
 
 ## Implemented
 
-| Feature                                                                                                    | Date       | Pages                                                                                                                                                                      |
-| :--------------------------------------------------------------------------------------------------------- | :--------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Alerts with a fix](./2026-10-30-alerts-with-a-fix/index.md): the app tells what is wrong and offers a fix | 2026-10-30 | [Overview](./2026-10-30-alerts-with-a-fix/index.md), [Proposal](./2026-10-30-alerts-with-a-fix/proposal.md), [Implementation plan](./2026-10-30-alerts-with-a-fix/plan.md) |
+| Feature                                                                                                            | Date       | Pages                                                                                                                                                                      |
+| :----------------------------------------------------------------------------------------------------------------- | :--------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Alerts with a fix](./2026-10-30-alerts-with-a-fix/index.md): the app tells what is wrong and offers a fix         | 2026-10-30 | [Overview](./2026-10-30-alerts-with-a-fix/index.md), [Proposal](./2026-10-30-alerts-with-a-fix/proposal.md), [Implementation plan](./2026-10-30-alerts-with-a-fix/plan.md) |
+| [Provider cards](./2026-10-30-provider-cards/index.md): a card per provider, the windows you choose, in your order | 2026-10-30 | [Overview](./2026-10-30-provider-cards/index.md), [Proposal](./2026-10-30-provider-cards/proposal.md), [Implementation plan](./2026-10-30-provider-cards/plan.md)          |
 
 ## In design and build
 
-| Feature                                                                                                            | Date       | Pages                                                                                                                                                             |
-| :----------------------------------------------------------------------------------------------------------------- | :--------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Provider cards](./2026-10-30-provider-cards/index.md): a card per provider, the windows you choose, in your order | 2026-10-30 | [Overview](./2026-10-30-provider-cards/index.md), [Proposal](./2026-10-30-provider-cards/proposal.md), [Implementation plan](./2026-10-30-provider-cards/plan.md) |
+| Feature | Date | Pages |
+| :------ | :--- | :---- |
+| _None._ |      |       |
 
 ## The pattern: from idea to implemented
 

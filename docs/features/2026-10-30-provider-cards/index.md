@@ -9,10 +9,10 @@ date: 2026-10-30
 
 Each provider is a card, you choose which of its windows to see, and you put the cards in the order you want.
 
-|        |                                 |
-| :----- | :------------------------------ |
-| Date   | 2026-10-30                      |
-| Status | in design: nothing is built yet |
+|        |                                                                                       |
+| :----- | :------------------------------------------------------------------------------------ |
+| Date   | 2026-10-30                                                                            |
+| Status | implemented, 2026-10-30: built and tested; the reorder was only tried on first builds |
 
 ## Intent
 
@@ -24,11 +24,11 @@ code names none of them. The light and the dark appearance both hold, because th
 
 ## The nucleus
 
-| Part                | Page                                                                           | Status               |
-| :------------------ | :----------------------------------------------------------------------------- | :------------------- |
-| Proposal            | [Proposal](./proposal.md)                                                      | chosen: filled cards |
-| Implementation plan | [Implementation plan](./plan.md)                                               | proposed             |
-| Decisions           | [ADR 0035](../../adr/0035-provider-cards-order-and-windows-are-preferences.md) | proposed             |
+| Part                | Page                                                                           | Status                        |
+| :------------------ | :----------------------------------------------------------------------------- | :---------------------------- |
+| Proposal            | [Proposal](./proposal.md)                                                      | built as chosen: filled cards |
+| Implementation plan | [Implementation plan](./plan.md)                                               | done, steps 1 to 7            |
+| Decisions           | [ADR 0035](../../adr/0035-provider-cards-order-and-windows-are-preferences.md) | accepted                      |
 
 ## Related
 
