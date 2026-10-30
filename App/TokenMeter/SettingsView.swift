@@ -8,6 +8,10 @@ enum SettingsWindow {
 
 struct SettingsView: View {
     let meter: Meter
+    /// The provider a dragged card is over: its row is outlined, so it is clear where the card will land.
+    @State private var dropTarget: String?
+    /// The provider whose handle was grabbed: it is never a drop target for itself.
+    @State private var dragging: String?
 
     private var claudeStatusText: String {
         guard meter.autoSetUpClaude else { return "Off: tokenmeter does not touch Claude Code's settings." }
@@ -46,13 +50,13 @@ struct SettingsView: View {
                 ForEach(Array(meter.cardProviders.enumerated()), id: \.element.id) { index, provider in
                     ProviderRow(
                         provider: provider, isFirst: index == 0, isLast: index == meter.cardProviders.count - 1,
+                        isDropTarget: dropTarget == provider.id,
                         onChange: { meter.setShownWindows($0, for: provider.id) },
-                        onMove: { meter.moveProvider(provider.id, by: $0) })
-                        .dropDestination(for: String.self) { ids, _ in
-                            guard let id = ids.first else { return false }
-                            meter.moveProvider(id, onto: provider.id)
-                            return true
-                        }
+                        onMove: { meter.moveProvider(provider.id, by: $0) },
+                        onDragStart: { dragging = provider.id })
+                        .onDrop(of: [.plainText], delegate: ProviderDropDelegate(
+                            target: provider.id, dragging: $dragging, dropTarget: $dropTarget,
+                            move: { meter.moveProvider($0, onto: $1) }))
                 }
                 Text("The percentage in the menu bar counts only the windows you show.")
                     .font(.caption).foregroundStyle(.secondary)
@@ -73,8 +77,10 @@ private struct ProviderRow: View {
     let provider: Meter.CardProvider
     let isFirst: Bool
     let isLast: Bool
+    let isDropTarget: Bool
     let onChange: (Set<String>) -> Void
     let onMove: (Int) -> Void
+    let onDragStart: () -> Void
 
     private static let all = "all"
 
@@ -82,7 +88,10 @@ private struct ProviderRow: View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
                 DragHandle()
-                    .draggable(provider.id) {
+                    .onDrag {
+                        onDragStart()
+                        return NSItemProvider(object: provider.id as NSString)
+                    } preview: {
                         Text(provider.title).padding(.horizontal, 10).padding(.vertical, 4)
                             .background(RoundedRectangle(cornerRadius: 6).fill(.background))
                     }
@@ -112,5 +121,36 @@ private struct ProviderRow: View {
                 .fixedSize()
             }
         }
+        .padding(isDropTarget ? 6 : 0)
+        .background(RoundedRectangle(cornerRadius: 8).fill(Color.accentColor.opacity(isDropTarget ? 0.12 : 0)))
+        .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(Color.accentColor, lineWidth: isDropTarget ? 2 : 0))
+    }
+}
+
+/// Moves the dragged card onto the one it is dropped on. A card is never a target for itself, so it is not outlined
+/// while it is over its own row.
+private struct ProviderDropDelegate: DropDelegate {
+    let target: String
+    @Binding var dragging: String?
+    @Binding var dropTarget: String?
+    let move: (String, String) -> Void
+
+    func validateDrop(info: DropInfo) -> Bool { dragging != nil && dragging != target }
+
+    func dropEntered(info: DropInfo) {
+        if dragging != target { dropTarget = target }
+    }
+
+    func dropUpdated(info: DropInfo) -> DropProposal? { DropProposal(operation: dragging == target ? .cancel : .move) }
+
+    func dropExited(info: DropInfo) {
+        if dropTarget == target { dropTarget = nil }
+    }
+
+    func performDrop(info: DropInfo) -> Bool {
+        defer { dragging = nil; dropTarget = nil }
+        guard let source = dragging, source != target else { return false }
+        move(source, target)
+        return true
     }
 }
