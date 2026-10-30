@@ -28,6 +28,7 @@ final class Meter {
     private var lastDetection: Date?
     private var base: Snapshot?
     private let dismissals = DefaultsDismissals()
+    private let preferences = DefaultsDisplayPreferences()
     private static let autoSetUpKey = "autoSetUpClaudeStatusLine"
     private let collector = Collector()
     private let store = SnapshotStore.appGroupStore()
@@ -61,11 +62,46 @@ final class Meter {
         publish()
     }
 
+    /// A provider as Settings lists it: every window it has, and which of them its card shows (ADR 0035).
+    struct CardProvider: Identifiable {
+        let id: String
+        let title: String
+        let windows: [String]
+        let shown: Set<String>
+    }
+
+    /// The providers in the person's order, from the full reading, so Settings can offer windows that are hidden.
+    var cardProviders: [CardProvider] {
+        let all = base?.providers ?? []
+        return preferences.ordered(all.map(\.provider.rawValue)).compactMap { id in
+            guard let provider = all.first(where: { $0.provider.rawValue == id }) else { return nil }
+            let names = provider.windows.map(\.window.name)
+            let chosen = preferences.windows(for: id).map { $0.intersection(names) }
+            return CardProvider(id: id, title: provider.title, windows: names,
+                                shown: chosen.flatMap { $0.isEmpty ? nil : $0 } ?? Set(names))
+        }
+    }
+
+    func moveProviders(from source: IndexSet, to destination: Int) {
+        var ids = cardProviders.map(\.id)
+        ids.move(fromOffsets: source, toOffset: destination)
+        preferences.setOrder(ids)
+        publish()
+    }
+
+    /// One window always stays: an empty choice is ignored.
+    func setShownWindows(_ windows: Set<String>, for provider: String) {
+        guard !windows.isEmpty else { return }
+        let all = Set(cardProviders.first { $0.id == provider }?.windows ?? [])
+        preferences.setWindows(windows == all ? nil : windows, for: provider)
+        publish()
+    }
+
     /// Puts the visible problems on the latest reading and gives it to the widget.
     private func publish() {
         guard let base else { return }
         problems = dismissals.visible(detected)
-        let result = base.with(problems: problems)
+        let result = base.applying(preferences).with(problems: problems)
         snapshot = result
         if let store {
             do {
