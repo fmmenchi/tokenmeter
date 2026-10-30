@@ -98,6 +98,20 @@ The order of the cards and the windows each shows are preferences of the app, no
 
 The app applies them when it writes the snapshot, so the widget draws what it is given.
 
+## Model limits
+
+A model's limit is a window with a scope ([ADR 0034](../adr/0034-limits-can-be-scoped-to-a-model.md)).
+
+| Type                  | What it is                                                                                                        |
+| :-------------------- | :---------------------------------------------------------------------------------------------------------------- |
+| `WindowSpec.scope`    | A model's name, from the data; `WindowSpec.id` is the name, and the scope after a colon for a scoped window.      |
+| `ReportedQuota.scope` | The model a reported limit applies to; the builder makes it a window of its own under the one of the same length. |
+| `ClaudeUsageRefresh`  | `locate`, `run` and `refresh`: ask Claude Code to refresh its usage copy by running its own `/usage`.             |
+
+A quota window in `providers.json` can read a list: `each` (the path to it), `where` (fields an entry must equal), `scope`
+(the path of the model's name inside an entry), a `file` of its own and `observedAt` (when the file was fetched). No model is
+named in the code.
+
 ## Sharing with the widget
 
 | Symbol                            | Does                                                                            |

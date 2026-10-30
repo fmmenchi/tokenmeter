@@ -102,6 +102,17 @@ The file is rewritten only while a session renders its status line. Between sess
 values stay and the panel shows how old they are; see [Reading the Bars](./bars.md).
 :::
 
+## A limit for one model
+
+Some plans have a limit for one model that is part of the weekly limit (the usage page shows it, for example, under
+**This week**). tokenmeter shows it as a compact line under **Weekly**, only when your plan has it. The figure comes from the
+usage copy Claude Code keeps in `~/.claude.json`, which Claude Code only refreshes when it runs `/usage`. So tokenmeter asks
+it to: with **Set up the Claude quota automatically** on, the **Refresh** button and a timer of 15 minutes run
+`claude -p "/usage"` in the background, in `~/.tokenmeter/claude/`, without a session file. Claude Code reads its own
+credentials; tokenmeter reads none. If `claude` is not in `~/.local/bin`, `/opt/homebrew/bin`, `/usr/local/bin` or your
+`PATH`, the figure stays as old as the copy and reads with `~`. In **Settings, Providers**, a switch under Claude's windows
+turns the line off. See [ADR 0034](../adr/0034-limits-can-be-scoped-to-a-model.md).
+
 ## Related
 
 - [Data Sources](../develop/data-sources.md)

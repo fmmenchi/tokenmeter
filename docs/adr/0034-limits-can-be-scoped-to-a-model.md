@@ -1,6 +1,6 @@
 # ADR 0034 — Limits can be scoped to a model, for every provider
 
-Status: proposed (2026-10-30), reopened: Claude Code's own `/usage` gives a fresh figure without tokenmeter handling a credential; extends [ADR 0007](./0007-expired-window-reads-as-reset.md), [ADR 0015](./0015-provider-contract.md) and [ADR 0016](./0016-providers-declared-in-a-config-file.md)
+Status: accepted (2026-10-30); extends [ADR 0007](./0007-expired-window-reads-as-reset.md), [ADR 0015](./0015-provider-contract.md) and [ADR 0016](./0016-providers-declared-in-a-config-file.md)
 
 ## Context
 
@@ -82,6 +82,9 @@ The solution is **cross-model**: no model, provider or plan is named in the comm
   credentials and has no sign-in of its own. If that is ever wanted it is a separate ADR.
 - Joining `weekly_scoped_shares` (the "up to 50%") by `limit_index` is not in the list-reading rule above and is left to
   the design: either a second field read by position, or omitted in the first version.
+- Built: the share of the week (`shareOfParent`) was left out of the first version, and a model's window never shows without
+  the one of the same name. An existing `providers.json` gets the new window once, with a backup, as in
+  [ADR 0033](./0033-add-the-claude-integration-to-an-existing-providers-file.md).
 - Not decided here: how it looks (a proposal first, [ADR 0032](./0032-a-features-section-groups-proposal-plan-and-decisions.md)).
 - Not verified: how often Claude Code refreshes the copy while in daily use (it is 15 days old on this Mac), and that
   other providers' data is shaped as a list.
