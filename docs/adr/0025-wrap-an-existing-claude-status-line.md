@@ -17,10 +17,10 @@ changes without that click: the automatic launch step keeps leaving another stat
 
 On the click, the app:
 
-- saves the original `statusLine` object, as it is, to `~/.tokenmeter/claude-original-statusline.json`
-  (flat, with the `claude-` prefix of the files already there; a `claude/` subfolder would need the
-  existing two files moved too, which three files do not justify);
-- writes `~/.tokenmeter/claude-statusline-wrapper.sh` and points `statusLine.command` at it, keeping
+- saves the original `statusLine` object, as it is, to `~/.tokenmeter/claude/original-statusline.json`
+  (a `claude/` folder for what concerns Claude Code's settings; `claude-statusline.sh` and
+  `claude-statusline.json` stay where they are, since moving them is a migration nobody needs);
+- writes `~/.tokenmeter/claude/statusline-wrapper.sh` and points `statusLine.command` at it, keeping
   every other field of the object (`padding` and the like);
 - backs `settings.json` up to `settings.json.tokenmeter.bak` first, as in ADR 0024.
 
