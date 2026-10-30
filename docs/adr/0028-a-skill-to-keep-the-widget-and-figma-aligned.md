@@ -22,6 +22,9 @@ the views they describe. No subagents, no scripts.
   after a yes, and takes every value from the code at that moment, never from a copy.
 - **`figma-import`** (Figma to code) changes the SwiftUI views for the differences the proposal listed.
   A design that needs data the snapshot lacks stops there: it needs an ADR.
+- **Two sections in the Figma file.** **Views** is what the code looks like now, written only by
+  `figma-export`. **Proposals** is what could change, written only by `figma-proposal`, additive, one set
+  of frames per proposal. An implemented proposal is exported to Views and marked `✓` in Proposals.
 - **No fixed list of views.** There are the widget, Settings and the panel today and there will be more, so
   `figma-proposal` finds the views in the source and says which it takes in scope and which it leaves.
 - The code is the source: when the two disagree and nobody says otherwise, Figma is the copy.
