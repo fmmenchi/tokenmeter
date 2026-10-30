@@ -39,17 +39,40 @@ public struct ProviderConfigFile: Decodable, Sendable {
         case untouched
     }
 
-    /// Adds `"integration": "claude-status-line"` to the `claude` entry of an existing file that lacks the key
-    /// (ADR 0033). The only change the app makes to a file that is already there; the original is kept as `.bak`.
+    /// The window that reads Claude's per-model limits from the usage copy Claude Code keeps (ADR 0034).
+    static func claudeModelLimits() -> [String: Any] { [
+        "file": "~/.claude.json", "each": "cachedUsageUtilization.utilization.limits",
+        "where": ["kind": "weekly_scoped"], "scope": "scope.model.display_name", "minutes": 10080,
+        "usedPercent": "percent", "resetsAt": "resets_at", "resetsAtFormat": "iso8601",
+        "observedAt": "cachedUsageUtilization.fetchedAtMs", "observedAtFormat": "epochMilliseconds",
+    ] }
+
+    /// Adds to the `claude` entry of an existing file what a newer version needs and the file lacks: its `integration`
+    /// (ADR 0033) and the window for its per-model limits (ADR 0034). The only changes the app makes to a file that is
+    /// already there; each is added once and only when absent, and the original is kept as `.bak`.
     @discardableResult
     public static func addClaudeIntegration(to url: URL = defaultURL) -> MigrationOutcome {
         guard let data = try? Data(contentsOf: url),
               var object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
               object["version"] as? Int == 1,
               var providers = object["providers"] as? [[String: Any]],
-              let index = providers.firstIndex(where: { $0["id"] as? String == "claude" && $0["integration"] == nil })
+              let index = providers.firstIndex(where: { $0["id"] as? String == "claude" })
         else { return .untouched }
-        providers[index]["integration"] = "claude-status-line"
+        var entry = providers[index]
+        var changed = false
+        if entry["integration"] == nil {
+            entry["integration"] = "claude-status-line"
+            changed = true
+        }
+        if var quota = entry["quota"] as? [String: Any], var windows = quota["windows"] as? [[String: Any]],
+           !windows.contains(where: { $0["each"] != nil }) {
+            windows.append(claudeModelLimits())
+            quota["windows"] = windows
+            entry["quota"] = quota
+            changed = true
+        }
+        guard changed else { return .untouched }
+        providers[index] = entry
         object["providers"] = providers
         let backup = url.appendingPathExtension("tokenmeter.bak")
         guard let output = try? JSONSerialization.data(
