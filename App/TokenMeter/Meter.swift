@@ -60,6 +60,22 @@ final class Meter {
         setUpClaudeStatusLine()
     }
 
+    /// ADR 0025: only on the user's click, never at launch.
+    func wrapClaudeStatusLine() { changeClaudeStatusLine { try ClaudeStatusLine.wrap(script: $0) } }
+
+    func restoreClaudeStatusLine() { changeClaudeStatusLine { _ in try ClaudeStatusLine.restore() } }
+
+    private func changeClaudeStatusLine<Result>(_ change: (Data) throws -> Result) {
+        guard let url = Bundle.main.url(forResource: "claude-statusline", withExtension: "sh"),
+              let script = try? Data(contentsOf: url) else { return }
+        do {
+            _ = try change(script)
+        } catch {
+            Self.log.error("Could not change the Claude status line: \(error.localizedDescription, privacy: .public)")
+        }
+        setUpClaudeStatusLine()
+    }
+
     /// ADR 0024: only while the switch is on, at every launch and when it is turned on.
     private func setUpClaudeStatusLine() {
         guard autoSetUpClaude else { claudeStatusLine = nil; return }

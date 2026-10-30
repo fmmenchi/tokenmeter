@@ -14,7 +14,8 @@ struct SettingsView: View {
         case .set: return "Done: Claude's status line now feeds tokenmeter."
         case .alreadySet: return "Claude's status line already feeds tokenmeter."
         case .notInstalled: return "Claude Code not found. Checked again at every launch."
-        case .otherStatusLine: return "Another status line is in use and was left alone. See the guide."
+        case .wrapped: return "Your status line is wrapped: it still prints as before, and also feeds tokenmeter."
+        case .otherStatusLine: return "Another status line is in use and was left alone. Wrap it to feed tokenmeter too."
         case .unreadableSettings: return "Claude's settings.json could not be read, so it was left alone."
         case nil: return "Checked at every launch; never replaces a status line you set."
         }
@@ -32,6 +33,13 @@ struct SettingsView: View {
                 set: { meter.setAutoSetUpClaude($0) }))
             Text(claudeStatusText)
                 .font(.caption).foregroundStyle(.secondary)
+            if meter.autoSetUpClaude {
+                switch meter.claudeStatusLine {
+                case .otherStatusLine: Button("Wrap it") { meter.wrapClaudeStatusLine() }
+                case .wrapped: Button("Restore original") { meter.restoreClaudeStatusLine() }
+                default: EmptyView()
+                }
+            }
         }
         .formStyle(.grouped)
         .scrollDisabled(true)
