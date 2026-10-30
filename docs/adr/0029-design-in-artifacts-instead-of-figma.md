@@ -20,7 +20,8 @@ The design lives in artifacts, in three kinds, and the flow goes one way:
 
 - **Design system** (a `Design System` artifact): the tokens and components, read from the code, never
   from memory. A value the code does not state (the system colours, for example) is marked as such.
-- **Views** (a `Design` canvas, page `Views`): what the app looks like now, built from the design system.
+- **Views** (one `Design` canvas, page `Views`, holding every view): what the app looks like now, built from the
+  design system. Each view is an artboard of that one canvas; the tool keeps each artboard in its own file inside it.
 - **One canvas per proposal**, named `Proposal · <area> · <yyyy-mm-dd>`, started from a copy of the Views
   artboards. An approved or imported proposal is never edited: a further change is a new canvas copied from it,
   and the old one is renamed with a leading `✓` once its code is in.
