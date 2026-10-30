@@ -59,6 +59,8 @@ public struct ProviderConfig: Decodable, Sendable {
     public let title: String
     public let windows: [Int]
     public let setupHint: String?
+    /// The id of the integration that reports this provider's problems and fixes them (ADR 0031); nil when it has none.
+    public let integration: String?
     public let log: Log?
     public let usage: Usage?
     public let quota: Quota?
