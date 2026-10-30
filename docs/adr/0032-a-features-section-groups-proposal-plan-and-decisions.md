@@ -32,6 +32,9 @@ here from `develop/`. The word "design" in the section means the proposal, not a
 
 - A change to one part shows up next to the other two.
 - A page belongs to one feature, and a feature to this section; the Develop pages stay about the app as it is.
+- The nucleus is a **pattern**, so it is written once for people and once for agents: `docs/features/index.md` (the pattern
+  and the list), `docs/develop/implement-a-feature.md` (the steps and the commands) and `.agents/doc/features.md` (what an
+  agent does and does not do).
 - The Overview lists the section, and `docs/develop/contribute.md` points to it.
 - Public URLs for the plan change (it was added hours before and linked from nowhere else).
 - The screenshots are rendered from the artboards of the proposal canvas, not taken from it; they are committed beside
