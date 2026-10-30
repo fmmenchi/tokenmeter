@@ -92,10 +92,26 @@ public struct ProviderSnapshot: Codable, Equatable, Sendable {
 public struct Snapshot: Codable, Equatable, Sendable {
     public let generatedAt: Date
     public let providers: [ProviderSnapshot]
+    /// Sentences for the person looking at the widget or the panel; written by the app, not the collector (ADR 0027).
+    public let notices: [String]
 
-    public init(generatedAt: Date, providers: [ProviderSnapshot]) {
+    public init(generatedAt: Date, providers: [ProviderSnapshot], notices: [String] = []) {
         self.generatedAt = generatedAt
         self.providers = providers
+        self.notices = notices
+    }
+
+    private enum CodingKeys: String, CodingKey { case generatedAt, providers, notices }
+
+    public init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(generatedAt: try c.decode(Date.self, forKey: .generatedAt),
+                  providers: try c.decode([ProviderSnapshot].self, forKey: .providers),
+                  notices: try c.decodeIfPresent([String].self, forKey: .notices) ?? [])
+    }
+
+    public func with(notices: [String]) -> Snapshot {
+        Snapshot(generatedAt: generatedAt, providers: providers, notices: notices)
     }
 }
 

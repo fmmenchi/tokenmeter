@@ -94,4 +94,12 @@ final class ProjectStatusLinesTests: XCTestCase {
     func testWithoutClaudeThereIsNothing() {
         XCTAssertEqual(overrides(), [])
     }
+
+    func testTheNoticeNamesThreeProjectsAndCountsTheRest() {
+        func item(_ name: String) -> ProjectStatusLines.Override { .init(project: URL(fileURLWithPath: "/w/\(name)"), command: "") }
+        XCTAssertNil(ProjectStatusLines.notice(for: []))
+        XCTAssertEqual(ProjectStatusLines.notice(for: [item("a")]), "Claude bars freeze in a: own status line")
+        XCTAssertEqual(ProjectStatusLines.notice(for: ["a", "b", "c", "d", "e"].map(item)),
+                       "Claude bars freeze in a, b, c +2: own status line")
+    }
 }
