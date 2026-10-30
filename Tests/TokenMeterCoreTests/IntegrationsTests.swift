@@ -4,6 +4,7 @@ import XCTest
 final class IntegrationsTests: XCTestCase {
     private struct Stub: ProviderIntegration {
         let id: String
+        var kinds: [ProblemKind] { [] }
         var fixes: [FixDescriptor] { [] }
         func problems(in context: ProblemContext) -> [Problem] { [] }
         func run(fix: String, in context: ProblemContext) -> FixResult { .done }

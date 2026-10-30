@@ -21,6 +21,8 @@ public enum FixResult: Equatable, Sendable {
 /// One implementation per provider that needs one; nothing outside it names the provider.
 public protocol ProviderIntegration: Sendable {
     var id: String { get }
+    /// Every kind of problem this integration can report: its part of the census.
+    var kinds: [ProblemKind] { get }
     var fixes: [FixDescriptor] { get }
     func problems(in context: ProblemContext) -> [Problem]
     func run(fix: String, in context: ProblemContext) -> FixResult

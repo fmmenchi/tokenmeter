@@ -8,5 +8,10 @@ public struct Integrations: Sendable {
         byID = Dictionary(integrations.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
     }
 
+    /// The census: the kinds of problem of the app and of every integration, in a stable order.
+    public var census: [ProblemKind] {
+        AppProblems.kinds + byID.keys.sorted().flatMap { byID[$0]?.kinds ?? [] }
+    }
+
     public subscript(id: String) -> (any ProviderIntegration)? { byID[id] }
 }

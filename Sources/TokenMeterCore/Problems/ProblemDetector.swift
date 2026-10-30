@@ -20,9 +20,10 @@ extension ProblemDetector {
         for provider in providers {
             guard let name = provider.integration else { continue }
             guard let integration = integrations[name] else {
-                unknown.append(Problem(id: "general.integration.\(provider.id)", topic: Problem.general,
-                                       message: "Integration not found for \(provider.title)",
-                                       detail: "providers.json asks for \"\(name)\", which this version does not have."))
+                unknown.append(AppProblems.integrationNotFound.problem(
+                    message: "Integration not found for \(provider.title)",
+                    detail: "providers.json asks for \"\(name)\", which this version does not have.",
+                    detailID: provider.id))
                 continue
             }
             found.append(integration.problems(in: context))

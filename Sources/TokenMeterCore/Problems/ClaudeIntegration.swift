@@ -28,25 +28,37 @@ public struct ClaudeIntegration: ProviderIntegration {
             """)]
     }
 
+    public static let otherStatusLine = ProblemKind(
+        id: "claude.statusline.other", topic: "claude", summary: "Another status line is in use",
+        explanation: "Claude Code runs one status line, and yours is not tokenmeter's, so tokenmeter gets no quota from "
+            + "it. tokenmeter did not replace it. You can wrap it: both get the same data and yours still prints "
+            + "exactly what it does now.",
+        guide: "use/enable-claude-quota", fix: wrapStatusLine)
+
+    public static let projectOverrides = ProblemKind(
+        id: "claude.statusline.projects", topic: "claude", summary: "Projects set their own status line",
+        explanation: "A project's own .claude/settings.json replaces the status line for sessions in that folder, so "
+            + "tokenmeter gets no quota from them and the Claude bars stop moving while you work there. tokenmeter never "
+            + "edits a project: wrap the status line in that project's settings (see the guide).",
+        guide: "use/enable-claude-quota")
+
+    public var kinds: [ProblemKind] { [Self.otherStatusLine, Self.projectOverrides] }
+
     public func problems(in context: ProblemContext) -> [Problem] {
         guard enabled else { return [] }
         var found: [Problem] = []
         if let command = ClaudeStatusLine.otherStatusLine(home: context.home) {
-            found.append(Problem(
-                id: "claude.statusline.other", topic: "claude", message: "Another status line is in use",
-                detail: "It was left alone, so the Claude bars do not update.",
-                fix: command.isEmpty ? nil : Self.wrapStatusLine, guide: "use/enable-claude-quota"))
+            found.append(Self.otherStatusLine.problem(
+                detail: "It was left alone, so the Claude bars do not update.", withFix: !command.isEmpty))
         }
         let overrides = ProjectStatusLines.overrides(home: context.home, now: context.now)
         if !overrides.isEmpty {
             let names = overrides.prefix(3).map(\.project.lastPathComponent).joined(separator: ", ")
             let more = overrides.count > 3 ? " +\(overrides.count - 3)" : ""
             let count = overrides.count
-            found.append(Problem(
-                id: "claude.statusline.projects",
-                topic: "claude",
+            found.append(Self.projectOverrides.problem(
                 message: count == 1 ? "1 project sets its own status line" : "\(count) projects set their own status line",
-                detail: "Claude bars freeze there: \(names)\(more).", guide: "use/enable-claude-quota"))
+                detail: "Claude bars freeze there: \(names)\(more)."))
         }
         return found
     }

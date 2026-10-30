@@ -39,6 +39,7 @@ final class ProblemDetectionTests: XCTestCase {
     private struct Stub: ProviderIntegration {
         let id: String
         let found: [Problem]
+        var kinds: [ProblemKind] { [] }
         var fixes: [FixDescriptor] { [] }
         func problems(in context: ProblemContext) -> [Problem] { found }
         func run(fix: String, in context: ProblemContext) -> FixResult { .done }

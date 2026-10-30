@@ -5,6 +5,7 @@ final class FixRunnerTests: XCTestCase {
     private struct Stub: ProviderIntegration {
         let id = "stub"
         let result: FixResult
+        var kinds: [ProblemKind] { [] }
         var fixes: [FixDescriptor] { [FixDescriptor(id: "go", label: "Go", runningLabel: "Going…", explanation: "e")] }
         func problems(in context: ProblemContext) -> [Problem] { [] }
         func run(fix: String, in context: ProblemContext) -> FixResult { result }
