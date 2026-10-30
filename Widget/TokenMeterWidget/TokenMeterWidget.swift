@@ -35,11 +35,10 @@ struct UsageWidgetView: View {
     var body: some View {
         if let snapshot = entry.snapshot {
             VStack(alignment: .leading, spacing: 10) {
-                ForEach(snapshot.providers, id: \.provider) { ProviderBlock(snapshot: $0) }
-                Spacer(minLength: 0)
-                ForEach(snapshot.notices, id: \.self) {
-                    Text($0).font(.caption2).foregroundStyle(.orange).lineLimit(2)
+                ForEach(snapshot.providers, id: \.provider) {
+                    ProviderBlock(snapshot: $0, problemCount: snapshot.problemCount(for: $0))
                 }
+                Spacer(minLength: 0)
                 Text(snapshot.generatedAt, style: .relative).font(.caption2).foregroundStyle(.secondary)
             }
         } else {

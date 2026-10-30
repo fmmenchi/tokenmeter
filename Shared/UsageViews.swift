@@ -102,6 +102,8 @@ struct WindowRow: View {
 
 struct ProviderBlock: View {
     let snapshot: ProviderSnapshot
+    /// How many problems have this provider as their topic; the widget only counts, the panel lists them.
+    var problemCount = 0
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -112,8 +114,15 @@ struct ProviderBlock: View {
                         .padding(.horizontal, 6).padding(.vertical, 1)
                         .background(Capsule().fill(Color.primary.opacity(0.12)))
                 }
+                if problemCount > 0 { NoticeChip(count: problemCount) }
             }
             ForEach(snapshot.windows, id: \.window.name) { WindowRow(usage: $0.resolved(at: Date())) }
         }
+    }
+}
+
+extension Snapshot {
+    func problemCount(for provider: ProviderSnapshot) -> Int {
+        problems.filter { $0.topic == provider.provider.rawValue }.count
     }
 }
