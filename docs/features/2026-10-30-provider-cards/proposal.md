@@ -56,7 +56,9 @@ colours, values assumed, and the design system gains a dark theme when the featu
   does not offer: nothing could be dragged. The row now drags on its own and has an up and a down arrow, so the order can be
   changed without dragging. The name has a line of its own and the choice of windows sits under it, so a name is never
   squeezed. The handle is a tinted area that darkens and shows an open hand under the pointer, and a drag starts only
-  from it, so the area to act on is clear and the choice of windows is never grabbed by mistake.
+  from it, so the area to act on is clear and the choice of windows is never grabbed by mistake. While a card is dragged, the row
+  it would land on is outlined in the accent colour with a light fill; the row being dragged is never outlined, so it
+  is clear where the card goes and that dropping on itself does nothing.
 
 ## Related
 
