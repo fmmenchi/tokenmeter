@@ -18,7 +18,7 @@ provider.
 - **`Problem`**: the model of ADR 0030. `topic` is a provider id from `providers.json`, or `general`. `fix`, when there is
   one, is the id of a fix that provider's integration declares.
 - **`ProviderIntegration`**: a small protocol, one implementation per provider that needs one. It declares its own
-  problems (given the home folder and the time), the fixes it can run (each with an id, a button label and the technical
+  kinds of problem (the census, ADR 0030) and reports them (given the home folder and the time), the fixes it can run (each with an id, a button label and the technical
   explanation that **Learn more** shows), and how to run one. The label and the explanation belong to the integration, so
   the interface and the detector know nothing about what a fix means.
 - **`ProblemDetector`**: gathers the problems of the app (the `general` ones, such as a missing App Group) and of each

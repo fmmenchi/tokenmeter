@@ -15,8 +15,13 @@ one and a way to dismiss it.
 
 A **problem** replaces the notice string:
 
-- `Problem` in `TokenMeterCore`: `id`, `topic`, `message`, optional `detail`, optional `fix`. The `topic` is a provider id
+- `Problem` in `TokenMeterCore`: `id`, `topic`, `message`, optional `detail`, optional `explanation` (what is wrong and
+  what to do, shown by Learn more), optional `fix`. The `topic` is a provider id
   (`claude`, `chatgpt`, or one from `providers.json`) or `general`, for what concerns the app itself.
+- **Every problem is catalogued.** A `ProblemKind` is one kind of problem: its id, topic, summary, explanation, guide and
+  fix. The app and each integration declare their kinds, a check only decides whether a kind applies and what the message
+  says this time, and the census is the list of all kinds. The interface falls back to a generic line only for a problem
+  that has no explanation.
 - `fix` is a closed set of kinds the app knows how to run: today only **wrap the status line**
   (`ClaudeStatusLine.wrap`). A problem without a fix shows no fix button. `guide` is an optional docs path.
 - `Snapshot` carries `problems: [Problem]`, empty by default and absent from older files; `notices` is removed.

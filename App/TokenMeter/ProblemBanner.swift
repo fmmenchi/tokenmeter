@@ -57,7 +57,10 @@ struct ProblemBanner: View {
 
     private var explanation: some View {
         VStack(alignment: .leading, spacing: 3) {
-            Text(fix?.explanation ?? "There is no automatic fix for this one. Nothing on your Mac changes.")
+            if let explanation = problem.explanation { Text(explanation) }
+            if let fix { Text(fix.explanation) } else if problem.explanation == nil {
+                Text("There is no automatic fix for this one. Nothing on your Mac changes.")
+            }
             if let guide = problem.guide, let url = URL(string: Self.guideBase + guide) {
                 Link("Open the guide", destination: url)
             }
