@@ -1,6 +1,6 @@
 # ADR 0028 — A skill to keep the widget and Figma aligned
 
-Status: accepted (2026-10-30)
+Status: accepted (2026-10-30), reworked the same day from one skill into three
 
 ## Context
 
@@ -11,20 +11,22 @@ one widget that is far more than the job needs.
 
 ## Decision
 
-One skill, one file: `.claude/skills/widget-figma/SKILL.md` in this repository, so it is versioned with
-the views it describes. No subagents, no scripts.
+Three small skills, one file each, in `.claude/skills/` of this repository so they are versioned with
+the views they describe. No subagents, no scripts.
 
-- **Proposal first.** The skill reads the SwiftUI views and, if a Figma file is named, the Figma file,
-  then writes a short proposal: which direction, what will be created or changed, what will not be
-  touched. It acts only after Fabio says yes; a "no" or a correction ends it or revises the proposal.
-- **Both directions.** Code to Figma: build the widget, the panel's `ProviderBlock` and their states in
-  Figma. Figma to code: change the SwiftUI views to match a design change, listing each difference
-  before editing.
-- **The code is the source.** When the two disagree and nobody says otherwise, the proposal treats
-  `Shared/UsageViews.swift` and the widget as right and Figma as the copy. Values (colours,
-  thresholds, spacing) are read from the code, never copied into the skill, so the skill cannot go stale.
-- The Figma work itself is delegated to the Figma skills already installed (`figma-use`,
-  `figma-generate-design`, `figma-swiftui`); this one only says what to build and in what order.
+- **`figma-proposal`** reads the SwiftUI views, the states in the docs and, if a Figma link is given,
+  the Figma file. It writes a proposal of ten lines at most (direction, what is created or changed, what
+  is not touched, differences, what is unknown) and **waits for a yes**. A correction revises it, a no
+  ends it, and a yes covers that proposal only.
+- **`figma-export`** (code to Figma) builds the views the proposal names and their states in Figma. It runs only
+  after a yes, and takes every value from the code at that moment, never from a copy.
+- **`figma-import`** (Figma to code) changes the SwiftUI views for the differences the proposal listed.
+  A design that needs data the snapshot lacks stops there: it needs an ADR.
+- **No fixed list of views.** There are the widget, Settings and the panel today and there will be more, so
+  `figma-proposal` finds the views in the source and says which it takes in scope and which it leaves.
+- The code is the source: when the two disagree and nobody says otherwise, Figma is the copy.
+- The Figma work itself is done with the Figma skills already installed (`figma-use`,
+  `figma-generate-design`, `figma-swiftui`, `figma-design-to-code`).
 
 ## Consequences
 
