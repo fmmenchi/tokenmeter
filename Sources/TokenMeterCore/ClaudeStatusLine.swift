@@ -61,6 +61,19 @@ public enum ClaudeStatusLine {
         return .set
     }
 
+    /// The status line someone else set in `~/.claude/settings.json`, read only; nil when there is none or it is
+    /// tokenmeter's own or its wrapper. The command is empty when the status line is not a `command` one.
+    public static func otherStatusLine(home: URL = FileManager.default.homeDirectoryForCurrentUser) -> String? {
+        let settings = home.appendingPathComponent(".claude/settings.json")
+        guard let data = try? Data(contentsOf: settings),
+              let object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
+              let value = object["statusLine"] else { return nil }
+        guard let current = value as? [String: Any], current["type"] as? String == "command",
+              let command = current["command"] as? String else { return "" }
+        let own = [home.appendingPathComponent(".tokenmeter/claude-statusline.sh").path, wrapperURL(home: home).path]
+        return own.contains(command) ? nil : command
+    }
+
     public enum WrapOutcome: Equatable, Sendable {
         case notInstalled
         /// The status line is wrapped now.
