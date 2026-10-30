@@ -9,7 +9,13 @@ public struct ClaudeIntegration: ProviderIntegration {
     /// The script tokenmeter's status line runs, from the app bundle; nil where there is none (a fix then fails).
     private let script: Data?
 
-    public init(script: Data?) { self.script = script }
+    /// False while the person has turned the status line setup off: they chose not to have it, so it is not a problem.
+    private let enabled: Bool
+
+    public init(script: Data?, enabled: Bool = true) {
+        self.script = script
+        self.enabled = enabled
+    }
 
     public var fixes: [FixDescriptor] {
         [FixDescriptor(
@@ -23,6 +29,7 @@ public struct ClaudeIntegration: ProviderIntegration {
     }
 
     public func problems(in context: ProblemContext) -> [Problem] {
+        guard enabled else { return [] }
         var found: [Problem] = []
         if let command = ClaudeStatusLine.otherStatusLine(home: context.home) {
             found.append(Problem(

@@ -35,6 +35,11 @@ final class ClaudeIntegrationTests: XCTestCase {
         XCTAssertEqual(integration.fixes.map(\.id), [ClaudeIntegration.wrapStatusLine])
     }
 
+    func testNothingIsReportedWhileTheSetupIsOff() throws {
+        try writeSettings(#"{"statusLine":{"type":"command","command":"/bin/mine"}}"#)
+        XCTAssertEqual(ClaudeIntegration(script: script, enabled: false).problems(in: context), [])
+    }
+
     func testAStatusLineThatIsNotACommandHasNoFix() throws {
         try writeSettings(#"{"statusLine":{"type":"static","text":"hi"}}"#)
         XCTAssertNil(integration.problems(in: context).first?.fix)
