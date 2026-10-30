@@ -1,6 +1,6 @@
 # ADR 0034 — Limits can be scoped to a model, for every provider
 
-Status: proposed (2026-10-30); extends [ADR 0007](./0007-expired-window-reads-as-reset.md) and [ADR 0015](./0015-provider-contract.md)
+Status: deferred (2026-10-30), not built: no source reports the figure; extends [ADR 0007](./0007-expired-window-reads-as-reset.md) and [ADR 0015](./0015-provider-contract.md)
 
 ## Context
 
@@ -19,6 +19,13 @@ the contract says that a window applies to a model.
   credentials and will not start to.
 
 What the logs do carry is **consumption per model**: each assistant message names its model and its tokens.
+
+## Why it is deferred
+
+The thing that was asked for, the model's own **percentage of limit**, cannot be read without the login token, so it
+cannot be built. What can be read is consumption per model, which is not the limit and would not answer the question. The
+design below stays as the way to do it **when a source reports the figure**, for any model; until then nothing in the app
+changes. Reopen it if Claude Code adds a per-model field to the status line.
 
 ## Decision
 
