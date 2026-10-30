@@ -67,15 +67,16 @@ On `main`, `docs.yml` deploys this site to GitHub Pages when `docs/` or `apps/do
 
 ## Project layout
 
-| Path                         | What                                                      |
-| :--------------------------- | :-------------------------------------------------------- |
-| `Sources/TokenMeterCore`     | Readers, window maths, snapshot. No UI.                   |
-| `Tests/TokenMeterCoreTests`  | XCTest; fixtures go to a temp folder, never to real logs. |
-| `App/`, `Widget/`, `Shared/` | The app, the widget and the views they share.             |
-| `project.yml`                | XcodeGen definition of the Xcode project.                 |
-| `docs/`                      | This site's content, ADRs included.                       |
-| `apps/docusaurus/`           | The site itself.                                          |
-| `.agents/doc/`               | Rules for AI coding agents working in the repo.           |
+| Path                         | What                                                                                                                          |
+| :--------------------------- | :---------------------------------------------------------------------------------------------------------------------------- |
+| `Sources/TokenMeterCore`     | Readers, window maths, snapshot. No UI.                                                                                       |
+| `Tests/TokenMeterCoreTests`  | XCTest; fixtures go to a temp folder, never to real logs.                                                                     |
+| `App/`, `Widget/`, `Shared/` | The app, the widget and the views they share.                                                                                 |
+| `project.yml`                | XcodeGen definition of the Xcode project.                                                                                     |
+| `docs/`                      | This site's content, ADRs included.                                                                                           |
+| `apps/docusaurus/`           | The site itself.                                                                                                              |
+| `.agents/doc/`               | Rules for AI coding agents working in the repo.                                                                               |
+| `.claude/skills/`            | `widget-figma`: keeps the widget and Figma aligned ([ADR 0028](../adr/0028-a-skill-to-keep-the-widget-and-figma-aligned.md)). |
 
 :::tip[Provider log formats are not contracts]
 Decode tolerantly: optional fields, skip lines that do not parse, and add a test with the exact
