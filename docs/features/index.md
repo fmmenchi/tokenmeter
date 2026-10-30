@@ -22,6 +22,7 @@ are [ADRs](../adr), and its overview links them.
 
 | Feature | Date | Pages |
 | :------ | :--- | :---- |
+| _None._ |      |       |
 
 ## The pattern: from idea to implemented
 
