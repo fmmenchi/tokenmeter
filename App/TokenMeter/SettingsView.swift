@@ -36,7 +36,6 @@ struct SettingsView: View {
                 .font(.caption).foregroundStyle(.secondary)
             if meter.autoSetUpClaude {
                 switch meter.claudeStatusLine {
-                case .otherStatusLine: Button("Wrap it") { meter.wrapClaudeStatusLine() }
                 case .wrapped: Button("Restore original") { meter.restoreClaudeStatusLine() }
                 default: EmptyView()
                 }

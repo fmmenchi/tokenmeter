@@ -7,8 +7,16 @@ struct MenuContent: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
+            ForEach(meter.problems) { problem in
+                ProblemBanner(
+                    problem: problem, topicTitle: title(of: problem.topic), fix: meter.fixDescriptor(for: problem),
+                    state: meter.fixStates[problem.id], onFix: { meter.runFix(problem) },
+                    onDismiss: { meter.dismiss(problem) })
+            }
             if let snapshot = meter.snapshot {
-                ForEach(snapshot.providers, id: \.provider) { ProviderBlock(snapshot: $0) }
+                ForEach(snapshot.providers, id: \.provider) {
+                    ProviderBlock(snapshot: $0, problemCount: snapshot.problemCount(for: $0))
+                }
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Read \(snapshot.generatedAt, style: .relative) ago")
                     ForEach(snapshot.providers, id: \.provider) { provider in
@@ -20,13 +28,8 @@ struct MenuContent: View {
                     }
                 }
                 .font(.caption2).foregroundStyle(.secondary)
-                ForEach(snapshot.notices, id: \.self) { Text($0).font(.caption2).foregroundStyle(.orange) }
             } else {
                 ProgressView()
-            }
-            if !meter.widgetCanRead {
-                Text("No App Group: set DEVELOPMENT_TEAM in Local.xcconfig for the widget.")
-                    .font(.caption2).foregroundStyle(.orange)
             }
             Divider()
             HStack {
@@ -50,5 +53,10 @@ struct MenuContent: View {
         .padding(12)
         .frame(width: 300)
         .task { await meter.refresh() }
+    }
+
+    private func title(of topic: String) -> String {
+        meter.snapshot?.providers.first { $0.provider.rawValue == topic }?.title
+            ?? (topic == Problem.general ? "General" : topic)
     }
 }

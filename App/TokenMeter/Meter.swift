@@ -47,8 +47,8 @@ final class Meter {
     /// Lowest known remaining fraction across providers, for the menu bar label.
     var menuBarTitle: String {
         let fractions = snapshot?.providers.flatMap(\.windows).compactMap(\.remainingFraction) ?? []
-        guard let lowest = fractions.min() else { return "tokenmeter" }
-        return "\(Int((lowest * 100).rounded()))%"
+        let percent = fractions.min().map { "\(Int(($0 * 100).rounded()))%" } ?? "tokenmeter"
+        return problems.isEmpty ? percent : "\(percent)  ▲ \(problems.count)"
     }
 
     func refresh() async {
@@ -94,17 +94,6 @@ final class Meter {
         }
         setUpClaudeStatusLine()
         detectProblems()
-    }
-
-    /// Until the panel shows the banners (next step of the plan); then the fix in the panel replaces it.
-    func wrapClaudeStatusLine() {
-        guard let script = claudeScript else { return }
-        do {
-            _ = try ClaudeStatusLine.wrap(script: script)
-        } catch {
-            Self.log.error("Could not wrap the Claude status line: \(error.localizedDescription, privacy: .public)")
-        }
-        setUpClaudeStatusLine()
     }
 
     private var claudeScript: Data? {
