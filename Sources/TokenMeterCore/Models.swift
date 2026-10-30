@@ -62,8 +62,11 @@ public struct ReportedQuota: Codable, Equatable, Sendable {
     public let resetsAt: Date?
     /// When the provider reported this value (not when it was read).
     public let observedAt: Date?
+    /// The model this limit applies to, when it is not the provider's own (ADR 0034).
+    public let scope: String?
 
-    public init(usedPercent: Double, windowMinutes: Int?, resetsAt: Date?, observedAt: Date? = nil) {
+    public init(usedPercent: Double, windowMinutes: Int?, resetsAt: Date?, observedAt: Date? = nil, scope: String? = nil) {
+        self.scope = scope
         self.usedPercent = usedPercent
         self.windowMinutes = windowMinutes
         self.resetsAt = resetsAt

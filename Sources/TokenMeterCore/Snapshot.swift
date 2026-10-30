@@ -3,11 +3,18 @@ import Foundation
 public struct WindowSpec: Codable, Equatable, Sendable {
     public let name: String
     public let duration: TimeInterval
+    /// What the window applies to when it is not the provider as a whole: a model's name, from the data (ADR 0034). A
+    /// scoped window is a part of the unscoped window of the same name.
+    public let scope: String?
 
-    public init(name: String, duration: TimeInterval) {
+    public init(name: String, duration: TimeInterval, scope: String? = nil) {
         self.name = name
         self.duration = duration
+        self.scope = scope
     }
+
+    /// Unique among a provider's windows: the name, and the scope after a colon for a scoped one. Preferences use it.
+    public var id: String { scope.map { "\(name):\($0)" } ?? name }
 
     public static let session = WindowSpec(name: "5h", duration: 5 * 3600)
     public static let week = WindowSpec(name: "7d", duration: 7 * 24 * 3600)
@@ -126,8 +133,11 @@ extension Snapshot {
         let shownIDs = kept.isEmpty ? Array(order.prefix(1)) : kept
         let shown = shownIDs.compactMap { id in providers.first { $0.provider.rawValue == id } }.map { provider -> ProviderSnapshot in
             guard let chosen = preferences.windows(for: provider.provider.rawValue) else { return provider }
-            let windows = provider.windows.filter { chosen.contains($0.window.name) }
-            guard !windows.isEmpty else { return provider }
+            var windows = provider.windows.filter { chosen.contains($0.window.id) }
+            guard windows.contains(where: { $0.window.scope == nil }) else { return provider }
+            // A model's window is a part of the one of the same name: it never shows without it.
+            let kept = Set(windows.filter { $0.window.scope == nil }.map(\.window.name))
+            windows = windows.filter { $0.window.scope == nil || kept.contains($0.window.name) }
             return ProviderSnapshot(provider: provider.provider, title: provider.title, windows: windows,
                                     plan: provider.plan, quotaUpdatedAt: provider.quotaUpdatedAt,
                                     setupHint: provider.setupHint)
@@ -154,7 +164,7 @@ public enum SnapshotBuilder {
                 .reduce(TokenCounts()) { $0 + $1.tokens }
 
             if let reported = reported.first(where: {
-                guard let minutes = $0.windowMinutes, abs(Double(minutes) * 60 - spec.duration) < 60 else { return false }
+                guard $0.scope == nil, let minutes = $0.windowMinutes, abs(Double(minutes) * 60 - spec.duration) < 60 else { return false }
                 return $0.resetsAt.map { $0 > now } ?? true
             }) {
                 return WindowUsage(window: spec, tokens: tokens,
@@ -162,7 +172,7 @@ public enum SnapshotBuilder {
                                    source: .reported, resetsAt: reported.resetsAt, observedAt: reported.observedAt)
             }
             if tokens.total == 0, reported.contains(where: {
-                guard let minutes = $0.windowMinutes, abs(Double(minutes) * 60 - spec.duration) < 60 else { return false }
+                guard $0.scope == nil, let minutes = $0.windowMinutes, abs(Double(minutes) * 60 - spec.duration) < 60 else { return false }
                 return $0.resetsAt.map { $0 <= now } ?? false
             }) {
                 return WindowUsage(window: spec, tokens: tokens, remainingFraction: 1,
@@ -171,7 +181,15 @@ public enum SnapshotBuilder {
             return WindowUsage(window: spec, tokens: tokens, remainingFraction: nil,
                                source: .consumptionOnly, resetsAt: nil, observedAt: nil)
         }
-        return ProviderSnapshot(provider: provider, title: title, windows: usages, plan: plan,
+        // A model's limit is a window of its own, a part of the one with the same length (ADR 0034). It has no token count.
+        let scoped = reported.compactMap { quota -> WindowUsage? in
+            guard let scope = quota.scope, let minutes = quota.windowMinutes,
+                  let parent = windows.first(where: { abs(Double(minutes) * 60 - $0.duration) < 60 }) else { return nil }
+            return WindowUsage(window: WindowSpec(name: parent.name, duration: parent.duration, scope: scope),
+                               tokens: TokenCounts(), remainingFraction: max(0, 1 - quota.usedPercent / 100),
+                               source: .reported, resetsAt: quota.resetsAt, observedAt: quota.observedAt)
+        }
+        return ProviderSnapshot(provider: provider, title: title, windows: usages + scoped, plan: plan,
                                 quotaUpdatedAt: quotaUpdatedAt, setupHint: setupHint)
     }
 }

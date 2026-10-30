@@ -127,7 +127,7 @@ struct ProviderBlock: View {
                 }
                 if problemCount > 0 { NoticeChip(count: problemCount) }
             }
-            ForEach(snapshot.windows, id: \.window.name) { WindowRow(usage: $0.resolved(at: Date())) }
+            ForEach(snapshot.windows, id: \.window.id) { WindowRow(usage: $0.resolved(at: Date())) }
         }
     }
 }

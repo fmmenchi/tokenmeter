@@ -191,3 +191,54 @@ final class PlanNameTests: XCTestCase {
         XCTAssertEqual(result.providers[0].windows.map(\.window.name), ["7d"])
     }
 }
+
+final class ModelLimitTests: XCTestCase {
+    private let now = Date(timeIntervalSince1970: 1_000_000)
+
+    private func snapshot(_ reported: [ReportedQuota]) -> ProviderSnapshot {
+        SnapshotBuilder.providerSnapshot(provider: .claude, events: [], windows: [.session, .week], reported: reported, now: now)
+    }
+
+    func testAModelLimitIsAWindowOfItsOwnUnderTheOneOfTheSameLength() {
+        let week = ReportedQuota(usedPercent: 48, windowMinutes: 10080, resetsAt: now.addingTimeInterval(86_400), observedAt: now)
+        let model = ReportedQuota(usedPercent: 13, windowMinutes: 10080, resetsAt: now.addingTimeInterval(86_400),
+                                  observedAt: now, scope: "Fable")
+        let result = snapshot([week, model])
+        XCTAssertEqual(result.windows.map(\.window.id), ["5h", "7d", "7d:Fable"])
+        XCTAssertEqual(result.windows[1].remainingFraction ?? 0, 0.52, accuracy: 0.001, "a model's figure never becomes the week's")
+        XCTAssertEqual(result.windows[2].remainingFraction ?? 0, 0.87, accuracy: 0.001)
+        XCTAssertEqual(result.windows[2].window.scope, "Fable")
+    }
+
+    func testAModelLimitWithNoParentWindowIsLeftOut() {
+        let model = ReportedQuota(usedPercent: 13, windowMinutes: 1440, resetsAt: nil, scope: "Fable")
+        XCTAssertEqual(snapshot([model]).windows.map(\.window.id), ["5h", "7d"])
+    }
+
+    func testAScopedWindowRoundTripsAndAnOlderWindowHasNoScope() throws {
+        let spec = WindowSpec(name: "7d", duration: 604_800, scope: "Fable")
+        let data = try JSONEncoder().encode(spec)
+        XCTAssertEqual(try JSONDecoder().decode(WindowSpec.self, from: data), spec)
+        let older = Data(#"{"name":"7d","duration":604800}"#.utf8)
+        XCTAssertNil(try JSONDecoder().decode(WindowSpec.self, from: older).scope)
+    }
+
+    func testAModelWindowNeverShowsWithoutItsParent() {
+        let week = ReportedQuota(usedPercent: 48, windowMinutes: 10080, resetsAt: now.addingTimeInterval(86_400), observedAt: now)
+        let model = ReportedQuota(usedPercent: 13, windowMinutes: 10080, resetsAt: now.addingTimeInterval(86_400),
+                                  observedAt: now, scope: "Fable")
+        let provider = snapshot([week, model])
+        let all = Snapshot(generatedAt: now, providers: [provider])
+        let preferences = MemoryDisplayPreferences()
+
+        preferences.setWindows(["5h", "7d:Fable"], for: "claude")
+        XCTAssertEqual(all.applying(preferences).providers[0].windows.map(\.window.id), ["5h"],
+                       "the model was chosen but its week was not: it does not show")
+
+        preferences.setWindows(["5h", "7d"], for: "claude")
+        XCTAssertEqual(all.applying(preferences).providers[0].windows.map(\.window.id), ["5h", "7d"], "the model is off")
+
+        preferences.setWindows(["7d", "7d:Fable"], for: "claude")
+        XCTAssertEqual(all.applying(preferences).providers[0].windows.map(\.window.id), ["7d", "7d:Fable"])
+    }
+}
