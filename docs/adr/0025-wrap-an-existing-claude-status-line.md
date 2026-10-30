@@ -1,6 +1,6 @@
 # ADR 0025 — Wrap an existing Claude status line, on request
 
-Status: proposed (2026-10-29); amends [ADR 0024](./0024-the-app-sets-up-the-claude-status-line.md)
+Status: accepted (2026-10-30); amends [ADR 0024](./0024-the-app-sets-up-the-claude-status-line.md)
 
 ## Context
 

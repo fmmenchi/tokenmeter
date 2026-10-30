@@ -1,6 +1,6 @@
 # ADR 0024 — The app sets up the Claude status line itself
 
-Status: accepted (2026-10-29); amends [ADR 0019](./0019-install-sets-up-the-claude-status-line.md)
+Status: accepted (2026-10-29); amends [ADR 0019](./0019-install-sets-up-the-claude-status-line.md); amended by [ADR 0025](./0025-wrap-an-existing-claude-status-line.md) (another status line can be wrapped, on request)
 
 ## Context
 

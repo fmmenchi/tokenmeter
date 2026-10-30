@@ -49,6 +49,8 @@ Unlike the panel, the probe prints the raw token total including cache reads.
 | `~/.tokenmeter/providers.json`                                 | the app on first run, then you  | the app and the probe      |
 | `~/.tokenmeter/claude-statusline.sh`                           | `scripts/install-statusline.sh` | Claude Code (`statusLine`) |
 | `~/.tokenmeter/claude-statusline.json`                         | `claude-statusline.sh`          | the app and the probe      |
+| `~/.tokenmeter/claude/original-statusline.json`                | the app, on **Wrap it**         | the app, on **Restore**    |
+| `~/.tokenmeter/claude/statusline-wrapper.sh`                   | the app, on **Wrap it**         | Claude Code (`statusLine`) |
 | `~/Library/Group Containers/<TeamID>.tokenmeter/snapshot.json` | the app                         | the widget                 |
 | `Local.xcconfig`                                               | you (git-ignored)               | the Xcode build            |
 

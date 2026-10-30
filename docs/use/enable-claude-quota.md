@@ -46,10 +46,17 @@ By hand, the setting is:
 
 To undo it, delete those lines and turn the Settings switch off, or the next launch sets it again.
 
-:::warning[You already have a status line?]
-Wrap it instead of replacing it. Your command must keep printing its own text, and the script has
-to receive the same JSON on stdin. The shipped script prints the word `tokenmeter` and nothing
-else, so replacing yours with it removes whatever you see there now.
+:::tip[You already have a status line?]
+The app leaves it alone and says so in Settings. Click **Wrap it** there: your status line keeps
+printing exactly what it printed, and tokenmeter gets the same input beside it
+([ADR 0025](../adr/0025-wrap-an-existing-claude-status-line.md)). The app saves your original setting
+in `~/.tokenmeter/claude/original-statusline.json`, puts a wrapper in `~/.tokenmeter/claude/`, and
+writes `settings.json.tokenmeter.bak` first. **Restore original** puts it all back. If you later
+change `statusLine` by hand, the app does not overwrite it. It never wraps by itself.
+
+By hand, your command must keep printing its own text and pass the same JSON on stdin to
+`~/.tokenmeter/claude-statusline.sh`. That script prints only the word `tokenmeter`, so replacing your
+command with it removes whatever you see there now.
 :::
 
 ## Step 2: Trigger it
