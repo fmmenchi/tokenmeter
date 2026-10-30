@@ -17,8 +17,8 @@ A **problem** replaces the notice string:
 
 - `Problem` in `TokenMeterCore`: `id`, `topic`, `message`, optional `detail`, optional `fix`. The `topic` is a provider id
   (`claude`, `chatgpt`, or one from `providers.json`) or `general`, for what concerns the app itself.
-- `fix` is a closed set of kinds the app knows how to run: **wrap the status line** (`ClaudeStatusLine.wrap`) and **open
-  a guide page** (a docs URL). A problem without a fix shows no action.
+- `fix` is a closed set of kinds the app knows how to run: today only **wrap the status line**
+  (`ClaudeStatusLine.wrap`). A problem without a fix shows no fix button. `guide` is an optional docs path.
 - `Snapshot` carries `problems: [Problem]`, empty by default and absent from older files; `notices` is removed.
 - The app computes the problems, not the collector: another status line in use and projects that override it (topic
   `claude`), no App Group (topic `general`). Projects are checked at most every 10 minutes, as in ADR 0027.
@@ -31,18 +31,25 @@ A **problem** replaces the notice string:
 
 ### Actions
 
-A problem has **at most one fix**, and always Dismiss. The fixes are a closed set, and each kind has one label, so the
-label comes from the kind and is not stored in the problem:
+A problem has **at most one fix**, and always **Dismiss** and **Learn more**. The fixes are a closed set, and each kind has
+one label, so the label comes from the kind and is not stored in the problem. The only fix today is
+`wrapStatusLine`.
 
-| Kind             | Button     | What it does                                          | After it                               |
-| :--------------- | :--------- | :---------------------------------------------------- | :------------------------------------- |
-| `wrapStatusLine` | Wrap it    | runs `ClaudeStatusLine.wrap` now                      | the problem leaves at the next check   |
-| `guide(path)`    | Learn more | opens a docs page in the browser                      | nothing changes, the banner stays      |
-| Dismiss (always) | Dismiss    | hides this problem by its `id`, in the app's defaults | it returns only if its message changes |
+| Action     | Where         | What it does                                                                | After it                               |
+| :--------- | :------------ | :-------------------------------------------------------------------------- | :------------------------------------- |
+| Wrap it    | a fix         | runs `ClaudeStatusLine.wrap` now                                            | the problem leaves at the next check   |
+| Dismiss    | every problem | hides this problem by its `id`, in the app's defaults                       | it returns only if its message changes |
+| Learn more | every problem | opens two or three lines in the banner, and a link to a docs page (`guide`) | nothing changes; Hide closes the lines |
+
+**Learn more** says what the action does technically, from its kind: for Wrap it, which file it edits
+(`statusLine` in `~/.claude/settings.json`, pointed at a script in `~/.tokenmeter/claude/`), what is saved (the original
+setting, and `settings.json.tokenmeter.bak`) and how to undo it (Restore original). For a problem with no fix it says
+what is wrong and what to do. Only the link inside it opens the browser. The model therefore carries an optional `guide`
+(a docs path) beside the optional `fix`; a guide is not a kind of fix.
 
 A fix has four states: **ready**, **running** (its buttons are disabled and the label reads "Wrapping…"), **failed** (the
 error replaces the detail, the button reads "Try again", nothing was changed) and **done** (a quiet line, then the banner
-goes). A guide has no states. Fix all and Re-check are not part of the chosen design.
+goes). Fix all and Re-check are not part of the chosen design.
 
 ## Open
 
