@@ -26,8 +26,7 @@ The design lives in artifacts, in three kinds, and the flow goes one way:
   artboards. An approved proposal is not edited: a further change is a new canvas copied from it.
 - **A proposal is temporary.** Once its code is in and Views has been refreshed from the code, or when it is
   discarded, its canvas is deleted. Deleting is permanent and breaks the link, so it happens only when Fabio
-  asks, each time. What stays is the record in the commit that imported it: the request, the role map, the
-  questions and answers (and, for a discarded one, a line in the commit or the ADR that explains why).
+  asks, each time. No history of proposals is kept, by choice.
 
 Three skills replace the three of ADR 0028, with the same rules:
 
