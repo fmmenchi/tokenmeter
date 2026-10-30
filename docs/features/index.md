@@ -12,16 +12,16 @@ are [ADRs](../adr), and its overview links them.
 
 ## Implemented
 
-| Feature                                                                                                            | Date       | Pages                                                                                                                                                                      |
-| :----------------------------------------------------------------------------------------------------------------- | :--------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Alerts with a fix](./2026-10-30-alerts-with-a-fix/index.md): the app tells what is wrong and offers a fix         | 2026-10-30 | [Overview](./2026-10-30-alerts-with-a-fix/index.md), [Proposal](./2026-10-30-alerts-with-a-fix/proposal.md), [Implementation plan](./2026-10-30-alerts-with-a-fix/plan.md) |
-| [Provider cards](./2026-10-30-provider-cards/index.md): a card per provider, the windows you choose, in your order | 2026-10-30 | [Overview](./2026-10-30-provider-cards/index.md), [Proposal](./2026-10-30-provider-cards/proposal.md), [Implementation plan](./2026-10-30-provider-cards/plan.md)          |
+| Feature                                                                                                                          | Date       | Pages                                                                                                                                                                            |
+| :------------------------------------------------------------------------------------------------------------------------------- | :--------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Alerts with a fix](./2026-10-30-alerts-with-a-fix/index.md): the app tells what is wrong and offers a fix                       | 2026-10-30 | [Overview](./2026-10-30-alerts-with-a-fix/index.md), [Proposal](./2026-10-30-alerts-with-a-fix/proposal.md), [Implementation plan](./2026-10-30-alerts-with-a-fix/plan.md)       |
+| [Provider cards](./2026-10-30-provider-cards/index.md): a card per provider, the windows you choose, in your order               | 2026-10-30 | [Overview](./2026-10-30-provider-cards/index.md), [Proposal](./2026-10-30-provider-cards/proposal.md), [Implementation plan](./2026-10-30-provider-cards/plan.md)                |
+| [Hide a provider](./2026-10-30-provider-visibility/index.md): an eye button takes a provider's card off the panel and the widget | 2026-10-30 | [Overview](./2026-10-30-provider-visibility/index.md), [Proposal](./2026-10-30-provider-visibility/proposal.md), [Implementation plan](./2026-10-30-provider-visibility/plan.md) |
 
 ## In design and build
 
-| Feature                                                                                                                          | Date       | Pages                                                                                                                                                                            |
-| :------------------------------------------------------------------------------------------------------------------------------- | :--------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Hide a provider](./2026-10-30-provider-visibility/index.md): an eye button takes a provider's card off the panel and the widget | 2026-10-30 | [Overview](./2026-10-30-provider-visibility/index.md), [Proposal](./2026-10-30-provider-visibility/proposal.md), [Implementation plan](./2026-10-30-provider-visibility/plan.md) |
+| Feature | Date | Pages |
+| :------ | :--- | :---- |
 
 ## The pattern: from idea to implemented
 

@@ -88,7 +88,7 @@ with a backup ([ADR 0033](../adr/0033-add-the-claude-integration-to-an-existing-
 ## Display preferences
 
 The order of the cards and the windows each shows are preferences of the app, not of `providers.json`
-([ADR 0035](../adr/0035-provider-cards-order-and-windows-are-preferences.md)).
+([ADR 0035](../adr/0035-provider-cards-order-and-windows-are-preferences.md), [ADR 0036](../adr/0036-a-provider-can-be-hidden.md)).
 
 | Type                         | What it is                                                                                      |
 | :--------------------------- | :---------------------------------------------------------------------------------------------- |

@@ -103,7 +103,10 @@ Each provider is a card in the panel and in the widget. In **Settings, Providers
   there.
 - **Choose the windows** a card shows: **5 hours**, **Weekly** or **Both** (a provider with other windows lists them
   instead). **Both** is the default, and one window always stays.
-- The percentage in the menu bar counts only the windows you show.
+- **Hide** a provider with the eye at the end of its row. A hidden provider has no card in the panel or the widget and is
+  not in the menu-bar percentage; its row stays, dimmed, and the eye shows it again with its place and its windows as they
+  were. One provider always stays shown. A hidden provider's problems still appear in the panel.
+- The percentage in the menu bar counts only the providers and windows you show.
 
 The order and the choice are kept by the app, per provider, and never written to `providers.json`. A provider you add
 goes last. Both the light and the dark appearance are respected.

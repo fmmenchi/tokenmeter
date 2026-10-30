@@ -9,10 +9,10 @@ date: 2026-10-30
 
 An eye button in Settings takes a provider's card off the panel and the widget, and puts it back.
 
-|        |                                 |
-| :----- | :------------------------------ |
-| Date   | 2026-10-30                      |
-| Status | in design: nothing is built yet |
+|        |                                                                 |
+| :----- | :-------------------------------------------------------------- |
+| Date   | 2026-10-30                                                      |
+| Status | implemented, 2026-10-30: built and tested; not yet seen running |
 
 ## Intent
 
@@ -23,11 +23,11 @@ every provider in `providers.json`.
 
 ## The nucleus
 
-| Part                | Page                                                   | Status                 |
-| :------------------ | :----------------------------------------------------- | :--------------------- |
-| Proposal            | [Proposal](./proposal.md)                              | chosen: the eye button |
-| Implementation plan | [Implementation plan](./plan.md)                       | proposed               |
-| Decisions           | [ADR 0036](../../adr/0036-a-provider-can-be-hidden.md) | accepted               |
+| Part                | Page                                                   | Status                          |
+| :------------------ | :----------------------------------------------------- | :------------------------------ |
+| Proposal            | [Proposal](./proposal.md)                              | built as chosen: the eye button |
+| Implementation plan | [Implementation plan](./plan.md)                       | done, steps 1 to 4              |
+| Decisions           | [ADR 0036](../../adr/0036-a-provider-can-be-hidden.md) | accepted                        |
 
 ## Related
 
