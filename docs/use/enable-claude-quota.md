@@ -47,11 +47,11 @@ By hand, the setting is:
 To undo it, delete those lines and turn the Settings switch off, or the next launch sets it again.
 
 :::tip[You already have a status line?]
-The app leaves it alone and says so in Settings. Click **Wrap it** there: your status line keeps
+The app leaves it alone and lists it as a problem in the panel. Click **Wrap it** there: your status line keeps
 printing exactly what it printed, and tokenmeter gets the same input beside it
 ([ADR 0025](../adr/0025-wrap-an-existing-claude-status-line.md)). The app saves your original setting
 in `~/.tokenmeter/claude/original-statusline.json`, puts a wrapper in `~/.tokenmeter/claude/`, and
-writes `settings.json.tokenmeter.bak` first. **Restore original** puts it all back. If you later
+writes `settings.json.tokenmeter.bak` first. **Restore original** in Settings puts it all back. If you later
 change `statusLine` by hand, the app does not overwrite it. It never wraps by itself.
 
 By hand, your command must keep printing its own text and pass the same JSON on stdin to
@@ -68,10 +68,10 @@ to the account, so a session in another project refreshes it, but if you only wo
 bars stay frozen.
 
 In the background, at launch and then at most every 10 minutes, tokenmeter looks, read only, at the
-projects you used in the last 30 days. It puts a small orange line on the widget, in the panel and in
-Settings naming the ones that override it; nothing blocks
+projects you used in the last 30 days. It adds a problem to the panel naming the ones that override it, and a chip with the count
+beside Claude in the widget; nothing blocks
 ([ADR 0026](../adr/0026-warn-when-a-project-overrides-the-status-line.md),
-[ADR 0027](../adr/0027-notices-in-the-snapshot.md)). It never writes to a
+[ADR 0030](../adr/0030-problems-with-a-topic-and-a-fix.md)). It never writes to a
 project: a tracked `.claude/settings.json` would carry a path from your home into a shared repository.
 To fix one, make that project's command also pipe its input to the tokenmeter script. In
 `.claude/settings.local.json`, which git ignores, that is:

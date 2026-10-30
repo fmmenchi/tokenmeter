@@ -6,8 +6,7 @@ sidebar_position: 3
 
 # Alerts with a fix, implementation plan
 
-How the app will detect problems, show them and fix them, and the order in which it gets built. Nothing here is
-written yet: the decisions are [ADR 0030](../../adr/0030-problems-with-a-topic-and-a-fix.md) (what a problem is, how it
+How the app will detect problems, show them and fix them, and the order in which it gets built. The code follows it, step by step: the decisions are [ADR 0030](../../adr/0030-problems-with-a-topic-and-a-fix.md) (what a problem is, how it
 shows and what its actions do) and [ADR 0031](../../adr/0031-problems-come-from-the-app-and-from-provider-integrations.md)
 (where the code lives). This page is the map from them to commits.
 
@@ -255,11 +254,10 @@ not build, so they are built with `xcodebuild` and looked at.
 | The widget reads `Snapshot.problems` and computes nothing. | The widget stays a drawing of a snapshot (ADR 0001). |
 | The common code names no provider; an integration may.     | The same rule as ADR 0015 to 0018.                   |
 
-## Open
+## Settled
 
-The open points of ADR 0030 are settled before the code that needs them: how long Dismiss lasts (before step 5), whether
-**Restore original** stays in Settings, and whether the `general` problems are counted in the widget (both before
-step 8).
+The open points of ADR 0030 were settled while building, with the defaults it proposed: **Restore original** stays in
+Settings, the `general` problems are not counted in the widget, and Dismiss lasts until the message changes.
 
 ## Related
 

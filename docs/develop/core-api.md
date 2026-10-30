@@ -56,13 +56,34 @@ let one = Collector(sources: [mySource]).snapshot(now: date) // your own list, f
 
 | Type                 | Fields                                                                                |
 | :------------------- | :------------------------------------------------------------------------------------ |
-| `Snapshot`           | `generatedAt`, `providers: [ProviderSnapshot]`.                                       |
+| `Snapshot`           | `generatedAt`, `providers: [ProviderSnapshot]`, `problems: [Problem]`.                |
 | `ProviderSnapshot`   | `provider`, `title`, `windows: [WindowUsage]`, `plan`, `quotaUpdatedAt`, `setupHint`. |
 | `WindowUsage`        | `window`, `tokens`, `remainingFraction?`, `source`, `resetsAt?`, `observedAt?`.       |
 | `WindowUsage.Source` | `reported`, `reset`, `consumptionOnly`.                                               |
 
 `WindowUsage.resolved(at:)` returns the window as it reads at a given time. The JSON shape is in
-[Commands and Files](./commands.md#the-snapshot); older snapshots without `title` still decode.
+[Commands and Files](./commands.md#the-snapshot); older snapshots without `title` or `problems` still decode.
+
+## Problems
+
+What the app tells the person is a `Problem`, not a string
+([ADR 0030](../adr/0030-problems-with-a-topic-and-a-fix.md),
+[ADR 0031](../adr/0031-problems-come-from-the-app-and-from-provider-integrations.md)). Everything is in
+`Sources/TokenMeterCore/Problems/`.
+
+| Type                  | What it is                                                                                                          |
+| :-------------------- | :------------------------------------------------------------------------------------------------------------------ |
+| `Problem`             | `id`, `topic` (a provider id or `general`), `message`, `detail?`, `explanation?`, `fix?`, `guide?`.                 |
+| `ProblemKind`         | One kind of problem: id, topic, summary, explanation, guide and fix. `problem(...)` makes a `Problem` of that kind. |
+| `ProviderIntegration` | One per provider that needs one: its `kinds`, its `fixes`, `problems(in:)` and `run(fix:in:)`.                      |
+| `Integrations`        | The registry by id; `census` lists every kind of the app and of each integration.                                   |
+| `ProblemDetector`     | `detect(...)` gathers the problems of the app and of each configured integration; `merge(...)` orders and dedupes.  |
+| `FixRunner`           | Runs a problem's fix through the integration that declared it; answers `FixResult.done` or `.failed(reason)`.       |
+| `Dismissals`          | What was hidden, by id and message, until the message changes. `DefaultsDismissals` keeps it in the app's defaults. |
+
+`providers.json` names a provider's integration in an optional `integration` field; the registry maps it to code, and
+an unknown id is a `general` problem, not a crash. An existing file whose `claude` entry lacks the field gets it once,
+with a backup ([ADR 0033](../adr/0033-add-the-claude-integration-to-an-existing-providers-file.md)).
 
 ## Sharing with the widget
 
@@ -78,6 +99,8 @@ let one = Collector(sources: [mySource]).snapshot(now: date) // your own list, f
   ([Configure Providers](../use/configure-providers.md)).
 - **A log the format cannot describe**: implement `ProviderSource`
   ([Add a Provider](./add-a-provider.md)).
+- **A problem or a fix for a provider**: implement `ProviderIntegration`
+  ([Add a Provider](./add-a-provider.md#step-4-optional-report-its-problems)).
 
 ## Related
 

@@ -58,6 +58,16 @@ swift run tokenmeter-probe
 
 The probe prints each provider's windows from the same `Collector` the app uses.
 
+## Step 4 (optional): Report its problems
+
+A provider that needs something set up, such as Claude's status line, can report problems and offer a fix. Implement
+`ProviderIntegration` in `Sources/TokenMeterCore/Problems/`: declare each `ProblemKind` it can report (topic,
+summary, explanation, guide, fix), report them in `problems(in:)`, and run its fixes in `run(fix:in:)`. Register it
+with one line in the list the app passes to `Integrations`, and name it in the provider's `integration` field in
+`providers.json`. The detector, the panel and the widget do not change
+([ADR 0031](../adr/0031-problems-come-from-the-app-and-from-provider-integrations.md)). Test it on a throwaway home
+folder, as `ClaudeIntegrationTests` does.
+
 ## Related
 
 - [Data Sources](./data-sources.md)
