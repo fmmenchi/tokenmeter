@@ -19,6 +19,11 @@ says that a window applies to a model.
   `scope.model.display_name` (and a `scope.surface`). `weekly_scoped_shares` gives its allowance as a percent of the
   weekly limit and `limit_index` points at the entry. The same object has `seven_day_opus`, `seven_day_sonnet` and others.
   The list shape is not tied to any model: a new model is a new entry, not a new field.
+- The open-source menu-bar app [OpenUsage](https://github.com/robinebers/openusage) reads the same list from the live endpoint
+  (`GET /api/oauth/usage` with an OAuth bearer token) and picks a model's row from `limits` by
+  `kind = weekly_scoped` and `scope.model.display_name`. Its code notes that the old fixed keys (`seven_day_<model>`) now
+  return null, so the list is the only reliable shape. It needs a token with the `user:profile` scope, which it obtains with
+  its own sign-in; the endpoint is undocumented.
 - `fetchedAtMs` says when it was written. On this Mac it is **15 October, 15 days old**, so the copy is only as fresh as
   Claude Code's last fetch, and nothing in the status line refreshes it.
 - It reads no credential: it is a cache of figures, and tokenmeter already reads another part of the same file for the
@@ -49,7 +54,8 @@ The solution is **cross-model**: no model, provider or plan is named in the comm
 - The snapshot gains `scope` and `shareOfParent` on a window, absent from older files; an older widget ignores them.
 - The first Claude bar for a model is as old as Claude Code's last usage fetch. On this Mac that is far older than a
   reset period, so it would read as a reset. Showing it honestly is the point; making it fresher would mean fetching
-  usage ourselves, which needs the login token, and tokenmeter will not read credentials.
+  usage ourselves, which needs an OAuth token on an undocumented endpoint. tokenmeter does not do that: it reads no
+  credentials and has no sign-in of its own. If that is ever wanted it is a separate ADR.
 - Joining `weekly_scoped_shares` (the "up to 50%") by `limit_index` is not in the list-reading rule above and is left to
   the design: either a second field read by position, or omitted in the first version.
 - Not decided here: how it looks (a proposal first, [ADR 0032](./0032-a-features-section-groups-proposal-plan-and-decisions.md)).
