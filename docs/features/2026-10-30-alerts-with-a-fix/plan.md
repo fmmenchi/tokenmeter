@@ -222,7 +222,8 @@ flowchart TD
   S7["7. Meter: schedule, filter,<br/>state of each fix"]
   S8["8. Surfaces: NoticeChip,<br/>banners, menu bar, widget"]
   S9["9. Docs"]
-  S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9
+  S10["10. Close: design-export<br/>(Views and Design System),<br/>delete the proposal"]
+  S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9 --> S10
 ```
 
 | Step | Adds                                                                      | Tests that show it works                                          | Gate                                          |
@@ -236,8 +237,11 @@ flowchart TD
 | 7    | `Meter.swift`                                                             | built, the schedule and the state of a fix by hand                | `pnpm run check` and `xcodebuild`             |
 | 8    | `NoticeChip.swift`, `ProblemBanner.swift`, the widget and the menu bar    | built, then looked at on screen                                   | `pnpm run check`, `xcodebuild` and the screen |
 | 9    | the docs: commands, Core API, troubleshooting                             | the docs build                                                    | `pnpm run check`                              |
+| 10   | the Views and the Design System artifacts, the feature's status           | the Views canvas shows the new screens, as built                  | proposal canvas deleted when Fabio asks       |
 
-Each step is one commit, three files at most, and leaves the gate green. Steps 7 and 8 are the only ones the gate does
+Steps 1 to 9 are one commit each, three files at most, and leave the gate green. Step 10 is the close: `design-export`
+refreshes the Views canvas and the Design System with the screens as built (with a fresh screenshot), the status
+becomes _Implemented_, and the proposal canvas is deleted when Fabio asks. Steps 7 and 8 are the only ones the gate does
 not build, so they are built with `xcodebuild` and looked at.
 
 ## Rules that keep it modular
