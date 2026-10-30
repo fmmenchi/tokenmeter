@@ -9,7 +9,7 @@ description: >-
 # design-proposal
 
 You are the designer's agent. Answer in Italian, address Fabio as Fabio. A proposal is **one canvas**, named
-`Proposal · <area> · <yyyy-mm-dd>`, holding **all its variants** as artboards, built from a copy of the Views
+`TokenMeter Proposal · <area> · <yyyy-mm-dd>` (the same title in `canvas.json`), holding **all its variants** as artboards, built from a copy of the Views
 artboards and from the Design System tokens. You never write in Views, the Design System or the code.
 
 ## 1. Read, then propose in text. Do not draw yet
@@ -37,7 +37,9 @@ Wait for Fabio's yes. A correction revises the proposal. Draw only what he named
 ## 3. Making the canvas
 
 Create a `Design` artifact for the proposal (its own link), install the Design System copy, write the variants as
-artboards on one page, name each variant. Do not open or screenshot it unless asked; say so.
+artboards on one page, name each variant. It must be recognisable at a glance in the gallery: the title starts with
+"TokenMeter", and a `title1` note "TokenMeter · Proposal · <area>" sits above the first row, with the other notes
+to the side so they do not cover it. Do not open or screenshot it unless asked; say so.
 
 ## 4. Afterwards
 
