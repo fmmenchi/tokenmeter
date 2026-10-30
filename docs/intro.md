@@ -61,9 +61,10 @@ For someone who builds, extends or ships it.
 3. [Concepts](./develop/concepts.md): the philosophy and how a window gets its state.
 4. [Data Sources](./develop/data-sources.md): where each number comes from and what is not seen.
 5. [Add a Provider](./develop/add-a-provider.md): in Swift, when the JSON file cannot say it.
-6. [Commands and Files](./develop/commands.md): commands, paths and the snapshot format.
-7. [Package and Distribute](./develop/package-and-distribute.md): Developer ID signing and notarization.
-8. [Contribute](./develop/contribute.md).
+6. [Implement a Feature](./develop/implement-a-feature.md): proposal, ADR, plan, then code.
+7. [Commands and Files](./develop/commands.md): commands, paths and the snapshot format.
+8. [Package and Distribute](./develop/package-and-distribute.md): Developer ID signing and notarization.
+9. [Contribute](./develop/contribute.md).
 
 ## 🧩 Features
 

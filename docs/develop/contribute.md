@@ -18,8 +18,8 @@ repositories of this account, so the habits carry over.
 A structural decision gets an ADR in `docs/adr/NNNN-title.md` before any code: status line,
 context, decision, consequences. If it replaces an earlier one, say which parts it supersedes.
 Existing ADRs are in [Decisions](../adr).
-A feature that is designed and then built is written as a nucleus of its proposal, its implementation plan and its
-ADRs, in [Features](../features/index.md).
+A feature that is designed and then built follows [the pattern in Features](../features/index.md): proposal, ADR,
+implementation plan, then code, with the three kept together in one folder.
 
 ## Step 2: Branch
 

@@ -22,6 +22,39 @@ are [ADRs](../adr), and its overview links them.
 | :--------------------------------------------------------------------------------------------------------- | :--------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [Alerts with a fix](./2026-10-30-alerts-with-a-fix/index.md): the app tells what is wrong and offers a fix | 2026-10-30 | [Overview](./2026-10-30-alerts-with-a-fix/index.md), [Proposal](./2026-10-30-alerts-with-a-fix/proposal.md), [Implementation plan](./2026-10-30-alerts-with-a-fix/plan.md) |
 
+## The pattern: from idea to implemented
+
+Every feature goes through the same steps, and each step leaves something in the feature's folder. The order does not
+change.
+
+```mermaid
+flowchart TD
+  A["Idea"] --> B["design-proposal<br/>a short text proposal, then Fabio's yes"]
+  B --> C["A proposal canvas<br/>with the variants"]
+  C --> D{"Fabio chooses"}
+  D --> E["The other variants are deleted<br/>when Fabio asks"]
+  E --> F["Feature folder:<br/>overview and proposal with screenshots<br/>status: in design"]
+  F --> G["ADR<br/>proposed, then accepted"]
+  G --> H["Implementation plan<br/>diagrams, ordered commits, tests"]
+  H --> I["Build it, one commit per step<br/>design-import and the gates"]
+  I --> J["design-export refreshes the Views<br/>the proposal canvas is deleted when Fabio asks"]
+  J --> K["Status: implemented<br/>the row moves to Implemented<br/>the Use and Develop pages are updated"]
+```
+
+| Step                  | Leaves                                                                             | In                                   |
+| :-------------------- | :--------------------------------------------------------------------------------- | :----------------------------------- |
+| Proposal              | the chosen design, drawn in a canvas named `TokenMeter Proposal · <area> · <date>` | Claude (private, temporary)          |
+| Overview and proposal | `index.md` and `proposal.md`, with a screenshot of the chosen design               | `docs/features/<yyyy-mm-dd>-<name>/` |
+| Decision              | the ADR, written before the plan                                                   | `docs/adr/`                          |
+| Plan                  | `plan.md` with diagrams, the order of commits and the tests                        | the feature's folder                 |
+| Code                  | one commit per step of the plan, each leaving the gate green                       | the repository                       |
+| Done                  | the status in the overview, the row in this list, the Use and Develop pages        | `docs/`                              |
+
+[Implement a Feature](../develop/implement-a-feature.md) says what to do and run at each step.
+
+The skills that do the design work are `design-proposal` (a proposal), `design-import` (a proposal into the code) and
+`design-export` (the code into the design artifacts); they live in `.claude/skills/`.
+
 ## How a feature is written
 
 | Part                    | Answers                                                                                                              | File          |
