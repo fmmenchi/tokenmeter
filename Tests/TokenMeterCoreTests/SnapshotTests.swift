@@ -119,4 +119,18 @@ final class PlanNameTests: XCTestCase {
         let older = Data(#"{"generatedAt":"1970-01-01T00:00:00Z","providers":[]}"#.utf8)
         XCTAssertEqual(try decoder.decode(Snapshot.self, from: older).notices, [])
     }
+
+    func testProblemsRoundTripAndAnOlderSnapshotHasNone() throws {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let base = Snapshot(generatedAt: Date(timeIntervalSince1970: 0), providers: [])
+        XCTAssertEqual(base.problems, [])
+        let problem = Problem(id: "claude.x", topic: "claude", message: "m", fix: "wrapStatusLine")
+        let withProblem = base.with(problems: [problem])
+        XCTAssertEqual(try decoder.decode(Snapshot.self, from: encoder.encode(withProblem)).problems, [problem])
+        let older = Data(#"{"generatedAt":"1970-01-01T00:00:00Z","providers":[],"notices":["old"]}"#.utf8)
+        XCTAssertEqual(try decoder.decode(Snapshot.self, from: older).problems, [])
+    }
 }
