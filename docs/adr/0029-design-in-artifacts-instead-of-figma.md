@@ -22,7 +22,7 @@ The design lives in artifacts, in three kinds, and the flow goes one way:
   from memory. A value the code does not state (the system colours, for example) is marked as such.
 - **Views** (one `Design` canvas, page `Views`, holding every view): what the app looks like now, built from the
   design system. Each view is an artboard of that one canvas; the tool keeps each artboard in its own file inside it.
-- **One canvas per proposal**, named `Proposal · <area> · <yyyy-mm-dd>`, started from a copy of the Views
+- **One canvas per proposal**, named `TokenMeter Proposal · <area> · <yyyy-mm-dd>` (so it is recognisable in the gallery), started from a copy of the Views
   artboards. An approved proposal is not edited: a further change is a new canvas copied from it.
 - **A proposal is temporary.** Once its code is in and Views has been refreshed from the code, or when it is
   discarded, its canvas is deleted. Deleting is permanent and breaks the link, so it happens only when Fabio
