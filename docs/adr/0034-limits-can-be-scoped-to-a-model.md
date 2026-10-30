@@ -1,6 +1,6 @@
 # ADR 0034 — Limits can be scoped to a model, for every provider
 
-Status: rejected (2026-10-30), not built: the only source without credentials can be days old, and a stale per-model bar says nothing; extends [ADR 0007](./0007-expired-window-reads-as-reset.md), [ADR 0015](./0015-provider-contract.md) and [ADR 0016](./0016-providers-declared-in-a-config-file.md)
+Status: proposed (2026-10-30), reopened: Claude Code's own `/usage` gives a fresh figure without tokenmeter handling a credential; extends [ADR 0007](./0007-expired-window-reads-as-reset.md), [ADR 0015](./0015-provider-contract.md) and [ADR 0016](./0016-providers-declared-in-a-config-file.md)
 
 ## Context
 
@@ -29,16 +29,24 @@ says that a window applies to a model.
 - It reads no credential: it is a cache of figures, and tokenmeter already reads another part of the same file for the
   plan ([ADR 0012](./0012-show-the-plan-name.md)).
 
-## Why it was rejected
+## Why it is possible after all
 
-The local copy of the usage response is only as fresh as Claude Code's last usage fetch (15 days old on the author's Mac),
-so a per-model bar would be a figure nobody can trust, and the fresh one needs a login token that tokenmeter does not
-handle. Fabio decided it does not make sense to show it. The design below stays on record for the day a source
-reports a per-model limit that tokenmeter can read without credentials, for any model.
+The first verdict was that the figure could only be fresh with a login token. That was wrong. Claude Code fetches and
+writes the usage copy itself whenever it runs `/usage`, and `/usage` works non-interactively:
+
+- `claude -p "/usage"` prints the session, the week and each model's week ("Current week (Fable): 13% used"), and refreshes
+  `cachedUsageUtilization` in `~/.claude.json`. Claude Code reads its own credentials; tokenmeter never sees them.
+- Measured on this Mac: about 5 seconds; with `--no-session-persistence --no-chrome` the CPU drops from about 15 seconds to
+  about 4. The write is throttled to one a minute, and without `--no-session-persistence` each run leaves a session file.
+- It is not a model call: it printed figures and no answer, and the run left no request in the account's own count (not
+  verified against the plan's usage).
+
+So tokenmeter can ask Claude Code for the figure and read the structured list, instead of waiting for the person to open
+`/usage`. The API stays out: no sign-in, no token, no client identity.
 
 The API was considered as an opt-in setting for the per-model rows and dropped. Its sign-in needs a client identity
 tokenmeter does not have; the open-source app that does this uses Claude Code's own client id (found in Claude Code's
-binary) and a `claude-cli` user agent, which is impersonation. Fabio decided to leave the API alone.
+binary) and a `claude-cli` user agent, which is impersonation. Fabio decided to leave the API alone; asking Claude Code to do it is not that.
 
 ## Decision
 
@@ -61,6 +69,11 @@ The solution is **cross-model**: no model, provider or plan is named in the comm
   limit and is not part of this decision.
 
 ## Consequences
+
+- **A refresh is a run of `claude`**: only on demand and on a slow timer (not every minute), in a folder of its own
+  (`~/.tokenmeter/claude/`), with `--no-session-persistence --no-chrome`, and only when the app can find the CLI. Where it
+  cannot, or it fails, the figure stays as old as the copy and says so (ADR 0008). The cadence and the lookup of the CLI
+  are for the plan.
 
 - The snapshot gains `scope` and `shareOfParent` on a window, absent from older files; an older widget ignores them.
 - The first Claude bar for a model is as old as Claude Code's last usage fetch. On this Mac that is far older than a
