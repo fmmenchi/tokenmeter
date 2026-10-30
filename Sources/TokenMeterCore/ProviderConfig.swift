@@ -33,6 +33,33 @@ public struct ProviderConfigFile: Decodable, Sendable {
         return (try? Data((DefaultProviders.json + "\n").utf8).write(to: url, options: .withoutOverwriting)) != nil
     }
 
+    public enum MigrationOutcome: Equatable, Sendable {
+        case migrated
+        /// Nothing to add, or the file is not one this rule applies to; it was left as it is.
+        case untouched
+    }
+
+    /// Adds `"integration": "claude-status-line"` to the `claude` entry of an existing file that lacks the key
+    /// (ADR 0033). The only change the app makes to a file that is already there; the original is kept as `.bak`.
+    @discardableResult
+    public static func addClaudeIntegration(to url: URL = defaultURL) -> MigrationOutcome {
+        guard let data = try? Data(contentsOf: url),
+              var object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
+              object["version"] as? Int == 1,
+              var providers = object["providers"] as? [[String: Any]],
+              let index = providers.firstIndex(where: { $0["id"] as? String == "claude" && $0["integration"] == nil })
+        else { return .untouched }
+        providers[index]["integration"] = "claude-status-line"
+        object["providers"] = providers
+        let backup = url.appendingPathExtension("tokenmeter.bak")
+        guard let output = try? JSONSerialization.data(
+            withJSONObject: object, options: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]) else { return .untouched }
+        try? FileManager.default.removeItem(at: backup)
+        guard (try? FileManager.default.copyItem(at: url, to: backup)) != nil,
+              (try? (output + Data("\n".utf8)).write(to: url, options: .atomic)) != nil else { return .untouched }
+        return .migrated
+    }
+
     static func decode(_ data: Data, origin: String) throws -> ProviderConfigFile {
         let file: ProviderConfigFile
         do {

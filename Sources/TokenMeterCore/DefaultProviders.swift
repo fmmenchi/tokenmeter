@@ -10,6 +10,7 @@ enum DefaultProviders {
           "title": "Claude",
           "windows": [300, 10080],
           "setupHint": "Claude quota: status line has not run yet",
+          "integration": "claude-status-line",
           "log": {
             "root": "~/.claude/projects",
             "contains": "\"usage\":",
