@@ -14,22 +14,19 @@ one widget that is far more than the job needs.
 Three small skills, one file each, in `.claude/skills/` of this repository so they are versioned with
 the views they describe. No subagents, no scripts.
 
-The names carry a `tokenmeter-` prefix, so they cannot collide with the Figma plugin's own skills or
-with those of other projects.
-
-- **`tokenmeter-figma-proposal`** reads the SwiftUI views, the states in the docs and, if a Figma link is given,
+- **`figma-proposal`** reads the SwiftUI views, the states in the docs and, if a Figma link is given,
   the Figma file. It writes a proposal of ten lines at most (direction, what is created or changed, what
   is not touched, differences, what is unknown) and **waits for a yes**. A correction revises it, a no
   ends it, and a yes covers that proposal only.
-- **`tokenmeter-figma-export`** (code to Figma) builds the views the proposal names and their states in Figma. It runs only
+- **`figma-export`** (code to Figma) builds the views the proposal names and their states in Figma. It runs only
   after a yes, and takes every value from the code at that moment, never from a copy.
-- **`tokenmeter-figma-import`** (Figma to code) changes the SwiftUI views for the differences the proposal listed.
+- **`figma-import`** (Figma to code) changes the SwiftUI views for the differences the proposal listed.
   A design that needs data the snapshot lacks stops there: it needs an ADR.
 - **Two sections in the Figma file.** **Views** is what the code looks like now, written only by
-  `tokenmeter-figma-export`. **Proposals** is what could change, written only by `tokenmeter-figma-proposal`, additive, one set
+  `figma-export`. **Proposals** is what could change, written only by `figma-proposal`, additive, one set
   of frames per proposal. An implemented proposal is exported to Views and marked `✓` in Proposals.
 - **No fixed list of views.** There are the widget, Settings and the panel today and there will be more, so
-  `tokenmeter-figma-proposal` finds the views in the source and says which it takes in scope and which it leaves.
+  `figma-proposal` finds the views in the source and says which it takes in scope and which it leaves.
 - The code is the source: when the two disagree and nobody says otherwise, Figma is the copy.
 - The Figma work itself is done with the Figma skills already installed (`figma-use`,
   `figma-generate-design`, `figma-swiftui`, `figma-design-to-code`).
