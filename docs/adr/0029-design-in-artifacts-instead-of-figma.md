@@ -23,8 +23,11 @@ The design lives in artifacts, in three kinds, and the flow goes one way:
 - **Views** (one `Design` canvas, page `Views`, holding every view): what the app looks like now, built from the
   design system. Each view is an artboard of that one canvas; the tool keeps each artboard in its own file inside it.
 - **One canvas per proposal**, named `Proposal · <area> · <yyyy-mm-dd>`, started from a copy of the Views
-  artboards. An approved or imported proposal is never edited: a further change is a new canvas copied from it,
-  and the old one is renamed with a leading `✓` once its code is in.
+  artboards. An approved proposal is not edited: a further change is a new canvas copied from it.
+- **A proposal is temporary.** Once its code is in and Views has been refreshed from the code, or when it is
+  discarded, its canvas is deleted. Deleting is permanent and breaks the link, so it happens only when Fabio
+  asks, each time. What stays is the record in the commit that imported it: the request, the role map, the
+  questions and answers (and, for a discarded one, a line in the commit or the ADR that explains why).
 
 Three skills replace the three of ADR 0028, with the same rules:
 
@@ -35,7 +38,7 @@ Three skills replace the three of ADR 0028, with the same rules:
   the code at that moment.
 - **`design-import`** reads an approved proposal, maps it to the code **by role** (`data-component` and
   `data-state` carry the SwiftUI type and state), asks once, implements, runs the gates, then runs the export so
-  Views matches the code again.
+  Views matches the code again, and offers to delete the proposal canvas.
 
 The Figma file stays as it is, a frozen archive; its three skills are removed when these exist.
 
