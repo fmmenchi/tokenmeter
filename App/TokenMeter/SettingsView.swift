@@ -16,7 +16,7 @@ struct SettingsView: View {
         case .alreadySet: return "Claude's status line already feeds tokenmeter."
         case .notInstalled: return "Claude Code not found. Checked again at every launch."
         case .wrapped: return "Your status line is wrapped: it still prints as before, and also feeds tokenmeter."
-        case .otherStatusLine: return "Another status line is in use and was left alone. Wrap it to feed tokenmeter too."
+        case .otherStatusLine: return "Another status line is in use and was left alone. Wrap it from the panel to feed tokenmeter too."
         case .unreadableSettings: return "Claude's settings.json could not be read, so it was left alone."
         case nil: return "Checked at every launch; never replaces a status line you set."
         }
@@ -40,6 +40,16 @@ struct SettingsView: View {
                 default: EmptyView()
                 }
             }
+            Section("Providers") {
+                Text("Drag a provider to reorder its card. Choose the windows each card shows.")
+                    .font(.caption).foregroundStyle(.secondary)
+                ForEach(meter.cardProviders) { provider in
+                    ProviderRow(provider: provider) { meter.setShownWindows($0, for: provider.id) }
+                }
+                .onMove { meter.moveProviders(from: $0, to: $1) }
+                Text("The percentage in the menu bar counts only the windows you show.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
         }
         .formStyle(.grouped)
         .scrollDisabled(true)
@@ -47,5 +57,39 @@ struct SettingsView: View {
         .frame(width: 380)
         .padding()
         .onDisappear { NSApplication.shared.setActivationPolicy(.accessory) }
+    }
+}
+
+/// One provider in the list: its name and which windows its card shows. Two windows are a choice of one or both; more
+/// than two are a menu of checkmarks, so any window of any provider can be chosen (ADR 0035).
+private struct ProviderRow: View {
+    let provider: Meter.CardProvider
+    let onChange: (Set<String>) -> Void
+
+    private static let all = "all"
+
+    var body: some View {
+        HStack {
+            Text(provider.title)
+            Spacer()
+            if provider.windows.count == 2 {
+                Picker(provider.title, selection: Binding(
+                    get: { provider.shown.count == provider.windows.count ? Self.all : provider.shown.first ?? Self.all },
+                    set: { onChange($0 == Self.all ? Set(provider.windows) : [$0]) })) {
+                    ForEach(provider.windows, id: \.self) { name in Text(WindowSpec(name: name, duration: 0).label).tag(name) }
+                    Text("Both").tag(Self.all)
+                }
+                .pickerStyle(.segmented).labelsHidden().fixedSize()
+            } else if provider.windows.count > 2 {
+                Menu("Windows") {
+                    ForEach(provider.windows, id: \.self) { name in
+                        Toggle(WindowSpec(name: name, duration: 0).label, isOn: Binding(
+                            get: { provider.shown.contains(name) },
+                            set: { on in onChange(on ? provider.shown.union([name]) : provider.shown.subtracting([name])) }))
+                    }
+                }
+                .fixedSize()
+            }
+        }
     }
 }
