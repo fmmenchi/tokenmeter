@@ -1,12 +1,12 @@
 # ADR 0033 — Add the Claude integration to an existing providers file
 
-Status: accepted (2026-10-30); narrows [ADR 0018](./0018-the-config-file-is-the-only-source-of-providers.md)
+Status: accepted (2026-10-30); narrows [ADR 0018](./0018-the-config-file-is-the-only-source.md)
 
 ## Context
 
 [ADR 0031](./0031-problems-come-from-the-app-and-from-provider-integrations.md) gives `providers.json` an optional
 `integration` field, and the Claude entry of the seed now carries `"integration": "claude-status-line"`. A file written
-before that has no such field, and [ADR 0018](./0018-the-config-file-is-the-only-source-of-providers.md) says an existing
+before that has no such field, and [ADR 0018](./0018-the-config-file-is-the-only-source.md) says an existing
 file is never changed by an update: the seed is never merged over what the user has. Left alone, the Claude problems and
 the **Wrap it** fix would never show for anyone who already ran the app, which includes the author.
 
