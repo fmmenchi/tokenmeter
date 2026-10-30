@@ -9,14 +9,6 @@ public enum ProjectStatusLines {
         public let command: String
     }
 
-    /// One sentence for the widget, the panel and Settings; nil when no project overrides the status line (ADR 0027).
-    public static func notice(for overrides: [Override]) -> String? {
-        guard !overrides.isEmpty else { return nil }
-        let names = overrides.prefix(3).map(\.project.lastPathComponent).joined(separator: ", ")
-        let more = overrides.count > 3 ? " +\(overrides.count - 3)" : ""
-        return "Claude bars freeze in \(names)\(more): own status line"
-    }
-
     static let headBytes = 256 * 1024
 
     public static func overrides(

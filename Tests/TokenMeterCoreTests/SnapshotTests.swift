@@ -107,19 +107,6 @@ final class PlanNameTests: XCTestCase {
         XCTAssertEqual(snap.plan, "Max 20x")
     }
 
-    func testNoticesRoundTripAndAnOlderSnapshotHasNone() throws {
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        let base = Snapshot(generatedAt: Date(timeIntervalSince1970: 0), providers: [])
-        XCTAssertEqual(base.notices, [])
-        let withNotice = base.with(notices: ["careful"])
-        XCTAssertEqual(try decoder.decode(Snapshot.self, from: encoder.encode(withNotice)).notices, ["careful"])
-        let older = Data(#"{"generatedAt":"1970-01-01T00:00:00Z","providers":[]}"#.utf8)
-        XCTAssertEqual(try decoder.decode(Snapshot.self, from: older).notices, [])
-    }
-
     func testProblemsRoundTripAndAnOlderSnapshotHasNone() throws {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601

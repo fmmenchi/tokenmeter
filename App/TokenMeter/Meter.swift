@@ -77,8 +77,6 @@ final class Meter {
         }
     }
 
-    var widgetCanRead: Bool { store != nil }
-
     func setAutoSetUpClaude(_ enabled: Bool) {
         autoSetUpClaude = enabled
         UserDefaults.standard.set(enabled, forKey: Self.autoSetUpKey)
