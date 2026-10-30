@@ -80,14 +80,16 @@ private struct ProviderRow: View {
     private static let all = "all"
 
     var body: some View {
-        HStack {
-            Image(systemName: "line.3.horizontal").foregroundStyle(.tertiary).accessibilityHidden(true)
-            Text(provider.title)
-            Spacer()
-            Button { onMove(-1) } label: { Image(systemName: "chevron.up") }
-                .buttonStyle(.borderless).disabled(isFirst).accessibilityLabel("Move \(provider.title) up")
-            Button { onMove(1) } label: { Image(systemName: "chevron.down") }
-                .buttonStyle(.borderless).disabled(isLast).accessibilityLabel("Move \(provider.title) down")
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Image(systemName: "line.3.horizontal").foregroundStyle(.tertiary).accessibilityHidden(true)
+                Text(provider.title).lineLimit(1).layoutPriority(1)
+                Spacer()
+                Button { onMove(-1) } label: { Image(systemName: "chevron.up") }
+                    .buttonStyle(.borderless).disabled(isFirst).accessibilityLabel("Move \(provider.title) up")
+                Button { onMove(1) } label: { Image(systemName: "chevron.down") }
+                    .buttonStyle(.borderless).disabled(isLast).accessibilityLabel("Move \(provider.title) down")
+            }
             if provider.windows.count == 2 {
                 Picker(provider.title, selection: Binding(
                     get: { provider.shown.count == provider.windows.count ? Self.all : provider.shown.first ?? Self.all },
@@ -95,7 +97,7 @@ private struct ProviderRow: View {
                     ForEach(provider.windows, id: \.self) { name in Text(WindowSpec(name: name, duration: 0).label).tag(name) }
                     Text("Both").tag(Self.all)
                 }
-                .pickerStyle(.segmented).labelsHidden().fixedSize()
+                .pickerStyle(.segmented).labelsHidden()
             } else if provider.windows.count > 2 {
                 Menu("Windows") {
                     ForEach(provider.windows, id: \.self) { name in

@@ -54,7 +54,8 @@ colours, values assumed, and the design system gains a dark theme when the featu
 
 - **Reordering is a drag and two arrows.** The first build used the list's own move gesture, which a grouped form on macOS
   does not offer: nothing could be dragged. The row now drags on its own and has an up and a down arrow, so the order can be
-  changed without dragging.
+  changed without dragging. The name has a line of its own and the choice of windows sits under it, so a name is never
+  squeezed.
 
 ## Related
 
