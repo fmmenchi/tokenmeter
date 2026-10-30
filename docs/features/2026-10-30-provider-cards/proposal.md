@@ -25,12 +25,12 @@ Light and dark, as drawn. Claude shows both windows and ChatGPT only Weekly, in 
 
 ## What changes
 
-| Surface  | What it shows                                                                                                                  | Why                                                                                   |
-| :------- | :----------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------ |
-| Panel    | The problem banners, then one card per provider: name, plan, the problem chip and the windows chosen.                          | The card groups what belongs to one provider and nothing else.                        |
-| Widget   | The same cards. The medium widget still holds one card fully and clips the next, so the order decides which provider it shows. | It is the one reason to reorder that costs nothing to explain.                        |
-| Settings | A list of the providers with a handle to drag, and for each a choice of windows: **5 hours**, **Weekly** or **Both**.          | One place for both preferences. With more than two windows the choice becomes a menu. |
-| Menu bar | Unchanged. Its percentage is the lowest of the **visible** windows.                                                            | Hiding a window must not leave the menu bar speaking about it.                        |
+| Surface  | What it shows                                                                                                                                                                | Why                                                                                   |
+| :------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------ |
+| Panel    | The problem banners, then one card per provider: name, plan, the problem chip and the windows chosen.                                                                        | The card groups what belongs to one provider and nothing else.                        |
+| Widget   | The same cards. The medium widget still holds one card fully and clips the next, so the order decides which provider it shows.                                               | It is the one reason to reorder that costs nothing to explain.                        |
+| Settings | A list of the providers with a handle to drag and two arrows (up, down) as the way that always works, and for each a choice of windows: **5 hours**, **Weekly** or **Both**. | One place for both preferences. With more than two windows the choice becomes a menu. |
+| Menu bar | Unchanged. Its percentage is the lowest of the **visible** windows.                                                                                                          | Hiding a window must not leave the menu bar speaking about it.                        |
 
 ## Rules
 
@@ -51,7 +51,9 @@ colours, values assumed, and the design system gains a dark theme when the featu
 
 ## Settled by building
 
-Nothing yet.
+- **Reordering is a drag and two arrows.** The first build used the list's own move gesture, which a grouped form on macOS
+  does not offer: nothing could be dragged. The row now drags on its own and has an up and a down arrow, so the order can be
+  changed without dragging.
 
 ## Related
 

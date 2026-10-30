@@ -99,7 +99,7 @@ file is never overwritten: the app runs on Claude and ChatGPT for that run until
 
 Each provider is a card in the panel and in the widget. In **Settings, Providers**:
 
-- **Drag** a provider to move its card. The medium widget shows one card fully, so the first card is the one you see
+- **Drag** a provider, or use its **arrows**, to move its card. The medium widget shows one card fully, so the first card is the one you see
   there.
 - **Choose the windows** a card shows: **5 hours**, **Weekly** or **Both** (a provider with other windows lists them
   instead). **Both** is the default, and one window always stays.
