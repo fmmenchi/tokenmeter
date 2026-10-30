@@ -34,8 +34,9 @@ Light and dark, as drawn. Claude shows both windows and ChatGPT only Weekly, in 
 
 ## Rules
 
-- **The card is filled** with the colour of the text at 4% (`Color.primary`), a `radius-group` corner and `space-10` of
-  padding. It has no border. It is a new token, `card-fill`, proposed here.
+- **The card is filled** with the colour of the text at 7% (`Color.primary`) and has a hairline of the same colour at 10%
+  (`border-divider`), a `radius-group` corner and `space-10` of padding. The fill is a new token, `card-fill`. At 4% and
+  with no hairline the first build did not read as a group on the dark panel.
 - **Both is the default.** A provider nobody touched looks as before, inside a card.
 - **At least one window always stays visible.** Choosing the only visible window again does nothing.
 - **A hidden window is ignored.** It is not drawn, it is not in the menu-bar percentage, and it raises no problem.

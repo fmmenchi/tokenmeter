@@ -25,8 +25,8 @@ makes each provider a card, with a choice of windows and an order set in Setting
   window always stays visible.
 - **A hidden window is out of every figure shown.** The menu-bar percentage is the lowest of the visible windows, and a
   hidden one raises no problem.
-- **The card uses system colours only** (`Color.primary` at 4% for its fill, the text styles and the existing tints), so
-  the light and the dark appearance both hold without a value written for either.
+- **The card uses system colours only** (`Color.primary` at 7% for its fill and at 10% for its hairline, the text styles and
+  the existing tints), so the light and the dark appearance both hold without a value written for either.
 
 ## Consequences
 
