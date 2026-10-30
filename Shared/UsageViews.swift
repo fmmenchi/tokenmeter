@@ -48,6 +48,17 @@ extension WindowUsage {
     }
 }
 
+extension WindowSpec {
+    /// How a window is named for a person: the two the providers declare today, and any other by its own name.
+    var label: String {
+        switch name {
+        case "5h": "5 hours"
+        case "7d": "Weekly"
+        default: name
+        }
+    }
+}
+
 extension Int {
     var compactTokens: String {
         switch self {
@@ -83,7 +94,7 @@ struct WindowRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 3) {
             HStack(alignment: .firstTextBaseline) {
-                Text(usage.window.name == "7d" ? "Weekly" : "5 hours").font(.caption.weight(.medium))
+                Text(usage.window.label).font(.caption.weight(.medium))
                 Spacer()
                 Text(usage.remainingFraction == nil ? "unknown" : "\(usage.remainingText) left")
                     .font(.caption.bold().monospacedDigit())
