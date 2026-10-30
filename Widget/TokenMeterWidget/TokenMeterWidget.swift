@@ -34,9 +34,9 @@ struct UsageWidgetView: View {
 
     var body: some View {
         if let snapshot = entry.snapshot {
-            VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: 8) {
                 ForEach(snapshot.providers, id: \.provider) {
-                    ProviderBlock(snapshot: $0, problemCount: snapshot.problemCount(for: $0))
+                    ProviderCard(snapshot: $0, problemCount: snapshot.problemCount(for: $0))
                 }
                 Spacer(minLength: 0)
                 Text(snapshot.generatedAt, style: .relative).font(.caption2).foregroundStyle(.secondary)

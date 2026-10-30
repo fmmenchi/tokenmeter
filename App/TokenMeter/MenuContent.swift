@@ -15,7 +15,7 @@ struct MenuContent: View {
             }
             if let snapshot = meter.snapshot {
                 ForEach(snapshot.providers, id: \.provider) {
-                    ProviderBlock(snapshot: $0, problemCount: snapshot.problemCount(for: $0))
+                    ProviderCard(snapshot: $0, problemCount: snapshot.problemCount(for: $0))
                 }
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Read \(snapshot.generatedAt, style: .relative) ago")
