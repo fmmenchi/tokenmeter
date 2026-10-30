@@ -120,4 +120,38 @@ final class PlanNameTests: XCTestCase {
         let older = Data(#"{"generatedAt":"1970-01-01T00:00:00Z","providers":[],"notices":["old"]}"#.utf8)
         XCTAssertEqual(try decoder.decode(Snapshot.self, from: older).problems, [])
     }
+
+    private func shown(_ id: String, windows: [WindowSpec] = [.session, .week]) -> ProviderSnapshot {
+        SnapshotBuilder.providerSnapshot(provider: Provider(rawValue: id), title: id, events: [], windows: windows)
+    }
+
+    func testApplyingOrdersTheProvidersAndFiltersTheirWindows() {
+        let snapshot = Snapshot(generatedAt: Date(timeIntervalSince1970: 0), providers: [shown("claude"), shown("chatgpt")])
+        let preferences = MemoryDisplayPreferences()
+        preferences.setOrder(["chatgpt", "claude"])
+        preferences.setWindows([WindowSpec.week.name], for: "chatgpt")
+
+        let result = snapshot.applying(preferences)
+        XCTAssertEqual(result.providers.map(\.title), ["chatgpt", "claude"])
+        XCTAssertEqual(result.providers[0].windows.map(\.window.name), ["7d"])
+        XCTAssertEqual(result.providers[1].windows.map(\.window.name), ["5h", "7d"], "no choice shows every window")
+    }
+
+    func testApplyingKeepsOneWindowAlwaysAndLeavesTheProblemsAlone() {
+        let problem = Problem(id: "claude.x", topic: "claude", message: "m")
+        let snapshot = Snapshot(generatedAt: Date(timeIntervalSince1970: 0), providers: [shown("claude")], problems: [problem])
+        let preferences = MemoryDisplayPreferences()
+        preferences.setWindows(["no-such-window"], for: "claude")
+
+        let result = snapshot.applying(preferences)
+        XCTAssertEqual(result.providers[0].windows.count, 2, "a choice that matches nothing shows them all")
+        XCTAssertEqual(result.problems, [problem])
+    }
+
+    func testApplyingIgnoresAnOrderThatNamesAMissingProvider() {
+        let snapshot = Snapshot(generatedAt: Date(timeIntervalSince1970: 0), providers: [shown("claude")])
+        let preferences = MemoryDisplayPreferences()
+        preferences.setOrder(["gone", "claude"])
+        XCTAssertEqual(snapshot.applying(preferences).providers.map(\.title), ["claude"])
+    }
 }
