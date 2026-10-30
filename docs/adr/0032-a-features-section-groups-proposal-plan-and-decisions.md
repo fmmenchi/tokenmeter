@@ -20,7 +20,11 @@ parts:
 - the **decisions**: the ADRs. They keep their place in `docs/adr/` and their numbers, because every ADR links to the
   others; the feature's `index.md` lists the ones that belong to it.
 
-`docs/features/index.md` says how a feature is written. The first feature is Problems, whose plan moved here from
+`docs/features/index.md` is the list of features by name, **newest first**, with those implemented apart from those
+still in design and build, and says how a feature is written. A feature's folder holds an `index.md` (the overview), the
+`proposal.md` and the `plan.md`. The proposal contains a **screenshot of the design that was chosen**, because the
+canvas it was drawn in is deleted once the code is in. Order is carried by the `position` of each folder's
+`_category_.json`: 99999999 minus the date as `YYYYMMDD`. The first feature is Problems, whose plan moved here from
 `develop/`. The word "design" in the section means the proposal, not a separate document.
 
 ## Consequences
@@ -29,3 +33,5 @@ parts:
 - A page belongs to one feature, and a feature to this section; the Develop pages stay about the app as it is.
 - The Overview lists the section, and `docs/develop/contribute.md` points to it.
 - Public URLs for the plan change (it was added hours before and linked from nowhere else).
+- The screenshots are rendered from the artboards of the proposal canvas, not taken from it; they are committed beside
+  the proposal.
