@@ -1,13 +1,13 @@
 ---
-name: tokenmeter-figma-export
+name: figma-export
 description: >-
   Builds the tokenmeter views the proposal names (the widget, Settings, the panel) in Figma from the SwiftUI views (code to Figma).
-  Runs only after a yes to a tokenmeter-figma-proposal. Use to put the widget on Figma or refresh a Figma copy.
+  Runs only after a yes to a figma-proposal. Use to put the widget on Figma or refresh a Figma copy.
 ---
 
-# tokenmeter-figma-export
+# figma-export
 
-Needs a **yes to a proposal for export in this conversation**. Without one, run `tokenmeter-figma-proposal`
+Needs a **yes to a proposal for export in this conversation**. Without one, run `figma-proposal`
 first and stop. Answer in Italian, address Fabio as Fabio.
 
 1. Load the installed Figma skills: `figma-use` before any `use_figma` call, then
