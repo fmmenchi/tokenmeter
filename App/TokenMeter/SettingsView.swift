@@ -48,7 +48,6 @@ struct SettingsView: View {
                         provider: provider, isFirst: index == 0, isLast: index == meter.cardProviders.count - 1,
                         onChange: { meter.setShownWindows($0, for: provider.id) },
                         onMove: { meter.moveProvider(provider.id, by: $0) })
-                        .draggable(provider.id)
                         .dropDestination(for: String.self) { ids, _ in
                             guard let id = ids.first else { return false }
                             meter.moveProvider(id, onto: provider.id)
@@ -82,7 +81,11 @@ private struct ProviderRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
-                Image(systemName: "line.3.horizontal").foregroundStyle(.tertiary).accessibilityHidden(true)
+                DragHandle()
+                    .draggable(provider.id) {
+                        Text(provider.title).padding(.horizontal, 10).padding(.vertical, 4)
+                            .background(RoundedRectangle(cornerRadius: 6).fill(.background))
+                    }
                 Text(provider.title).lineLimit(1).layoutPriority(1)
                 Spacer()
                 Button { onMove(-1) } label: { Image(systemName: "chevron.up") }
