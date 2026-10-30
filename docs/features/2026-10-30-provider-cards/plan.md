@@ -61,6 +61,7 @@ Sources/TokenMeterCore/Snapshot.swift             gains `applying(_:)`
 App/TokenMeter/Meter.swift                        keeps the full reading, the preferences, the setters
 App/TokenMeter/SettingsView.swift                 the list with the handle and the choice of windows
 Shared/ProviderCard.swift                         the card used by the panel and the widget
+App/TokenMeter/DragHandle.swift                   the handle to grab a card, a component of the design system
 Shared/UsageViews.swift                           ProviderBlock becomes the card's content
 Tests/TokenMeterCoreTests/DisplayPreferencesTests.swift
 ```
@@ -120,15 +121,15 @@ flowchart TD
   S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7
 ```
 
-| Step | Adds                                                            | Tests that show it works                                                                      | Gate                                          |
-| :--- | :-------------------------------------------------------------- | :-------------------------------------------------------------------------------------------- | :-------------------------------------------- |
-| 1    | `DisplayPreferences.swift`                                      | order kept and a new provider last, windows nil means all, the defaults version persists      | `pnpm run check`                              |
-| 2    | `Snapshot.applying`                                             | order, a hidden window dropped, one always kept, an unknown provider in the order ignored     | `pnpm run check`                              |
-| 3    | `Meter.swift`                                                   | built; the setters change the snapshot and the menu-bar percentage counts the visible windows | `pnpm run check` and `xcodebuild`             |
-| 4    | `ProviderCard.swift`, `UsageViews.swift`, the panel, the widget | built, then looked at on screen in light and in dark                                          | `pnpm run check`, `xcodebuild` and the screen |
-| 5    | `SettingsView.swift`                                            | built; dragging and the choice looked at on screen                                            | `pnpm run check`, `xcodebuild` and the screen |
-| 6    | the docs: Settings guide, Core API                              | the docs build                                                                                | `pnpm run check`                              |
-| 7    | the Views and the Design System, the feature's status           | the Views show the cards as built; the Design System has a dark theme                         | proposal canvas deleted when Fabio asks       |
+| Step | Adds                                                                                                                                                                           | Tests that show it works                                                                      | Gate                                          |
+| :--- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------- | :-------------------------------------------- |
+| 1    | `DisplayPreferences.swift`                                                                                                                                                     | order kept and a new provider last, windows nil means all, the defaults version persists      | `pnpm run check`                              |
+| 2    | `Snapshot.applying`                                                                                                                                                            | order, a hidden window dropped, one always kept, an unknown provider in the order ignored     | `pnpm run check`                              |
+| 3    | `Meter.swift`                                                                                                                                                                  | built; the setters change the snapshot and the menu-bar percentage counts the visible windows | `pnpm run check` and `xcodebuild`             |
+| 4    | `ProviderCard.swift`, `UsageViews.swift`, the panel, the widget                                                                                                                | built, then looked at on screen in light and in dark                                          | `pnpm run check`, `xcodebuild` and the screen |
+| 5    | `SettingsView.swift`                                                                                                                                                           | built; dragging and the choice looked at on screen                                            | `pnpm run check`, `xcodebuild` and the screen |
+| 6    | the docs: Settings guide, Core API                                                                                                                                             | the docs build                                                                                | `pnpm run check`                              |
+| 7    | the Views and the Design System (the new components `ProviderCard`, `ProviderListRow` and `DragHandle`, the `card-fill` and handle tokens, a dark theme), the feature's status | the Views show the cards as built; the Design System has a dark theme                         | proposal canvas deleted when Fabio asks       |
 
 Steps 1 to 6 are one commit each, three files at most, and leave the gate green. Steps 3 to 5 are not built by the gate,
 so they are built with `xcodebuild` and looked at, in the light and the dark appearance. Step 7 is the close:
