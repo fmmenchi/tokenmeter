@@ -36,6 +36,10 @@ so a per-model bar would be a figure nobody can trust, and the fresh one needs a
 handle. Fabio decided it does not make sense to show it. The design below stays on record for the day a source
 reports a per-model limit that tokenmeter can read without credentials, for any model.
 
+The API was considered as an opt-in setting for the per-model rows and dropped. Its sign-in needs a client identity
+tokenmeter does not have; the open-source app that does this uses Claude Code's own client id (found in Claude Code's
+binary) and a `claude-cli` user agent, which is impersonation. Fabio decided to leave the API alone.
+
 ## Decision
 
 The solution is **cross-model**: no model, provider or plan is named in the common code. A model is data, never a case.
