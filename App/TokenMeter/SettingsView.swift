@@ -21,6 +21,14 @@ struct SettingsView: View {
         }
     }
 
+    private var overridesText: String? {
+        let found = meter.projectOverrides
+        guard !found.isEmpty else { return nil }
+        let names = found.prefix(3).map(\.project.lastPathComponent).joined(separator: ", ")
+        let more = found.count > 3 ? " and \(found.count - 3) more" : ""
+        return "Warning: \(names)\(more) set their own status line, so the Claude bars stop updating while you work there. Wrap it in that project: see the guide."
+    }
+
     var body: some View {
         Form {
             Toggle("Launch at login", isOn: Binding(
@@ -33,6 +41,9 @@ struct SettingsView: View {
                 set: { meter.setAutoSetUpClaude($0) }))
             Text(claudeStatusText)
                 .font(.caption).foregroundStyle(.secondary)
+            if let overridesText {
+                Text(overridesText).font(.caption).foregroundStyle(.orange)
+            }
             if meter.autoSetUpClaude {
                 switch meter.claudeStatusLine {
                 case .otherStatusLine: Button("Wrap it") { meter.wrapClaudeStatusLine() }

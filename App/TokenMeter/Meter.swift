@@ -12,6 +12,8 @@ final class Meter {
     private(set) var launchAtLogin = false
     private(set) var autoSetUpClaude = UserDefaults.standard.object(forKey: Meter.autoSetUpKey) as? Bool ?? true
     private(set) var claudeStatusLine: ClaudeStatusLine.Outcome?
+    /// ADR 0026: projects whose own settings replace the status line. Read only; nothing is written.
+    private(set) var projectOverrides: [ProjectStatusLines.Override] = []
     private static let autoSetUpKey = "autoSetUpClaudeStatusLine"
     private let collector = Collector()
     private let store = SnapshotStore.appGroupStore()
@@ -86,6 +88,19 @@ final class Meter {
         } catch {
             claudeStatusLine = nil
             Self.log.error("Could not set up the Claude status line: \(error.localizedDescription, privacy: .public)")
+        }
+        checkProjectOverrides()
+    }
+
+    private func checkProjectOverrides() {
+        switch claudeStatusLine {
+        case .set, .alreadySet, .wrapped:
+            Task {
+                let found = await Task.detached { ProjectStatusLines.overrides() }.value
+                projectOverrides = found
+            }
+        default:
+            projectOverrides = []
         }
     }
 
