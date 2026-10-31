@@ -6,9 +6,10 @@ import TokenMeterCore
 struct ProviderCard: View {
     let snapshot: ProviderSnapshot
     var problemCount = 0
+    var showsPace = false
 
     var body: some View {
-        ProviderBlock(snapshot: snapshot, problemCount: problemCount)
+        ProviderBlock(snapshot: snapshot, problemCount: problemCount, showsPace: showsPace)
             .padding(10)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(RoundedRectangle(cornerRadius: 10).fill(Color.primary.opacity(0.07)))
