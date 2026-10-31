@@ -94,6 +94,9 @@ final class Meter {
 
         let id: String
         let title: String
+        let plan: String?
+        /// Names of windows the plan does not have (ADR 0037).
+        let missing: [String]
         /// The provider's own windows, by id, in order.
         let windows: [String]
         let models: [Model]
@@ -125,7 +128,7 @@ final class Meter {
             let chosen = preferences.windows(for: id)
             let chosenOwn = chosen.map { $0.intersection(ownIDs) }
             return CardProvider(
-                id: id, title: provider.title, windows: ownIDs, models: models,
+                id: id, title: provider.title, plan: provider.plan, missing: provider.missing, windows: ownIDs, models: models,
                 shown: chosenOwn.flatMap { $0.isEmpty ? nil : $0 } ?? Set(ownIDs),
                 shownModels: chosen.map { $0.intersection(models.map(\.id)) } ?? Set(models.map(\.id)),
                 isShown: visible.contains(id))

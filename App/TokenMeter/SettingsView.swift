@@ -131,6 +131,14 @@ private struct ProviderRow: View {
                     .disabled(!provider.isShown).opacity(provider.isShown ? 1 : 0.45)
                 }
             }
+            if provider.windows.count == 1, !provider.missing.isEmpty {
+                // Nothing to choose: say what the plan lacks, from the data (ADR 0037).
+                let lacks = provider.missing.map { WindowSpec(name: $0, duration: 0).limitName }.joined(separator: " or ")
+                let only = WindowSpec(name: provider.windows[0].split(separator: ":").first.map(String.init) ?? "", duration: 0).label
+                Text("\(provider.plan ?? provider.title) has no \(lacks) limit: \(only) is its only window.")
+                    .font(.caption2).foregroundStyle(.secondary).padding(.leading, 36)
+                    .opacity(provider.isShown ? 1 : 0.45)
+            }
             ForEach(provider.models) { model in
                 HStack {
                     VStack(alignment: .leading, spacing: 1) {

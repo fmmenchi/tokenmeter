@@ -57,6 +57,15 @@ extension WindowSpec {
         default: name
         }
     }
+
+    /// The window as a limit is named in a sentence: "5-hour", "weekly", or the name as it is.
+    var limitName: String {
+        switch name {
+        case "5h": "5-hour"
+        case "7d": "weekly"
+        default: name
+        }
+    }
 }
 
 extension Int {
