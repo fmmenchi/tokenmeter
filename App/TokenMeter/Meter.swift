@@ -94,6 +94,7 @@ final class Meter {
 
         let id: String
         let title: String
+        let plan: String?
         /// The provider's own windows, by id, in order.
         let windows: [String]
         let models: [Model]
@@ -124,11 +125,12 @@ final class Meter {
             let ownIDs = own.map(\.id)
             let chosen = preferences.windows(for: id)
             let chosenOwn = chosen.map { $0.intersection(ownIDs) }
+            let shownOwn = chosenOwn.flatMap { $0.isEmpty ? nil : $0 } ?? Set(ownIDs)
+            let off = preferences.hiddenModels(for: id)
+            let shownModels = Set(models.filter { shownOwn.contains($0.parent) && !off.contains($0.id) }.map(\.id))
             return CardProvider(
-                id: id, title: provider.title, windows: ownIDs, models: models,
-                shown: chosenOwn.flatMap { $0.isEmpty ? nil : $0 } ?? Set(ownIDs),
-                shownModels: chosen.map { $0.intersection(models.map(\.id)) } ?? Set(models.map(\.id)),
-                isShown: visible.contains(id))
+                id: id, title: provider.title, plan: provider.plan, windows: ownIDs, models: models,
+                shown: shownOwn, shownModels: shownModels, isShown: visible.contains(id))
         }
     }
 
@@ -150,18 +152,30 @@ final class Meter {
         publish()
     }
 
-    /// Hides or shows a provider's card. The last shown provider cannot be hidden.
+    /// Hides or shows a provider's card. The last shown provider cannot be hidden. Showing one selects every window.
     func setProviderShown(_ shown: Bool, for provider: String) {
-        guard shown || cardProviders.filter(\.isShown).contains(where: { $0.id != provider }) else { return }
-        preferences.setHidden(!shown, for: provider)
+        guard shown || canHide(provider) else { return }
+        preferences.setShown(shown, for: provider)
         publish()
     }
 
-    /// One window always stays: an empty choice is ignored.
-    func setShownWindows(_ windows: Set<String>, models: Set<String>, for provider: String) {
-        guard !windows.isEmpty, let card = cardProviders.first(where: { $0.id == provider }) else { return }
-        let everything = windows == Set(card.windows) && models == Set(card.models.map(\.id))
-        preferences.setWindows(everything ? nil : windows.union(models), for: provider)
+    private func canHide(_ provider: String) -> Bool {
+        cardProviders.filter(\.isShown).contains { $0.id != provider }
+    }
+
+    /// The person chooses windows: choosing none hides the provider, choosing one shows it again (ADR 0037).
+    func setShownWindows(_ windows: Set<String>, for provider: String) {
+        guard let card = cardProviders.first(where: { $0.id == provider }) else { return }
+        let choice = WindowChoice(windows: card.windows, models: Dictionary(uniqueKeysWithValues: card.models.map {
+            ($0.id, $0.parent)
+        }))
+        guard preferences.select(windows, among: choice, for: provider, canHide: canHide(provider)) else { return }
+        publish()
+    }
+
+    /// Turns a model's limit on or off.
+    func setModel(_ model: String, shown: Bool, for provider: String) {
+        preferences.setModel(model, shown: shown, for: provider)
         publish()
     }
 

@@ -20,6 +20,12 @@ final class DisplayPreferencesTests: XCTestCase {
         XCTAssertEqual(preferences.hidden, ["chatgpt"])
         preferences.setHidden(false, for: "chatgpt")
         XCTAssertEqual(preferences.hidden, [])
+
+        XCTAssertEqual(preferences.hiddenModels(for: "claude"), [])
+        preferences.setHiddenModels(["7d:Fable"], for: "claude")
+        XCTAssertEqual(preferences.hiddenModels(for: "claude"), ["7d:Fable"])
+        preferences.setHiddenModels([], for: "claude")
+        XCTAssertEqual(preferences.hiddenModels(for: "claude"), [])
     }
 
     func testMemoryKeepsWhatIsSet() { check(MemoryDisplayPreferences()) }

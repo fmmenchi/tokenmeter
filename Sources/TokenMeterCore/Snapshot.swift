@@ -132,12 +132,19 @@ extension Snapshot {
         let kept = order.filter { !hidden.contains($0) }
         let shownIDs = kept.isEmpty ? Array(order.prefix(1)) : kept
         let shown = shownIDs.compactMap { id in providers.first { $0.provider.rawValue == id } }.map { provider -> ProviderSnapshot in
-            guard let chosen = preferences.windows(for: provider.provider.rawValue) else { return provider }
-            var windows = provider.windows.filter { chosen.contains($0.window.id) }
-            guard windows.contains(where: { $0.window.scope == nil }) else { return provider }
-            // A model's window is a part of the one of the same name: it never shows without it.
-            let kept = Set(windows.filter { $0.window.scope == nil }.map(\.window.name))
-            windows = windows.filter { $0.window.scope == nil || kept.contains($0.window.name) }
+            let id = provider.provider.rawValue
+            let chosen = preferences.windows(for: id)
+            let offModels = preferences.hiddenModels(for: id)
+            // The provider's own windows follow the choice (all when none, or when it names none of them). A model's window
+            // is a part of the one of the same name: it shows with it, on by default, unless it was turned off (ADR 0037).
+            let own = provider.windows.filter { $0.window.scope == nil }
+            let ownKept = chosen.map { set in own.filter { set.contains($0.window.id) } }.flatMap { $0.isEmpty ? nil : $0 } ?? own
+            let names = Set(ownKept.map(\.window.name))
+            let windows = provider.windows.filter { usage in
+                usage.window.scope == nil
+                    ? ownKept.contains { $0.window.id == usage.window.id }
+                    : names.contains(usage.window.name) && !offModels.contains(usage.window.id)
+            }
             return ProviderSnapshot(provider: provider.provider, title: provider.title, windows: windows,
                                     plan: provider.plan, quotaUpdatedAt: provider.quotaUpdatedAt,
                                     setupHint: provider.setupHint)
@@ -156,8 +163,12 @@ public enum SnapshotBuilder {
         plan: String? = nil,
         quotaUpdatedAt: Date? = nil,
         setupHint: String? = nil,
+        absent: Set<Int> = [],
         now: Date = Date()
     ) -> ProviderSnapshot {
+        // A window the plan does not have is not drawn, and neither are the models that were part of it (ADR 0037).
+        let gone = windows.filter { spec in absent.contains { abs(Double($0) * 60 - spec.duration) < 60 } }
+        let windows = windows.filter { spec in !gone.contains(spec) }
         let usages = windows.map { spec -> WindowUsage in
             let start = now.addingTimeInterval(-spec.duration)
             let tokens = events.lazy.filter { $0.date >= start && $0.date <= now }

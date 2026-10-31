@@ -30,7 +30,7 @@ enum DefaultProviders {
           "quota": {
             "file": "~/.tokenmeter/claude-statusline.json",
             "windows": [
-              { "at": "rate_limits.five_hour", "minutes": 300, "usedPercent": "used_percentage", "resetsAt": "resets_at" },
+              { "at": "rate_limits.five_hour", "minutes": 300, "usedPercent": "used_percentage", "resetsAt": "resets_at", "existsIf": { "file": "~/.claude.json", "each": "cachedUsageUtilization.utilization.limits", "where": { "kind": "session" }, "observedAt": "cachedUsageUtilization.fetchedAtMs", "observedAtFormat": "epochMilliseconds" } },
               { "at": "rate_limits.seven_day", "minutes": 10080, "usedPercent": "used_percentage", "resetsAt": "resets_at" },
               { "file": "~/.claude.json", "each": "cachedUsageUtilization.utilization.limits", "where": { "kind": "weekly_scoped" }, "scope": "scope.model.display_name", "minutes": 10080, "usedPercent": "percent", "resetsAt": "resets_at", "resetsAtFormat": "iso8601", "observedAt": "cachedUsageUtilization.fetchedAtMs", "observedAtFormat": "epochMilliseconds" }
             ]

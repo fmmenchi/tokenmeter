@@ -113,6 +113,14 @@ credentials; tokenmeter reads none. If `claude` is not in `~/.local/bin`, `/opt/
 `PATH`, the figure stays as old as the copy and reads with `~`. In **Settings, Providers**, a switch under Claude's windows
 turns the line off. See [ADR 0034](../adr/0034-limits-can-be-scoped-to-a-model.md).
 
+## A plan without the 5-hour limit
+
+Some plans do not have every window (Ultra, formerly Max 20x, has no 5-hour limit). tokenmeter shows only the windows your plan
+has: when the usage copy Claude Code keeps in `~/.claude.json` is recent (at most six hours old), lists your other limits and
+does not list the 5-hour one, the 5 hours row is not drawn and **Settings, Providers** says so. If the copy cannot be read, is
+older or Claude Code is not there, the row stays with "unknown", because nothing says the plan lacks it. See
+[ADR 0037](../adr/0037-a-window-exists-only-if-the-data-lists-it.md).
+
 ## Related
 
 - [Data Sources](../develop/data-sources.md)

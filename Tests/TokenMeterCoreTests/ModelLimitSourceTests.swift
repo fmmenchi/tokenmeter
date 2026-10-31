@@ -56,3 +56,64 @@ final class ModelLimitSourceTests: XCTestCase {
         XCTAssertEqual(try source(file: file).read(since: Date(timeIntervalSince1970: 0)).quotas.count, 0)
     }
 }
+
+final class WindowsByPlanTests: XCTestCase {
+    private func tempDir() throws -> URL {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+        addTeardownBlock { try? FileManager.default.removeItem(at: url) }
+        return url
+    }
+
+    private func source(file: URL, maxAge: String = "") throws -> ConfiguredSource {
+        let json = """
+        {"id":"p","title":"P","windows":[300,10080],
+         "quota":{"windows":[
+           {"file":"\(file.path)","minutes":300,"usedPercent":"p","existsIf":{"file":"\(file.path)","each":"usage.limits",
+            "where":{"kind":"session"},"observedAt":"usage.fetchedAtMs","observedAtFormat":"epochMilliseconds"\(maxAge)}}]}}
+        """
+        return ConfiguredSource(try JSONDecoder().decode(ProviderConfig.self, from: Data(json.utf8)))
+    }
+
+    private func write(_ limits: String, fetched: Date, to file: URL) throws {
+        let ms = Int(fetched.timeIntervalSince1970 * 1000)
+        try Data(#"{"usage":{"fetchedAtMs":\#(ms),"limits":\#(limits)}}"#.utf8).write(to: file)
+    }
+
+    private let epoch = Date(timeIntervalSince1970: 0)
+
+    func testAWindowThatAFreshListDoesNotNameIsAbsent() throws {
+        let file = try tempDir().appendingPathComponent("u.json")
+        try write(#"[{"kind":"weekly_all","percent":51}]"#, fetched: Date(), to: file)
+        XCTAssertEqual(try source(file: file).read(since: epoch).absent, [300])
+    }
+
+    func testAWindowThatTheListNamesIsThere() throws {
+        let file = try tempDir().appendingPathComponent("u.json")
+        try write(#"[{"kind":"session","percent":9},{"kind":"weekly_all","percent":51}]"#, fetched: Date(), to: file)
+        XCTAssertEqual(try source(file: file).read(since: epoch).absent, [])
+    }
+
+    func testUnknownIsNotAbsent() throws {
+        let dir = try tempDir()
+        XCTAssertEqual(try source(file: dir.appendingPathComponent("none.json")).read(since: epoch).absent, [], "no file")
+        let file = dir.appendingPathComponent("u.json")
+        try write("[]", fetched: Date(), to: file)
+        XCTAssertEqual(try source(file: file).read(since: epoch).absent, [], "an empty list says nothing")
+        try write(#"[{"kind":"weekly_all"}]"#, fetched: Date().addingTimeInterval(-7 * 3600), to: file)
+        XCTAssertEqual(try source(file: file).read(since: epoch).absent, [], "a list older than six hours says nothing")
+        XCTAssertEqual(try source(file: file, maxAge: #","maxAgeHours":24"#).read(since: epoch).absent, [300], "unless the rule allows it")
+    }
+
+    func testTheBuilderLeavesAnAbsentWindowOut() {
+        let result = SnapshotBuilder.providerSnapshot(provider: .claude, events: [], windows: [.session, .week], absent: [300])
+        XCTAssertEqual(result.windows.map(\.window.id), ["7d"])
+    }
+
+    func testAModelOfAnAbsentWindowGoesWithIt() {
+        let model = ReportedQuota(usedPercent: 10, windowMinutes: 300, resetsAt: nil, scope: "Fable")
+        let result = SnapshotBuilder.providerSnapshot(provider: .claude, events: [], windows: [.session, .week],
+                                                      reported: [model], absent: [300])
+        XCTAssertEqual(result.windows.map(\.window.id), ["7d"])
+    }
+}

@@ -18,6 +18,7 @@ are [ADRs](../adr), and its overview links them.
 | [Provider cards](./2026-10-30-provider-cards/index.md): a card per provider, the windows you choose, in your order               | 2026-10-30 | [Overview](./2026-10-30-provider-cards/index.md), [Proposal](./2026-10-30-provider-cards/proposal.md), [Implementation plan](./2026-10-30-provider-cards/plan.md)                |
 | [Hide a provider](./2026-10-30-provider-visibility/index.md): an eye button takes a provider's card off the panel and the widget | 2026-10-30 | [Overview](./2026-10-30-provider-visibility/index.md), [Proposal](./2026-10-30-provider-visibility/proposal.md), [Implementation plan](./2026-10-30-provider-visibility/plan.md) |
 | [Model limits](./2026-10-30-model-limits/index.md): a limit for one model, part of Weekly, as a compact line                     | 2026-10-30 | [Overview](./2026-10-30-model-limits/index.md), [Proposal](./2026-10-30-model-limits/proposal.md), [Implementation plan](./2026-10-30-model-limits/plan.md)                      |
+| [Windows by plan](./2026-10-31-windows-by-plan/index.md): a card shows only the windows the plan has                             | 2026-10-31 | [Overview](./2026-10-31-windows-by-plan/index.md), [Proposal](./2026-10-31-windows-by-plan/proposal.md), [Implementation plan](./2026-10-31-windows-by-plan/plan.md)             |
 
 ## In design and build
 
