@@ -29,7 +29,7 @@ Every command, script, file and data shape in one place.
 The probe output looks like:
 
 ```text
-Claude (Max 20x)
+Claude (Ultra)
   5h: 575663908 tokens (in 4200, out 1230025, cache r/w 568384240/6045443) — 75% left [reported]
   7d: 5104412950 tokens (in 70299, out 12975652, cache r/w 5024475829/66891170) — 67% left [reported]
 ChatGPT (Team)
@@ -63,7 +63,7 @@ Unlike the panel, the probe prints the raw token total including cache reads.
 | `generatedAt`                | date           | When the app built the snapshot.                                                                                           |
 | `providers[].provider`       | string         | The provider id, for example `claude` or `chatgpt`.                                                                        |
 | `providers[].title`          | string         | Display name. Older snapshots lack it and show the id.                                                                     |
-| `providers[].plan`           | string, option | Subscription label such as `Max 20x`.                                                                                      |
+| `providers[].plan`           | string, option | Subscription label such as `Ultra`.                                                                                        |
 | `providers[].quotaUpdatedAt` | date, optional | When the provider's quota was last written.                                                                                |
 | `providers[].setupHint`      | string, option | Shown while no quota has been seen.                                                                                        |
 | `providers[].windows[]`      | array          | One entry per window the provider declares, `5h` then `7d` today.                                                          |
