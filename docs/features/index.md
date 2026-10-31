@@ -22,9 +22,9 @@ are [ADRs](../adr), and its overview links them.
 
 ## In design and build
 
-| Feature | Date | Pages |
-| :------ | :--- | :---- |
-| _None._ |      |       |
+| Feature                                                                                                         | Date       | Pages                                                                                                                                              |
+| :-------------------------------------------------------------------------------------------------------------- | :--------- | :------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Burn rate](./2026-10-31-burn-rate/index.md): a window says when it runs out at its pace, when before the reset | 2026-10-31 | [Overview](./2026-10-31-burn-rate/index.md), [Proposal](./2026-10-31-burn-rate/proposal.md), [Implementation plan](./2026-10-31-burn-rate/plan.md) |
 
 ## The pattern: from idea to implemented
 
