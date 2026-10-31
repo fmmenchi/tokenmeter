@@ -102,14 +102,15 @@ The app applies them when it writes the snapshot, so the widget draws what it is
 
 A model's limit is a window with a scope ([ADR 0034](../adr/0034-limits-can-be-scoped-to-a-model.md)).
 
-| Type                       | What it is                                                                                                                                    |
-| :------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
-| `WindowSpec.scope`         | A model's name, from the data; `WindowSpec.id` is the name, and the scope after a colon for a scoped window.                                  |
-| `ReportedQuota.scope`      | The model a reported limit applies to; the builder makes it a window of its own under the one of the same length.                             |
-| `ClaudeUsageRefresh`       | `locate`, `run` and `refresh`: ask Claude Code to refresh its usage copy by running its own `/usage`.                                         |
-| `ProviderReading.absent`   | Lengths in minutes of windows the plan lacks, when fresh data says so ([ADR 0037](../adr/0037-a-window-exists-only-if-the-data-lists-it.md)). |
-| `ProviderSnapshot.missing` | Names of the windows left out, so Settings can say so.                                                                                        |
-| `ProviderConfig.ExistsIf`  | A list that says whether a window exists: `file`, `each`, `where`, `observedAt` and `maxAgeHours` (6 by default).                             |
+| Type                              | What it is                                                                                                                                    |
+| :-------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
+| `WindowSpec.scope`                | A model's name, from the data; `WindowSpec.id` is the name, and the scope after a colon for a scoped window.                                  |
+| `ReportedQuota.scope`             | The model a reported limit applies to; the builder makes it a window of its own under the one of the same length.                             |
+| `ClaudeUsageRefresh`              | `locate`, `run` and `refresh`: ask Claude Code to refresh its usage copy by running its own `/usage`.                                         |
+| `ProviderReading.absent`          | Lengths in minutes of windows the plan lacks, when fresh data says so ([ADR 0037](../adr/0037-a-window-exists-only-if-the-data-lists-it.md)). |
+| `DisplayPreferences.hiddenModels` | The models of a provider the person turned off; a model is on unless it is here.                                                              |
+| `DisplayPreferences.select`       | The windows the person chose: none hides the provider, any shows it, and a window just chosen turns its models on.                            |
+| `ProviderConfig.ExistsIf`         | A list that says whether a window exists: `file`, `each`, `where`, `observedAt` and `maxAgeHours` (6 by default).                             |
 
 A quota window in `providers.json` can read a list: `each` (the path to it), `where` (fields an entry must equal), `scope`
 (the path of the model's name inside an entry), a `file` of its own and `observedAt` (when the file was fetched). No model is

@@ -22,7 +22,8 @@ makes each provider a card, with a choice of windows and an order set in Setting
   app, not from the snapshot.
 - **The choice is a set of windows by name**, taken from the windows the provider declares, never from a fixed list. The
   interface offers each window and "Both" (all); no provider and no window is named in the common code. At least one
-  window always stays visible.
+  window always stays visible. (Superseded in part by [ADR 0037](./0037-a-window-exists-only-if-the-data-lists-it.md): the
+  windows are chosen one by one, with no "Both", and choosing none hides the provider.)
 - **A hidden window is out of every figure shown.** The menu-bar percentage is the lowest of the visible windows, and a
   hidden one raises no problem.
 - **The card uses system colours only** (`Color.primary` at 7% for its fill and at 10% for its hairline, the text styles and

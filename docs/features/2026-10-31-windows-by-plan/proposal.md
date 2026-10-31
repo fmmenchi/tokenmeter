@@ -13,18 +13,18 @@ implemented; this page is what stays. The decisions behind it are in
 
 ## The proposal
 
-![The chosen proposal in the light appearance: the panel and the widget with a Claude card that has only Weekly and Fable, the card with the 5 hours row kept as unknown while nothing is known, and Settings with a line saying the plan has no 5-hour limit](./proposal-overview.png)
+![The chosen proposal in the light appearance: the panel and the widget with a Claude card that has only Weekly and Fable, the card with the 5 hours row kept as unknown while nothing is known, and Settings with a selector that has only the windows the plan has](./proposal-overview.png)
 
 ![The same design in the dark appearance](./proposal-overview-dark.png)
 
 ## What changes
 
-| Surface  | What it shows                                                                                                                                 | Why                                                    |
-| :------- | :-------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------- |
-| Panel    | A card without the windows the plan lacks. Claude on Ultra has Weekly and the model's line; ChatGPT keeps its two windows.                    | A grey "unknown" row says nothing true.                |
-| Widget   | The same cards. The shorter card leaves room for the start of the next one.                                                                   | The widget draws what the snapshot holds.              |
-| Settings | A provider with one window has no choice of windows, and a line says what is missing: "Ultra has no 5-hour limit: Weekly is its only window." | There is nothing to choose, and the person learns why. |
-| Menu bar | Unchanged. Its percentage counts only the windows that exist.                                                                                 | A window that does not exist must not set the number.  |
+| Surface  | What it shows                                                                                                                                                                              | Why                                                                          |
+| :------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------- |
+| Panel    | A card without the windows the plan lacks. Claude on Ultra has Weekly and the model's line; ChatGPT keeps its two windows.                                                                 | A grey "unknown" row says nothing true.                                      |
+| Widget   | The same cards. The shorter card leaves room for the start of the next one.                                                                                                                | The widget draws what the snapshot holds.                                    |
+| Settings | A selector with one segment for each window the plan has, chosen independently, in the accent colour when on; a model is a sub-segment under its window. Choosing none hides the provider. | The same control serves one window or many, and a model comes with the plan. |
+| Menu bar | Unchanged. Its percentage counts only the windows that exist.                                                                                                                              | A window that does not exist must not set the number.                        |
 
 ## Rules
 
@@ -32,7 +32,7 @@ implemented; this page is what stays. The decisions behind it are in
   the file is readable, the list is not empty and it is at most six hours old. Otherwise the row stays, with "unknown".
 - **A window can come back.** When a fresh list names it again, the row returns.
 - **A model of a missing window goes with it.**
-- **No plan is named in the code.** The line in Settings reads the plan's name from the data.
+- **No plan or model is named in the code.** The segments come from the data.
 - **ChatGPT is unchanged**: its logs declare their own windows.
 
 ## Settled by building

@@ -101,8 +101,10 @@ Each provider is a card in the panel and in the widget. In **Settings, Providers
 
 - **Drag** a provider, or use its **arrows**, to move its card. The medium widget shows one card fully, so the first card is the one you see
   there.
-- **Choose the windows** a card shows: **5 hours**, **Weekly** or **Both** (a provider with other windows lists them
-  instead). **Both** is the default, and one window always stays.
+- **Choose the windows** a card shows. Each window the plan has is a segment, in blue when it is on; choose as many as you
+  like. A plan that lacks a window (Ultra has no 5-hour limit) does not list it. A model's limit, such as Fable, is under
+  its window and is on with it by default; it is greyed out while its window is off. Turning every window off hides the
+  provider, and turning one on shows it again.
 - **Hide** a provider with the eye at the end of its row. A hidden provider has no card in the panel or the widget and is
   not in the menu-bar percentage; its row stays, dimmed, and the eye shows it again with its place and its windows as they
   were. One provider always stays shown. A hidden provider's problems still appear in the panel.
