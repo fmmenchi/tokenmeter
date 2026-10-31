@@ -15,7 +15,7 @@ public struct Collector: Sendable {
             return SnapshotBuilder.providerSnapshot(
                 provider: source.info.provider, title: source.info.title, events: reading.events,
                 windows: source.info.windows, reported: reading.quotas, plan: reading.plan,
-                quotaUpdatedAt: reading.quotaUpdatedAt, setupHint: source.info.setupHint, now: now)
+                quotaUpdatedAt: reading.quotaUpdatedAt, setupHint: source.info.setupHint, absent: reading.absent, now: now)
         }
         return Snapshot(generatedAt: now, providers: providers)
     }

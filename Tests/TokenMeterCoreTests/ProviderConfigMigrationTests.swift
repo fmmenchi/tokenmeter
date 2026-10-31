@@ -95,10 +95,13 @@ final class ModelLimitMigrationTests: XCTestCase {
         XCTAssertEqual(try windowCount(), 2, "added once")
     }
 
-    func testAFileThatAlreadyHasAListWindowIsNotTouched() throws {
+    func testAFileThatAlreadyHasAListWindowDoesNotGetAnotherOne() throws {
         let json = old.replacingOccurrences(of: #"{"at":"rate_limits.five_hour""#, with: #"{"each":"x.y","usedPercent":"percent"},{"at":"rate_limits.five_hour""#)
         try Data(json.utf8).write(to: url)
-        XCTAssertEqual(ProviderConfigFile.addClaudeIntegration(to: url), .untouched)
+        ProviderConfigFile.addClaudeIntegration(to: url)
+        let windows = try ProviderConfigFile.load(from: url)?.providers.first?.quota?.windows ?? []
+        XCTAssertEqual(windows.filter { $0.each != nil }.count, 1, "the model window is not added twice")
+        XCTAssertEqual(windows.first { $0.each == nil }?.existsIf?.where?["kind"], "session", "the 5 hours still get their rule")
     }
 
     func testTheSeedCarriesTheModelLimitWindow() {
@@ -138,5 +141,23 @@ final class UltraPlanMigrationTests: XCTestCase {
         try Data(json(label: "My big plan").utf8).write(to: url)
         XCTAssertEqual(ProviderConfigFile.addClaudeIntegration(to: url), .untouched)
         XCTAssertEqual(try label(), "My big plan")
+    }
+}
+
+final class FiveHourRuleMigrationTests: XCTestCase {
+    func testTheSeedAndAnOldFileGetTheRuleOnce() throws {
+        let seed = ProviderConfigFile.seed().providers.first { $0.id == "claude" }
+        XCTAssertNotNil(seed?.quota?.windows.first { $0.minutes == 300 }?.existsIf)
+
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let url = folder.appendingPathComponent("providers.json")
+        let old = #"{"version":1,"providers":[{"id":"claude","title":"C","windows":[300,10080],"integration":"claude-status-line","quota":{"file":"f","windows":[{"at":"rate_limits.five_hour","minutes":300,"usedPercent":"u"},{"each":"x","usedPercent":"p"}]}}]}"#
+        try Data(old.utf8).write(to: url)
+        XCTAssertEqual(ProviderConfigFile.addClaudeIntegration(to: url), .migrated)
+        let file = try ProviderConfigFile.load(from: url)
+        XCTAssertEqual(file?.providers.first?.quota?.windows.first?.existsIf?.where?["kind"], "session")
+        XCTAssertEqual(ProviderConfigFile.addClaudeIntegration(to: url), .untouched)
     }
 }

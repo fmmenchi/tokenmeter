@@ -47,8 +47,14 @@ public struct ProviderConfigFile: Decodable, Sendable {
         "observedAt": "cachedUsageUtilization.fetchedAtMs", "observedAtFormat": "epochMilliseconds",
     ] }
 
+    /// The rule that says Claude's 5-hour window exists only if the usage copy lists a session limit (ADR 0037).
+    static func claudeFiveHourExists() -> [String: Any] {
+        ["file": "~/.claude.json", "each": "cachedUsageUtilization.utilization.limits", "where": ["kind": "session"],
+         "observedAt": "cachedUsageUtilization.fetchedAtMs", "observedAtFormat": "epochMilliseconds"]
+    }
+
     /// Adds to the `claude` entry of an existing file what a newer version needs and the file lacks: its `integration`
-    /// (ADR 0033) and the window for its per-model limits (ADR 0034). The only changes the app makes to a file that is
+    /// (ADR 0033), the window for its per-model limits (ADR 0034) and the rule for its 5 hours (ADR 0037). The only changes the app makes to a file that is
     /// already there; each is added once and only when absent, and the original is kept as `.bak`.
     @discardableResult
     public static func addClaudeIntegration(to url: URL = defaultURL) -> MigrationOutcome {
@@ -64,12 +70,17 @@ public struct ProviderConfigFile: Decodable, Sendable {
             entry["integration"] = "claude-status-line"
             changed = true
         }
-        if var quota = entry["quota"] as? [String: Any], var windows = quota["windows"] as? [[String: Any]],
-           !windows.contains(where: { $0["each"] != nil }) {
-            windows.append(claudeModelLimits())
+        if var quota = entry["quota"] as? [String: Any], var windows = quota["windows"] as? [[String: Any]] {
+            if !windows.contains(where: { $0["each"] != nil }) {
+                windows.append(claudeModelLimits())
+                changed = true
+            }
+            if let five = windows.firstIndex(where: { ($0["at"] as? String) == "rate_limits.five_hour" && $0["existsIf"] == nil }) {
+                windows[five]["existsIf"] = claudeFiveHourExists()
+                changed = true
+            }
             quota["windows"] = windows
             entry["quota"] = quota
-            changed = true
         }
         // Anthropic renamed Max 20x to Ultra: the rule that carries the old default text gets the new one. A label the person
         // wrote themselves is left alone.
@@ -186,6 +197,8 @@ public struct ProviderConfig: Decodable, Sendable {
             /// Where the file says when its figures were fetched, from the file's root; the file's age when absent.
             public let observedAt: String?
             public let observedAtFormat: TimeFormat?
+            /// The window exists only if a list names it (ADR 0037); without it the window is always there.
+            public let existsIf: ExistsIf?
             /// The object holding the fields below; the line or file root when absent.
             public let at: String?
             public let usedPercent: String
@@ -194,6 +207,17 @@ public struct ProviderConfig: Decodable, Sendable {
             public let minutes: Int?
             public let minutesPath: String?
         }
+    }
+
+    /// A list that says whether a window exists: one entry of `each` must match `where`. The list is believed only while
+    /// it is fresh (`maxAgeHours`, 6 by default); otherwise nothing is said and the window stays (ADR 0037).
+    public struct ExistsIf: Decodable, Sendable {
+        public let file: String
+        public let each: String
+        public let `where`: [String: String]?
+        public let observedAt: String?
+        public let observedAtFormat: Quota.Window.TimeFormat?
+        public let maxAgeHours: Double?
     }
 
     public struct Plan: Decodable, Sendable {

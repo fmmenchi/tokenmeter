@@ -23,9 +23,12 @@ public struct ProviderReading: Sendable {
     public var plan: String?
     /// When the provider last wrote its quota; nil if it never did.
     public var quotaUpdatedAt: Date?
+    /// Lengths in minutes of windows the plan does not have, when fresh data says so (ADR 0037).
+    public var absent: Set<Int>
 
     public init(events: [UsageEvent] = [], quotas: [ReportedQuota] = [], plan: String? = nil,
-                quotaUpdatedAt: Date? = nil) {
+                quotaUpdatedAt: Date? = nil, absent: Set<Int> = []) {
+        self.absent = absent
         self.events = events
         self.quotas = quotas
         self.plan = plan

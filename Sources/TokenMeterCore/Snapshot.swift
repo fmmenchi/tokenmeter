@@ -70,9 +70,12 @@ public struct ProviderSnapshot: Codable, Equatable, Sendable {
     public let quotaUpdatedAt: Date?
     /// Shown while no quota has been seen; nil when the provider has nothing to set up (ADR 0015).
     public let setupHint: String?
+    /// Names of windows the provider declares that the plan does not have (ADR 0037), so Settings can say so.
+    public let missing: [String]
 
     public init(provider: Provider, title: String? = nil, windows: [WindowUsage], plan: String? = nil,
-                quotaUpdatedAt: Date? = nil, setupHint: String? = nil) {
+                quotaUpdatedAt: Date? = nil, setupHint: String? = nil, missing: [String] = []) {
+        self.missing = missing
         self.provider = provider
         self.title = title ?? provider.rawValue
         self.windows = windows
@@ -82,7 +85,7 @@ public struct ProviderSnapshot: Codable, Equatable, Sendable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case provider, title, windows, plan, quotaUpdatedAt, setupHint
+        case provider, title, windows, plan, quotaUpdatedAt, setupHint, missing
     }
 
     public init(from decoder: any Decoder) throws {
@@ -92,7 +95,8 @@ public struct ProviderSnapshot: Codable, Equatable, Sendable {
                   windows: try c.decode([WindowUsage].self, forKey: .windows),
                   plan: try c.decodeIfPresent(String.self, forKey: .plan),
                   quotaUpdatedAt: try c.decodeIfPresent(Date.self, forKey: .quotaUpdatedAt),
-                  setupHint: try c.decodeIfPresent(String.self, forKey: .setupHint))
+                  setupHint: try c.decodeIfPresent(String.self, forKey: .setupHint),
+                  missing: try c.decodeIfPresent([String].self, forKey: .missing) ?? [])
     }
 }
 
@@ -140,7 +144,7 @@ extension Snapshot {
             windows = windows.filter { $0.window.scope == nil || kept.contains($0.window.name) }
             return ProviderSnapshot(provider: provider.provider, title: provider.title, windows: windows,
                                     plan: provider.plan, quotaUpdatedAt: provider.quotaUpdatedAt,
-                                    setupHint: provider.setupHint)
+                                    setupHint: provider.setupHint, missing: provider.missing)
         }
         return Snapshot(generatedAt: generatedAt, providers: shown, problems: problems)
     }
@@ -156,8 +160,12 @@ public enum SnapshotBuilder {
         plan: String? = nil,
         quotaUpdatedAt: Date? = nil,
         setupHint: String? = nil,
+        absent: Set<Int> = [],
         now: Date = Date()
     ) -> ProviderSnapshot {
+        // A window the plan does not have is not drawn, and neither are the models that were part of it (ADR 0037).
+        let gone = windows.filter { spec in absent.contains { abs(Double($0) * 60 - spec.duration) < 60 } }
+        let windows = windows.filter { spec in !gone.contains(spec) }
         let usages = windows.map { spec -> WindowUsage in
             let start = now.addingTimeInterval(-spec.duration)
             let tokens = events.lazy.filter { $0.date >= start && $0.date <= now }
@@ -190,6 +198,6 @@ public enum SnapshotBuilder {
                                source: .reported, resetsAt: quota.resetsAt, observedAt: quota.observedAt)
         }
         return ProviderSnapshot(provider: provider, title: title, windows: usages + scoped, plan: plan,
-                                quotaUpdatedAt: quotaUpdatedAt, setupHint: setupHint)
+                                quotaUpdatedAt: quotaUpdatedAt, setupHint: setupHint, missing: gone.map(\.name))
     }
 }
