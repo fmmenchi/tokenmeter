@@ -27,8 +27,7 @@ flowchart LR
 ## Files
 
 ```text
-Sources/TokenMeterCore/Snapshot.swift     staleAfter moves here from Shared, so both use one value
-Sources/TokenMeterCore/RunOut.swift       the estimate and its text
+Sources/TokenMeterCore/RunOut.swift       the estimate and its text; staleAfter moves here so both use one value
 Shared/UsageViews.swift, ProviderCard.swift  the line, drawn only where asked
 App/TokenMeter/MenuContent.swift          the panel asks for it
 ```

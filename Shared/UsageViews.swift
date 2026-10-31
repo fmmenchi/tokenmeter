@@ -2,9 +2,6 @@ import SwiftUI
 import TokenMeterCore
 
 extension WindowUsage {
-    /// A reported figure older than this no longer counts as live (ADR 0008).
-    static let staleAfter: TimeInterval = 10 * 60
-
     var isStale: Bool {
         guard source == .reported, let observedAt else { return false }
         return Date().timeIntervalSince(observedAt) > Self.staleAfter
