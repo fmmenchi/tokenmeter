@@ -9,10 +9,10 @@ date: 2026-10-31
 
 A window says when its quota would run out at the pace it has had, when that is before the reset.
 
-|        |                                                    |
-| :----- | :------------------------------------------------- |
-| Date   | 2026-10-31                                         |
-| Status | in design and build: the proposal and the ADR done |
+|        |                                                                   |
+| :----- | :---------------------------------------------------------------- |
+| Date   | 2026-10-31                                                        |
+| Status | implemented, 2026-10-31: built and tested; not yet seen on screen |
 
 ## Intent
 
@@ -22,11 +22,11 @@ nothing is said. Without a fresh figure, or too early in the window, nothing can
 
 ## The nucleus
 
-| Part                | Page                                                                     | Status           |
-| :------------------ | :----------------------------------------------------------------------- | :--------------- |
-| Proposal            | [Proposal](./proposal.md)                                                | variant B chosen |
-| Implementation plan | [Implementation plan](./plan.md)                                         | in progress      |
-| Decisions           | [ADR 0038](../../adr/0038-a-window-says-when-it-runs-out-at-its-pace.md) | accepted         |
+| Part                | Page                                                                     | Status             |
+| :------------------ | :----------------------------------------------------------------------- | :----------------- |
+| Proposal            | [Proposal](./proposal.md)                                                | built as chosen    |
+| Implementation plan | [Implementation plan](./plan.md)                                         | done, steps 1 to 4 |
+| Decisions           | [ADR 0038](../../adr/0038-a-window-says-when-it-runs-out-at-its-pace.md) | accepted           |
 
 ## Related
 

@@ -61,7 +61,9 @@ let one = Collector(sources: [mySource]).snapshot(now: date) // your own list, f
 | `WindowUsage`        | `window`, `tokens`, `remainingFraction?`, `source`, `resetsAt?`, `observedAt?`.       |
 | `WindowUsage.Source` | `reported`, `reset`, `consumptionOnly`.                                               |
 
-`WindowUsage.resolved(at:)` returns the window as it reads at a given time. The JSON shape is in
+`WindowUsage.resolved(at:)` returns the window as it reads at a given time. `runsOut(at:)` is when its quota runs out at the
+pace since the window began, if that is before the reset, and `runsOutText(at:)` is the sentence for it; both are nil when
+the quota lasts or nothing can be estimated ([ADR 0038](../adr/0038-a-window-says-when-it-runs-out-at-its-pace.md)). The JSON shape is in
 [Commands and Files](./commands.md#the-snapshot); older snapshots without `title` or `problems` still decode.
 
 ## Problems

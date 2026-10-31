@@ -8,6 +8,10 @@ sidebar_position: 2
 
 The design that was chosen, [ADR 0038](../../adr/0038-a-window-says-when-it-runs-out-at-its-pace.md) is the decision.
 
+![The chosen proposal in the light appearance: variant A with a line on every window that can be estimated, and variant B, chosen, with the line only under the Claude Weekly window that would run out before its reset](./proposal-overview.png)
+
+![The same in the dark appearance](./proposal-overview-dark.png)
+
 ## What changes
 
 | Surface  | What it shows                                                                                                                                                | Why                                            |

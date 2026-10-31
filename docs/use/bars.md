@@ -41,6 +41,20 @@ there was use after the reset and no new quota was reported, the window stays **
 than claiming to be full ([ADR 0007](../adr/0007-expired-window-reads-as-reset.md)).
 :::
 
+## When it runs out
+
+When a window would run out **before it resets**, the panel adds one orange line under its detail:
+`at this pace you run out Thursday at 6 pm`. The moment is rounded to the hour and says today, tomorrow or the weekday
+([ADR 0038](../adr/0038-a-window-says-when-it-runs-out-at-its-pace.md)).
+
+- The pace is the average since the window began, so a quiet night counts as slow use and the line is pessimistic for
+  someone who does not work at night.
+- **No line means one of two things:** the quota lasts, or it cannot be estimated. Nothing is estimated for a stale,
+  reset or unknown window, one with no reset time, or one with less than a tenth of the window gone.
+- Claude's figure moves only while Claude Code runs, so its line often goes away after ten minutes and comes back with
+  the next session.
+- The widget does not show it, and a model's limit under Weekly has no line of its own.
+
 ## Tokens
 
 The line under a bar shows **input + output** tokens seen in that window. Cache reads and cache

@@ -19,12 +19,13 @@ are [ADRs](../adr), and its overview links them.
 | [Hide a provider](./2026-10-30-provider-visibility/index.md): an eye button takes a provider's card off the panel and the widget | 2026-10-30 | [Overview](./2026-10-30-provider-visibility/index.md), [Proposal](./2026-10-30-provider-visibility/proposal.md), [Implementation plan](./2026-10-30-provider-visibility/plan.md) |
 | [Model limits](./2026-10-30-model-limits/index.md): a limit for one model, part of Weekly, as a compact line                     | 2026-10-30 | [Overview](./2026-10-30-model-limits/index.md), [Proposal](./2026-10-30-model-limits/proposal.md), [Implementation plan](./2026-10-30-model-limits/plan.md)                      |
 | [Windows by plan](./2026-10-31-windows-by-plan/index.md): a card shows only the windows the plan has                             | 2026-10-31 | [Overview](./2026-10-31-windows-by-plan/index.md), [Proposal](./2026-10-31-windows-by-plan/proposal.md), [Implementation plan](./2026-10-31-windows-by-plan/plan.md)             |
+| [Burn rate](./2026-10-31-burn-rate/index.md): a window says when it runs out at its pace, when before the reset                  | 2026-10-31 | [Overview](./2026-10-31-burn-rate/index.md), [Proposal](./2026-10-31-burn-rate/proposal.md), [Implementation plan](./2026-10-31-burn-rate/plan.md)                               |
 
 ## In design and build
 
-| Feature                                                                                                         | Date       | Pages                                                                                                                                              |
-| :-------------------------------------------------------------------------------------------------------------- | :--------- | :------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Burn rate](./2026-10-31-burn-rate/index.md): a window says when it runs out at its pace, when before the reset | 2026-10-31 | [Overview](./2026-10-31-burn-rate/index.md), [Proposal](./2026-10-31-burn-rate/proposal.md), [Implementation plan](./2026-10-31-burn-rate/plan.md) |
+| Feature | Date | Pages |
+| :------ | :--- | :---- |
+| _None._ |      |       |
 
 ## The pattern: from idea to implemented
 
