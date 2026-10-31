@@ -70,12 +70,9 @@ public struct ProviderSnapshot: Codable, Equatable, Sendable {
     public let quotaUpdatedAt: Date?
     /// Shown while no quota has been seen; nil when the provider has nothing to set up (ADR 0015).
     public let setupHint: String?
-    /// Names of windows the provider declares that the plan does not have (ADR 0037), so Settings can say so.
-    public let missing: [String]
 
     public init(provider: Provider, title: String? = nil, windows: [WindowUsage], plan: String? = nil,
-                quotaUpdatedAt: Date? = nil, setupHint: String? = nil, missing: [String] = []) {
-        self.missing = missing
+                quotaUpdatedAt: Date? = nil, setupHint: String? = nil) {
         self.provider = provider
         self.title = title ?? provider.rawValue
         self.windows = windows
@@ -85,7 +82,7 @@ public struct ProviderSnapshot: Codable, Equatable, Sendable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case provider, title, windows, plan, quotaUpdatedAt, setupHint, missing
+        case provider, title, windows, plan, quotaUpdatedAt, setupHint
     }
 
     public init(from decoder: any Decoder) throws {
@@ -95,8 +92,7 @@ public struct ProviderSnapshot: Codable, Equatable, Sendable {
                   windows: try c.decode([WindowUsage].self, forKey: .windows),
                   plan: try c.decodeIfPresent(String.self, forKey: .plan),
                   quotaUpdatedAt: try c.decodeIfPresent(Date.self, forKey: .quotaUpdatedAt),
-                  setupHint: try c.decodeIfPresent(String.self, forKey: .setupHint),
-                  missing: try c.decodeIfPresent([String].self, forKey: .missing) ?? [])
+                  setupHint: try c.decodeIfPresent(String.self, forKey: .setupHint))
     }
 }
 
@@ -136,15 +132,22 @@ extension Snapshot {
         let kept = order.filter { !hidden.contains($0) }
         let shownIDs = kept.isEmpty ? Array(order.prefix(1)) : kept
         let shown = shownIDs.compactMap { id in providers.first { $0.provider.rawValue == id } }.map { provider -> ProviderSnapshot in
-            guard let chosen = preferences.windows(for: provider.provider.rawValue) else { return provider }
-            var windows = provider.windows.filter { chosen.contains($0.window.id) }
-            guard windows.contains(where: { $0.window.scope == nil }) else { return provider }
-            // A model's window is a part of the one of the same name: it never shows without it.
-            let kept = Set(windows.filter { $0.window.scope == nil }.map(\.window.name))
-            windows = windows.filter { $0.window.scope == nil || kept.contains($0.window.name) }
+            let id = provider.provider.rawValue
+            let chosen = preferences.windows(for: id)
+            let offModels = preferences.hiddenModels(for: id)
+            // The provider's own windows follow the choice (all when none, or when it names none of them). A model's window
+            // is a part of the one of the same name: it shows with it, on by default, unless it was turned off (ADR 0037).
+            let own = provider.windows.filter { $0.window.scope == nil }
+            let ownKept = chosen.map { set in own.filter { set.contains($0.window.id) } }.flatMap { $0.isEmpty ? nil : $0 } ?? own
+            let names = Set(ownKept.map(\.window.name))
+            let windows = provider.windows.filter { usage in
+                usage.window.scope == nil
+                    ? ownKept.contains { $0.window.id == usage.window.id }
+                    : names.contains(usage.window.name) && !offModels.contains(usage.window.id)
+            }
             return ProviderSnapshot(provider: provider.provider, title: provider.title, windows: windows,
                                     plan: provider.plan, quotaUpdatedAt: provider.quotaUpdatedAt,
-                                    setupHint: provider.setupHint, missing: provider.missing)
+                                    setupHint: provider.setupHint)
         }
         return Snapshot(generatedAt: generatedAt, providers: shown, problems: problems)
     }
@@ -198,6 +201,6 @@ public enum SnapshotBuilder {
                                source: .reported, resetsAt: quota.resetsAt, observedAt: quota.observedAt)
         }
         return ProviderSnapshot(provider: provider, title: title, windows: usages + scoped, plan: plan,
-                                quotaUpdatedAt: quotaUpdatedAt, setupHint: setupHint, missing: gone.map(\.name))
+                                quotaUpdatedAt: quotaUpdatedAt, setupHint: setupHint)
     }
 }

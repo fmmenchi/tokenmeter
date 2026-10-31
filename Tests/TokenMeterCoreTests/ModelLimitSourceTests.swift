@@ -105,10 +105,9 @@ final class WindowsByPlanTests: XCTestCase {
         XCTAssertEqual(try source(file: file, maxAge: #","maxAgeHours":24"#).read(since: epoch).absent, [300], "unless the rule allows it")
     }
 
-    func testTheBuilderLeavesAnAbsentWindowOutAndNamesIt() {
+    func testTheBuilderLeavesAnAbsentWindowOut() {
         let result = SnapshotBuilder.providerSnapshot(provider: .claude, events: [], windows: [.session, .week], absent: [300])
         XCTAssertEqual(result.windows.map(\.window.id), ["7d"])
-        XCTAssertEqual(result.missing, ["5h"])
     }
 
     func testAModelOfAnAbsentWindowGoesWithIt() {
@@ -116,10 +115,5 @@ final class WindowsByPlanTests: XCTestCase {
         let result = SnapshotBuilder.providerSnapshot(provider: .claude, events: [], windows: [.session, .week],
                                                       reported: [model], absent: [300])
         XCTAssertEqual(result.windows.map(\.window.id), ["7d"])
-    }
-
-    func testAnOlderSnapshotHasNothingMissing() throws {
-        let json = Data(#"{"provider":"claude","title":"Claude","windows":[]}"#.utf8)
-        XCTAssertEqual(try JSONDecoder().decode(ProviderSnapshot.self, from: json).missing, [])
     }
 }

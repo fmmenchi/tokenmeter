@@ -204,7 +204,7 @@ final class ModelLimitTests: XCTestCase {
         let model = ReportedQuota(usedPercent: 13, windowMinutes: 10080, resetsAt: now.addingTimeInterval(86_400),
                                   observedAt: now, scope: "Fable")
         let result = snapshot([week, model])
-        XCTAssertEqual(result.windows.map(\.window.id), ["5h", "7d", "7d:Fable"])
+        XCTAssertEqual(result.windows.map { $0.window.id }, ["5h", "7d", "7d:Fable"])
         XCTAssertEqual(result.windows[1].remainingFraction ?? 0, 0.52, accuracy: 0.001, "a model's figure never becomes the week's")
         XCTAssertEqual(result.windows[2].remainingFraction ?? 0, 0.87, accuracy: 0.001)
         XCTAssertEqual(result.windows[2].window.scope, "Fable")
@@ -212,7 +212,7 @@ final class ModelLimitTests: XCTestCase {
 
     func testAModelLimitWithNoParentWindowIsLeftOut() {
         let model = ReportedQuota(usedPercent: 13, windowMinutes: 1440, resetsAt: nil, scope: "Fable")
-        XCTAssertEqual(snapshot([model]).windows.map(\.window.id), ["5h", "7d"])
+        XCTAssertEqual(snapshot([model]).windows.map { $0.window.id }, ["5h", "7d"])
     }
 
     func testAScopedWindowRoundTripsAndAnOlderWindowHasNoScope() throws {
@@ -232,13 +232,73 @@ final class ModelLimitTests: XCTestCase {
         let preferences = MemoryDisplayPreferences()
 
         preferences.setWindows(["5h", "7d:Fable"], for: "claude")
-        XCTAssertEqual(all.applying(preferences).providers[0].windows.map(\.window.id), ["5h"],
+        XCTAssertEqual(all.applying(preferences).providers[0].windows.map { $0.window.id }, ["5h"],
                        "the model was chosen but its week was not: it does not show")
 
         preferences.setWindows(["5h", "7d"], for: "claude")
-        XCTAssertEqual(all.applying(preferences).providers[0].windows.map(\.window.id), ["5h", "7d"], "the model is off")
+        XCTAssertEqual(all.applying(preferences).providers[0].windows.map { $0.window.id }, ["5h", "7d", "7d:Fable"],
+                       "a model is on unless the person turned it off (ADR 0037)")
 
-        preferences.setWindows(["7d", "7d:Fable"], for: "claude")
-        XCTAssertEqual(all.applying(preferences).providers[0].windows.map(\.window.id), ["7d", "7d:Fable"])
+        preferences.setModel("7d:Fable", shown: false, for: "claude")
+        XCTAssertEqual(all.applying(preferences).providers[0].windows.map { $0.window.id }, ["5h", "7d"], "the model is off")
+    }
+
+    // ADR 0037: a model is on unless the person turned it off, and shows only with its window.
+    private let weeklyAndFable: [WindowSpec] = [.week, WindowSpec(name: "7d", duration: 604_800, scope: "Fable")]
+
+    func testAModelShowsByDefaultAndWithoutItsWindowDoesNot() {
+        let snapshot = Snapshot(generatedAt: Date(timeIntervalSince1970: 0), providers: [SnapshotBuilder.providerSnapshot(
+            provider: Provider(rawValue: "claude"), title: "claude", events: [], windows: [.session] + weeklyAndFable)])
+        let preferences = MemoryDisplayPreferences()
+        XCTAssertEqual(snapshot.applying(preferences).providers[0].windows.map { $0.window.id }, ["5h", "7d", "7d:Fable"])
+
+        preferences.setWindows(["5h"], for: "claude")
+        XCTAssertEqual(snapshot.applying(preferences).providers[0].windows.map { $0.window.id }, ["5h"],
+                       "Fable is part of Weekly: it does not show without it")
+
+        preferences.setWindows(["5h", "7d"], for: "claude")
+        preferences.setModel("7d:Fable", shown: false, for: "claude")
+        XCTAssertEqual(snapshot.applying(preferences).providers[0].windows.map { $0.window.id }, ["5h", "7d"])
+    }
+
+    func testDeselectingTheLastWindowHidesTheProviderAndSelectingOneShowsItAgain() {
+        let choice = WindowChoice(windows: ["5h", "7d"], models: ["7d:Fable": "7d"])
+        let preferences = MemoryDisplayPreferences()
+        XCTAssertTrue(preferences.select(["7d"], among: choice, for: "claude", canHide: true))
+        XCTAssertEqual(preferences.windows(for: "claude"), ["7d"])
+        XCTAssertFalse(preferences.hidden.contains("claude"))
+
+        XCTAssertTrue(preferences.select([], among: choice, for: "claude", canHide: true))
+        XCTAssertTrue(preferences.hidden.contains("claude"))
+
+        XCTAssertTrue(preferences.select(["5h"], among: choice, for: "claude", canHide: true))
+        XCTAssertFalse(preferences.hidden.contains("claude"))
+        XCTAssertEqual(preferences.windows(for: "claude"), ["5h"])
+    }
+
+    func testTheLastShownProviderKeepsItsLastWindow() {
+        let choice = WindowChoice(windows: ["7d"], models: [:])
+        let preferences = MemoryDisplayPreferences()
+        XCTAssertFalse(preferences.select([], among: choice, for: "claude", canHide: false))
+        XCTAssertFalse(preferences.hidden.contains("claude"))
+    }
+
+    func testSelectingAWindowTurnsItsModelsOnByDefault() {
+        let choice = WindowChoice(windows: ["5h", "7d"], models: ["7d:Fable": "7d"])
+        let preferences = MemoryDisplayPreferences()
+        preferences.setModel("7d:Fable", shown: false, for: "claude")
+        preferences.select(["5h"], among: choice, for: "claude", canHide: true)
+        XCTAssertEqual(preferences.hiddenModels(for: "claude"), ["7d:Fable"], "Weekly was not added: Fable stays as it was")
+        preferences.select(["5h", "7d"], among: choice, for: "claude", canHide: true)
+        XCTAssertEqual(preferences.hiddenModels(for: "claude"), [], "selecting Weekly turns Fable on")
+    }
+
+    func testShowingAProviderWithTheEyeSelectsEveryWindow() {
+        let preferences = MemoryDisplayPreferences()
+        preferences.setWindows(["7d"], for: "claude")
+        preferences.setHidden(true, for: "claude")
+        preferences.setShown(true, for: "claude")
+        XCTAssertNil(preferences.windows(for: "claude"))
+        XCTAssertFalse(preferences.hidden.contains("claude"))
     }
 }

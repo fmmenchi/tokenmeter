@@ -52,8 +52,8 @@ struct SettingsView: View {
                         provider: provider, isFirst: index == 0, isLast: index == meter.cardProviders.count - 1,
                         isDropTarget: dropTarget == provider.id,
                         canHide: !provider.isShown || meter.cardProviders.filter(\.isShown).count > 1,
-                        onChange: { meter.setShownWindows($0, models: provider.shownModels, for: provider.id) },
-                        onChangeModels: { meter.setShownWindows(provider.shown, models: $0, for: provider.id) },
+                        onChange: { meter.setShownWindows($0, for: provider.id) },
+                        onChangeModel: { meter.setModel($0, shown: $1, for: provider.id) },
                         onMove: { meter.moveProvider(provider.id, by: $0) },
                         onToggleShown: { meter.setProviderShown(!provider.isShown, for: provider.id) },
                         onDragStart: { dragging = provider.id })
@@ -74,8 +74,8 @@ struct SettingsView: View {
     }
 }
 
-/// One provider in the list: its name and which windows its card shows. Two windows are a choice of one or both; more
-/// than two are a menu of checkmarks, so any window of any provider can be chosen (ADR 0035).
+/// One provider in the list: its name and which windows its card shows, chosen in a `WindowSelector` that has one segment
+/// for each window the data lists (ADR 0035, 0037).
 private struct ProviderRow: View {
     let provider: Meter.CardProvider
     let isFirst: Bool
@@ -83,12 +83,10 @@ private struct ProviderRow: View {
     let isDropTarget: Bool
     let canHide: Bool
     let onChange: (Set<String>) -> Void
-    let onChangeModels: (Set<String>) -> Void
+    let onChangeModel: (String, Bool) -> Void
     let onMove: (Int) -> Void
     let onToggleShown: () -> Void
     let onDragStart: () -> Void
-
-    private static let all = "all"
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -109,54 +107,24 @@ private struct ProviderRow: View {
                     .buttonStyle(.borderless).disabled(isLast).accessibilityLabel("Move \(provider.title) down")
                 VisibilityButton(provider: provider.title, isShown: provider.isShown, isEnabled: canHide, action: onToggleShown)
             }
-            if provider.windows.count == 2 {
-                Picker(provider.title, selection: Binding(
-                    get: { provider.shown.count == provider.windows.count ? Self.all : provider.shown.first ?? Self.all },
-                    set: { onChange($0 == Self.all ? Set(provider.windows) : [$0]) })) {
-                    ForEach(provider.windows, id: \.self) { name in Text(WindowSpec(name: name, duration: 0).label).tag(name) }
-                    Text("Both").tag(Self.all)
-                }
-                .pickerStyle(.segmented).labelsHidden()
-                .disabled(!provider.isShown).opacity(provider.isShown ? 1 : 0.45)
-            } else if provider.windows.count > 2 {
-                ForEach(provider.windows, id: \.self) { name in
-                    HStack {
-                        Text(WindowSpec(name: name, duration: 0).label)
-                        Spacer()
-                        Toggle(WindowSpec(name: name, duration: 0).label, isOn: Binding(
-                            get: { provider.shown.contains(name) },
-                            set: { on in onChange(on ? provider.shown.union([name]) : provider.shown.subtracting([name])) }))
-                            .labelsHidden().toggleStyle(.switch)
-                    }
-                    .disabled(!provider.isShown).opacity(provider.isShown ? 1 : 0.45)
-                }
-            }
-            if provider.windows.count == 1, !provider.missing.isEmpty {
-                // Nothing to choose: say what the plan lacks, from the data (ADR 0037).
-                let lacks = provider.missing.map { WindowSpec(name: $0, duration: 0).limitName }.joined(separator: " or ")
-                let only = WindowSpec(name: provider.windows[0].split(separator: ":").first.map(String.init) ?? "", duration: 0).label
-                Text("\(provider.plan ?? provider.title) has no \(lacks) limit: \(only) is its only window.")
-                    .font(.caption2).foregroundStyle(.secondary).padding(.leading, 36)
-                    .opacity(provider.isShown ? 1 : 0.45)
-            }
-            ForEach(provider.models) { model in
-                HStack {
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text(model.label)
-                        Text("Part of \(model.parentLabel): shown only with it").font(.caption2).foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                    Toggle("Show the \(model.label) limit", isOn: Binding(
-                        get: { provider.shownModels.contains(model.id) },
-                        set: { on in
-                            onChangeModels(on ? provider.shownModels.union([model.id]) : provider.shownModels.subtracting([model.id]))
-                        }))
-                        .labelsHidden().toggleStyle(.switch)
-                        .disabled(!provider.shown.contains(model.parent))
-                }
-                .padding(.leading, 12)
-                .disabled(!provider.isShown).opacity(provider.isShown ? 1 : 0.45)
-            }
+            // A hidden provider shows nothing selected: choosing a window shows it again (ADR 0037).
+            WindowSelector(
+                segments: provider.windows.map { id in
+                    WindowSelector.Segment(
+                        id: id, label: WindowSpec(name: id, duration: 0).label, isOn: provider.isShown && provider.shown.contains(id),
+                        models: provider.models.filter { $0.parent == id }.map { model in
+                            WindowSelector.Segment(
+                                id: model.id, label: model.label,
+                                isOn: provider.isShown && provider.shownModels.contains(model.id),
+                                isEnabled: provider.isShown && provider.shown.contains(id))
+                        })
+                },
+                onToggle: { id in
+                    let on = provider.isShown ? provider.shown : []
+                    onChange(on.contains(id) ? on.subtracting([id]) : on.union([id]))
+                },
+                onToggleModel: { id in onChangeModel(id, !provider.shownModels.contains(id)) })
+                .opacity(provider.isShown ? 1 : 0.45)
         }
         .padding(isDropTarget ? 6 : 0)
         .background(RoundedRectangle(cornerRadius: 8).fill(Color.accentColor.opacity(isDropTarget ? 0.12 : 0)))
