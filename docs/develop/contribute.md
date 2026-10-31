@@ -25,7 +25,8 @@ implementation plan, then code, with the three kept together in one folder.
 
 Never work on `main`. A branch is `<type>/<description>`, lowercase words joined by `-`, at least
 three characters, for example `feat/launch-at-login`. The type comes from the commit vocabulary
-below. The `pre-push` hook enforces it.
+below. The `pre-push` hook enforces it. A branch holds one feature or one fix, and when it is finished it is merged into
+`main` with a merge commit (`git merge --no-ff <branch>`), never a fast-forward or a rebase.
 
 ## Step 3: Commit
 
