@@ -106,3 +106,37 @@ final class ModelLimitMigrationTests: XCTestCase {
         XCTAssertEqual(claude?.quota?.windows.filter { $0.each != nil }.count, 1)
     }
 }
+
+final class UltraPlanMigrationTests: XCTestCase {
+    private var url: URL!
+
+    override func setUpWithError() throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        url = folder.appendingPathComponent("providers.json")
+    }
+
+    override func tearDownWithError() throws { try? FileManager.default.removeItem(at: url.deletingLastPathComponent()) }
+
+    private func json(label: String) -> String {
+        #"{"version":1,"providers":[{"id":"claude","title":"Claude","windows":[300,10080],"integration":"claude-status-line","quota":{"file":"f","windows":[{"each":"x","usedPercent":"p"}]},"plan":{"path":"a","labels":[{"path":"b","contains":"max_20x","label":"\#(label)"}]}}]}"#
+    }
+
+    private func label() throws -> String? {
+        let object = try JSONSerialization.jsonObject(with: Data(contentsOf: url)) as? [String: Any]
+        let plan = (object?["providers"] as? [[String: Any]])?.first?["plan"] as? [String: Any]
+        return (plan?["labels"] as? [[String: Any]])?.first?["label"] as? String
+    }
+
+    func testTheOldDefaultNameOfTheTwentyTimesPlanBecomesUltra() throws {
+        try Data(json(label: "Max 20x").utf8).write(to: url)
+        XCTAssertEqual(ProviderConfigFile.addClaudeIntegration(to: url), .migrated)
+        XCTAssertEqual(try label(), "Ultra")
+    }
+
+    func testANameThePersonWroteIsLeftAlone() throws {
+        try Data(json(label: "My big plan").utf8).write(to: url)
+        XCTAssertEqual(ProviderConfigFile.addClaudeIntegration(to: url), .untouched)
+        XCTAssertEqual(try label(), "My big plan")
+    }
+}
