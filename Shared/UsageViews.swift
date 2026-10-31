@@ -91,6 +91,8 @@ struct QuotaBar: View {
 
 struct WindowRow: View {
     let usage: WindowUsage
+    /// The limits of models that are part of this window, drawn right under its bar (ADR 0034).
+    var models: [WindowUsage] = []
 
     var body: some View {
         VStack(alignment: .leading, spacing: 3) {
@@ -102,6 +104,7 @@ struct WindowRow: View {
             }
             QuotaBar(fraction: usage.remainingFraction, tint: tint)
                 .opacity(usage.isApproximate ? 0.5 : 1)
+            ForEach(models, id: \.window.id) { ScopedWindowRow(usage: $0) }
             Text(usage.detailText).font(.caption2).foregroundStyle(.secondary)
         }
     }
@@ -116,21 +119,35 @@ extension WindowUsage {
     }
 }
 
-/// A model's limit, a part of the window of the same length: one compact line under it (ADR 0034). The share of the
-/// week and the reset are in the help text, so the line stays one line.
+/// The corner that joins a model's line to the bar of the window it is part of.
+private struct Bracket: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        let radius: CGFloat = 3
+        path.move(to: CGPoint(x: rect.minX, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY - radius))
+        path.addQuadCurve(to: CGPoint(x: rect.minX + radius, y: rect.maxY), control: CGPoint(x: rect.minX, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+        return path
+    }
+}
+
+/// A model's limit, a part of the window above it: a bracket, the name, a thin bar and the figure on one line, right
+/// under that window's bar (ADR 0034). The share of the week and the reset are in the help text.
 struct ScopedWindowRow: View {
     let usage: WindowUsage
 
     var body: some View {
         HStack(spacing: 6) {
+            Bracket().stroke(Color.secondary.opacity(0.6), lineWidth: 1).frame(width: 8, height: 8).offset(y: -3)
             Text(usage.window.scope ?? "").font(.caption.weight(.medium)).lineLimit(1)
-                .frame(minWidth: 34, alignment: .leading)
-            QuotaBar(fraction: usage.remainingFraction, tint: usage.tint, height: 6)
-                .opacity(usage.isApproximate ? 0.5 : 1)
+                .frame(minWidth: 30, alignment: .leading)
+            QuotaBar(fraction: usage.remainingFraction, tint: usage.tint, height: 4)
             Text(usage.remainingFraction == nil ? "unknown" : "\(usage.remainingText) left")
                 .font(.caption.bold().monospacedDigit()).frame(minWidth: 54, alignment: .trailing)
         }
-        .padding(.leading, 12)
+        .opacity(usage.isApproximate ? 0.5 : 1)
+        .padding(.leading, 6)
         .help([ "Part of \(WindowSpec(name: usage.window.name, duration: 0).label)",
                 usage.resetText.map { "resets \($0)" }, usage.isApproximate ? usage.observedAgoText.map { "seen \($0)" } : nil ]
             .compactMap { $0 }.joined(separator: " · "))
@@ -153,12 +170,10 @@ struct ProviderBlock: View {
                 }
                 if problemCount > 0 { NoticeChip(count: problemCount) }
             }
-            ForEach(snapshot.windows, id: \.window.id) { window in
-                if window.window.scope == nil {
-                    WindowRow(usage: window.resolved(at: Date()))
-                } else {
-                    ScopedWindowRow(usage: window.resolved(at: Date()))
-                }
+            ForEach(snapshot.windows.filter { $0.window.scope == nil }, id: \.window.id) { window in
+                WindowRow(usage: window.resolved(at: Date()),
+                          models: snapshot.windows.filter { $0.window.scope != nil && $0.window.name == window.window.name }
+                              .map { $0.resolved(at: Date()) })
             }
         }
     }
