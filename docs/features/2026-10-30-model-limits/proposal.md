@@ -6,8 +6,8 @@ sidebar_position: 2
 
 # Model limits, proposal
 
-The design that was chosen after three rounds: a compact line, a switch of the design system in Settings, and Settings drawn
-from the current screen. It was drawn as a canvas of artboards in Claude, which is deleted once the feature is implemented;
+The design that was chosen after several rounds: a thin line joined to Weekly's bar by a bracket (variant S2), a switch of the
+design system in Settings, and Settings drawn from the current screen. It was drawn as a canvas of artboards in Claude, which is deleted once the feature is implemented;
 this page is what stays. The decisions behind it are in [ADR 0034](../../adr/0034-limits-can-be-scoped-to-a-model.md).
 
 ## The proposal
@@ -18,11 +18,11 @@ this page is what stays. The decisions behind it are in [ADR 0034](../../adr/003
 
 ## What changes
 
-| Surface  | What it shows                                                                                                                                       | Why                                                                             |
-| :------- | :-------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------ |
-| Panel    | Under Weekly, one line indented: the model's name, a thin bar (6px) and the figure ("87% left"). The help text says "Part of Weekly" and the reset. | The limit is part of the week, and a line costs the card almost no height.      |
-| Widget   | The same line, in the card of its provider.                                                                                                         | The widget draws what the snapshot holds.                                       |
-| Settings | Under the choice of windows of the provider, a row with the model's name, "Part of Weekly: shown only with it" and a `Toggle`.                      | The model is not a third window: it needs Weekly, so it is a switch of its own. |
+| Surface  | What it shows                                                                                                                                                                                                 | Why                                                                                     |
+| :------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :-------------------------------------------------------------------------------------- |
+| Panel    | Right under Weekly's bar, before its detail line, one line joined to the bar by a bracket: the model's name, a thin bar (4px) and the figure ("87% left"). The help text says "Part of Weekly" and the reset. | The bracket says the limit is part of the week, and the line costs the card about 14px. |
+| Widget   | The same line, in the card of its provider.                                                                                                                                                                   | The widget draws what the snapshot holds.                                               |
+| Settings | Under the choice of windows of the provider, a row with the model's name, "Part of Weekly: shown only with it" and a `Toggle`.                                                                                | The model is not a third window: it needs Weekly, so it is a switch of its own.         |
 
 ## Rules
 
