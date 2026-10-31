@@ -2,9 +2,6 @@ import SwiftUI
 import TokenMeterCore
 
 extension WindowUsage {
-    /// A reported figure older than this no longer counts as live (ADR 0008).
-    static let staleAfter: TimeInterval = 10 * 60
-
     var isStale: Bool {
         guard source == .reported, let observedAt else { return false }
         return Date().timeIntervalSince(observedAt) > Self.staleAfter
@@ -93,6 +90,8 @@ struct WindowRow: View {
     let usage: WindowUsage
     /// The limits of models that are part of this window, drawn right under its bar (ADR 0034).
     var models: [WindowUsage] = []
+    /// Say when the quota runs out, if it does before the reset (ADR 0038). The widget does not.
+    var showsPace = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 3) {
@@ -106,6 +105,9 @@ struct WindowRow: View {
                 .opacity(usage.isApproximate ? 0.5 : 1)
             ForEach(models, id: \.window.id) { ScopedWindowRow(usage: $0) }
             Text(usage.detailText).font(.caption2).foregroundStyle(.secondary)
+            if showsPace, let pace = usage.runsOutText(at: Date()) {
+                Text(pace).font(.caption2.weight(.semibold)).foregroundStyle(.orange)
+            }
         }
     }
 
@@ -158,6 +160,7 @@ struct ProviderBlock: View {
     let snapshot: ProviderSnapshot
     /// How many problems have this provider as their topic; the widget only counts, the panel lists them.
     var problemCount = 0
+    var showsPace = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -173,7 +176,8 @@ struct ProviderBlock: View {
             ForEach(snapshot.windows.filter { $0.window.scope == nil }, id: \.window.id) { window in
                 WindowRow(usage: window.resolved(at: Date()),
                           models: snapshot.windows.filter { $0.window.scope != nil && $0.window.name == window.window.name }
-                              .map { $0.resolved(at: Date()) })
+                              .map { $0.resolved(at: Date()) },
+                          showsPace: showsPace)
             }
         }
     }
