@@ -122,7 +122,7 @@ final class ReaderTests: XCTestCase {
             _ = try write(#"{"oauthAccount":{"emailAddress":"x@y.z"\#(account)}}"#, to: ".claude.json")
             return source(.claude).read(since: epoch).plan
         }
-        XCTAssertEqual(try plan(#","organizationType":"claude_max","organizationRateLimitTier":"default_claude_max_20x""#), "Max 20x")
+        XCTAssertEqual(try plan(#","organizationType":"claude_max","organizationRateLimitTier":"default_claude_max_20x""#), "Ultra")
         XCTAssertEqual(try plan(#","organizationType":"claude_max","organizationRateLimitTier":"default_claude_max_5x""#), "Max 5x")
         XCTAssertEqual(try plan(#","organizationType":"claude_max""#), "Max")
         XCTAssertEqual(try plan(#","organizationType":"claude_pro""#), "Pro")

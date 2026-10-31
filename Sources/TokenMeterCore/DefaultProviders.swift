@@ -40,7 +40,7 @@ enum DefaultProviders {
             "path": "oauthAccount.organizationType",
             "stripPrefix": "claude_",
             "labels": [
-              { "path": "oauthAccount.organizationRateLimitTier", "contains": "max_20x", "label": "Max 20x" },
+              { "path": "oauthAccount.organizationRateLimitTier", "contains": "max_20x", "label": "Ultra" },
               { "path": "oauthAccount.organizationRateLimitTier", "contains": "max_5x", "label": "Max 5x" },
               { "equals": "claude_max", "label": "Max" },
               { "equals": "claude_pro", "label": "Pro" },

@@ -71,6 +71,15 @@ public struct ProviderConfigFile: Decodable, Sendable {
             entry["quota"] = quota
             changed = true
         }
+        // Anthropic renamed Max 20x to Ultra: the rule that carries the old default text gets the new one. A label the person
+        // wrote themselves is left alone.
+        if var plan = entry["plan"] as? [String: Any], var labels = plan["labels"] as? [[String: Any]],
+           let rule = labels.firstIndex(where: { ($0["contains"] as? String) == "max_20x" && ($0["label"] as? String) == "Max 20x" }) {
+            labels[rule]["label"] = "Ultra"
+            plan["labels"] = labels
+            entry["plan"] = plan
+            changed = true
+        }
         guard changed else { return .untouched }
         providers[index] = entry
         object["providers"] = providers
