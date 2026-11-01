@@ -81,11 +81,10 @@ apps, and it does not match how the plans count.
 
 ## The panel
 
-![The menu-bar panel with its two providers, the three read-age lines and the Refresh, Settings and Quit buttons](../assets/panel.png)
+![The menu-bar panel with its two providers, the quota-age lines and the Refresh, Settings and Quit buttons](../assets/panel.png)
 
 | Element                                     | Meaning                                                                                                       |
 | :------------------------------------------ | :------------------------------------------------------------------------------------------------------------ |
-| `Read 12 seconds ago`                       | When the app last read the files.                                                                             |
 | `Claude quota from 3 hours ago`             | When the status line last wrote Claude's quota.                                                               |
 | `Claude quota: status line has not run yet` | The status line is not set up or no session has run. See [Enable the Claude Quota](./enable-claude-quota.md). |
 | Orange warning about the App Group          | No signing team: the widget cannot read the snapshot.                                                         |
