@@ -122,7 +122,11 @@ struct WindowRow: View {
             QuotaBar(fraction: usage.remainingFraction, tint: tint, mark: showsPace ? usage.pace(at: Date()) : nil)
                 .opacity(usage.isApproximate ? 0.5 : 1)
                 .hovered($hovering, enabled: showsPace)
-            ForEach(models, id: \.window.id) { ScopedWindowRow(usage: $0, showsPace: showsPace) }
+            // A model's thin bar is 4 points tall in a row as tall as its text, so it has 4 points of air above and below it.
+            // The last row gives the air below back, so the gap to the line under it is the one a bar of its own would have.
+            ForEach(Array(models.enumerated()), id: \.element.window.id) { index, model in
+                ScopedWindowRow(usage: model, showsPace: showsPace).padding(.bottom, index == models.count - 1 ? -4 : 0)
+            }
             detail
         }
     }
