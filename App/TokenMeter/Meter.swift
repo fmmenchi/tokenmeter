@@ -152,7 +152,7 @@ final class Meter {
         publish()
     }
 
-    /// Hides or shows a provider's card. The last shown provider cannot be hidden. Showing one selects every window.
+    /// Hides or shows a provider's card with its switch. The last shown provider cannot be hidden. Its windows are kept (ADR 0041).
     func setProviderShown(_ shown: Bool, for provider: String) {
         guard shown || canHide(provider) else { return }
         preferences.setShown(shown, for: provider)
@@ -163,13 +163,13 @@ final class Meter {
         cardProviders.filter(\.isShown).contains { $0.id != provider }
     }
 
-    /// The person chooses windows: choosing none hides the provider, choosing one shows it again (ADR 0037).
+    /// The person chooses windows. The last one cannot be turned off, and a window never hides the provider (ADR 0041).
     func setShownWindows(_ windows: Set<String>, for provider: String) {
         guard let card = cardProviders.first(where: { $0.id == provider }) else { return }
         let choice = WindowChoice(windows: card.windows, models: Dictionary(uniqueKeysWithValues: card.models.map {
             ($0.id, $0.parent)
         }))
-        guard preferences.select(windows, among: choice, for: provider, canHide: canHide(provider)) else { return }
+        guard preferences.select(windows, among: choice, for: provider) else { return }
         publish()
     }
 

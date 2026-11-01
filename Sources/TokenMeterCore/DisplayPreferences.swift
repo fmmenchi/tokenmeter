@@ -32,33 +32,26 @@ public struct WindowChoice: Sendable {
 }
 
 extension DisplayPreferences {
-    /// The person selects windows in Settings (ADR 0037). Deselecting the last one hides the provider; selecting any shows it
-    /// again, and a window that was just selected turns its models on, as they are by default. Returns false when the choice is
-    /// refused: the last provider that is shown cannot lose its last window, or nothing would be left to show.
+    /// The person chooses windows in Settings (ADR 0041). A window turned off never hides the provider: the provider's own
+    /// switch does that, so an empty choice is refused and the last window stays on. A window that was just selected turns
+    /// its models on, as they are by default. Returns false when the choice was refused.
     @discardableResult
-    public func select(_ windows: Set<String>, among choice: WindowChoice, for provider: String, canHide: Bool) -> Bool {
+    public func select(_ windows: Set<String>, among choice: WindowChoice, for provider: String) -> Bool {
         let all = Set(choice.windows)
         let selected = windows.intersection(all)
-        if selected.isEmpty {
-            guard canHide else { return false }
-            setWindows(nil, for: provider)
-            setHiddenModels([], for: provider)
-            setHidden(true, for: provider)
-            return true
-        }
+        guard !selected.isEmpty else { return false }
         let before = (self.windows(for: provider)?.intersection(all)).flatMap { $0.isEmpty ? nil : $0 } ?? all
         let added = selected.subtracting(before)
         var off = hiddenModels(for: provider)
         for (model, parent) in choice.models where added.contains(parent) { off.remove(model) }
         setHiddenModels(off, for: provider)
         setWindows(selected == all ? nil : selected, for: provider)
-        setHidden(false, for: provider)
         return true
     }
 
-    /// Shows a provider again with the eye, or hides it: showing one with nothing selected selects every window.
+    /// Shows or hides a provider with its switch. Neither touches its windows or its models: a provider that is shown again
+    /// comes back as it was (ADR 0041).
     public func setShown(_ shown: Bool, for provider: String) {
-        if shown { setWindows(nil, for: provider) }
         setHidden(!shown, for: provider)
     }
 
