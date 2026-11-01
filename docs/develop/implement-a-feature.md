@@ -20,7 +20,8 @@ preview, merge, and the reconciliation of the interface. Nothing is built before
 - A semantic branch, never `main`: `feat/<name>` or `docs/<name>`. The pre-push hook checks it.
 - The gate is `pnpm run check`. It does not build the app or the widget, so changes there also need `xcodebuild`
   (step 6), and the branch is tried with `./scripts/preview.sh` (step 7).
-- The three design skills are in `.claude/skills/`: `design-proposal`, `design-import` and `design-export`.
+- The skills are in `.claude/skills/`: `feature` runs the whole flow and stops at each approval, and it calls
+  `design-proposal`, `design-import` and `design-export` at their steps.
 
 ## Step 1: Describe the feature
 
