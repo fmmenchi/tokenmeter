@@ -9,10 +9,10 @@ date: 2026-11-01
 
 In Settings a provider has a switch that is the only thing that hides it, and each window under it has a switch of its own.
 
-|        |                                                             |
-| :----- | :---------------------------------------------------------- |
-| Date   | 2026-11-01                                                  |
-| Status | in build, 2026-11-01: ADR accepted, step 2 of the plan next |
+|        |                         |
+| :----- | :---------------------- |
+| Date   | 2026-11-01              |
+| Status | implemented, 2026-11-01 |
 
 ## Intent
 
@@ -26,11 +26,11 @@ off. A provider that is off keeps its list, dimmed, and the choice is kept for w
 
 ## The nucleus
 
-| Part                | Page                      | Status |
-| :------------------ | :------------------------ | :----- |
-| Proposal            | [Proposal](./proposal.md) | chosen |
-| Implementation plan | not written               | next   |
-| Decisions           | not written               | next   |
+| Part                | Page                                                                     | Status   |
+| :------------------ | :----------------------------------------------------------------------- | :------- |
+| Proposal            | [Proposal](./proposal.md)                                                | chosen   |
+| Implementation plan | [Implementation plan](./plan.md)                                         | done     |
+| Decisions           | [ADR 0041](../../adr/0041-the-provider-switch-alone-hides-a-provider.md) | accepted |
 
 ## Related
 
