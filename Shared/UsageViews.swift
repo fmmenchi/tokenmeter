@@ -117,6 +117,7 @@ struct WindowRow: View {
                 Text(say ?? (usage.remainingFraction == nil ? "unknown" : "\(usage.remainingText) left"))
                     .font(.caption.bold().monospacedDigit())
                     .foregroundStyle(say == nil ? Color.primary : usage.paceFigureStyle(at: Date()))
+                    .id(say ?? "").transition(.opacity)
             }
             QuotaBar(fraction: usage.remainingFraction, tint: tint, mark: showsPace ? usage.pace(at: Date()) : nil)
                 .opacity(usage.isApproximate ? 0.5 : 1)
@@ -176,13 +177,14 @@ struct ScopedWindowRow: View {
                 .frame(minWidth: 30, alignment: .leading)
             QuotaBar(fraction: usage.remainingFraction, tint: usage.tint, height: 4,
                      mark: showsPace ? usage.pace(at: Date()) : nil)
-            // The column is as wide as the longest thing it says in the panel, so the bar does not change length (ADR 0039).
+            // The figure is as wide as what it says, and the bar gives way to it, smoothly (ADR 0039).
             let say = hovering && showsPace ? usage.paceFigureText(at: Date()) : nil
             Text(say ?? (usage.remainingFraction == nil ? "unknown" : "\(usage.remainingText) left"))
                 .font(.caption.bold().monospacedDigit())
                 .foregroundStyle(say == nil ? Color.primary : usage.paceFigureStyle(at: Date()))
-                .lineLimit(1).minimumScaleFactor(0.8)
-                .frame(minWidth: showsPace ? 86 : 54, maxWidth: showsPace ? 86 : nil, alignment: .trailing)
+                .lineLimit(1).fixedSize()
+                .id(say ?? "").transition(.opacity)
+                .frame(minWidth: 54, alignment: .trailing)
         }
         .opacity(usage.isApproximate ? 0.5 : 1)
         .padding(.leading, 6)
