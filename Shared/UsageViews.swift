@@ -121,7 +121,7 @@ struct WindowRow: View {
             QuotaBar(fraction: usage.remainingFraction, tint: tint, mark: showsPace ? usage.pace(at: Date()) : nil)
                 .opacity(usage.isApproximate ? 0.5 : 1)
                 .help(ifAny: showsPace ? usage.paceHoverText(at: Date()) : nil)
-            ForEach(models, id: \.window.id) { ScopedWindowRow(usage: $0) }
+            ForEach(models, id: \.window.id) { ScopedWindowRow(usage: $0, showsPace: showsPace) }
             Text(usage.detailText).font(.caption2).foregroundStyle(.secondary)
         }
     }
@@ -153,21 +153,31 @@ private struct Bracket: Shape {
 /// under that window's bar (ADR 0034). The share of the week and the reset are in the help text.
 struct ScopedWindowRow: View {
     let usage: WindowUsage
+    /// Draw the mark on the thin bar and say in the hover when it runs out (ADR 0039). The widget does not.
+    var showsPace = false
 
     var body: some View {
         HStack(spacing: 6) {
             Bracket().stroke(Color.secondary.opacity(0.6), lineWidth: 1).frame(width: 8, height: 8).offset(y: -3)
             Text(usage.window.scope ?? "").font(.caption.weight(.medium)).lineLimit(1)
                 .frame(minWidth: 30, alignment: .leading)
-            QuotaBar(fraction: usage.remainingFraction, tint: usage.tint, height: 4)
+            QuotaBar(fraction: usage.remainingFraction, tint: usage.tint, height: 4,
+                     mark: showsPace ? usage.pace(at: Date()) : nil)
             Text(usage.remainingFraction == nil ? "unknown" : "\(usage.remainingText) left")
                 .font(.caption.bold().monospacedDigit()).frame(minWidth: 54, alignment: .trailing)
         }
         .opacity(usage.isApproximate ? 0.5 : 1)
         .padding(.leading, 6)
-        .help([ "Part of \(WindowSpec(name: usage.window.name, duration: 0).label)",
-                usage.resetText.map { "resets \($0)" }, usage.isApproximate ? usage.observedAgoText.map { "seen \($0)" } : nil ]
-            .compactMap { $0 }.joined(separator: " · "))
+        .help(helpText)
+    }
+
+    /// The row's hover: when the model's quota runs out, if the panel asks, then what the row is part of. It is the row's
+    /// whole hover rather than the bar's alone, so there is one tooltip and no tooltip inside another.
+    private var helpText: String {
+        let part = [ "Part of \(WindowSpec(name: usage.window.name, duration: 0).label)",
+                     usage.resetText.map { "resets \($0)" }, usage.isApproximate ? usage.observedAgoText.map { "seen \($0)" } : nil ]
+            .compactMap { $0 }.joined(separator: " · ")
+        return [showsPace ? usage.paceHoverText(at: Date()) : nil, part].compactMap { $0 }.joined(separator: "\n")
     }
 }
 
