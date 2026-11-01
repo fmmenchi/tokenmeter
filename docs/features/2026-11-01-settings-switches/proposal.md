@@ -9,18 +9,18 @@ sidebar_position: 2
 The design that was chosen. It was drawn as a canvas in Claude, which is deleted once the feature is implemented; this
 page is what stays.
 
-![The chosen design in the light appearance: the Providers group of Settings with Claude on, its Weekly switch on and Fable indented under it with a smaller switch, and ChatGPT off, with its 5 hours and Weekly rows dimmed](./proposal-settings.png)
+![The chosen design in the light appearance: the Providers group of Settings with Claude on, its Weekly switch on and Fable indented under it with a smaller switch as it was drawn, and ChatGPT off, with its 5 hours and Weekly rows dimmed](./proposal-settings.png)
 
 Claude is drawn as it is for the Ultra plan, with Weekly alone and Fable under it. ChatGPT is the provider that is off.
 
 ## What changes
 
-| Surface  | What it shows                                                                                                                                                                                          | Why                                                                     |
-| :------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------- |
-| Settings | A switch beside the provider's name, in place of the eye. Under the provider a vertical list, one row per window with its switch, and a model's limit indented under its window with a smaller switch. | A master switch with options under it is the pattern of macOS Settings. |
-| Panel    | Unchanged.                                                                                                                                                                                             | What a card shows is the same.                                          |
-| Widget   | Unchanged.                                                                                                                                                                                             | Same.                                                                   |
-| Menu bar | Unchanged. Its percentage counts the providers that are on.                                                                                                                                            | Same.                                                                   |
+| Surface  | What it shows                                                                                                                                                                                        | Why                                                                     |
+| :------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------- |
+| Settings | A switch beside the provider's name, in place of the eye. Under the provider a vertical list, one row per window with its switch, and a model's limit indented under its window with a smaller text. | A master switch with options under it is the pattern of macOS Settings. |
+| Panel    | Unchanged.                                                                                                                                                                                           | What a card shows is the same.                                          |
+| Widget   | Unchanged.                                                                                                                                                                                           | Same.                                                                   |
+| Menu bar | Unchanged. Its percentage counts the providers that are on.                                                                                                                                          | Same.                                                                   |
 
 ## Rules
 
@@ -40,9 +40,14 @@ Claude is drawn as it is for the Ultra plan, with Weekly alone and Fable under i
 - Before these, a hidden provider with its row of pills removed was drawn and dropped: it made "only Weekly" a two-step
   choice for a hidden provider, and the choice could not be read.
 
+## Settled by building
+
+- **Every switch has the same size.** The drawing had a smaller switch for a model; built with three sizes, the switches did not
+  line up, so the level is told by the indent and the text size. The image above is the drawing, with the smaller one.
+
 ## Open
 
-- The size of the switch in the list and the exact indentation of a model's limit are settled when it is built.
+- The exact indentation of a model's limit is settled on screen.
 - The dark appearance is not drawn: the design system defines the light one only.
 
 ## Related

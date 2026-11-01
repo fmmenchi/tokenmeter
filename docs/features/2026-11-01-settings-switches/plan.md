@@ -19,7 +19,7 @@ flowchart LR
   subgraph App["Settings"]
     METER["Meter<br/>setShownWindows, setProviderShown"]
     ROW["ProviderRow<br/>the provider's switch"]
-    LIST["WindowToggles<br/>a switch for each window, a smaller one for a model"]
+    LIST["WindowToggles<br/>a switch for each window, one for a model, indented"]
   end
   PREF --> METER --> ROW
   METER --> LIST
@@ -51,7 +51,7 @@ Three files at most per step, the gate green, and `xcodebuild` for the steps tha
 | :--- | :---------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1    | the ADR, the proposal and this plan                                                                                           | the docs build                                                                                                                                                                                                                                                                                                                           |
 | 2    | in core and `Meter`: `select` refuses an empty choice and never hides, `setShown` and hiding keep windows and models          | an empty choice is refused and changes nothing; turning a window off leaves the provider shown; hiding keeps the windows and the hidden models; showing gives them back; a provider hidden with no windows saved comes back with every window; selecting a window still turns its models on. `xcodebuild` because `Meter` calls `select` |
-| 3    | `WindowToggles.swift`: the list, a row for each window, a model indented with a smaller switch, dimmed and disabled when off  | `xcodebuild`; not used yet                                                                                                                                                                                                                                                                                                               |
+| 3    | `WindowToggles.swift`: the list, a row for each window, a model indented, dimmed and disabled when off                        | `xcodebuild`; not used yet                                                                                                                                                                                                                                                                                                               |
 | 4    | `SettingsView`: the provider's switch in place of the eye, the list under it; `WindowSelector` and `VisibilityButton` removed | `xcodebuild`; Settings on screen with `./scripts/preview.sh`: a provider off keeps its list dimmed, the last window does not turn off, a model is dimmed with its window, the last provider's switch is disabled                                                                                                                         |
 | 5    | the Use page and the API table say what the switch does                                                                       | the docs build                                                                                                                                                                                                                                                                                                                           |
 | 6    | after the merge, on a `docs/` branch: the Views and Design System as built, the status, the row in the list                   | `design-export`; `pnpm run check`; the row moves to Implemented                                                                                                                                                                                                                                                                          |
@@ -67,8 +67,8 @@ Views lose the Settings states of one window, of Weekly off and of nothing selec
 
 ## What is not known until it is built
 
-- **The small switch in a grouped form.** `Toggle` with a mini control size may not read as in the drawing; if it does not,
-  the model's row keeps the normal size.
+- **The size of the switch in a grouped form.** Three sizes were tried and did not line up; every switch is now the form's own
+  size, and the level is told by the indent and the text.
 - **The indentation of a model** under its window's label, which was drawn in HTML.
 - **The tooltip of the last window** on a disabled switch: a disabled control may not show one, and then the rule is
   explained by the line under the list.
