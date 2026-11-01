@@ -14,9 +14,9 @@ extension View {
 
 extension WindowUsage {
     /// The colour of the figure while the pointer is on the bar (ADR 0039): the notice colour where the quota runs out, the
-    /// quiet one for a reading that is out of date, the text colour otherwise.
+    /// text colour otherwise. It only shows while the figure says a date.
     func paceFigureStyle(at now: Date) -> Color {
         guard let pace = pace(at: now) else { return .primary }
-        return pace.runsOut ? .orange : pace.isStale ? .secondary : .primary
+        return pace.runsOut ? .orange : .primary
     }
 }
