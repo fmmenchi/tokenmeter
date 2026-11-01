@@ -19,8 +19,9 @@ ADR 0038 says when a window runs out with a line of text under it, in the panel 
 ([the proposal](../features/2026-11-01-pace-on-bars/proposal.md)).
 
 - **A mark on the bar** of every window whose pace can be estimated. It sits at the share of the window still ahead,
-  `(resetsAt − now) / length`: where the bar would end if the window were used steadily. The bar ending before the mark
-  means the quota runs out before the reset, and ending after it means it lasts. The mark is in the notice colour when it
+  `(resetsAt − observedAt) / length`, with `observedAt` as in `RunOut.swift`: where the bar would end if the window were
+  used steadily. The bar ending before the mark means the quota runs out before the reset, and ending after it means it
+  lasts, exactly: the quota runs out first when what is left is less than the share of the window still ahead. The mark is in the notice colour when it
   runs out and in the primary text colour when it lasts. Nothing is estimated under the conditions of ADR 0038, and then
   there is no mark: a mark with the bar to its right says it lasts, and no mark says nothing can be said.
 - **The date is in the hover on the bar**, the system tooltip: "At this pace you run out Thursday at 6 pm". The permanent
