@@ -68,7 +68,7 @@ extension Int {
 
 /// A thick, filled bar. SwiftUI's `ProgressView` collapses to a hairline in menus and widgets.
 /// A `mark` is where the bar would end at a steady use (ADR 0039): the quota runs out before the reset when the bar ends
-/// before it, and the mark is orange then.
+/// before it, and the mark is orange then. A figure that is out of date has its bar at half strength, and the mark with it.
 struct QuotaBar: View {
     let fraction: Double?
     let tint: Color
@@ -96,13 +96,6 @@ struct QuotaBar: View {
     }
 }
 
-private extension View {
-    /// The tooltip when there is text for it; no tooltip at all, not an empty one, when there is none.
-    @ViewBuilder func help(ifAny text: String?) -> some View {
-        if let text { help(text) } else { self }
-    }
-}
-
 struct WindowRow: View {
     let usage: WindowUsage
     /// The limits of models that are part of this window, drawn right under its bar (ADR 0034).
@@ -123,7 +116,7 @@ struct WindowRow: View {
             }
             QuotaBar(fraction: usage.remainingFraction, tint: tint, mark: showsPace ? usage.pace(at: Date()) : nil)
                 .opacity(usage.isApproximate ? 0.5 : 1)
-                .help(ifAny: showsPace ? usage.paceHoverText(at: Date()) : nil)
+                .paceBubble(showsPace ? usage.paceHoverText(at: Date()) : nil)
             ForEach(models, id: \.window.id) { ScopedWindowRow(usage: $0, showsPace: showsPace) }
             detail
         }
@@ -183,16 +176,10 @@ struct ScopedWindowRow: View {
         }
         .opacity(usage.isApproximate ? 0.5 : 1)
         .padding(.leading, 6)
-        .help(helpText)
-    }
-
-    /// The row's hover: when the model's quota runs out, if the panel asks, then what the row is part of. It is the row's
-    /// whole hover rather than the bar's alone, so there is one tooltip and no tooltip inside another.
-    private var helpText: String {
-        let part = [ "Part of \(WindowSpec(name: usage.window.name, duration: 0).label)",
-                     usage.resetText.map { "resets \($0)" }, usage.isApproximate ? usage.observedAgoText.map { "seen \($0)" } : nil ]
-            .compactMap { $0 }.joined(separator: " · ")
-        return [showsPace ? usage.paceHoverText(at: Date()) : nil, part].compactMap { $0 }.joined(separator: "\n")
+        .paceBubble(showsPace ? usage.paceHoverText(at: Date()) : nil)
+        .help([ "Part of \(WindowSpec(name: usage.window.name, duration: 0).label)",
+                usage.resetText.map { "resets \($0)" }, usage.isApproximate ? usage.observedAgoText.map { "seen \($0)" } : nil ]
+            .compactMap { $0 }.joined(separator: " · "))
     }
 }
 
