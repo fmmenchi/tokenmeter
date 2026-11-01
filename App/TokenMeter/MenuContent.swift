@@ -18,7 +18,6 @@ struct MenuContent: View {
                     ProviderCard(snapshot: $0, problemCount: snapshot.problemCount(for: $0), showsPace: true)
                 }
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Read \(snapshot.generatedAt, style: .relative) ago")
                     ForEach(snapshot.providers, id: \.provider) { provider in
                         if let quotaAge = provider.quotaUpdatedAt {
                             Text("\(provider.title) quota from \(quotaAge, style: .relative) ago")
