@@ -45,7 +45,7 @@ struct SettingsView: View {
                 }
             }
             Section("Providers") {
-                Text("Drag a provider, or use the arrows, to reorder its card. Hide one to take its card off the panel and the widget. Choose the windows each card shows.")
+                Text("Drag a provider, or use the arrows, to reorder its card. Turn a provider off to take its card off the panel and the widget. Choose the windows each card shows.")
                     .font(.caption).foregroundStyle(.secondary)
                 ForEach(Array(meter.cardProviders.enumerated()), id: \.element.id) { index, provider in
                     ProviderRow(
@@ -74,8 +74,8 @@ struct SettingsView: View {
     }
 }
 
-/// One provider in the list: its name and which windows its card shows, chosen in a `WindowSelector` that has one segment
-/// for each window the data lists (ADR 0035, 0037).
+/// One provider in the list: its name with a switch that shows or hides its card, and the windows it shows, chosen in a
+/// `WindowToggles` with a switch for each window the data lists (ADR 0035, 0037, 0041).
 private struct ProviderRow: View {
     let provider: Meter.CardProvider
     let isFirst: Bool
@@ -105,26 +105,27 @@ private struct ProviderRow: View {
                     .buttonStyle(.borderless).disabled(isFirst).accessibilityLabel("Move \(provider.title) up")
                 Button { onMove(1) } label: { Image(systemName: "chevron.down") }
                     .buttonStyle(.borderless).disabled(isLast).accessibilityLabel("Move \(provider.title) down")
-                VisibilityButton(provider: provider.title, isShown: provider.isShown, isEnabled: canHide, action: onToggleShown)
+                Toggle(provider.title, isOn: Binding(get: { provider.isShown }, set: { _ in onToggleShown() }))
+                    .labelsHidden()
+                    .toggleStyle(.switch)
+                    .disabled(!canHide)
+                    .help(canHide ? "" : "One provider always stays on")
             }
-            // A hidden provider shows nothing selected: choosing a window shows it again (ADR 0037).
-            WindowSelector(
-                segments: provider.windows.map { id in
-                    WindowSelector.Segment(
-                        id: id, label: WindowSpec(name: id, duration: 0).label, isOn: provider.isShown && provider.shown.contains(id),
+            // A provider that is off keeps its list, dimmed, with the choice it has (ADR 0041).
+            WindowToggles(
+                rows: provider.windows.map { id in
+                    WindowToggles.Row(
+                        id: id, label: WindowSpec(name: id, duration: 0).label, isOn: provider.shown.contains(id),
                         models: provider.models.filter { $0.parent == id }.map { model in
-                            WindowSelector.Segment(
-                                id: model.id, label: model.label,
-                                isOn: provider.isShown && provider.shownModels.contains(model.id),
-                                isEnabled: provider.isShown && provider.shown.contains(id))
+                            WindowToggles.Row(id: model.id, label: model.label, isOn: provider.shownModels.contains(model.id))
                         })
                 },
+                isActive: provider.isShown,
                 onToggle: { id in
-                    let on = provider.isShown ? provider.shown : []
+                    let on = provider.shown
                     onChange(on.contains(id) ? on.subtracting([id]) : on.union([id]))
                 },
                 onToggleModel: { id in onChangeModel(id, !provider.shownModels.contains(id)) })
-                .opacity(provider.isShown ? 1 : 0.45)
         }
         .padding(isDropTarget ? 6 : 0)
         .background(RoundedRectangle(cornerRadius: 8).fill(Color.accentColor.opacity(isDropTarget ? 0.12 : 0)))
