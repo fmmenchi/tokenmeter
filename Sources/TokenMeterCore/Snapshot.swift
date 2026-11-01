@@ -170,15 +170,20 @@ public enum SnapshotBuilder {
         let gone = windows.filter { spec in absent.contains { abs(Double($0) * 60 - spec.duration) < 60 } }
         let windows = windows.filter { spec in !gone.contains(spec) }
         let usages = windows.map { spec -> WindowUsage in
-            let start = now.addingTimeInterval(-spec.duration)
-            let tokens = events.lazy.filter { $0.date >= start && $0.date <= now }
-                .reduce(TokenCounts()) { $0 + $1.tokens }
+            let rolling = now.addingTimeInterval(-spec.duration)
+            func counted(since start: Date) -> TokenCounts {
+                events.lazy.filter { $0.date >= start && $0.date <= now }.reduce(TokenCounts()) { $0 + $1.tokens }
+            }
+            let tokens = counted(since: rolling)
 
             if let reported = reported.first(where: {
                 guard $0.scope == nil, let minutes = $0.windowMinutes, abs(Double(minutes) * 60 - spec.duration) < 60 else { return false }
                 return $0.resetsAt.map { $0 > now } ?? true
             }) {
-                return WindowUsage(window: spec, tokens: tokens,
+                // A window whose reset time is known counts its tokens in its own period, the one its percentage is about
+                // (ADR 0040), and not in the last `duration`, which differs once the provider moves the boundary.
+                let own = reported.resetsAt.map { max($0.addingTimeInterval(-spec.duration), rolling) }
+                return WindowUsage(window: spec, tokens: own.map { counted(since: $0) } ?? tokens,
                                    remainingFraction: max(0, 1 - reported.usedPercent / 100),
                                    source: .reported, resetsAt: reported.resetsAt, observedAt: reported.observedAt)
             }

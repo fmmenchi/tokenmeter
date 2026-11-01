@@ -17,6 +17,47 @@ final class SnapshotTests: XCTestCase {
         XCTAssertEqual(snap.windows[1].tokens.total, 100)
     }
 
+    // MARK: ADR 0040: a window's tokens are counted in its own period
+
+    func testAReportedWindowCountsItsTokensFromTheStartOfItsOwnPeriod() {
+        // A 5-hour window that began 1h ago: 10 tokens 30 min ago are in it, 90 tokens 3h ago are in the last 5 hours but
+        // belong to the window before.
+        let quota = ReportedQuota(usedPercent: 0, windowMinutes: 300, resetsAt: now.addingTimeInterval(4 * 3600))
+        let snap = SnapshotBuilder.providerSnapshot(
+            provider: .chatgpt, events: [event(hoursAgo: 0.5, tokens: 10), event(hoursAgo: 3, tokens: 90)],
+            windows: [.session], reported: [quota], now: now)
+        XCTAssertEqual(snap.windows[0].tokens.total, 10)
+    }
+
+    func testAMovedBoundaryChangesWhatAWeeklyWindowCounts() {
+        // The same use, 4 days ago and today. A week that began 3 days ago counts today only; one that began 6 days ago,
+        // both.
+        let events = [event(hoursAgo: 96, tokens: 900), event(hoursAgo: 2, tokens: 25)]
+        func weekly(beganDaysAgo: Double) -> Int {
+            let quota = ReportedQuota(usedPercent: 0, windowMinutes: 10080,
+                                      resetsAt: now.addingTimeInterval((7 - beganDaysAgo) * 86400))
+            return SnapshotBuilder.providerSnapshot(provider: .chatgpt, events: events, windows: [.week],
+                                                    reported: [quota], now: now).windows[0].tokens.total
+        }
+        XCTAssertEqual(weekly(beganDaysAgo: 3), 25)
+        XCTAssertEqual(weekly(beganDaysAgo: 6), 925)
+    }
+
+    func testAReportedWindowWithoutAResetTimeStaysRolling() {
+        let quota = ReportedQuota(usedPercent: 10, windowMinutes: 300, resetsAt: nil)
+        let snap = SnapshotBuilder.providerSnapshot(
+            provider: .chatgpt, events: [event(hoursAgo: 0.5, tokens: 10), event(hoursAgo: 3, tokens: 90)],
+            windows: [.session], reported: [quota], now: now)
+        XCTAssertEqual(snap.windows[0].tokens.total, 100)
+    }
+
+    func testAWindowWithNoReportCountsTheLastDurationAsBefore() {
+        let snap = SnapshotBuilder.providerSnapshot(
+            provider: .claude, events: [event(hoursAgo: 0.5, tokens: 10), event(hoursAgo: 3, tokens: 90)],
+            windows: [.session], now: now)
+        XCTAssertEqual(snap.windows[0].tokens.total, 100)
+    }
+
     func testWithoutLimitOrReportNoRemainingQuotaIsInvented() {
         let snap = SnapshotBuilder.providerSnapshot(
             provider: .claude, events: [event(hoursAgo: 1, tokens: 10)], windows: [.session], now: now)
