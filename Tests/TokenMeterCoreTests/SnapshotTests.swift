@@ -302,44 +302,66 @@ final class ModelLimitTests: XCTestCase {
         XCTAssertEqual(snapshot.applying(preferences).providers[0].windows.map { $0.window.id }, ["5h", "7d"])
     }
 
-    func testDeselectingTheLastWindowHidesTheProviderAndSelectingOneShowsItAgain() {
+    func testTurningAWindowOffNeverHidesTheProviderAndTheLastOneStaysOn() {
         let choice = WindowChoice(windows: ["5h", "7d"], models: ["7d:Fable": "7d"])
         let preferences = MemoryDisplayPreferences()
-        XCTAssertTrue(preferences.select(["7d"], among: choice, for: "claude", canHide: true))
+        XCTAssertTrue(preferences.select(["7d"], among: choice, for: "claude"))
         XCTAssertEqual(preferences.windows(for: "claude"), ["7d"])
         XCTAssertFalse(preferences.hidden.contains("claude"))
 
-        XCTAssertTrue(preferences.select([], among: choice, for: "claude", canHide: true))
-        XCTAssertTrue(preferences.hidden.contains("claude"))
-
-        XCTAssertTrue(preferences.select(["5h"], among: choice, for: "claude", canHide: true))
+        XCTAssertFalse(preferences.select([], among: choice, for: "claude"), "the last window is refused")
+        XCTAssertEqual(preferences.windows(for: "claude"), ["7d"], "and nothing changed")
         XCTAssertFalse(preferences.hidden.contains("claude"))
-        XCTAssertEqual(preferences.windows(for: "claude"), ["5h"])
     }
 
-    func testTheLastShownProviderKeepsItsLastWindow() {
+    func testAChoiceThatNamesNoWindowOfTheProviderIsRefused() {
         let choice = WindowChoice(windows: ["7d"], models: [:])
         let preferences = MemoryDisplayPreferences()
-        XCTAssertFalse(preferences.select([], among: choice, for: "claude", canHide: false))
-        XCTAssertFalse(preferences.hidden.contains("claude"))
+        XCTAssertFalse(preferences.select(["5h"], among: choice, for: "claude"))
+        XCTAssertNil(preferences.windows(for: "claude"))
+    }
+
+    func testChoosingWhileTheProviderIsOffDoesNotShowIt() {
+        let choice = WindowChoice(windows: ["5h", "7d"], models: [:])
+        let preferences = MemoryDisplayPreferences()
+        preferences.setShown(false, for: "claude")
+        XCTAssertTrue(preferences.select(["5h"], among: choice, for: "claude"))
+        XCTAssertTrue(preferences.hidden.contains("claude"))
+        XCTAssertEqual(preferences.windows(for: "claude"), ["5h"])
     }
 
     func testSelectingAWindowTurnsItsModelsOnByDefault() {
         let choice = WindowChoice(windows: ["5h", "7d"], models: ["7d:Fable": "7d"])
         let preferences = MemoryDisplayPreferences()
         preferences.setModel("7d:Fable", shown: false, for: "claude")
-        preferences.select(["5h"], among: choice, for: "claude", canHide: true)
+        preferences.select(["5h"], among: choice, for: "claude")
         XCTAssertEqual(preferences.hiddenModels(for: "claude"), ["7d:Fable"], "Weekly was not added: Fable stays as it was")
-        preferences.select(["5h", "7d"], among: choice, for: "claude", canHide: true)
+        preferences.select(["5h", "7d"], among: choice, for: "claude")
         XCTAssertEqual(preferences.hiddenModels(for: "claude"), [], "selecting Weekly turns Fable on")
     }
 
-    func testShowingAProviderWithTheEyeSelectsEveryWindow() {
+    func testHidingAProviderKeepsItsWindowsAndModelsAndShowingItGivesThemBack() {
+        let choice = WindowChoice(windows: ["5h", "7d"], models: ["7d:Fable": "7d"])
         let preferences = MemoryDisplayPreferences()
-        preferences.setWindows(["7d"], for: "claude")
+        preferences.select(["7d"], among: choice, for: "claude")
+        preferences.setModel("7d:Fable", shown: false, for: "claude")
+
+        preferences.setShown(false, for: "claude")
+        XCTAssertTrue(preferences.hidden.contains("claude"))
+        XCTAssertEqual(preferences.windows(for: "claude"), ["7d"])
+        XCTAssertEqual(preferences.hiddenModels(for: "claude"), ["7d:Fable"])
+
+        preferences.setShown(true, for: "claude")
+        XCTAssertFalse(preferences.hidden.contains("claude"))
+        XCTAssertEqual(preferences.windows(for: "claude"), ["7d"])
+        XCTAssertEqual(preferences.hiddenModels(for: "claude"), ["7d:Fable"])
+    }
+
+    func testAProviderHiddenBeforeWithNoWindowsSavedComesBackWithEveryWindow() {
+        let preferences = MemoryDisplayPreferences()
         preferences.setHidden(true, for: "claude")
         preferences.setShown(true, for: "claude")
-        XCTAssertNil(preferences.windows(for: "claude"))
+        XCTAssertNil(preferences.windows(for: "claude"), "no choice saved means every window")
         XCTAssertFalse(preferences.hidden.contains("claude"))
     }
 }

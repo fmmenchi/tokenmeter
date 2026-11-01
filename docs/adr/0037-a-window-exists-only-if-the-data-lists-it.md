@@ -1,6 +1,6 @@
 # ADR 0037 — A window exists only if the data lists it
 
-Status: accepted (2026-10-30); extends [ADR 0034](./0034-limits-can-be-scoped-to-a-model.md) and [ADR 0016](./0016-providers-declared-in-a-config-file.md)
+Status: accepted (2026-10-30), the lines on hiding by choosing no window and on the eye replaced by [ADR 0041](./0041-the-provider-switch-alone-hides-a-provider.md); extends [ADR 0034](./0034-limits-can-be-scoped-to-a-model.md) and [ADR 0016](./0016-providers-declared-in-a-config-file.md)
 
 ## Context
 

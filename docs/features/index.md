@@ -24,7 +24,9 @@ are [ADRs](../adr), and its overview links them.
 
 ## In design and build
 
-Nothing at the moment.
+| Feature                                                                                                                    | Date       | Pages                                                                                                       |
+| :------------------------------------------------------------------------------------------------------------------------- | :--------- | :---------------------------------------------------------------------------------------------------------- |
+| [Settings switches](./2026-11-01-settings-switches/index.md): a switch hides a provider, a switch for each window under it | 2026-11-01 | [Overview](./2026-11-01-settings-switches/index.md), [Proposal](./2026-11-01-settings-switches/proposal.md) |
 
 ## The pattern: from idea to implemented
 
