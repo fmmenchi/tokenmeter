@@ -9,9 +9,9 @@ sidebar_position: 2
 The design that was chosen. It was drawn as a canvas in Claude, which is deleted once the feature is implemented; this
 page is what stays.
 
-![The chosen design in the light appearance: the Providers group of Settings with Claude on, its Weekly switch on and Fable indented under it with a smaller switch as it was drawn, and ChatGPT off, with its 5 hours and Weekly rows dimmed](./proposal-settings.png)
+![The design as built in the light appearance: Settings with Claude on, its Weekly switch locked on and Fable indented under it, and ChatGPT off, with its 5 hours and Weekly rows dimmed and the choice kept](./proposal-settings.png)
 
-Claude is drawn as it is for the Ultra plan, with Weekly alone and Fable under it. ChatGPT is the provider that is off.
+The image is the Settings board of the design as built, with sample data: Claude on and ChatGPT off. Its Weekly is the last window that is on, so it is locked.
 
 ## What changes
 
@@ -43,7 +43,7 @@ Claude is drawn as it is for the Ultra plan, with Weekly alone and Fable under i
 ## Settled by building
 
 - **Every switch has the same size.** The drawing had a smaller switch for a model; built with three sizes, the switches did not
-  line up, so the level is told by the indent and the text size. The image above is the drawing, with the smaller one.
+  line up, so the level is told by the indent and the text size. The image above is the design as built, with every switch the same size.
 
 ## Open
 
