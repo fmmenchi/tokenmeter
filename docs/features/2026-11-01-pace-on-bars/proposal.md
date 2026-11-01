@@ -17,7 +17,7 @@ The design that was chosen. [ADR 0039](../../adr/0039-the-pace-is-drawn-on-the-b
 | Surface        | What it shows                                                                                                                                                        | Why                                                   |
 | :------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------- |
 | Panel, a bar   | A mark where the bar would end at a steady use. Orange when the quota runs out before the reset, the text colour when it lasts. No mark when it cannot be estimated. | It shows at a glance whether the quota lasts.         |
-| Panel, a hover | On the bar, the system tooltip: "At this pace you run out Thursday at 6 pm", or "At this pace it lasts until the reset".                                             | The date is there when wanted, and takes no row.      |
+| Panel, a hover | On the bar, a bubble of the app's own: "At this pace you run out Thursday at 6 pm", or "At this pace it lasts until the reset", or how old a stale reading is.       | The date is there when wanted, and takes no row.      |
 | Panel, a model | The same mark on its thin bar, 8 px tall, and the same hover. No line of its own.                                                                                    | The model's limit had a figure and nowhere to say it. |
 | Panel, the `i` | Beside the provider's name. A click opens a popover with the explanation, an `x` and a Learn more link to the docs.                                                  | Nothing else explains the mark.                       |
 | Widget         | In the Weekly detail line, in short, orange and semibold: "3.4B tokens · out Thu 6 pm · resets in 3d 14h". No mark, no hover. The small widget is unchanged.         | The widget has no pointer, and no room for a row.     |
@@ -39,7 +39,7 @@ mark means you are going too fast. Hover the bar to see when."
 
 ## Rules
 
-- **The mark exists only where ADR 0038's conditions hold, except that something must have been used**: a fresh, reported
+- **The mark exists where ADR 0038's conditions hold, except that nothing used is fine and a stale figure counts**: a fresh, reported
   figure with a reset time in the future and at least 10% of the window gone. Where nothing was used it lasts. A mark with the bar to its right says it lasts, and no mark says nothing can be said.
 - **The position is a fraction of the window**, `(resetsAt − observedAt) / length`, so it needs nothing the snapshot lacks.
 - **The date is rounded to the hour** and written as today, tomorrow or the weekday, in the hover and in the widget.

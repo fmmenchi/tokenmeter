@@ -49,15 +49,19 @@ end if the window were used steadily from its start to its reset ([ADR 0039](../
 - **A bar that ends before the mark** means you are going too fast: at this pace the quota runs out before the reset. The
   mark is orange then.
 - **A bar that ends after the mark** means the quota lasts until the reset. The mark is the colour of the text.
-- **Hover the bar** to see when. It says "At this pace you run out Thursday at 6 pm", the moment rounded to the hour as
-  today, tomorrow or the weekday, or "At this pace it lasts until the reset".
+- **Hover the bar** to see when. A bubble above it says "At this pace you run out Thursday at 6 pm", the moment rounded to
+  the hour as today, tomorrow or the weekday, or "At this pace it lasts until the reset". The bubble is the app's own, not
+  the system tooltip, which does not show in a panel of an app with no Dock icon.
 - **The `i`** beside the provider's name opens a short explanation of the mark, with a link to this section. It closes with
   its `x`, with a second click on the `i` or with a click outside it.
 
-**No mark means nothing can be said**, not that the quota lasts. Nothing is estimated for a stale, reset or unknown window,
-one with no reset time, or one with less than a tenth of the window gone. A window where nothing was used has a mark and
-lasts.
+**No mark means nothing can be said**, not that the quota lasts. Nothing is estimated for a reset or unknown window, one
+with no reset time, or one with less than a tenth of the window gone. A window where nothing was used has a mark and lasts.
 
+- **A reading older than ten minutes keeps its mark, at half strength** and measured now, so it moves left as time passes.
+  The bar is the last reading, which can only have gone down since. The mark is orange only when the bar is already before
+  it, since then the quota runs out even if nothing was used. The bubble says how old the reading is. ChatGPT is like this
+  most of the time: Codex writes its quota only when it runs.
 - **The pace is the average since the window began**, so a quiet night counts as slow use and the mark is pessimistic for
   someone who does not work at night.
 - **Claude's figure moves only while Claude Code runs**, so its mark and its hover go away after ten minutes and come back
