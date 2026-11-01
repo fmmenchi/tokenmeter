@@ -52,25 +52,35 @@ extension WindowUsage {
         pace(at: now)?.runsOutAt
     }
 
-    /// What the figure on the bar's label line says while the pointer is on the bar (ADR 0039): "out Thu 6 pm" where the quota
-    /// runs out, "lasts" where it lasts. For a figure that is out of date, how old it is ("22 min ago"), or "runs out" when
-    /// the reading is already under the mark. Short, because it takes the place of "20% left". Nil when nothing can be
-    /// estimated, and then the bar has no mark either.
+    /// What the figure on the bar's label line says while the pointer is on the bar (ADR 0039): the date where the quota runs
+    /// out ("out Thu 6 pm"), and for a figure that is out of date the same with a tilde ("~out Thu 6 pm"), only where the bar
+    /// is already before the mark. Nil otherwise, and then the figure stays as it is: where the quota lasts there is no date
+    /// to give, and the mark already says it. Short, because it takes the place of "20% left".
     public func paceFigureText(at now: Date, calendar: Calendar = .current) -> String? {
         guard let pace = pace(at: now) else { return nil }
+        let moment: Date?
         if pace.isStale {
-            return pace.runsOut ? "runs out" : "\(observedAt.map { Self.age(now.timeIntervalSince($0)) } ?? "a while") ago"
+            moment = pace.runsOut ? readingMoment(at: now) : nil
+        } else {
+            moment = pace.runsOutAt
         }
-        guard let moment = pace.runsOutAt else { return "lasts" }
+        guard let moment else { return nil }
         // Tomorrow is the weekday here, which is shorter: a window is never as long as a week, so the name is not ambiguous.
         let when = Self.rounded(moment, from: now, calendar: calendar, weekday: "EEE", namesTomorrow: true)
-        return "out \(when.day) \(when.clock)"
+        return "\(pace.isStale ? "~" : "")out \(when.day) \(when.clock)"
     }
 
-    /// "20 min", "3 h" or "5 d": how old a reading is.
-    private static func age(_ seconds: TimeInterval) -> String {
-        let minutes = Int(seconds / 60)
-        return minutes >= 1440 ? "\(minutes / 1440) d" : minutes >= 60 ? "\(minutes / 60) h" : "\(max(minutes, 1)) min"
+    /// When the quota would run out at the pace the old reading showed, not corrected for use since: the moment a fresh
+    /// reading of it would have given. Nil when it has passed, when it is not before the reset, and when the reading shows
+    /// no pace (nothing used, or too little of the window gone).
+    private func readingMoment(at now: Date) -> Date? {
+        guard let remainingFraction, let resetsAt, let observedAt, window.duration > 0 else { return nil }
+        let start = resetsAt.addingTimeInterval(-window.duration)
+        let elapsed = observedAt.timeIntervalSince(start)
+        let used = 1 - remainingFraction
+        guard used > 0, elapsed >= window.duration * Self.minimumElapsed else { return nil }
+        let moment = start.addingTimeInterval(elapsed / used)
+        return moment >= now && moment < resetsAt ? moment : nil
     }
 
     /// The same moment in short, for the widget's detail line (ADR 0039): "out Thu 6 pm". Nil when it lasts, and when

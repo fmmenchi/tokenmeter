@@ -35,7 +35,8 @@ ADR 0038 says when a window runs out with a line of text under it, in the panel 
 - **The date is in the figure on the bar's label line**, for the time the pointer is on the bar (changed 2026-11-01, after the
   system tooltip and then a bubble of ours were seen on screen). The figure, "20% left", becomes "out Thu 6 pm", in the
   notice colour, where the quota runs out, with tomorrow named by its weekday. Where it lasts it says "lasts". For a figure
-  that is out of date it says "22 min ago", or, in the notice colour, "runs out" when the bar is already before the mark.
+  that is out of date it says only "runs out", in the notice colour, when the bar is already before the mark (changed
+  2026-11-01: it also said "22 min ago", which the line of the provider at the bottom of the panel already says).
   The change is a short fade.
   Nothing else moves: the label does not, the other rows do not, nothing is covered and no layer is drawn. A bubble covered
   the row above, and a swap of the detail line read as a layout shift. The system tooltip did not show at all: the app has

@@ -50,7 +50,8 @@ end if the window were used steadily from its start to its reset ([ADR 0039](../
   mark is orange then.
 - **A bar that ends after the mark** means the quota lasts until the reset. The mark is the colour of the text.
 - **Put the pointer on the bar** to see when. The figure on its label line, "20% left", becomes "out Thu 6 pm" in orange where
-  the quota runs out, or "lasts", with a short fade, and goes back when the pointer leaves. Nothing else moves. The system
+  the quota runs out, with a short fade, and goes back when the pointer leaves. Where it lasts the figure does not change:
+  the mark already says it. Nothing else moves. The system
   tooltip does not show in a panel of an app with no Dock icon, and a bubble covered the row above.
 - **The `i`** beside the provider's name opens a short explanation of the mark, with a link to this section. It closes with
   its `x`, with a second click on the `i` or with a click outside it.
@@ -60,7 +61,9 @@ with no reset time, or one with less than a tenth of the window gone. A window w
 
 - **A reading older than ten minutes keeps its mark, at half strength** and measured now, so it moves left as time passes.
   The bar is the last reading, which can only have gone down since. The mark is orange only when the bar is already before
-  it, since then the quota runs out even if nothing was used. The bubble says how old the reading is. ChatGPT is like this
+  it, since then the quota runs out even if nothing was used. Where the bar is already before the mark, the hover gives the
+  date with a tilde, "~out Thu 6 pm", worked out from the reading and not corrected for use since; otherwise it says nothing, since
+  the line of the provider at the bottom already says how old the reading is. ChatGPT is like this
   most of the time: Codex writes its quota only when it runs.
 - **The pace is the average since the window began**, so a quiet night counts as slow use and the mark is pessimistic for
   someone who does not work at night.

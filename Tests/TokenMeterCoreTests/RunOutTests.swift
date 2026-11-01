@@ -118,12 +118,22 @@ final class RunOutTests: XCTestCase {
         XCTAssertNil(usage(left: 0.2, observed: 5 * 60).pace(at: start.addingTimeInterval(25 * 60)), "too early in the window")
     }
 
-    func testTheFigureOfAStaleReadingSaysHowOldItIsOrThatItRunsOutAnyway() {
-        let now = start.addingTimeInterval(3 * 3600)
-        XCTAssertEqual(usage(left: 0.5, observed: 2 * 3600).paceFigureText(at: now, calendar: calendar),
-                       "1 h ago")
-        XCTAssertEqual(usage(left: 0.3, observed: 2 * 3600 + 20 * 60).paceFigureText(at: now, calendar: calendar),
-                       "runs out")
+    func testTheFigureOfAStaleReadingIsTheDateWithATildeOnlyWhereTheBarIsUnderTheMark() {
+        // Read at 2h of 5h with 30% left, 70% used: out at 2h / 0.7 = 2h51m. Now it is 2h20m, so that is ahead, and
+        // 30% left is under the 0.52 of the window ahead now.
+        let now = start.addingTimeInterval(2 * 3600 + 20 * 60 + 11 * 60)
+        let window = usage(left: 0.3, observed: 2 * 3600)
+        XCTAssertTrue(try XCTUnwrap(window.pace(at: now)).isStale)
+        XCTAssertEqual(window.paceFigureText(at: now, calendar: calendar), "~out today 3 pm")
+        XCTAssertNil(window.runsOut(at: now), "the widget takes no moment from an old reading")
+    }
+
+    func testTheFigureOfAStaleReadingSaysNothingWhereTheBarIsOverTheMarkOrTheMomentHasPassed() {
+        let now = start.addingTimeInterval(3 * 3600)   // 0.4 of the window ahead now
+        XCTAssertNil(usage(left: 0.5, observed: 2 * 3600).paceFigureText(at: now, calendar: calendar), "may still go down")
+        // 30% left at 2h: out at 2h51m, which has passed at 3h.
+        XCTAssertNil(usage(left: 0.3, observed: 2 * 3600).paceFigureText(at: now, calendar: calendar), "the moment has passed")
+        XCTAssertNil(usage(left: 1, observed: 2 * 3600).paceFigureText(at: now, calendar: calendar), "nothing was used")
     }
 
     func testTheFigureNamesTomorrowByItsWeekdayAndTheWidgetDoesNot() {
@@ -139,18 +149,17 @@ final class RunOutTests: XCTestCase {
         let pace = try XCTUnwrap(usage(left: 1, observed: 3 * 3600).pace(at: now))
         XCTAssertEqual(pace.aheadFraction, 0.4, accuracy: 1e-9)
         XCTAssertFalse(pace.runsOut)
-        XCTAssertEqual(usage(left: 1, observed: 3 * 3600).paceFigureText(at: now, calendar: calendar),
-                       "lasts")
+        XCTAssertNil(usage(left: 1, observed: 3 * 3600).paceFigureText(at: now, calendar: calendar), "no date to give")
         XCTAssertNil(usage(left: 1, observed: 3 * 3600).runsOut(at: now), "it never runs out")
         XCTAssertNil(usage(left: 1, observed: 20 * 60).pace(at: start.addingTimeInterval(20 * 60)), "still too early")
     }
 
-    func testTheFigureSaysWhenItRunsOutOrThatItLasts() {
+    func testTheFigureSaysWhenItRunsOutAndNothingWhereItLasts() {
         let now = start.addingTimeInterval(2 * 3600)
         XCTAssertEqual(usage(left: 0.4, observed: 2 * 3600).paceFigureText(at: now, calendar: calendar),
                        "out today 3 pm")
-        XCTAssertEqual(usage(left: 0.8, observed: 2 * 3600).paceFigureText(at: now, calendar: calendar),
-                       "lasts")
+        XCTAssertNil(usage(left: 0.8, observed: 2 * 3600).paceFigureText(at: now, calendar: calendar),
+                     "where it lasts the figure does not change")
         XCTAssertNil(usage(left: 0.8, observed: 2 * 3600, source: .reset).paceFigureText(at: now, calendar: calendar))
     }
 
