@@ -25,9 +25,19 @@ ADR 0038 says when a window runs out with a line of text under it, in the panel 
   runs out and in the primary text colour when it lasts. Nothing is estimated under the conditions of ADR 0038, and then
   there is no mark: a mark with the bar to its right says it lasts, and no mark says nothing can be said. One condition of
   ADR 0038 does not carry over: a window where nothing was used has a mark, since it lasts, and its hover says so.
-- **The date is in the hover on the bar**, the system tooltip: "At this pace you run out Thursday at 6 pm". When the quota
-  lasts, the same hover says "At this pace it lasts until the reset". The permanent line of ADR 0038 goes, so a card is as
-  tall as it was before that ADR.
+- **A figure that is out of date has a mark too** (changed 2026-11-01, after it was seen on screen). Codex writes its quota
+  only when it runs, so ChatGPT's figure is older than ten minutes most of the time and, under ADR 0038, had no mark. The
+  mark is then drawn at half strength, at the share of the window still ahead **now**, `(resetsAt − now) / length`, so it
+  moves left as time passes, and the bar is the last reading, which can only have gone down since. It is orange only when
+  the bar is already before the mark, since then the quota runs out even if nothing was used since; otherwise it is in the
+  text colour. No moment is given for it. The conditions of ADR 0038 for a reported window with a reset time ahead and at
+  least a tenth of the window gone still apply.
+- **The date is in a hover bubble on the bar**: "At this pace you run out Thursday at 6 pm". When the quota lasts, the same
+  hover says "At this pace it lasts until the reset". For a figure that is out of date it says how old the reading is:
+  "Last reading 20 min ago. It may be lower now", or, when the bar is before the mark, that it runs out even with no use
+  since. The bubble is drawn by the app, above the bar, when the pointer is on it. **It is not the system tooltip**: the app
+  has no Dock icon and its panel opens without making the app active, and a system tooltip did not show in it. The permanent
+  line of ADR 0038 goes, so a card is as tall as it was before that ADR.
 - **A model's thin bar** has the same mark, 8 px tall, and the same hover. It has no line of its own. It shares its
   window's reset, which is to be checked in the code.
 - **An `i` beside the provider's name** opens a popover on a click. It closes with its `x`, with a second click on the `i` or
@@ -64,6 +74,7 @@ ADR 0038 says when a window runs out with a line of text under it, in the panel 
 - **A popover opened from inside the menu-bar panel**: not known whether it keeps the panel open.
 - **The widget's height**: not seen on screen; the short phrase in the detail line does not add a row, but the widget may
   already cut what is under its first card.
+- **The bubble near the top of the panel**: for the first bar it must fit above the bar inside the panel's window.
 - **The orange text on a light card**: its contrast was not measured. It is the colour of the notice text already in use.
 - **The dark appearance** of the mark, the popover and the phrase was not seen when it was drawn.
 - **The Learn more target** exists for a person only once the docs are published, and the published docs may be behind the
