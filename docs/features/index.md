@@ -23,9 +23,9 @@ are [ADRs](../adr), and its overview links them.
 
 ## In design and build
 
-| Feature | Date | Pages |
-| :------ | :--- | :---- |
-| _None._ |      |       |
+| Feature                                                                                                                               | Date       | Pages                                                                                                                                                       |
+| :------------------------------------------------------------------------------------------------------------------------------------ | :--------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Pace on the bars](./2026-11-01-pace-on-bars/index.md): a mark on the bar says whether the quota lasts, a hover says when it runs out | 2026-11-01 | [Overview](./2026-11-01-pace-on-bars/index.md), [Proposal](./2026-11-01-pace-on-bars/proposal.md), [Implementation plan](./2026-11-01-pace-on-bars/plan.md) |
 
 ## The pattern: from idea to implemented
 
