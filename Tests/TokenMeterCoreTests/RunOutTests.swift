@@ -118,10 +118,10 @@ final class RunOutTests: XCTestCase {
         XCTAssertNil(usage(left: 0.2, observed: 5 * 60).pace(at: start.addingTimeInterval(25 * 60)), "too early in the window")
     }
 
-    func testTheFigureOfAStaleReadingSaysHowOldItIsOrThatItRunsOutAnyway() {
+    func testTheFigureOfAStaleReadingSaysNothingUnlessItRunsOutAnyway() {
         let now = start.addingTimeInterval(3 * 3600)
-        XCTAssertEqual(usage(left: 0.5, observed: 2 * 3600).paceFigureText(at: now, calendar: calendar),
-                       "1 h ago")
+        XCTAssertNil(usage(left: 0.5, observed: 2 * 3600).paceFigureText(at: now, calendar: calendar),
+                     "how old it is, the panel says below")
         XCTAssertEqual(usage(left: 0.3, observed: 2 * 3600 + 20 * 60).paceFigureText(at: now, calendar: calendar),
                        "runs out")
     }

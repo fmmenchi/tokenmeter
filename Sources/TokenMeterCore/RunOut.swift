@@ -53,24 +53,18 @@ extension WindowUsage {
     }
 
     /// What the figure on the bar's label line says while the pointer is on the bar (ADR 0039): "out Thu 6 pm" where the quota
-    /// runs out, "lasts" where it lasts. For a figure that is out of date, how old it is ("22 min ago"), or "runs out" when
-    /// the reading is already under the mark. Short, because it takes the place of "20% left". Nil when nothing can be
-    /// estimated, and then the bar has no mark either.
+    /// runs out, "lasts" where it lasts. For a figure that is out of date, "runs out" when the reading is already under the
+    /// mark, and nothing otherwise: how old it is, the panel already says below. Short, because it takes the place of
+    /// "20% left". Nil when there is nothing to say, and then the figure stays as it is.
     public func paceFigureText(at now: Date, calendar: Calendar = .current) -> String? {
         guard let pace = pace(at: now) else { return nil }
         if pace.isStale {
-            return pace.runsOut ? "runs out" : "\(observedAt.map { Self.age(now.timeIntervalSince($0)) } ?? "a while") ago"
+            return pace.runsOut ? "runs out" : nil
         }
         guard let moment = pace.runsOutAt else { return "lasts" }
         // Tomorrow is the weekday here, which is shorter: a window is never as long as a week, so the name is not ambiguous.
         let when = Self.rounded(moment, from: now, calendar: calendar, weekday: "EEE", namesTomorrow: true)
         return "out \(when.day) \(when.clock)"
-    }
-
-    /// "20 min", "3 h" or "5 d": how old a reading is.
-    private static func age(_ seconds: TimeInterval) -> String {
-        let minutes = Int(seconds / 60)
-        return minutes >= 1440 ? "\(minutes / 1440) d" : minutes >= 60 ? "\(minutes / 60) h" : "\(max(minutes, 1)) min"
     }
 
     /// The same moment in short, for the widget's detail line (ADR 0039): "out Thu 6 pm". Nil when it lasts, and when
