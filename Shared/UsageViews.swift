@@ -67,10 +67,13 @@ extension Int {
 }
 
 /// A thick, filled bar. SwiftUI's `ProgressView` collapses to a hairline in menus and widgets.
+/// A `mark` is where the bar would end at a steady use (ADR 0039): the quota runs out before the reset when the bar ends
+/// before it, and the mark is orange then.
 struct QuotaBar: View {
     let fraction: Double?
     let tint: Color
     var height: CGFloat = 10
+    var mark: Pace?
 
     var body: some View {
         GeometryReader { proxy in
@@ -80,9 +83,23 @@ struct QuotaBar: View {
                     Capsule().fill(tint)
                         .frame(width: max(proxy.size.height, proxy.size.width * min(max(fraction, 0), 1)))
                 }
+                if let mark {
+                    Capsule().fill(mark.runsOut ? Color.orange : Color.primary)
+                        .frame(width: 2, height: proxy.size.height + 4)
+                        .background(Capsule().fill(Color(nsColor: .windowBackgroundColor)).padding(-1))
+                        .offset(x: proxy.size.width * min(max(mark.aheadFraction, 0), 1) - 1)
+                        .accessibilityLabel("Where a steady use would put the bar")
+                }
             }
         }
         .frame(height: height)
+    }
+}
+
+private extension View {
+    /// The tooltip when there is text for it; no tooltip at all, not an empty one, when there is none.
+    @ViewBuilder func help(ifAny text: String?) -> some View {
+        if let text { help(text) } else { self }
     }
 }
 
@@ -90,7 +107,7 @@ struct WindowRow: View {
     let usage: WindowUsage
     /// The limits of models that are part of this window, drawn right under its bar (ADR 0034).
     var models: [WindowUsage] = []
-    /// Say when the quota runs out, if it does before the reset (ADR 0038). The widget does not.
+    /// Draw the mark on the bar and the hover that says when the quota runs out (ADR 0039). The widget does not.
     var showsPace = false
 
     var body: some View {
@@ -101,13 +118,11 @@ struct WindowRow: View {
                 Text(usage.remainingFraction == nil ? "unknown" : "\(usage.remainingText) left")
                     .font(.caption.bold().monospacedDigit())
             }
-            QuotaBar(fraction: usage.remainingFraction, tint: tint)
+            QuotaBar(fraction: usage.remainingFraction, tint: tint, mark: showsPace ? usage.pace(at: Date()) : nil)
                 .opacity(usage.isApproximate ? 0.5 : 1)
+                .help(ifAny: showsPace ? usage.paceHoverText(at: Date()) : nil)
             ForEach(models, id: \.window.id) { ScopedWindowRow(usage: $0) }
             Text(usage.detailText).font(.caption2).foregroundStyle(.secondary)
-            if showsPace, let pace = usage.runsOutText(at: Date()) {
-                Text(pace).font(.caption2.weight(.semibold)).foregroundStyle(.orange)
-            }
         }
     }
 
