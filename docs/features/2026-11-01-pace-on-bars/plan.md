@@ -49,16 +49,18 @@ docs/use/bars.md                           a section for Learn more
 
 Three files at most per step, the gate green, and `xcodebuild` for the steps that touch the app or the widget.
 
-| Step | Adds                                                                                              | Tests that show it works                                                                                                                                          |
-| :--- | :------------------------------------------------------------------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1    | the ADR, the proposal and this plan                                                               | the docs build                                                                                                                                                    |
-| 2    | in core: the fraction ahead, the hover text for a lasting window and the short phrase             | the fraction is `(resetsAt − observedAt) / length`; remaining under it means runs out, over it lasts; no value under ADR 0038's conditions; the phrase is rounded |
-| 3    | the mark on `QuotaBar`, the hover on the bar, the permanent line removed, in the panel            | `xcodebuild`; the panel on screen, light and dark; a bar with and without a mark                                                                                  |
-| 4    | the mark and the hover on a model's thin bar                                                      | `xcodebuild`; Fable on screen; the model's reset is its window's                                                                                                  |
-| 5    | the `i` beside the provider's name, with its popover, `x` and Learn more                          | `xcodebuild`; the popover on screen; the panel stays open while it is; the link opens the docs                                                                    |
-| 6    | the short phrase in the Weekly detail line of the widget                                          | `xcodebuild`; the medium widget on the desktop; the small widget unchanged                                                                                        |
-| 7    | the section of the Bars page that Learn more opens, and the Use pages that said the line is there | the docs build                                                                                                                                                    |
-| 8    | close: Views and Design System, status, Use and Develop pages                                     | `pnpm run check`; the row moves to Implemented                                                                                                                    |
+| Step | Adds                                                                                                        | Tests that show it works                                                                                                                                          |
+| :--- | :---------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1    | the ADR, the proposal and this plan                                                                         | the docs build                                                                                                                                                    |
+| 2    | in core: the fraction ahead, the hover text for a lasting window and the short phrase                       | the fraction is `(resetsAt − observedAt) / length`; remaining under it means runs out, over it lasts; no value under ADR 0038's conditions; the phrase is rounded |
+| 3    | the mark on `QuotaBar`, the hover on the bar, the permanent line removed, in the panel                      | `xcodebuild`; the panel on screen, light and dark; a bar with and without a mark                                                                                  |
+| 4    | the mark and the hover on a model's thin bar                                                                | `xcodebuild`; Fable on screen; the model's reset is its window's                                                                                                  |
+| 5    | the `i` beside the provider's name, with its popover, `x` and Learn more                                    | `xcodebuild`; the popover on screen; the panel stays open while it is; the link opens the docs                                                                    |
+| 6    | the short phrase in the Weekly detail line of the widget                                                    | `xcodebuild`; the medium widget on the desktop; the small widget unchanged                                                                                        |
+| 7    | the section of the Bars page that Learn more opens, and the Use pages that said the line is there           | the docs build                                                                                                                                                    |
+| 8    | after the merge, on a `docs/` branch: the Views and Design System as built, the status, the row in the list | `design-export`; `pnpm run check`; the row moves to Implemented                                                                                                   |
+
+After step 7 come the review and the preview with `./scripts/preview.sh`, and the merge into `main`; step 8 follows them.
 
 Steps 3 and 4 are the same drawing in two places and can be one commit if it stays under three files. Step 2 is the only
 one that decides a number, so it is the one with the most tests.
@@ -69,4 +71,3 @@ one that decides a number, so it is the one with the most tests.
   tooltip, or a section of the panel itself.
 - **The widget's real height.** Step 6 is judged on the desktop, not on the drawing.
 - **The contrast of the orange text** on a light card, which was not measured.
-- **What the hover says when the quota lasts**: proposed "At this pace it lasts until the reset", to be confirmed in step 2.
