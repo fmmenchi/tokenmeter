@@ -52,20 +52,15 @@ extension WindowUsage {
         pace(at: now)?.runsOutAt
     }
 
-    /// The hover bubble on the bar (ADR 0039): "At this pace you run out Thursday at 6 pm", or that it lasts until the reset.
-    /// For a figure that is out of date, how old the reading is and what can be said. Nil when nothing can be estimated, and
-    /// then the bar has no mark either.
-    public func paceHoverText(at now: Date, calendar: Calendar = .current) -> String? {
+    /// What the figure on the bar's label line says while the pointer is on the bar (ADR 0039): "out Thu 6 pm" where the quota
+    /// runs out, "lasts until reset" where it lasts. For a figure that is out of date, how old it is, or that it runs out even
+    /// with no use since. Nil when nothing can be estimated, and then the bar has no mark either.
+    public func paceFigureText(at now: Date, calendar: Calendar = .current) -> String? {
         guard let pace = pace(at: now) else { return nil }
         if pace.isStale {
-            let ago = observedAt.map { Self.age(now.timeIntervalSince($0)) } ?? "a while"
-            return pace.runsOut
-                ? "Last reading \(ago) ago. Even with no use since, at this pace it runs out before the reset"
-                : "Last reading \(ago) ago. It may be lower now"
+            return pace.runsOut ? "runs out even with no use" : "seen \(observedAt.map { Self.age(now.timeIntervalSince($0)) } ?? "a while") ago"
         }
-        guard let moment = pace.runsOutAt else { return "At this pace it lasts until the reset" }
-        let when = Self.rounded(moment, from: now, calendar: calendar, weekday: "EEEE")
-        return "At this pace you run out \(when.day) at \(when.clock)"
+        return runsOutShortText(at: now, calendar: calendar) ?? "lasts until reset"
     }
 
     /// "20 min", "3 h" or "5 d": how old a reading is.

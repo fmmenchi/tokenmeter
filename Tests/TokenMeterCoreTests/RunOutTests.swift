@@ -53,7 +53,7 @@ final class RunOutTests: XCTestCase {
         let week = 7 * 24 * 3600.0
         let window = usage(left: 0.4, observed: 3 * 24 * 3600, duration: week)
         let now = start.addingTimeInterval(3 * 24 * 3600)
-        XCTAssertEqual(window.paceHoverText(at: now, calendar: calendar), "At this pace you run out Friday at 12 pm")
+        XCTAssertEqual(window.paceFigureText(at: now, calendar: calendar), "out Fri 12 pm")
     }
 
     // MARK: the mark and the hover (ADR 0039)
@@ -118,12 +118,12 @@ final class RunOutTests: XCTestCase {
         XCTAssertNil(usage(left: 0.2, observed: 5 * 60).pace(at: start.addingTimeInterval(25 * 60)), "too early in the window")
     }
 
-    func testTheHoverOfAStaleFigureSaysHowOldItIsAndWhatItMeans() {
+    func testTheFigureOfAStaleReadingSaysHowOldItIsOrThatItRunsOutAnyway() {
         let now = start.addingTimeInterval(3 * 3600)
-        XCTAssertEqual(usage(left: 0.5, observed: 2 * 3600).paceHoverText(at: now, calendar: calendar),
-                       "Last reading 1 h ago. It may be lower now")
-        XCTAssertEqual(usage(left: 0.3, observed: 2 * 3600 + 20 * 60).paceHoverText(at: now, calendar: calendar),
-                       "Last reading 40 min ago. Even with no use since, at this pace it runs out before the reset")
+        XCTAssertEqual(usage(left: 0.5, observed: 2 * 3600).paceFigureText(at: now, calendar: calendar),
+                       "seen 1 h ago")
+        XCTAssertEqual(usage(left: 0.3, observed: 2 * 3600 + 20 * 60).paceFigureText(at: now, calendar: calendar),
+                       "runs out even with no use")
     }
 
     func testAWindowWhereNothingWasUsedHasAMarkAndLasts() throws {
@@ -131,19 +131,19 @@ final class RunOutTests: XCTestCase {
         let pace = try XCTUnwrap(usage(left: 1, observed: 3 * 3600).pace(at: now))
         XCTAssertEqual(pace.aheadFraction, 0.4, accuracy: 1e-9)
         XCTAssertFalse(pace.runsOut)
-        XCTAssertEqual(usage(left: 1, observed: 3 * 3600).paceHoverText(at: now, calendar: calendar),
-                       "At this pace it lasts until the reset")
+        XCTAssertEqual(usage(left: 1, observed: 3 * 3600).paceFigureText(at: now, calendar: calendar),
+                       "lasts until reset")
         XCTAssertNil(usage(left: 1, observed: 3 * 3600).runsOut(at: now), "it never runs out")
         XCTAssertNil(usage(left: 1, observed: 20 * 60).pace(at: start.addingTimeInterval(20 * 60)), "still too early")
     }
 
-    func testTheHoverSaysWhenItRunsOutOrThatItLasts() {
+    func testTheFigureSaysWhenItRunsOutOrThatItLasts() {
         let now = start.addingTimeInterval(2 * 3600)
-        XCTAssertEqual(usage(left: 0.4, observed: 2 * 3600).paceHoverText(at: now, calendar: calendar),
-                       "At this pace you run out today at 3 pm")
-        XCTAssertEqual(usage(left: 0.8, observed: 2 * 3600).paceHoverText(at: now, calendar: calendar),
-                       "At this pace it lasts until the reset")
-        XCTAssertNil(usage(left: 0.8, observed: 2 * 3600, source: .reset).paceHoverText(at: now, calendar: calendar))
+        XCTAssertEqual(usage(left: 0.4, observed: 2 * 3600).paceFigureText(at: now, calendar: calendar),
+                       "out today 3 pm")
+        XCTAssertEqual(usage(left: 0.8, observed: 2 * 3600).paceFigureText(at: now, calendar: calendar),
+                       "lasts until reset")
+        XCTAssertNil(usage(left: 0.8, observed: 2 * 3600, source: .reset).paceFigureText(at: now, calendar: calendar))
     }
 
     func testTheShortPhraseIsRoundedAndNamesTheDayInThreeLetters() {
@@ -165,12 +165,12 @@ final class RunOutTests: XCTestCase {
     func testTheTextSaysTodayAndTomorrow() {
         let now = start.addingTimeInterval(2 * 3600)
         let window = usage(left: 0.4, observed: 2 * 3600)
-        XCTAssertEqual(window.paceHoverText(at: now, calendar: calendar), "At this pace you run out today at 3 pm")
+        XCTAssertEqual(window.paceFigureText(at: now, calendar: calendar), "out today 3 pm")
 
         let week = 7 * 24 * 3600.0
         // 66 hours gone (Wed 06:00), 70% used: all of it at 94.3 hours, Thu 10:20.
         let tomorrow = usage(left: 0.3, observed: 66 * 3600, duration: week)
-        XCTAssertEqual(tomorrow.paceHoverText(at: start.addingTimeInterval(66 * 3600), calendar: calendar),
-                       "At this pace you run out tomorrow at 10 am")
+        XCTAssertEqual(tomorrow.paceFigureText(at: start.addingTimeInterval(66 * 3600), calendar: calendar),
+                       "out tomorrow 10 am")
     }
 }
