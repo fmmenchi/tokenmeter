@@ -33,6 +33,11 @@ percentage is about.
 - The Tokens section of the Bars page of the docs says "the last N hours or days" in one case and "since the window began" in
   the other.
 
+## Out of scope
+
+- **Totals since the beginning and statistics on tokens** are a feature of their own, with their own proposal and ADR. This
+  one only says which period a window's count is about.
+
 ## Open
 
 - Whether a window whose figure is old, but whose reset time is still ahead, should count from its start. It does here: the
