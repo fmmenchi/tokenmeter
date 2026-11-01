@@ -22,17 +22,26 @@ The label is the feature's title in the user's words, never the name of a concep
 
 ## Order of work
 
-1. **Propose before drawing.** Use the `design-proposal` skill: a text proposal of ten lines, then wait for Fabio's yes.
-   The proposal is one canvas, `TokenMeter Proposal · <area> · <yyyy-mm-dd>`, with all its variants.
-2. **Delete the other variants only when Fabio asks**, each time; it is permanent. No history of proposals is kept.
-3. **Write the feature's folder** from the chosen design: `index.md` (status: in design) and `proposal.md` with a
-   screenshot.
-4. **ADR before the plan, plan before the code.** Status `proposed`, then `accepted` when Fabio confirms. Every plan
-   ends with a close step (item 6) written as its own row: it is never left implied.
-5. **Build it** with the `design-import` skill, one commit per step of the plan, three files at most, the gate green.
-   `pnpm run check` does not build the app or the widget: also run `xcodebuild`, and look at the result on screen.
-6. **When the code is in:** run `design-export` so the Views match the code, set the status, move the row to
-   _Implemented_ with its date, update the Use and Develop pages, and offer to delete the proposal canvas.
+1. **Describe it.** Use the `design-proposal` skill: a text proposal of ten lines, then wait for Fabio's yes. Draw nothing
+   before it.
+2. **Design it.** The proposal is one canvas, `TokenMeter Proposal · <area> · <yyyy-mm-dd>`, with all its variants, from a
+   copy of the Views and the Design System's tokens.
+3. **Wait for Fabio to approve the design.** Delete the other variants only when he asks, each time; it is permanent. No
+   history of proposals is kept. Then write the feature's folder from the chosen design: `index.md` (status: in design) and
+   `proposal.md` with a screenshot.
+4. **Write the technical plan.** ADR before the plan, plan before the code: status `proposed`. Every plan ends with the
+   reconciliation (item 9) written as its own row: it is never left implied.
+5. **Wait for Fabio to approve the plan.** The ADR is `accepted` when he confirms. No code before.
+6. **Build it** with the `design-import` skill, one commit per step of the plan, three files at most, the gate green.
+   `pnpm run check` does not build the app or the widget: also run `xcodebuild`. Update the Use and Develop pages with the
+   code, in the same branch.
+7. **Review and preview.** Read the diff against the ADR and the plan, then `./scripts/preview.sh` builds the branch and
+   opens it without installing it. Report what was not seen as not seen: the widget needs the install, and a tooltip only
+   shows on the real app.
+8. **Merge** the branch into `main` with `git merge --no-ff`, a merge commit, and run the gate on `main`. Never push.
+9. **Reconcile the interface**, on a short `docs/` branch once the code is in `main`: run `design-export` so the Views and the
+   Design System match the code as built, set the status, move the row to _Implemented_ with its date, and offer to delete
+   the proposal canvas.
 
 ## Screenshots of a proposal
 
