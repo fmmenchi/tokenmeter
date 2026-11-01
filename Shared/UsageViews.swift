@@ -109,6 +109,8 @@ struct WindowRow: View {
     var models: [WindowUsage] = []
     /// Draw the mark on the bar and the hover that says when the quota runs out (ADR 0039). The widget does not.
     var showsPace = false
+    /// Say in the detail line, in short, when the quota runs out (ADR 0039). It is the widget's answer: it has no hover.
+    var showsRunOut = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 3) {
@@ -122,11 +124,23 @@ struct WindowRow: View {
                 .opacity(usage.isApproximate ? 0.5 : 1)
                 .help(ifAny: showsPace ? usage.paceHoverText(at: Date()) : nil)
             ForEach(models, id: \.window.id) { ScopedWindowRow(usage: $0, showsPace: showsPace) }
-            Text(usage.detailText).font(.caption2).foregroundStyle(.secondary)
+            detail
         }
     }
 
     var tint: Color { usage.tint }
+
+    /// The detail line. Where the quota would run out before the reset and the widget asks, the moment is in it, in short
+    /// and in the notice colour: "3.4B tokens · out Thu 6 pm · resets in 3d 14h".
+    @ViewBuilder private var detail: some View {
+        if showsRunOut, let phrase = usage.runsOutShortText(at: Date()) {
+            (Text("\(usage.tokensText) · ") + Text(phrase).fontWeight(.semibold).foregroundColor(.orange)
+                + Text(usage.resetText.map { " · resets \($0)" } ?? ""))
+                .font(.caption2).foregroundStyle(.secondary)
+        } else {
+            Text(usage.detailText).font(.caption2).foregroundStyle(.secondary)
+        }
+    }
 }
 
 extension WindowUsage {
@@ -186,6 +200,7 @@ struct ProviderBlock: View {
     /// How many problems have this provider as their topic; the widget only counts, the panel lists them.
     var problemCount = 0
     var showsPace = false
+    var showsRunOut = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -207,7 +222,7 @@ struct ProviderBlock: View {
                 WindowRow(usage: window.resolved(at: Date()),
                           models: snapshot.windows.filter { $0.window.scope != nil && $0.window.name == window.window.name }
                               .map { $0.resolved(at: Date()) },
-                          showsPace: showsPace)
+                          showsPace: showsPace, showsRunOut: showsRunOut)
             }
         }
     }

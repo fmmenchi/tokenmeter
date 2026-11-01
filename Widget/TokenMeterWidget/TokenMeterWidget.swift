@@ -36,7 +36,7 @@ struct UsageWidgetView: View {
         if let snapshot = entry.snapshot {
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(snapshot.providers, id: \.provider) {
-                    ProviderCard(snapshot: $0, problemCount: snapshot.problemCount(for: $0))
+                    ProviderCard(snapshot: $0, problemCount: snapshot.problemCount(for: $0), showsRunOut: true)
                 }
                 Spacer(minLength: 0)
                 Text(snapshot.generatedAt, style: .relative).font(.caption2).foregroundStyle(.secondary)
