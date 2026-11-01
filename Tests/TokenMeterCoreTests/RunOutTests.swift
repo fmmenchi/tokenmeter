@@ -86,11 +86,44 @@ final class RunOutTests: XCTestCase {
 
     func testThereIsNoMarkWhereNothingCanBeEstimated() {
         let now = start.addingTimeInterval(3 * 3600)
-        XCTAssertNil(usage(left: 0.2, observed: 3 * 3600 - 11 * 60).pace(at: now), "stale")
         XCTAssertNil(usage(left: 0.2, observed: 3 * 3600, source: .reset).pace(at: now))
         XCTAssertNil(usage(left: 0.2, observed: 3 * 3600, source: .consumptionOnly).pace(at: now))
         XCTAssertNil(usage(left: 0.2, observed: 3 * 3600, resets: false).pace(at: now))
         XCTAssertNil(usage(left: 0.5, observed: 20 * 60).pace(at: start.addingTimeInterval(20 * 60)), "too early")
+    }
+
+    // MARK: a figure that is out of date (ADR 0039)
+
+    func testAStaleFigureHasAMarkMeasuredNowAndNoMoment() throws {
+        // 2h of 5h gone when it was read, and it is now 3h: 2/5 of the window is ahead now, not 3/5.
+        let window = usage(left: 0.5, observed: 2 * 3600)
+        let pace = try XCTUnwrap(window.pace(at: start.addingTimeInterval(3 * 3600)))
+        XCTAssertTrue(pace.isStale)
+        XCTAssertEqual(pace.aheadFraction, 0.4, accuracy: 1e-9)
+        XCTAssertNil(pace.runsOutAt)
+        XCTAssertNil(window.runsOut(at: start.addingTimeInterval(3 * 3600)), "no moment for an old reading")
+    }
+
+    func testAStaleFigureRunsOutOnlyWhenTheReadingIsAlreadyUnderTheMark() throws {
+        let now = start.addingTimeInterval(3 * 3600)   // 0.4 of the window ahead
+        XCTAssertTrue(try XCTUnwrap(usage(left: 0.3, observed: 2 * 3600).pace(at: now)).runsOut, "30% left < 40% ahead")
+        XCTAssertFalse(try XCTUnwrap(usage(left: 0.5, observed: 2 * 3600).pace(at: now)).runsOut, "50% left may still go down")
+    }
+
+    func testAStaleFigureStillNeedsAResetTimeAndAReportedSource() {
+        let now = start.addingTimeInterval(3 * 3600)
+        XCTAssertNil(usage(left: 0.2, observed: 2 * 3600, source: .reset).pace(at: now))
+        XCTAssertNil(usage(left: 0.2, observed: 2 * 3600, source: .consumptionOnly).pace(at: now))
+        XCTAssertNil(usage(left: 0.2, observed: 2 * 3600, resets: false).pace(at: now))
+        XCTAssertNil(usage(left: 0.2, observed: 5 * 60).pace(at: start.addingTimeInterval(25 * 60)), "too early in the window")
+    }
+
+    func testTheHoverOfAStaleFigureSaysHowOldItIsAndWhatItMeans() {
+        let now = start.addingTimeInterval(3 * 3600)
+        XCTAssertEqual(usage(left: 0.5, observed: 2 * 3600).paceHoverText(at: now, calendar: calendar),
+                       "Last reading 1 h ago. It may be lower now")
+        XCTAssertEqual(usage(left: 0.3, observed: 2 * 3600 + 20 * 60).paceHoverText(at: now, calendar: calendar),
+                       "Last reading 40 min ago. Even with no use since, at this pace it runs out before the reset")
     }
 
     func testAWindowWhereNothingWasUsedHasAMarkAndLasts() throws {
