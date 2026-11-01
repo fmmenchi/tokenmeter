@@ -1,6 +1,6 @@
 # ADR 0036 — A provider can be hidden
 
-Status: accepted (2026-10-30); extends [ADR 0035](./0035-provider-cards-order-and-windows-are-preferences.md)
+Status: accepted (2026-10-30), the eye changed into a switch by [ADR 0041](./0041-the-provider-switch-alone-hides-a-provider.md); extends [ADR 0035](./0035-provider-cards-order-and-windows-are-preferences.md)
 
 ## Context
 
