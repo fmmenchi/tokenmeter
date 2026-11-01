@@ -55,7 +55,8 @@ end if the window were used steadily from its start to its reset ([ADR 0039](../
   its `x`, with a second click on the `i` or with a click outside it.
 
 **No mark means nothing can be said**, not that the quota lasts. Nothing is estimated for a stale, reset or unknown window,
-one with no reset time, one where nothing was used, or one with less than a tenth of the window gone.
+one with no reset time, or one with less than a tenth of the window gone. A window where nothing was used has a mark and
+lasts.
 
 - **The pace is the average since the window began**, so a quiet night counts as slow use and the mark is pessimistic for
   someone who does not work at night.

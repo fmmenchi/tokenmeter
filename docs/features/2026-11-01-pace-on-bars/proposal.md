@@ -39,8 +39,8 @@ mark means you are going too fast. Hover the bar to see when."
 
 ## Rules
 
-- **The mark exists only where ADR 0038's conditions hold**: a fresh, reported figure with a reset time in the future and at
-  least 10% of the window gone. A mark with the bar to its right says it lasts, and no mark says nothing can be said.
+- **The mark exists only where ADR 0038's conditions hold, except that something must have been used**: a fresh, reported
+  figure with a reset time in the future and at least 10% of the window gone. Where nothing was used it lasts. A mark with the bar to its right says it lasts, and no mark says nothing can be said.
 - **The position is a fraction of the window**, `(resetsAt − observedAt) / length`, so it needs nothing the snapshot lacks.
 - **The date is rounded to the hour** and written as today, tomorrow or the weekday, in the hover and in the widget.
 - **The mark is information, not a control.** The `i` and the `x` are buttons, and the bar is only hovered.

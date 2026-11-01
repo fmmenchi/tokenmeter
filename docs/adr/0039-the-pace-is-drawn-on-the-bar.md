@@ -23,7 +23,8 @@ ADR 0038 says when a window runs out with a line of text under it, in the panel 
   used steadily. The bar ending before the mark means the quota runs out before the reset, and ending after it means it
   lasts, exactly: the quota runs out first when what is left is less than the share of the window still ahead. The mark is in the notice colour when it
   runs out and in the primary text colour when it lasts. Nothing is estimated under the conditions of ADR 0038, and then
-  there is no mark: a mark with the bar to its right says it lasts, and no mark says nothing can be said.
+  there is no mark: a mark with the bar to its right says it lasts, and no mark says nothing can be said. One condition of
+  ADR 0038 does not carry over: a window where nothing was used has a mark, since it lasts, and its hover says so.
 - **The date is in the hover on the bar**, the system tooltip: "At this pace you run out Thursday at 6 pm". When the quota
   lasts, the same hover says "At this pace it lasts until the reset". The permanent line of ADR 0038 goes, so a card is as
   tall as it was before that ADR.
