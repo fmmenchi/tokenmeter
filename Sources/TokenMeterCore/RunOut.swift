@@ -38,13 +38,6 @@ extension WindowUsage {
         pace(at: now)?.runsOutAt
     }
 
-    /// "at this pace you run out Thursday at 6 pm": the moment rounded to the hour, as today, tomorrow or the weekday.
-    public func runsOutText(at now: Date, calendar: Calendar = .current) -> String? {
-        guard let moment = runsOut(at: now) else { return nil }
-        let when = Self.rounded(moment, from: now, calendar: calendar, weekday: "EEEE")
-        return "at this pace you run out \(when.day) at \(when.clock)"
-    }
-
     /// The hover on the bar (ADR 0039): "At this pace you run out Thursday at 6 pm", or that it lasts until the reset.
     /// Nil when nothing can be estimated, and then the bar has no mark either.
     public func paceHoverText(at now: Date, calendar: Calendar = .current) -> String? {

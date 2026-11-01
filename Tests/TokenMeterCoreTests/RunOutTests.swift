@@ -53,7 +53,7 @@ final class RunOutTests: XCTestCase {
         let week = 7 * 24 * 3600.0
         let window = usage(left: 0.4, observed: 3 * 24 * 3600, duration: week)
         let now = start.addingTimeInterval(3 * 24 * 3600)
-        XCTAssertEqual(window.runsOutText(at: now, calendar: calendar), "at this pace you run out Friday at 12 pm")
+        XCTAssertEqual(window.paceHoverText(at: now, calendar: calendar), "At this pace you run out Friday at 12 pm")
     }
 
     // MARK: the mark and the hover (ADR 0039)
@@ -122,12 +122,12 @@ final class RunOutTests: XCTestCase {
     func testTheTextSaysTodayAndTomorrow() {
         let now = start.addingTimeInterval(2 * 3600)
         let window = usage(left: 0.4, observed: 2 * 3600)
-        XCTAssertEqual(window.runsOutText(at: now, calendar: calendar), "at this pace you run out today at 3 pm")
+        XCTAssertEqual(window.paceHoverText(at: now, calendar: calendar), "At this pace you run out today at 3 pm")
 
         let week = 7 * 24 * 3600.0
         // 66 hours gone (Wed 06:00), 70% used: all of it at 94.3 hours, Thu 10:20.
         let tomorrow = usage(left: 0.3, observed: 66 * 3600, duration: week)
-        XCTAssertEqual(tomorrow.runsOutText(at: start.addingTimeInterval(66 * 3600), calendar: calendar),
-                       "at this pace you run out tomorrow at 10 am")
+        XCTAssertEqual(tomorrow.paceHoverText(at: start.addingTimeInterval(66 * 3600), calendar: calendar),
+                       "At this pace you run out tomorrow at 10 am")
     }
 }
