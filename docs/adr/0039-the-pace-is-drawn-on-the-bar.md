@@ -34,14 +34,15 @@ ADR 0038 says when a window runs out with a line of text under it, in the panel 
   least a tenth of the window gone still apply.
 - **The date is in the figure on the bar's label line**, for the time the pointer is on the bar (changed 2026-11-01, after the
   system tooltip and then a bubble of ours were seen on screen). The figure, "20% left", becomes "out Thu 6 pm", in the
-  notice colour, where the quota runs out. Where it lasts it says "lasts until reset". For a figure that is out of date it
-  says "seen 22 min ago", or, in the notice colour, "runs out anyway" when the bar is already before the mark.
+  notice colour, where the quota runs out, with tomorrow named by its weekday. Where it lasts it says "lasts". For a figure
+  that is out of date it says "22 min ago", or, in the notice colour, "runs out" when the bar is already before the mark.
+  The change is a short fade.
   Nothing else moves: the label does not, the other rows do not, nothing is covered and no layer is drawn. A bubble covered
   the row above, and a swap of the detail line read as a layout shift. The system tooltip did not show at all: the app has
   no Dock icon and its panel opens without making the app active. The permanent line of ADR 0038 goes, so a card is as tall
   as it was before that ADR.
-- **A model's thin bar** has the same mark, 8 px tall, and the same swap on its own figure at the end of its row, whose
-  column is wide enough for the longest text so that the bar does not change length. It has no line of its own. The
+- **A model's thin bar** has the same mark, 8 px tall, and the same swap on its own figure at the end of its row, and
+  its bar gives way to the figure, shortening smoothly while the pointer is on it. It has no line of its own. The
   provider gives it a reset time of its own.
 - **An `i` beside the provider's name** opens a popover on a click. It closes with its `x`, with a second click on the `i` or
   with a click outside. It says: "The mark is how much you'd have left if you used it steadily until the reset. A bar
