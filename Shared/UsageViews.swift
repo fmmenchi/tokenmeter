@@ -113,7 +113,8 @@ struct WindowRow: View {
     var showsRunOut = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 3) {
+        // The mark sticks out 2 points above and below its bar, so the panel leaves 2 more between the lines than the widget.
+        VStack(alignment: .leading, spacing: showsPace ? 5 : 3) {
             HStack(alignment: .firstTextBaseline) {
                 Text(usage.window.label).font(.caption.weight(.medium))
                 Spacer()
