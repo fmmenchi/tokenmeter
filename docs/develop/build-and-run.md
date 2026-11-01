@@ -52,6 +52,17 @@ again after adding or removing source files.
 open .build/xcode/Build/Products/Debug/TokenMeter.app
 ```
 
+To try the branch you have checked out, without installing it, one command does steps 2 and 3: it builds, quits the
+TokenMeter that is running and opens the build. The copy in `/Applications` is not touched, and opening it again takes you
+back. It shows your own data, so this is the way to see a change before it is merged.
+
+```bash
+./scripts/preview.sh
+```
+
+The widget is not covered: macOS may not register one that comes from outside `/Applications`, so a change to the widget
+still needs [the install](#step-4-install-it-and-let-it-start-at-login).
+
 The app has no Dock icon and no window: look for the gauge icon in the menu bar and click it to
 open the panel. Without a team the app still runs, but the panel warns that the widget cannot read
 the snapshot.

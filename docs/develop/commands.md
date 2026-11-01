@@ -21,6 +21,7 @@ Every command, script, file and data shape in one place.
 | `pnpm run docs:start`             | Serves this site locally with hot reload.                                |
 | `pnpm run docs:build`             | Builds the site; broken links fail the build.                            |
 | `./scripts/install.sh`            | Builds the app, installs it in `/Applications`, sets up the status line. |
+| `./scripts/preview.sh`            | Builds the checked-out branch and opens it, without installing it.       |
 | `./scripts/install-statusline.sh` | Only the Claude status line: copies the script, sets `statusLine`.       |
 | `./scripts/sign-release.sh`       | Archives the app and exports it signed with Developer ID, as a zip.      |
 | `./scripts/notarize.sh`           | Notarizes that zip, staples the ticket, checks it with `spctl`.          |
