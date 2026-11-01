@@ -9,10 +9,10 @@ date: 2026-11-01
 
 In Settings a provider has a switch that is the only thing that hides it, and each window under it has a switch of its own.
 
-|        |                                                                    |
-| :----- | :----------------------------------------------------------------- |
-| Date   | 2026-11-01                                                         |
-| Status | in design, 2026-11-01: the design is approved, the plan is written |
+|        |                                                             |
+| :----- | :---------------------------------------------------------- |
+| Date   | 2026-11-01                                                  |
+| Status | in build, 2026-11-01: ADR accepted, step 2 of the plan next |
 
 ## Intent
 

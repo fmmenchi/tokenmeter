@@ -1,6 +1,6 @@
 # ADR 0041 — The provider's switch alone hides a provider
 
-Status: proposed (2026-11-01); replaces the lines of [ADR 0037](./0037-a-window-exists-only-if-the-data-lists-it.md) that say
+Status: accepted (2026-11-01); replaces the lines of [ADR 0037](./0037-a-window-exists-only-if-the-data-lists-it.md) that say
 choosing no window hides the provider and that showing it with the eye selects every window, and changes the eye of
 [ADR 0036](./0036-a-provider-can-be-hidden.md) into a switch
 
