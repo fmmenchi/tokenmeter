@@ -12,24 +12,33 @@ is the same every time, is in [Features](../features/index.md); this page is wha
 ## Intent
 
 A feature is written as a nucleus of three parts kept in one folder: its **proposal**, its **implementation plan** and
-the **ADRs** behind it. The order is fixed: proposal, ADR, plan, code. Nothing is built before the decision and the
-plan are written.
+the **ADRs** behind it. The order is fixed: description, design, approval, technical plan, approval, build, review and
+preview, merge, and the reconciliation of the interface. Nothing is built before the design and the plan are approved.
 
 ## Before you start
 
 - A semantic branch, never `main`: `feat/<name>` or `docs/<name>`. The pre-push hook checks it.
 - The gate is `pnpm run check`. It does not build the app or the widget, so changes there also need `xcodebuild`
-  (step 5).
-- The three design skills are in `.claude/skills/`: `design-proposal`, `design-import` and `design-export`.
+  (step 6), and the branch is tried with `./scripts/preview.sh` (step 7).
+- The skills are in `.claude/skills/`: `feature` runs the whole flow and stops at each approval, and it calls
+  `design-proposal`, `design-import` and `design-export` at their steps.
 
-## Step 1: Propose
+## Step 1: Describe the feature
 
 Describe the feature in a short text proposal (ten lines at most): what it is, the variants if there are several, what
-it leaves untouched and the questions for the code. `design-proposal` writes it, waits for a yes and then draws the
-variants in one canvas named `TokenMeter Proposal · <area> · <yyyy-mm-dd>`. Choose the variant, and delete the others
-when you are sure: it is permanent.
+it leaves untouched and the questions for the code. `design-proposal` writes it and waits for a yes. Nothing is drawn
+yet.
 
-## Step 2: Write the feature's folder
+## Step 2: Design it
+
+With the yes, `design-proposal` draws the variants in one canvas named `TokenMeter Proposal · <area> · <yyyy-mm-dd>`,
+from a copy of the Views and with the tokens of the Design System, not loose values. A new element is drawn as a proposed
+component.
+
+## Step 3: Approve the design
+
+You choose the variant. The other variants are deleted only when you ask: it is permanent. Then the feature's folder is
+written from the chosen design.
 
 Make `docs/features/<yyyy-mm-dd>-<name>/` with three files and a category file:
 
@@ -53,12 +62,10 @@ design system's `tokens.css` beside it, and headless Chrome:
 Set each iframe's height to its content so there is no empty space, save the image beside `proposal.md` and give it
 a descriptive alt text. Show only tokenmeter's own windows, with the sample data of the docs.
 
-## Step 3: Write the ADR
+## Step 4: Write the technical plan
 
 A structural choice gets `docs/adr/NNNN-title.md` before any code: status, context, decision, consequences, and what
 is still open. It is `proposed` until you confirm it, then `accepted`. The feature's overview links it.
-
-## Step 4: Write the plan
 
 `plan.md` in the feature's folder says how it is built:
 
@@ -68,7 +75,11 @@ is still open. It is `proposed` until you confirm it, then `accepted`. The featu
 
 A step whose point is not testable is split until it is.
 
-## Step 5: Build it
+## Step 5: Approve the plan
+
+The ADR becomes `accepted` when you confirm it, and the plan is yours to approve too. Nothing is built before both.
+
+## Step 6: Build it
 
 One commit per step of the plan, conventional, each leaving the gate green:
 
@@ -80,25 +91,48 @@ xcodebuild -project TokenMeter.xcodeproj -scheme TokenMeter -configuration Debug
 ```
 
 `design-import` brings a chosen proposal into the code by what each thing is, asks once about what the design cannot
-decide, and runs these gates. Then look at the result on screen: the menu bar, the panel, the widget, Settings. A visual
-change that was not seen is reported as not seen.
+decide, and runs these gates. The Use and Develop pages the feature changes are updated with the code, in the same
+branch.
 
-## Step 6: Finish
+## Step 7: Review and preview
 
-1. Run `design-export` so the design artifacts match the code, and delete the proposal canvas when you are sure.
-2. Set the feature's status to implemented, move its row to _Implemented_ with the date, and set the ADR to `accepted`.
-3. Update the [Use](../use/what-it-does.md) pages the feature changes, and the Develop pages (Architecture, Core API,
-   Commands and Files) that describe what moved.
+- **Review** the diff against the ADR and the plan: one concern per commit, three files at most, nothing the plan does not
+  name.
+- **Preview** the branch without installing it: `./scripts/preview.sh` builds it, quits the TokenMeter that is running and
+  opens the build, with your own data. Look at the menu bar, the panel and Settings. The widget needs
+  [the install](./build-and-run.md#step-4-install-it-and-let-it-start-at-login).
+- A visual change that was not seen is reported as not seen. A defect found here is fixed on the branch.
+
+## Step 8: Merge
+
+Merge the finished branch into `main` with a merge commit, never a fast-forward and never a rebase:
+
+```bash
+git checkout main
+git merge --no-ff <branch>
+```
+
+Run the gate on `main`. Pushing is yours.
+
+## Step 9: Reconcile the interface
+
+On a short `docs/` branch, once the code is in `main`:
+
+1. Run `design-export` so the Views and the Design System match the code as built, and delete the proposal canvas when you
+   are sure.
+2. Set the feature's status to implemented, move its row to _Implemented_ with the date, and set the ADR to `accepted` if
+   it is not yet.
 
 ## Checklist
 
 | Done                                                       | Where          |
 | :--------------------------------------------------------- | :------------- |
-| The proposal, with a screenshot                            | `proposal.md`  |
-| The ADR, accepted                                          | `docs/adr/`    |
-| The plan, with its order of commits                        | `plan.md`      |
+| The proposal, with a screenshot, approved                  | `proposal.md`  |
+| The ADR, accepted, and the plan, approved                  | `docs/adr/`    |
 | The code, one commit per step, gate and `xcodebuild` green | the repository |
-| The status, the row in the list, the Use and Develop pages | `docs/`        |
+| The branch reviewed and previewed                          | your Mac       |
+| The branch merged into `main` with a merge commit          | the repository |
+| The Views and Design System reconciled, the status set     | `docs/`        |
 
 ## Related
 

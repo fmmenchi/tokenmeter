@@ -27,7 +27,7 @@ Gate: `pnpm run check`. Spike: `swift run tokenmeter-probe`.
 ## How we work
 
 - **A structural decision gets an ADR first**, and is not made until it is written.
-- **A feature is a nucleus** of proposal, implementation plan and ADRs in `docs/features/`, built in that order ([features](./.agents/doc/features.md)).
+- **A feature is a nucleus** of proposal, implementation plan and ADRs in `docs/features/`, built in that order ([features](./.agents/doc/features.md)). The `feature` skill runs the flow and stops at each approval.
 - **Never work on `main`.** Every feature or fix is built on its own semantic branch, with conventional commits.
 - **Never bypass a hook.**
 - **Never push.** Fabio pushes. A finished branch is merged into `main` with a **merge commit** (`git merge --no-ff`), never

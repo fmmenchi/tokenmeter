@@ -34,26 +34,28 @@ change.
 
 ```mermaid
 flowchart TD
-  A["Idea"] --> B["design-proposal<br/>a short text proposal, then Fabio's yes"]
-  B --> C["A proposal canvas<br/>with the variants"]
-  C --> D{"Fabio chooses"}
-  D --> E["The other variants are deleted<br/>when Fabio asks"]
-  E --> F["Feature folder:<br/>overview and proposal with screenshots<br/>status: in design"]
-  F --> G["ADR<br/>proposed, then accepted"]
-  G --> H["Implementation plan<br/>diagrams, ordered commits, tests"]
-  H --> I["Build it, one commit per step<br/>design-import and the gates"]
-  I --> J["design-export refreshes the Views<br/>the proposal canvas is deleted when Fabio asks"]
-  J --> K["Status: implemented<br/>the row moves to Implemented<br/>the Use and Develop pages are updated"]
+  A["Idea"] --> B["Description<br/>a short text proposal, then Fabio's yes"]
+  B --> C["Design<br/>a canvas with the variants, from the Design System"]
+  C --> D{"Fabio approves the design"}
+  D --> E["Feature folder:<br/>overview and proposal with screenshots<br/>status: in design"]
+  E --> F["Technical plan<br/>ADR proposed, plan with ordered commits and tests"]
+  F --> G{"Fabio approves the plan<br/>ADR accepted"}
+  G --> H["Build it, one commit per step<br/>design-import and the gates"]
+  H --> I["Review and preview<br/>preview.sh, on the branch"]
+  I --> J["Merge into main<br/>a merge commit"]
+  J --> K["Reconcile the interface<br/>design-export, status implemented, the row moves"]
 ```
 
-| Step                  | Leaves                                                                             | In                                   |
-| :-------------------- | :--------------------------------------------------------------------------------- | :----------------------------------- |
-| Proposal              | the chosen design, drawn in a canvas named `TokenMeter Proposal · <area> · <date>` | Claude (private, temporary)          |
-| Overview and proposal | `index.md` and `proposal.md`, with a screenshot of the chosen design               | `docs/features/<yyyy-mm-dd>-<name>/` |
-| Decision              | the ADR, written before the plan                                                   | `docs/adr/`                          |
-| Plan                  | `plan.md` with diagrams, the order of commits and the tests                        | the feature's folder                 |
-| Code                  | one commit per step of the plan, each leaving the gate green                       | the repository                       |
-| Done                  | the status in the overview, the row in this list, the Use and Develop pages        | `docs/`                              |
+| Step                   | Leaves                                                                             | In                                   |
+| :--------------------- | :--------------------------------------------------------------------------------- | :----------------------------------- |
+| Description and design | the chosen design, drawn in a canvas named `TokenMeter Proposal · <area> · <date>` | Claude (private, temporary)          |
+| Overview and proposal  | `index.md` and `proposal.md`, with a screenshot of the chosen design               | `docs/features/<yyyy-mm-dd>-<name>/` |
+| Decision               | the ADR, written before the plan and accepted before the code                      | `docs/adr/`                          |
+| Plan                   | `plan.md` with diagrams, the order of commits and the tests                        | the feature's folder                 |
+| Code                   | one commit per step of the plan, each leaving the gate green                       | the repository                       |
+| Review and preview     | the branch seen running, without installing it                                     | your Mac                             |
+| Merge                  | a merge commit on `main`                                                           | the repository                       |
+| Reconciliation         | the Views and Design System as built, the status, the row in this list             | `docs/` and the design artifacts     |
 
 [Implement a Feature](../develop/implement-a-feature.md) says what to do and run at each step.
 
@@ -74,4 +76,4 @@ The skills that do the design work are `design-proposal` (a proposal), `design-i
   minus its date as `YYYYMMDD`, so the sidebar lists the newest first without renumbering the others.
 - **Status.** A feature is listed under _In design and build_ until its code is in; then its overview says so and it
   moves to _Implemented_, with the date it was implemented.
-- Write the ADR before the plan, and the plan before the code.
+- Write the ADR before the plan, and the plan before the code, and have each approved.
