@@ -69,7 +69,9 @@ lasts.
 
 ## Tokens
 
-The line under a bar shows **input + output** tokens seen in that window. Cache reads and cache
+The line under a bar shows **input + output** tokens seen in that window's own period: from its start, which is its reset
+time minus its length, when the provider gave one ([ADR 0040](../adr/0040-a-windows-tokens-are-counted-in-its-own-period.md)),
+and over the last 5 hours or 7 days when it did not. Cache reads and cache
 writes are left out: they make up about 98% of the raw total and say nothing about plan use. The
 count comes from local CLI logs only, so it covers Claude Code and Codex and not the web or desktop
 apps, and it does not match how the plans count.
