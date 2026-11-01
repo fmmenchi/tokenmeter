@@ -121,9 +121,17 @@ final class RunOutTests: XCTestCase {
     func testTheFigureOfAStaleReadingSaysHowOldItIsOrThatItRunsOutAnyway() {
         let now = start.addingTimeInterval(3 * 3600)
         XCTAssertEqual(usage(left: 0.5, observed: 2 * 3600).paceFigureText(at: now, calendar: calendar),
-                       "seen 1 h ago")
+                       "1 h ago")
         XCTAssertEqual(usage(left: 0.3, observed: 2 * 3600 + 20 * 60).paceFigureText(at: now, calendar: calendar),
-                       "runs out anyway")
+                       "runs out")
+    }
+
+    func testTheFigureNamesTomorrowByItsWeekdayAndTheWidgetDoesNot() {
+        let week = 7 * 24 * 3600.0
+        let tomorrow = usage(left: 0.3, observed: 66 * 3600, duration: week)   // runs out Thu 10 am; now is Wed 06:00
+        let now = start.addingTimeInterval(66 * 3600)
+        XCTAssertEqual(tomorrow.paceFigureText(at: now, calendar: calendar), "out Thu 10 am")
+        XCTAssertEqual(tomorrow.runsOutShortText(at: now, calendar: calendar), "out tomorrow 10 am")
     }
 
     func testAWindowWhereNothingWasUsedHasAMarkAndLasts() throws {
@@ -132,7 +140,7 @@ final class RunOutTests: XCTestCase {
         XCTAssertEqual(pace.aheadFraction, 0.4, accuracy: 1e-9)
         XCTAssertFalse(pace.runsOut)
         XCTAssertEqual(usage(left: 1, observed: 3 * 3600).paceFigureText(at: now, calendar: calendar),
-                       "lasts until reset")
+                       "lasts")
         XCTAssertNil(usage(left: 1, observed: 3 * 3600).runsOut(at: now), "it never runs out")
         XCTAssertNil(usage(left: 1, observed: 20 * 60).pace(at: start.addingTimeInterval(20 * 60)), "still too early")
     }
@@ -142,7 +150,7 @@ final class RunOutTests: XCTestCase {
         XCTAssertEqual(usage(left: 0.4, observed: 2 * 3600).paceFigureText(at: now, calendar: calendar),
                        "out today 3 pm")
         XCTAssertEqual(usage(left: 0.8, observed: 2 * 3600).paceFigureText(at: now, calendar: calendar),
-                       "lasts until reset")
+                       "lasts")
         XCTAssertNil(usage(left: 0.8, observed: 2 * 3600, source: .reset).paceFigureText(at: now, calendar: calendar))
     }
 
@@ -171,6 +179,6 @@ final class RunOutTests: XCTestCase {
         // 66 hours gone (Wed 06:00), 70% used: all of it at 94.3 hours, Thu 10:20.
         let tomorrow = usage(left: 0.3, observed: 66 * 3600, duration: week)
         XCTAssertEqual(tomorrow.paceFigureText(at: start.addingTimeInterval(66 * 3600), calendar: calendar),
-                       "out tomorrow 10 am")
+                       "out Thu 10 am")
     }
 }

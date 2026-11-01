@@ -53,14 +53,18 @@ extension WindowUsage {
     }
 
     /// What the figure on the bar's label line says while the pointer is on the bar (ADR 0039): "out Thu 6 pm" where the quota
-    /// runs out, "lasts until reset" where it lasts. For a figure that is out of date, how old it is, or that it runs out even
-    /// with no use since. Nil when nothing can be estimated, and then the bar has no mark either.
+    /// runs out, "lasts" where it lasts. For a figure that is out of date, how old it is ("22 min ago"), or "runs out" when
+    /// the reading is already under the mark. Short, because it takes the place of "20% left". Nil when nothing can be
+    /// estimated, and then the bar has no mark either.
     public func paceFigureText(at now: Date, calendar: Calendar = .current) -> String? {
         guard let pace = pace(at: now) else { return nil }
         if pace.isStale {
-            return pace.runsOut ? "runs out anyway" : "seen \(observedAt.map { Self.age(now.timeIntervalSince($0)) } ?? "a while") ago"
+            return pace.runsOut ? "runs out" : "\(observedAt.map { Self.age(now.timeIntervalSince($0)) } ?? "a while") ago"
         }
-        return runsOutShortText(at: now, calendar: calendar) ?? "lasts until reset"
+        guard let moment = pace.runsOutAt else { return "lasts" }
+        // Tomorrow is the weekday here, which is shorter: a window is never as long as a week, so the name is not ambiguous.
+        let when = Self.rounded(moment, from: now, calendar: calendar, weekday: "EEE", namesTomorrow: true)
+        return "out \(when.day) \(when.clock)"
     }
 
     /// "20 min", "3 h" or "5 d": how old a reading is.
@@ -78,7 +82,8 @@ extension WindowUsage {
     }
 
     /// The moment rounded to the hour: "6 pm", and the day as today, tomorrow or the weekday in the given format.
-    private static func rounded(_ moment: Date, from now: Date, calendar: Calendar, weekday: String) -> (day: String, clock: String) {
+    private static func rounded(_ moment: Date, from now: Date, calendar: Calendar, weekday: String,
+                                namesTomorrow: Bool = false) -> (day: String, clock: String) {
         let hour = calendar.dateInterval(of: .hour, for: moment.addingTimeInterval(30 * 60))?.start ?? moment
         let parts = calendar.dateComponents([.hour], from: hour)
         let clock = parts.hour.map { ($0 % 12 == 0 ? 12 : $0 % 12).description + ($0 < 12 ? " am" : " pm") } ?? ""
@@ -86,7 +91,7 @@ extension WindowUsage {
         let day: String
         switch days {
         case ..<1: day = "today"
-        case 1: day = "tomorrow"
+        case 1 where !namesTomorrow: day = "tomorrow"
         default:
             // The interface is in English, like "resets in 2h".
             let formatter = DateFormatter()
