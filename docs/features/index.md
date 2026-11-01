@@ -21,12 +21,11 @@ are [ADRs](../adr), and its overview links them.
 | [Windows by plan](./2026-10-31-windows-by-plan/index.md): a card shows only the windows the plan has                                  | 2026-10-31 | [Overview](./2026-10-31-windows-by-plan/index.md), [Proposal](./2026-10-31-windows-by-plan/proposal.md), [Implementation plan](./2026-10-31-windows-by-plan/plan.md)             |
 | [Burn rate](./2026-10-31-burn-rate/index.md): a window says when it runs out at its pace, when before the reset                       | 2026-10-31 | [Overview](./2026-10-31-burn-rate/index.md), [Proposal](./2026-10-31-burn-rate/proposal.md), [Implementation plan](./2026-10-31-burn-rate/plan.md)                               |
 | [Pace on the bars](./2026-11-01-pace-on-bars/index.md): a mark on the bar says whether the quota lasts, a hover says when it runs out | 2026-11-01 | [Overview](./2026-11-01-pace-on-bars/index.md), [Proposal](./2026-11-01-pace-on-bars/proposal.md), [Implementation plan](./2026-11-01-pace-on-bars/plan.md)                      |
+| [Settings switches](./2026-11-01-settings-switches/index.md): a switch hides a provider, a switch for each window under it            | 2026-11-01 | [Overview](./2026-11-01-settings-switches/index.md), [Proposal](./2026-11-01-settings-switches/proposal.md)                                                                      |
 
 ## In design and build
 
-| Feature                                                                                                                    | Date       | Pages                                                                                                       |
-| :------------------------------------------------------------------------------------------------------------------------- | :--------- | :---------------------------------------------------------------------------------------------------------- |
-| [Settings switches](./2026-11-01-settings-switches/index.md): a switch hides a provider, a switch for each window under it | 2026-11-01 | [Overview](./2026-11-01-settings-switches/index.md), [Proposal](./2026-11-01-settings-switches/proposal.md) |
+Nothing at the moment.
 
 ## The pattern: from idea to implemented
 
