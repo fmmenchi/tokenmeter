@@ -115,7 +115,7 @@ A model's limit is a window with a scope ([ADR 0034](../adr/0034-limits-can-be-s
 | `ClaudeUsageRefresh`              | `locate`, `run` and `refresh`: ask Claude Code to refresh its usage copy by running its own `/usage`.                                         |
 | `ProviderReading.absent`          | Lengths in minutes of windows the plan lacks, when fresh data says so ([ADR 0037](../adr/0037-a-window-exists-only-if-the-data-lists-it.md)). |
 | `DisplayPreferences.hiddenModels` | The models of a provider the person turned off; a model is on unless it is here.                                                              |
-| `DisplayPreferences.select`       | The windows the person chose: none hides the provider, any shows it, and a window just chosen turns its models on.                            |
+| `DisplayPreferences.select`       | The windows the person chose: an empty choice is refused, it never hides the provider, and a window just chosen turns its models on.          |
 | `ProviderConfig.ExistsIf`         | A list that says whether a window exists: `file`, `each`, `where`, `observedAt` and `maxAgeHours` (6 by default).                             |
 
 A quota window in `providers.json` can read a list: `each` (the path to it), `where` (fields an entry must equal), `scope`
