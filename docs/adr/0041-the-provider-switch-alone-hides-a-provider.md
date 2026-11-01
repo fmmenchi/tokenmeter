@@ -21,7 +21,7 @@ under it, as macOS Settings does it.
 - **The provider's switch** replaces the eye, beside the name. Off is the same preference as hidden (`hidden` in the
   defaults): no card in the panel or the widget, not in the menu-bar percentage. Nothing else in the reading changes.
 - **Under the provider a vertical list**, one row per window with a switch, and a model's limit indented under its window,
-  with a smaller switch. This replaces the segments of `WindowSelector` of ADR 0037.
+  with the same switch, and its label in a smaller text. This replaces the segments of `WindowSelector` of ADR 0037.
 - **Turning a window off never hides the provider.** The last window that is on cannot be turned off:
   `DisplayPreferences.select` refuses an empty choice, and its switch does not turn off, with a tooltip that says to turn
   the provider off.
