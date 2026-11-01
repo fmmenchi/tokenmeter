@@ -123,7 +123,7 @@ final class RunOutTests: XCTestCase {
         XCTAssertEqual(usage(left: 0.5, observed: 2 * 3600).paceFigureText(at: now, calendar: calendar),
                        "seen 1 h ago")
         XCTAssertEqual(usage(left: 0.3, observed: 2 * 3600 + 20 * 60).paceFigureText(at: now, calendar: calendar),
-                       "runs out even with no use")
+                       "runs out anyway")
     }
 
     func testAWindowWhereNothingWasUsedHasAMarkAndLasts() throws {

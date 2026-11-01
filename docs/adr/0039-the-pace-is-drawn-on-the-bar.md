@@ -35,7 +35,7 @@ ADR 0038 says when a window runs out with a line of text under it, in the panel 
 - **The date is in the figure on the bar's label line**, for the time the pointer is on the bar (changed 2026-11-01, after the
   system tooltip and then a bubble of ours were seen on screen). The figure, "20% left", becomes "out Thu 6 pm", in the
   notice colour, where the quota runs out. Where it lasts it says "lasts until reset". For a figure that is out of date it
-  says "seen 22 min ago", or, in the notice colour, "runs out even with no use" when the bar is already before the mark.
+  says "seen 22 min ago", or, in the notice colour, "runs out anyway" when the bar is already before the mark.
   Nothing else moves: the label does not, the other rows do not, nothing is covered and no layer is drawn. A bubble covered
   the row above, and a swap of the detail line read as a layout shift. The system tooltip did not show at all: the app has
   no Dock icon and its panel opens without making the app active. The permanent line of ADR 0038 goes, so a card is as tall

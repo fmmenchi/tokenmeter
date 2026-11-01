@@ -58,7 +58,7 @@ extension WindowUsage {
     public func paceFigureText(at now: Date, calendar: Calendar = .current) -> String? {
         guard let pace = pace(at: now) else { return nil }
         if pace.isStale {
-            return pace.runsOut ? "runs out even with no use" : "seen \(observedAt.map { Self.age(now.timeIntervalSince($0)) } ?? "a while") ago"
+            return pace.runsOut ? "runs out anyway" : "seen \(observedAt.map { Self.age(now.timeIntervalSince($0)) } ?? "a while") ago"
         }
         return runsOutShortText(at: now, calendar: calendar) ?? "lasts until reset"
     }
