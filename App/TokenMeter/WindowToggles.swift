@@ -2,7 +2,7 @@ import SwiftUI
 
 /// The windows a provider's card can show, one row each with a switch, chosen independently (ADR 0041). The rows are the
 /// windows the data lists, so a plan with one has one. A model's limit is a row under the window it is part of, indented and
-/// joined by the same bracket as in the bars, with a smaller switch; it is off, and cannot be chosen, while its window is off.
+/// joined by the same bracket as in the bars, with the same switch; it is off, and cannot be chosen, while its window is off.
 /// The last window that is on cannot be turned off: the provider's own switch is what hides it. While the provider is off
 /// the list stays, dimmed and not touchable, with the choice it has.
 struct WindowToggles: View {
@@ -28,12 +28,12 @@ struct WindowToggles: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             ForEach(rows) { row in
-                line(row, isLocked: row.id == lockedID, size: .small, action: { onToggle(row.id) })
+                line(row, isLocked: row.id == lockedID, isModel: false, action: { onToggle(row.id) })
                     .help(row.id == lockedID ? "The last window stays on: turn the provider off to hide it" : "")
                 ForEach(row.models) { model in
                     HStack(spacing: 6) {
                         Bracket().frame(width: 8, height: 8).offset(y: -6)
-                        line(model, isLocked: false, size: .mini, action: { onToggleModel(model.id) })
+                        line(model, isLocked: false, isModel: true, action: { onToggleModel(model.id) })
                             .disabled(!row.isOn)
                             .opacity(row.isOn ? 1 : 0.45)
                     }
@@ -47,14 +47,13 @@ struct WindowToggles: View {
         .opacity(isActive ? 1 : 0.45)
     }
 
-    private func line(_ row: Row, isLocked: Bool, size: ControlSize, action: @escaping () -> Void) -> some View {
+    private func line(_ row: Row, isLocked: Bool, isModel: Bool, action: @escaping () -> Void) -> some View {
         HStack {
-            Text(row.label).font(size == .mini ? .callout : .body)
+            Text(row.label).font(isModel ? .callout : .body)
             Spacer()
             Toggle(row.label, isOn: Binding(get: { row.isOn }, set: { _ in action() }))
                 .labelsHidden()
                 .toggleStyle(.switch)
-                .controlSize(size)
                 .disabled(isLocked)
         }
     }
