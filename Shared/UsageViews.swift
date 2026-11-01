@@ -67,10 +67,13 @@ extension Int {
 }
 
 /// A thick, filled bar. SwiftUI's `ProgressView` collapses to a hairline in menus and widgets.
+/// A `mark` is where the bar would end at a steady use (ADR 0039): the quota runs out before the reset when the bar ends
+/// before it, and the mark is orange then. A figure that is out of date has its bar at half strength, and the mark with it.
 struct QuotaBar: View {
     let fraction: Double?
     let tint: Color
     var height: CGFloat = 10
+    var mark: Pace?
 
     var body: some View {
         GeometryReader { proxy in
@@ -80,6 +83,13 @@ struct QuotaBar: View {
                     Capsule().fill(tint)
                         .frame(width: max(proxy.size.height, proxy.size.width * min(max(fraction, 0), 1)))
                 }
+                if let mark {
+                    Capsule().fill(mark.runsOut ? Color.orange : Color.primary)
+                        .frame(width: 2, height: proxy.size.height + 4)
+                        .background(Capsule().fill(Color(nsColor: .windowBackgroundColor)).padding(-1))
+                        .offset(x: proxy.size.width * min(max(mark.aheadFraction, 0), 1) - 1)
+                        .accessibilityLabel("Where a steady use would put the bar")
+                }
             }
         }
         .frame(height: height)
@@ -88,30 +98,48 @@ struct QuotaBar: View {
 
 struct WindowRow: View {
     let usage: WindowUsage
+    @State private var hovering = false
     /// The limits of models that are part of this window, drawn right under its bar (ADR 0034).
     var models: [WindowUsage] = []
-    /// Say when the quota runs out, if it does before the reset (ADR 0038). The widget does not.
+    /// Draw the mark on the bar and the hover that says when the quota runs out (ADR 0039). The widget does not.
     var showsPace = false
+    /// Say in the detail line, in short, when the quota runs out (ADR 0039). It is the widget's answer: it has no hover.
+    var showsRunOut = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 3) {
+        // The mark sticks out 2 points above and below its bar, so the panel leaves 2 more between the lines than the widget.
+        VStack(alignment: .leading, spacing: showsPace ? 5 : 3) {
             HStack(alignment: .firstTextBaseline) {
                 Text(usage.window.label).font(.caption.weight(.medium))
                 Spacer()
-                Text(usage.remainingFraction == nil ? "unknown" : "\(usage.remainingText) left")
+                // While the pointer is on the bar the figure says when the quota runs out (ADR 0039); the label does not move.
+                let say = hovering && showsPace ? usage.paceFigureText(at: Date()) : nil
+                Text(say ?? (usage.remainingFraction == nil ? "unknown" : "\(usage.remainingText) left"))
                     .font(.caption.bold().monospacedDigit())
+                    .foregroundStyle(say == nil ? Color.primary : usage.paceFigureStyle(at: Date()))
+                    .id(say ?? "").transition(.opacity)
             }
-            QuotaBar(fraction: usage.remainingFraction, tint: tint)
+            QuotaBar(fraction: usage.remainingFraction, tint: tint, mark: showsPace ? usage.pace(at: Date()) : nil)
                 .opacity(usage.isApproximate ? 0.5 : 1)
-            ForEach(models, id: \.window.id) { ScopedWindowRow(usage: $0) }
-            Text(usage.detailText).font(.caption2).foregroundStyle(.secondary)
-            if showsPace, let pace = usage.runsOutText(at: Date()) {
-                Text(pace).font(.caption2.weight(.semibold)).foregroundStyle(.orange)
-            }
+                .hovered($hovering, enabled: showsPace)
+            ForEach(models, id: \.window.id) { ScopedWindowRow(usage: $0, showsPace: showsPace) }
+            detail
         }
     }
 
     var tint: Color { usage.tint }
+
+    /// The detail line. Where the quota would run out before the reset and the widget asks, the moment is in it, in short
+    /// and in the notice colour: "3.4B tokens · out Thu 6 pm · resets in 3d 14h".
+    @ViewBuilder private var detail: some View {
+        if showsRunOut, let phrase = usage.runsOutShortText(at: Date()) {
+            (Text("\(usage.tokensText) · ") + Text(phrase).fontWeight(.semibold).foregroundColor(.orange)
+                + Text(usage.resetText.map { " · resets \($0)" } ?? ""))
+                .font(.caption2).foregroundStyle(.secondary)
+        } else {
+            Text(usage.detailText).font(.caption2).foregroundStyle(.secondary)
+        }
+    }
 }
 
 extension WindowUsage {
@@ -138,18 +166,29 @@ private struct Bracket: Shape {
 /// under that window's bar (ADR 0034). The share of the week and the reset are in the help text.
 struct ScopedWindowRow: View {
     let usage: WindowUsage
+    /// Draw the mark on the thin bar and say in its figure when it runs out (ADR 0039). The widget does not.
+    var showsPace = false
+    @State private var hovering = false
 
     var body: some View {
         HStack(spacing: 6) {
             Bracket().stroke(Color.secondary.opacity(0.6), lineWidth: 1).frame(width: 8, height: 8).offset(y: -3)
             Text(usage.window.scope ?? "").font(.caption.weight(.medium)).lineLimit(1)
                 .frame(minWidth: 30, alignment: .leading)
-            QuotaBar(fraction: usage.remainingFraction, tint: usage.tint, height: 4)
-            Text(usage.remainingFraction == nil ? "unknown" : "\(usage.remainingText) left")
-                .font(.caption.bold().monospacedDigit()).frame(minWidth: 54, alignment: .trailing)
+            QuotaBar(fraction: usage.remainingFraction, tint: usage.tint, height: 4,
+                     mark: showsPace ? usage.pace(at: Date()) : nil)
+            // The figure is as wide as what it says, and the bar gives way to it, smoothly (ADR 0039).
+            let say = hovering && showsPace ? usage.paceFigureText(at: Date()) : nil
+            Text(say ?? (usage.remainingFraction == nil ? "unknown" : "\(usage.remainingText) left"))
+                .font(.caption.bold().monospacedDigit())
+                .foregroundStyle(say == nil ? Color.primary : usage.paceFigureStyle(at: Date()))
+                .lineLimit(1).fixedSize()
+                .id(say ?? "").transition(.opacity)
+                .frame(minWidth: 54, alignment: .trailing)
         }
         .opacity(usage.isApproximate ? 0.5 : 1)
         .padding(.leading, 6)
+        .hovered($hovering, enabled: showsPace)
         .help([ "Part of \(WindowSpec(name: usage.window.name, duration: 0).label)",
                 usage.resetText.map { "resets \($0)" }, usage.isApproximate ? usage.observedAgoText.map { "seen \($0)" } : nil ]
             .compactMap { $0 }.joined(separator: " · "))
@@ -161,6 +200,7 @@ struct ProviderBlock: View {
     /// How many problems have this provider as their topic; the widget only counts, the panel lists them.
     var problemCount = 0
     var showsPace = false
+    var showsRunOut = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -172,12 +212,17 @@ struct ProviderBlock: View {
                         .background(Capsule().fill(Color.primary.opacity(0.12)))
                 }
                 if problemCount > 0 { NoticeChip(count: problemCount) }
+                // Only where there is a mark to explain: a provider whose windows cannot be estimated has none.
+                if showsPace, snapshot.windows.contains(where: { $0.pace(at: Date()) != nil }) {
+                    Spacer(minLength: 0)
+                    PaceInfo()
+                }
             }
             ForEach(snapshot.windows.filter { $0.window.scope == nil }, id: \.window.id) { window in
                 WindowRow(usage: window.resolved(at: Date()),
                           models: snapshot.windows.filter { $0.window.scope != nil && $0.window.name == window.window.name }
                               .map { $0.resolved(at: Date()) },
-                          showsPace: showsPace)
+                          showsPace: showsPace, showsRunOut: showsRunOut)
             }
         }
     }

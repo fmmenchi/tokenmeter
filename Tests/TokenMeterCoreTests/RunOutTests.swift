@@ -53,18 +53,132 @@ final class RunOutTests: XCTestCase {
         let week = 7 * 24 * 3600.0
         let window = usage(left: 0.4, observed: 3 * 24 * 3600, duration: week)
         let now = start.addingTimeInterval(3 * 24 * 3600)
-        XCTAssertEqual(window.runsOutText(at: now, calendar: calendar), "at this pace you run out Friday at 12 pm")
+        XCTAssertEqual(window.paceFigureText(at: now, calendar: calendar), "out Fri 12 pm")
+    }
+
+    // MARK: the mark and the hover (ADR 0039)
+
+    func testTheMarkIsTheShareOfTheWindowStillAheadWhenTheFigureWasObserved() throws {
+        // 2h of 5h gone: 3/5 ahead, whether it runs out (40% left) or lasts (80% left).
+        let runsOut = usage(left: 0.4, observed: 2 * 3600).pace(at: start.addingTimeInterval(2 * 3600))
+        XCTAssertEqual(try XCTUnwrap(runsOut).aheadFraction, 0.6, accuracy: 1e-9)
+        XCTAssertTrue(try XCTUnwrap(runsOut).runsOut)
+        let lasts = usage(left: 0.8, observed: 2 * 3600).pace(at: start.addingTimeInterval(2 * 3600))
+        XCTAssertEqual(try XCTUnwrap(lasts).aheadFraction, 0.6, accuracy: 1e-9)
+        XCTAssertFalse(try XCTUnwrap(lasts).runsOut, "a window that lasts still has a mark")
+    }
+
+    func testTheMarkDoesNotMoveWhileTheFigureIsFresh() throws {
+        // The figure is five minutes old: the mark is where it was when the figure was observed, not at `now`.
+        let window = usage(left: 0.4, observed: 2 * 3600)
+        let pace = window.pace(at: start.addingTimeInterval(2 * 3600 + 5 * 60))
+        XCTAssertEqual(try XCTUnwrap(pace).aheadFraction, 0.6, accuracy: 1e-9)
+    }
+
+    func testTheBarEndsBeforeTheMarkExactlyWhenTheQuotaRunsOut() throws {
+        for hundredths in stride(from: 5, through: 95, by: 5) {
+            let left = Double(hundredths) / 100
+            let now = start.addingTimeInterval(3 * 3600)
+            let pace = try XCTUnwrap(usage(left: left, observed: 3 * 3600).pace(at: now))
+            XCTAssertEqual(left < pace.aheadFraction, pace.runsOut, "\(hundredths)% left, \(pace.aheadFraction) ahead")
+        }
+    }
+
+    func testThereIsNoMarkWhereNothingCanBeEstimated() {
+        let now = start.addingTimeInterval(3 * 3600)
+        XCTAssertNil(usage(left: 0.2, observed: 3 * 3600, source: .reset).pace(at: now))
+        XCTAssertNil(usage(left: 0.2, observed: 3 * 3600, source: .consumptionOnly).pace(at: now))
+        XCTAssertNil(usage(left: 0.2, observed: 3 * 3600, resets: false).pace(at: now))
+        XCTAssertNil(usage(left: 0.5, observed: 20 * 60).pace(at: start.addingTimeInterval(20 * 60)), "too early")
+    }
+
+    // MARK: a figure that is out of date (ADR 0039)
+
+    func testAStaleFigureHasAMarkMeasuredNowAndNoMoment() throws {
+        // 2h of 5h gone when it was read, and it is now 3h: 2/5 of the window is ahead now, not 3/5.
+        let window = usage(left: 0.5, observed: 2 * 3600)
+        let pace = try XCTUnwrap(window.pace(at: start.addingTimeInterval(3 * 3600)))
+        XCTAssertTrue(pace.isStale)
+        XCTAssertEqual(pace.aheadFraction, 0.4, accuracy: 1e-9)
+        XCTAssertNil(pace.runsOutAt)
+        XCTAssertNil(window.runsOut(at: start.addingTimeInterval(3 * 3600)), "no moment for an old reading")
+    }
+
+    func testAStaleFigureRunsOutOnlyWhenTheReadingIsAlreadyUnderTheMark() throws {
+        let now = start.addingTimeInterval(3 * 3600)   // 0.4 of the window ahead
+        XCTAssertTrue(try XCTUnwrap(usage(left: 0.3, observed: 2 * 3600).pace(at: now)).runsOut, "30% left < 40% ahead")
+        XCTAssertFalse(try XCTUnwrap(usage(left: 0.5, observed: 2 * 3600).pace(at: now)).runsOut, "50% left may still go down")
+    }
+
+    func testAStaleFigureStillNeedsAResetTimeAndAReportedSource() {
+        let now = start.addingTimeInterval(3 * 3600)
+        XCTAssertNil(usage(left: 0.2, observed: 2 * 3600, source: .reset).pace(at: now))
+        XCTAssertNil(usage(left: 0.2, observed: 2 * 3600, source: .consumptionOnly).pace(at: now))
+        XCTAssertNil(usage(left: 0.2, observed: 2 * 3600, resets: false).pace(at: now))
+        XCTAssertNil(usage(left: 0.2, observed: 5 * 60).pace(at: start.addingTimeInterval(25 * 60)), "too early in the window")
+    }
+
+    func testTheFigureOfAStaleReadingSaysHowOldItIsOrThatItRunsOutAnyway() {
+        let now = start.addingTimeInterval(3 * 3600)
+        XCTAssertEqual(usage(left: 0.5, observed: 2 * 3600).paceFigureText(at: now, calendar: calendar),
+                       "1 h ago")
+        XCTAssertEqual(usage(left: 0.3, observed: 2 * 3600 + 20 * 60).paceFigureText(at: now, calendar: calendar),
+                       "runs out")
+    }
+
+    func testTheFigureNamesTomorrowByItsWeekdayAndTheWidgetDoesNot() {
+        let week = 7 * 24 * 3600.0
+        let tomorrow = usage(left: 0.3, observed: 66 * 3600, duration: week)   // runs out Thu 10 am; now is Wed 06:00
+        let now = start.addingTimeInterval(66 * 3600)
+        XCTAssertEqual(tomorrow.paceFigureText(at: now, calendar: calendar), "out Thu 10 am")
+        XCTAssertEqual(tomorrow.runsOutShortText(at: now, calendar: calendar), "out tomorrow 10 am")
+    }
+
+    func testAWindowWhereNothingWasUsedHasAMarkAndLasts() throws {
+        let now = start.addingTimeInterval(3 * 3600)
+        let pace = try XCTUnwrap(usage(left: 1, observed: 3 * 3600).pace(at: now))
+        XCTAssertEqual(pace.aheadFraction, 0.4, accuracy: 1e-9)
+        XCTAssertFalse(pace.runsOut)
+        XCTAssertEqual(usage(left: 1, observed: 3 * 3600).paceFigureText(at: now, calendar: calendar),
+                       "lasts")
+        XCTAssertNil(usage(left: 1, observed: 3 * 3600).runsOut(at: now), "it never runs out")
+        XCTAssertNil(usage(left: 1, observed: 20 * 60).pace(at: start.addingTimeInterval(20 * 60)), "still too early")
+    }
+
+    func testTheFigureSaysWhenItRunsOutOrThatItLasts() {
+        let now = start.addingTimeInterval(2 * 3600)
+        XCTAssertEqual(usage(left: 0.4, observed: 2 * 3600).paceFigureText(at: now, calendar: calendar),
+                       "out today 3 pm")
+        XCTAssertEqual(usage(left: 0.8, observed: 2 * 3600).paceFigureText(at: now, calendar: calendar),
+                       "lasts")
+        XCTAssertNil(usage(left: 0.8, observed: 2 * 3600, source: .reset).paceFigureText(at: now, calendar: calendar))
+    }
+
+    func testTheShortPhraseIsRoundedAndNamesTheDayInThreeLetters() {
+        let week = 7 * 24 * 3600.0
+        let friday = usage(left: 0.4, observed: 3 * 24 * 3600, duration: week)
+        XCTAssertEqual(friday.runsOutShortText(at: start.addingTimeInterval(3 * 24 * 3600), calendar: calendar), "out Fri 12 pm")
+        let today = usage(left: 0.4, observed: 2 * 3600)
+        XCTAssertEqual(today.runsOutShortText(at: start.addingTimeInterval(2 * 3600), calendar: calendar), "out today 3 pm")
+        let tomorrow = usage(left: 0.3, observed: 66 * 3600, duration: week)
+        XCTAssertEqual(tomorrow.runsOutShortText(at: start.addingTimeInterval(66 * 3600), calendar: calendar), "out tomorrow 10 am")
+    }
+
+    func testTheShortPhraseIsAbsentWhenItLastsOrCannotBeEstimated() {
+        let now = start.addingTimeInterval(2 * 3600)
+        XCTAssertNil(usage(left: 0.8, observed: 2 * 3600).runsOutShortText(at: now, calendar: calendar))
+        XCTAssertNil(usage(left: 0.4, observed: 2 * 3600, source: .consumptionOnly).runsOutShortText(at: now, calendar: calendar))
     }
 
     func testTheTextSaysTodayAndTomorrow() {
         let now = start.addingTimeInterval(2 * 3600)
         let window = usage(left: 0.4, observed: 2 * 3600)
-        XCTAssertEqual(window.runsOutText(at: now, calendar: calendar), "at this pace you run out today at 3 pm")
+        XCTAssertEqual(window.paceFigureText(at: now, calendar: calendar), "out today 3 pm")
 
         let week = 7 * 24 * 3600.0
         // 66 hours gone (Wed 06:00), 70% used: all of it at 94.3 hours, Thu 10:20.
         let tomorrow = usage(left: 0.3, observed: 66 * 3600, duration: week)
-        XCTAssertEqual(tomorrow.runsOutText(at: start.addingTimeInterval(66 * 3600), calendar: calendar),
-                       "at this pace you run out tomorrow at 10 am")
+        XCTAssertEqual(tomorrow.paceFigureText(at: start.addingTimeInterval(66 * 3600), calendar: calendar),
+                       "out Thu 10 am")
     }
 }

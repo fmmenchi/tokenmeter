@@ -41,19 +41,34 @@ there was use after the reset and no new quota was reported, the window stays **
 than claiming to be full ([ADR 0007](../adr/0007-expired-window-reads-as-reset.md)).
 :::
 
-## When it runs out
+## Reading the mark
 
-When a window would run out **before it resets**, the panel adds one orange line under its detail:
-`at this pace you run out Thursday at 6 pm`. The moment is rounded to the hour and says today, tomorrow or the weekday
-([ADR 0038](../adr/0038-a-window-says-when-it-runs-out-at-its-pace.md)).
+A bar says how much is left, not whether it lasts until the reset. The **mark** on the bar does: it is where the bar would
+end if the window were used steadily from its start to its reset ([ADR 0039](../adr/0039-the-pace-is-drawn-on-the-bar.md)).
 
-- The pace is the average since the window began, so a quiet night counts as slow use and the line is pessimistic for
+- **A bar that ends before the mark** means you are going too fast: at this pace the quota runs out before the reset. The
+  mark is orange then.
+- **A bar that ends after the mark** means the quota lasts until the reset. The mark is the colour of the text.
+- **Put the pointer on the bar** to see when. The figure on its label line, "20% left", becomes "out Thu 6 pm" in orange where
+  the quota runs out, or "lasts", with a short fade, and goes back when the pointer leaves. Nothing else moves. The system
+  tooltip does not show in a panel of an app with no Dock icon, and a bubble covered the row above.
+- **The `i`** beside the provider's name opens a short explanation of the mark, with a link to this section. It closes with
+  its `x`, with a second click on the `i` or with a click outside it.
+
+**No mark means nothing can be said**, not that the quota lasts. Nothing is estimated for a reset or unknown window, one
+with no reset time, or one with less than a tenth of the window gone. A window where nothing was used has a mark and lasts.
+
+- **A reading older than ten minutes keeps its mark, at half strength** and measured now, so it moves left as time passes.
+  The bar is the last reading, which can only have gone down since. The mark is orange only when the bar is already before
+  it, since then the quota runs out even if nothing was used. The bubble says how old the reading is. ChatGPT is like this
+  most of the time: Codex writes its quota only when it runs.
+- **The pace is the average since the window began**, so a quiet night counts as slow use and the mark is pessimistic for
   someone who does not work at night.
-- **No line means one of two things:** the quota lasts, or it cannot be estimated. Nothing is estimated for a stale,
-  reset or unknown window, one with no reset time, or one with less than a tenth of the window gone.
-- Claude's figure moves only while Claude Code runs, so its line often goes away after ten minutes and comes back with
-  the next session.
-- The widget does not show it, and a model's limit under Weekly has no line of its own.
+- **Claude's figure moves only while Claude Code runs**, so after ten minutes its mark goes to half strength, and back to full
+  with the next session.
+- **A model's limit under Weekly** has its own thin bar with its own mark, and its own figure at the end of its row says when it runs out; its bar shortens to make room for it.
+- **The widget has no mark and no hover.** Where a window would run out before its reset, its detail line says so in
+  short, in orange: `3.4B tokens · out Thu 6 pm · resets in 3d 14h`. A model's limit has no phrase of its own there.
 
 ## Tokens
 
