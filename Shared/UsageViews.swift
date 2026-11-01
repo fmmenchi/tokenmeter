@@ -98,6 +98,7 @@ struct QuotaBar: View {
 
 struct WindowRow: View {
     let usage: WindowUsage
+    @State private var hovering = false
     /// The limits of models that are part of this window, drawn right under its bar (ADR 0034).
     var models: [WindowUsage] = []
     /// Draw the mark on the bar and the hover that says when the quota runs out (ADR 0039). The widget does not.
@@ -111,12 +112,15 @@ struct WindowRow: View {
             HStack(alignment: .firstTextBaseline) {
                 Text(usage.window.label).font(.caption.weight(.medium))
                 Spacer()
-                Text(usage.remainingFraction == nil ? "unknown" : "\(usage.remainingText) left")
+                // While the pointer is on the bar the figure says when the quota runs out (ADR 0039); the label does not move.
+                let say = hovering && showsPace ? usage.paceFigureText(at: Date()) : nil
+                Text(say ?? (usage.remainingFraction == nil ? "unknown" : "\(usage.remainingText) left"))
                     .font(.caption.bold().monospacedDigit())
+                    .foregroundStyle(say == nil ? Color.primary : usage.paceFigureStyle(at: Date()))
             }
             QuotaBar(fraction: usage.remainingFraction, tint: tint, mark: showsPace ? usage.pace(at: Date()) : nil)
                 .opacity(usage.isApproximate ? 0.5 : 1)
-                .paceBubble(showsPace ? usage.paceHoverText(at: Date()) : nil)
+                .hovered($hovering, enabled: showsPace)
             ForEach(models, id: \.window.id) { ScopedWindowRow(usage: $0, showsPace: showsPace) }
             detail
         }
@@ -161,8 +165,9 @@ private struct Bracket: Shape {
 /// under that window's bar (ADR 0034). The share of the week and the reset are in the help text.
 struct ScopedWindowRow: View {
     let usage: WindowUsage
-    /// Draw the mark on the thin bar and say in the hover when it runs out (ADR 0039). The widget does not.
+    /// Draw the mark on the thin bar and say in its figure when it runs out (ADR 0039). The widget does not.
     var showsPace = false
+    @State private var hovering = false
 
     var body: some View {
         HStack(spacing: 6) {
@@ -171,12 +176,17 @@ struct ScopedWindowRow: View {
                 .frame(minWidth: 30, alignment: .leading)
             QuotaBar(fraction: usage.remainingFraction, tint: usage.tint, height: 4,
                      mark: showsPace ? usage.pace(at: Date()) : nil)
-            Text(usage.remainingFraction == nil ? "unknown" : "\(usage.remainingText) left")
-                .font(.caption.bold().monospacedDigit()).frame(minWidth: 54, alignment: .trailing)
+            // The column is as wide as the longest thing it says in the panel, so the bar does not change length (ADR 0039).
+            let say = hovering && showsPace ? usage.paceFigureText(at: Date()) : nil
+            Text(say ?? (usage.remainingFraction == nil ? "unknown" : "\(usage.remainingText) left"))
+                .font(.caption.bold().monospacedDigit())
+                .foregroundStyle(say == nil ? Color.primary : usage.paceFigureStyle(at: Date()))
+                .lineLimit(1).minimumScaleFactor(0.8)
+                .frame(minWidth: showsPace ? 86 : 54, maxWidth: showsPace ? 86 : nil, alignment: .trailing)
         }
         .opacity(usage.isApproximate ? 0.5 : 1)
         .padding(.leading, 6)
-        .paceBubble(showsPace ? usage.paceHoverText(at: Date()) : nil)
+        .hovered($hovering, enabled: showsPace)
         .help([ "Part of \(WindowSpec(name: usage.window.name, duration: 0).label)",
                 usage.resetText.map { "resets \($0)" }, usage.isApproximate ? usage.observedAgoText.map { "seen \($0)" } : nil ]
             .compactMap { $0 }.joined(separator: " · "))
