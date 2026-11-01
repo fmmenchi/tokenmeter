@@ -56,6 +56,69 @@ final class RunOutTests: XCTestCase {
         XCTAssertEqual(window.runsOutText(at: now, calendar: calendar), "at this pace you run out Friday at 12 pm")
     }
 
+    // MARK: the mark and the hover (ADR 0039)
+
+    func testTheMarkIsTheShareOfTheWindowStillAheadWhenTheFigureWasObserved() throws {
+        // 2h of 5h gone: 3/5 ahead, whether it runs out (40% left) or lasts (80% left).
+        let runsOut = usage(left: 0.4, observed: 2 * 3600).pace(at: start.addingTimeInterval(2 * 3600))
+        XCTAssertEqual(try XCTUnwrap(runsOut).aheadFraction, 0.6, accuracy: 1e-9)
+        XCTAssertTrue(try XCTUnwrap(runsOut).runsOut)
+        let lasts = usage(left: 0.8, observed: 2 * 3600).pace(at: start.addingTimeInterval(2 * 3600))
+        XCTAssertEqual(try XCTUnwrap(lasts).aheadFraction, 0.6, accuracy: 1e-9)
+        XCTAssertFalse(try XCTUnwrap(lasts).runsOut, "a window that lasts still has a mark")
+    }
+
+    func testTheMarkDoesNotMoveWhileTheFigureIsFresh() throws {
+        // The figure is five minutes old: the mark is where it was when the figure was observed, not at `now`.
+        let window = usage(left: 0.4, observed: 2 * 3600)
+        let pace = window.pace(at: start.addingTimeInterval(2 * 3600 + 5 * 60))
+        XCTAssertEqual(try XCTUnwrap(pace).aheadFraction, 0.6, accuracy: 1e-9)
+    }
+
+    func testTheBarEndsBeforeTheMarkExactlyWhenTheQuotaRunsOut() throws {
+        for hundredths in stride(from: 5, through: 95, by: 5) {
+            let left = Double(hundredths) / 100
+            let now = start.addingTimeInterval(3 * 3600)
+            let pace = try XCTUnwrap(usage(left: left, observed: 3 * 3600).pace(at: now))
+            XCTAssertEqual(left < pace.aheadFraction, pace.runsOut, "\(hundredths)% left, \(pace.aheadFraction) ahead")
+        }
+    }
+
+    func testThereIsNoMarkWhereNothingCanBeEstimated() {
+        let now = start.addingTimeInterval(3 * 3600)
+        XCTAssertNil(usage(left: 0.2, observed: 3 * 3600 - 11 * 60).pace(at: now), "stale")
+        XCTAssertNil(usage(left: 0.2, observed: 3 * 3600, source: .reset).pace(at: now))
+        XCTAssertNil(usage(left: 0.2, observed: 3 * 3600, source: .consumptionOnly).pace(at: now))
+        XCTAssertNil(usage(left: 0.2, observed: 3 * 3600, resets: false).pace(at: now))
+        XCTAssertNil(usage(left: 1, observed: 3 * 3600).pace(at: now), "nothing used")
+        XCTAssertNil(usage(left: 0.5, observed: 20 * 60).pace(at: start.addingTimeInterval(20 * 60)), "too early")
+    }
+
+    func testTheHoverSaysWhenItRunsOutOrThatItLasts() {
+        let now = start.addingTimeInterval(2 * 3600)
+        XCTAssertEqual(usage(left: 0.4, observed: 2 * 3600).paceHoverText(at: now, calendar: calendar),
+                       "At this pace you run out today at 3 pm")
+        XCTAssertEqual(usage(left: 0.8, observed: 2 * 3600).paceHoverText(at: now, calendar: calendar),
+                       "At this pace it lasts until the reset")
+        XCTAssertNil(usage(left: 0.8, observed: 2 * 3600, source: .reset).paceHoverText(at: now, calendar: calendar))
+    }
+
+    func testTheShortPhraseIsRoundedAndNamesTheDayInThreeLetters() {
+        let week = 7 * 24 * 3600.0
+        let friday = usage(left: 0.4, observed: 3 * 24 * 3600, duration: week)
+        XCTAssertEqual(friday.runsOutShortText(at: start.addingTimeInterval(3 * 24 * 3600), calendar: calendar), "out Fri 12 pm")
+        let today = usage(left: 0.4, observed: 2 * 3600)
+        XCTAssertEqual(today.runsOutShortText(at: start.addingTimeInterval(2 * 3600), calendar: calendar), "out today 3 pm")
+        let tomorrow = usage(left: 0.3, observed: 66 * 3600, duration: week)
+        XCTAssertEqual(tomorrow.runsOutShortText(at: start.addingTimeInterval(66 * 3600), calendar: calendar), "out tomorrow 10 am")
+    }
+
+    func testTheShortPhraseIsAbsentWhenItLastsOrCannotBeEstimated() {
+        let now = start.addingTimeInterval(2 * 3600)
+        XCTAssertNil(usage(left: 0.8, observed: 2 * 3600).runsOutShortText(at: now, calendar: calendar))
+        XCTAssertNil(usage(left: 0.4, observed: 2 * 3600, source: .consumptionOnly).runsOutShortText(at: now, calendar: calendar))
+    }
+
     func testTheTextSaysTodayAndTomorrow() {
         let now = start.addingTimeInterval(2 * 3600)
         let window = usage(left: 0.4, observed: 2 * 3600)
