@@ -18,18 +18,19 @@ extension WindowUsage {
     /// Less of the window than this has gone: the pace says too little to be believed (ADR 0038).
     public static let minimumElapsed = 0.10
 
-    /// The pace of the window. Nil when nothing can be estimated: not a fresh reported figure, no reset time, nothing used,
-    /// or too little of the window gone (ADR 0038).
+    /// The pace of the window. Nil when nothing can be estimated: not a fresh reported figure, no reset time, or too little of
+    /// the window gone (ADR 0038). Where nothing was used it lasts, so it has a mark and no moment it runs out (ADR 0039).
     public func pace(at now: Date) -> Pace? {
         guard source == .reported, let remainingFraction, let resetsAt, let observedAt,
               resetsAt > now, now.timeIntervalSince(observedAt) <= Self.staleAfter, window.duration > 0 else { return nil }
         let used = 1 - remainingFraction
         let start = resetsAt.addingTimeInterval(-window.duration)
         let elapsed = observedAt.timeIntervalSince(start)
-        guard used > 0, elapsed >= window.duration * Self.minimumElapsed, elapsed < window.duration else { return nil }
+        guard elapsed >= window.duration * Self.minimumElapsed, elapsed < window.duration else { return nil }
+        let ahead = resetsAt.timeIntervalSince(observedAt) / window.duration
+        guard used > 0 else { return Pace(aheadFraction: ahead, runsOutAt: nil) }
         let runsOut = start.addingTimeInterval(elapsed / used)
-        return Pace(aheadFraction: resetsAt.timeIntervalSince(observedAt) / window.duration,
-                    runsOutAt: runsOut < resetsAt ? runsOut : nil)
+        return Pace(aheadFraction: ahead, runsOutAt: runsOut < resetsAt ? runsOut : nil)
     }
 
     /// When the quota runs out at the pace it has had since the window began, if that is before the reset (ADR 0038).

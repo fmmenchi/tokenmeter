@@ -90,8 +90,18 @@ final class RunOutTests: XCTestCase {
         XCTAssertNil(usage(left: 0.2, observed: 3 * 3600, source: .reset).pace(at: now))
         XCTAssertNil(usage(left: 0.2, observed: 3 * 3600, source: .consumptionOnly).pace(at: now))
         XCTAssertNil(usage(left: 0.2, observed: 3 * 3600, resets: false).pace(at: now))
-        XCTAssertNil(usage(left: 1, observed: 3 * 3600).pace(at: now), "nothing used")
         XCTAssertNil(usage(left: 0.5, observed: 20 * 60).pace(at: start.addingTimeInterval(20 * 60)), "too early")
+    }
+
+    func testAWindowWhereNothingWasUsedHasAMarkAndLasts() throws {
+        let now = start.addingTimeInterval(3 * 3600)
+        let pace = try XCTUnwrap(usage(left: 1, observed: 3 * 3600).pace(at: now))
+        XCTAssertEqual(pace.aheadFraction, 0.4, accuracy: 1e-9)
+        XCTAssertFalse(pace.runsOut)
+        XCTAssertEqual(usage(left: 1, observed: 3 * 3600).paceHoverText(at: now, calendar: calendar),
+                       "At this pace it lasts until the reset")
+        XCTAssertNil(usage(left: 1, observed: 3 * 3600).runsOut(at: now), "it never runs out")
+        XCTAssertNil(usage(left: 1, observed: 20 * 60).pace(at: start.addingTimeInterval(20 * 60)), "still too early")
     }
 
     func testTheHoverSaysWhenItRunsOutOrThatItLasts() {
