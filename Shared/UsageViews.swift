@@ -197,6 +197,11 @@ struct ProviderBlock: View {
                         .background(Capsule().fill(Color.primary.opacity(0.12)))
                 }
                 if problemCount > 0 { NoticeChip(count: problemCount) }
+                // Only where there is a mark to explain: a provider whose windows cannot be estimated has none.
+                if showsPace, snapshot.windows.contains(where: { $0.pace(at: Date()) != nil }) {
+                    Spacer(minLength: 0)
+                    PaceInfo()
+                }
             }
             ForEach(snapshot.windows.filter { $0.window.scope == nil }, id: \.window.id) { window in
                 WindowRow(usage: window.resolved(at: Date()),
