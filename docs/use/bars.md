@@ -60,7 +60,7 @@ with no reset time, or one with less than a tenth of the window gone. A window w
 
 - **A reading older than ten minutes keeps its mark, at half strength** and measured now, so it moves left as time passes.
   The bar is the last reading, which can only have gone down since. The mark is orange only when the bar is already before
-  it, since then the quota runs out even if nothing was used. The bubble says how old the reading is. ChatGPT is like this
+  it, since then the quota runs out even if nothing was used. The hover says nothing more for it, since the line of the provider at the bottom says how old the reading is, unless it runs out anyway. ChatGPT is like this
   most of the time: Codex writes its quota only when it runs.
 - **The pace is the average since the window began**, so a quiet night counts as slow use and the mark is pessimistic for
   someone who does not work at night.
