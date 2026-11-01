@@ -49,9 +49,9 @@ end if the window were used steadily from its start to its reset ([ADR 0039](../
 - **A bar that ends before the mark** means you are going too fast: at this pace the quota runs out before the reset. The
   mark is orange then.
 - **A bar that ends after the mark** means the quota lasts until the reset. The mark is the colour of the text.
-- **Hover the bar** to see when. A bubble above it says "At this pace you run out Thursday at 6 pm", the moment rounded to
-  the hour as today, tomorrow or the weekday, or "At this pace it lasts until the reset". The bubble is the app's own, not
-  the system tooltip, which does not show in a panel of an app with no Dock icon.
+- **Put the pointer on the bar** to see when. The figure on its label line, "20% left", becomes "out Thu 6 pm" in orange where
+  the quota runs out, or "lasts until reset", and goes back when the pointer leaves. Nothing else moves. The system
+  tooltip does not show in a panel of an app with no Dock icon, and a bubble covered the row above.
 - **The `i`** beside the provider's name opens a short explanation of the mark, with a link to this section. It closes with
   its `x`, with a second click on the `i` or with a click outside it.
 
@@ -64,10 +64,9 @@ with no reset time, or one with less than a tenth of the window gone. A window w
   most of the time: Codex writes its quota only when it runs.
 - **The pace is the average since the window began**, so a quiet night counts as slow use and the mark is pessimistic for
   someone who does not work at night.
-- **Claude's figure moves only while Claude Code runs**, so its mark and its hover go away after ten minutes and come back
+- **Claude's figure moves only while Claude Code runs**, so after ten minutes its mark goes to half strength, and back to full
   with the next session.
-- **A model's limit under Weekly** has its own thin bar with its own mark. Its hover is the row's, and says when it runs out
-  before saying what the row is part of.
+- **A model's limit under Weekly** has its own thin bar with its own mark, and its own figure at the end of its row says when it runs out.
 - **The widget has no mark and no hover.** Where a window would run out before its reset, its detail line says so in
   short, in orange: `3.4B tokens · out Thu 6 pm · resets in 3d 14h`. A model's limit has no phrase of its own there.
 

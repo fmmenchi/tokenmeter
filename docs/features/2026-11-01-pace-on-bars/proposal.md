@@ -14,14 +14,14 @@ The design that was chosen. [ADR 0039](../../adr/0039-the-pace-is-drawn-on-the-b
 
 ## What changes
 
-| Surface        | What it shows                                                                                                                                                        | Why                                                   |
-| :------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------- |
-| Panel, a bar   | A mark where the bar would end at a steady use. Orange when the quota runs out before the reset, the text colour when it lasts. No mark when it cannot be estimated. | It shows at a glance whether the quota lasts.         |
-| Panel, a hover | On the bar, a bubble of the app's own: "At this pace you run out Thursday at 6 pm", or "At this pace it lasts until the reset", or how old a stale reading is.       | The date is there when wanted, and takes no row.      |
-| Panel, a model | The same mark on its thin bar, 8 px tall, and the same hover. No line of its own.                                                                                    | The model's limit had a figure and nowhere to say it. |
-| Panel, the `i` | Beside the provider's name. A click opens a popover with the explanation, an `x` and a Learn more link to the docs.                                                  | Nothing else explains the mark.                       |
-| Widget         | In the Weekly detail line, in short, orange and semibold: "3.4B tokens · out Thu 6 pm · resets in 3d 14h". No mark, no hover. The small widget is unchanged.         | The widget has no pointer, and no room for a row.     |
-| Settings       | Unchanged.                                                                                                                                                           | There is nothing to choose.                           |
+| Surface           | What it shows                                                                                                                                                                             | Why                                                            |
+| :---------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------- |
+| Panel, a bar      | A mark where the bar would end at a steady use. Orange when the quota runs out before the reset, the text colour when it lasts. No mark when it cannot be estimated.                      | It shows at a glance whether the quota lasts.                  |
+| Panel, the figure | While the pointer is on a bar, its figure, "20% left", says "out Thu 6 pm" in orange, "lasts until reset", or "seen 22 min ago" for an old reading. It goes back when the pointer leaves. | The date is there when wanted, takes no row and moves nothing. |
+| Panel, a model    | The same mark on its thin bar, 8 px tall, and the same swap on its own figure. No line of its own.                                                                                        | The model's limit had a figure and nowhere to say it.          |
+| Panel, the `i`    | Beside the provider's name. A click opens a popover with the explanation, an `x` and a Learn more link to the docs.                                                                       | Nothing else explains the mark.                                |
+| Widget            | In the Weekly detail line, in short, orange and semibold: "3.4B tokens · out Thu 6 pm · resets in 3d 14h". No mark, no hover. The small widget is unchanged.                              | The widget has no pointer, and no room for a row.              |
+| Settings          | Unchanged.                                                                                                                                                                                | There is nothing to choose.                                    |
 
 The popover says: "The mark is how much you'd have left if you used it steadily until the reset. A bar shorter than the
 mark means you are going too fast. Hover the bar to see when."
@@ -35,6 +35,9 @@ mark means you are going too fast. Hover the bar to see when."
 - **F** painted the gap between the bar and the mark. It was not seen working at 10 px.
 - **G, H, I, J, L** worked the `i`, the model's bar and the hover. The chosen ones are the `i` beside the name (G), the
   mark and the hover on the bar and on a model's thin bar (I, L).
+- **The hover** was drawn as a bubble above the row (A), as the detail line swapped (B, C), as a status line at the bottom (D) and
+  as the bar's own figure (E). E was chosen: the bubble covered the row above, and the swap of the detail line read as a
+  layout shift.
 - **The popover** was drawn to close by itself after a timer, with a shrinking line. It closes with an `x` instead.
 
 ## Rules
