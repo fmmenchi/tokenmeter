@@ -1,6 +1,6 @@
 # ADR 0040 — A window's tokens are counted in its own period
 
-Status: proposed (2026-11-01); corrects the count of [ADR 0002](./0002-metric-and-data-sources.md) for a window whose
+Status: accepted (2026-11-01); corrects the count of [ADR 0002](./0002-metric-and-data-sources.md) for a window whose
 provider gave its reset time
 
 ## Context
