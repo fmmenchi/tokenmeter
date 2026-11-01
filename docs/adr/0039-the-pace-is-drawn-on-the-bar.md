@@ -1,6 +1,6 @@
 # ADR 0039 — The pace is drawn on the bar
 
-Status: proposed (2026-11-01); changes the line of [ADR 0038](./0038-a-window-says-when-it-runs-out-at-its-pace.md) that says
+Status: accepted (2026-11-01); changes the line of [ADR 0038](./0038-a-window-says-when-it-runs-out-at-its-pace.md) that says
 "Only the panel draws it", and how the panel draws it
 
 ## Context
@@ -24,8 +24,9 @@ ADR 0038 says when a window runs out with a line of text under it, in the panel 
   lasts, exactly: the quota runs out first when what is left is less than the share of the window still ahead. The mark is in the notice colour when it
   runs out and in the primary text colour when it lasts. Nothing is estimated under the conditions of ADR 0038, and then
   there is no mark: a mark with the bar to its right says it lasts, and no mark says nothing can be said.
-- **The date is in the hover on the bar**, the system tooltip: "At this pace you run out Thursday at 6 pm". The permanent
-  line of ADR 0038 goes, so a card is as tall as it was before that ADR.
+- **The date is in the hover on the bar**, the system tooltip: "At this pace you run out Thursday at 6 pm". When the quota
+  lasts, the same hover says "At this pace it lasts until the reset". The permanent line of ADR 0038 goes, so a card is as
+  tall as it was before that ADR.
 - **A model's thin bar** has the same mark, 8 px tall, and the same hover. It has no line of its own. It shares its
   window's reset, which is to be checked in the code.
 - **An `i` beside the provider's name** opens a popover on a click. It closes with its `x`, with a second click on the `i` or
@@ -59,7 +60,6 @@ ADR 0038 says when a window runs out with a line of text under it, in the panel 
 
 ## Open
 
-- **What the hover says when the quota lasts.** Proposed: "At this pace it lasts until the reset". Not decided.
 - **A popover opened from inside the menu-bar panel**: not known whether it keeps the panel open.
 - **The widget's height**: not seen on screen; the short phrase in the detail line does not add a row, but the widget may
   already cut what is under its first card.

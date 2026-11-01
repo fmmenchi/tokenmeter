@@ -17,7 +17,7 @@ The design that was chosen. [ADR 0039](../../adr/0039-the-pace-is-drawn-on-the-b
 | Surface        | What it shows                                                                                                                                                        | Why                                                   |
 | :------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------- |
 | Panel, a bar   | A mark where the bar would end at a steady use. Orange when the quota runs out before the reset, the text colour when it lasts. No mark when it cannot be estimated. | It shows at a glance whether the quota lasts.         |
-| Panel, a hover | On the bar, the system tooltip: "At this pace you run out Thursday at 6 pm".                                                                                         | The date is there when wanted, and takes no row.      |
+| Panel, a hover | On the bar, the system tooltip: "At this pace you run out Thursday at 6 pm", or "At this pace it lasts until the reset".                                             | The date is there when wanted, and takes no row.      |
 | Panel, a model | The same mark on its thin bar, 8 px tall, and the same hover. No line of its own.                                                                                    | The model's limit had a figure and nowhere to say it. |
 | Panel, the `i` | Beside the provider's name. A click opens a popover with the explanation, an `x` and a Learn more link to the docs.                                                  | Nothing else explains the mark.                       |
 | Widget         | In the Weekly detail line, in short, orange and semibold: "3.4B tokens · out Thu 6 pm · resets in 3d 14h". No mark, no hover. The small widget is unchanged.         | The widget has no pointer, and no room for a row.     |
@@ -47,7 +47,6 @@ mark means you are going too fast. Hover the bar to see when."
 
 ## Open
 
-- What the hover says when the quota lasts. Proposed: "At this pace it lasts until the reset".
 - Whether a popover opened from inside the menu-bar panel keeps the panel open.
 - Whether the medium widget already cuts what is under its first card: computed from the drawing, not seen.
 - The contrast of the orange text on a light card was not measured.

@@ -9,10 +9,10 @@ date: 2026-11-01
 
 A mark on the bar says whether the quota lasts until the reset, a hover says when it runs out, and an `i` explains both.
 
-|        |                                                        |
-| :----- | :----------------------------------------------------- |
-| Date   | 2026-11-01                                             |
-| Status | in design, 2026-11-01: ADR proposed, nothing built yet |
+|        |                                                             |
+| :----- | :---------------------------------------------------------- |
+| Date   | 2026-11-01                                                  |
+| Status | in build, 2026-11-01: ADR accepted, step 2 of the plan next |
 
 ## Intent
 
@@ -28,7 +28,7 @@ line. The permanent line of the panel goes.
 | :------------------ | :--------------------------------------------------------- | :------- |
 | Proposal            | [Proposal](./proposal.md)                                  | chosen   |
 | Implementation plan | [Implementation plan](./plan.md)                           | written  |
-| Decisions           | [ADR 0039](../../adr/0039-the-pace-is-drawn-on-the-bar.md) | proposed |
+| Decisions           | [ADR 0039](../../adr/0039-the-pace-is-drawn-on-the-bar.md) | accepted |
 
 ## Related
 
