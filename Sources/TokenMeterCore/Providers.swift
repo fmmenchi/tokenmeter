@@ -9,6 +9,7 @@ public enum Providers {
     ) -> [any ProviderSource] {
         let providers: [ProviderConfig]
         ProviderConfigFile.addClaudeIntegration(to: config)
+        ProviderConfigFile.addUsageFacts(to: config)
         if let file = try? ProviderConfigFile.load(from: config) {
             providers = file.providers
         } else {
