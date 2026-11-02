@@ -2,7 +2,7 @@
 
 A macOS menu-bar app and widget showing how much of your **Claude** and **ChatGPT** plan quota is left.
 
-![The menu-bar panel with a 5-hour and a weekly bar per provider](./docs/assets/panel.png)
+![The menu-bar panel with a card per provider, its bars and a mark on each](./docs/assets/panel.png)
 
 **Documentation: <https://fmmenchi.github.io/tokenmeter/>**
 

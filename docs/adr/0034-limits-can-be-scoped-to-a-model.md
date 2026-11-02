@@ -85,6 +85,6 @@ The solution is **cross-model**: no model, provider or plan is named in the comm
 - Built: the share of the week (`shareOfParent`) was left out of the first version, and a model's window never shows without
   the one of the same name. An existing `providers.json` gets the new window once, with a backup, as in
   [ADR 0033](./0033-add-the-claude-integration-to-an-existing-providers-file.md).
-- Not decided here: how it looks (a proposal first, [ADR 0032](./0032-a-features-section-groups-proposal-plan-and-decisions.md)).
+- Not decided here: how it looks (a proposal first, [Features](../features/index.md)).
 - Not verified: how often Claude Code refreshes the copy while in daily use (it is 15 days old on this Mac), and that
   other providers' data is shaped as a list.

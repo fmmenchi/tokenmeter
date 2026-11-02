@@ -234,7 +234,7 @@ final class Meter {
         Integrations([ClaudeIntegration(script: claudeScript, enabled: autoSetUpClaude)])
     }
 
-    /// ADR 0027: in the background at utility priority, at most every 10 minutes between changes.
+    /// ADR 0030: in the background at utility priority, at most every 10 minutes between changes.
     private func detectProblemsIfDue() {
         if let last = lastDetection, Date().timeIntervalSince(last) < 600 { return }
         detectProblems()

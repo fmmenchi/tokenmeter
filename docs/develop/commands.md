@@ -59,16 +59,16 @@ Unlike the panel, the probe prints the raw token total including cache reads.
 
 `snapshot.json` is what the widget renders. Dates are ISO 8601.
 
-| Field                        | Type           | Description                                                                                                                |
-| :--------------------------- | :------------- | :------------------------------------------------------------------------------------------------------------------------- |
-| `generatedAt`                | date           | When the app built the snapshot.                                                                                           |
-| `providers[].provider`       | string         | The provider id, for example `claude` or `chatgpt`.                                                                        |
-| `providers[].title`          | string         | Display name. Older snapshots lack it and show the id.                                                                     |
-| `providers[].plan`           | string, option | Subscription label such as `Ultra`.                                                                                        |
-| `providers[].quotaUpdatedAt` | date, optional | When the provider's quota was last written.                                                                                |
-| `providers[].setupHint`      | string, option | Shown while no quota has been seen.                                                                                        |
-| `providers[].windows[]`      | array          | One entry per window the provider declares, `5h` then `7d` today.                                                          |
-| `notices[]`                  | string array   | Sentences the widget and panel show in orange; absent in older files ([ADR 0027](../adr/0027-notices-in-the-snapshot.md)). |
+| Field                        | Type           | Description                                                                                                                        |
+| :--------------------------- | :------------- | :--------------------------------------------------------------------------------------------------------------------------------- |
+| `generatedAt`                | date           | When the app built the snapshot.                                                                                                   |
+| `providers[].provider`       | string         | The provider id, for example `claude` or `chatgpt`.                                                                                |
+| `providers[].title`          | string         | Display name. Older snapshots lack it and show the id.                                                                             |
+| `providers[].plan`           | string, option | Subscription label such as `Ultra`.                                                                                                |
+| `providers[].quotaUpdatedAt` | date, optional | When the provider's quota was last written.                                                                                        |
+| `providers[].setupHint`      | string, option | Shown while no quota has been seen.                                                                                                |
+| `providers[].windows[]`      | array          | One entry per window the provider declares, `5h` then `7d` today.                                                                  |
+| `notices[]`                  | string array   | Sentences the widget and panel show in orange; absent in older files ([ADR 0030](../adr/0030-problems-with-a-topic-and-a-fix.md)). |
 
 Each window:
 
@@ -80,6 +80,14 @@ Each window:
 | `source`            | `reported`, `reset`, `consumptionOnly`     | Where `remainingFraction` comes from.       |
 | `resetsAt`          | date, optional                             | When the provider says the window resets.   |
 | `observedAt`        | date, optional                             | When the provider last reported the figure. |
+
+## The app icon
+
+The icon is a dark rounded square with a dial: a green, orange and red arc, which repeat the thresholds of the bars, and a
+white needle. It is the `AppIcon` set in `App/TokenMeter/Assets.xcassets`. The master is drawn in SwiftUI by
+`tools/icon/main.swift` (`swift tools/icon/main.swift out.png`) and scaled with `sips` to the sizes the set needs; the PNGs are
+committed, so a build needs no extra step. The menu-bar item draws the same gauge as a monochrome template image
+(`App/TokenMeter/MenuBarIcon.swift`), so it follows the light and the dark menu bar. The widget has no icon of its own.
 
 ## Related
 
