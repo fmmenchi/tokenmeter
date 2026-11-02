@@ -19,7 +19,27 @@ The control at the top picks how far back the stats look: **1 month**, **3 month
 everything the app has kept. It changes the tokens by model and how many windows are counted; the list of windows below is
 always the latest few (four for a month, six for the longer ranges, eight for the 5 hours).
 
-## A card for each provider
+## A card for each provider, closed or open
+
+Each provider that is on has a card, in the order of Settings, closed to one line for each window (what the app saw) and one for
+the models. **A click anywhere on a card opens it**, and which cards are open is remembered. Open, it has the verdict, the windows
+that ended and the models as a ring. **All providers** is a card of its own: closed, a bar; open, the models under their provider,
+indented, against one total.
+
+### The verdict
+
+A word at the top of an open card, from percentages only:
+
+| Word          | When                                                                                                                                                                           |
+| :------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Wait**      | Fewer than four windows of any length have ended in the range. Claude's weekly quota is kept from the day the app first ran this version, so it says Wait for the first weeks. |
+| **Stay**      | The ceiling was reached in any window that counts, or the readings were not complete enough to say more, or the lowest margin was under 60% left.                              |
+| **Move down** | The ceiling was never reached, every reading was seen near the end of its window and the lowest margin was 60% left or more.                                                   |
+
+It never says Move up, because the size of the other plans is not known, and it never looks at tokens. The four windows and the 60%
+are a choice and not a measurement.
+
+### What an open card lists
 
 Each provider that is on has a card, in the order of Settings. For each window the plan has:
 
@@ -35,8 +55,8 @@ A plan without the 5 hours does not list them.
 
 ## Tokens by model
 
-Under the windows, the **first three models** by tokens, input plus output, as a share of the total. Hover a row for the
-count. **N more models…** opens the rest, and what is under 2% is added into **Other**. Versions of a model add up
+As a ring, the **first three models** by tokens, input plus output, with the rest as one slice. Hover a row for the count.
+**N more models…** opens the rest, and what is under 2% is added into **Other**. Versions of a model add up
 (`fable-5` and `fable-5-1` are Fable) and a name with no rule shows as it is; the rules are `usage.families` in
 `providers.json` ([format](./configure-providers.md)). A provider whose log does not name the model says so.
 
