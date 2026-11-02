@@ -62,6 +62,7 @@ struct SettingsView: View {
                             move: { meter.moveProvider($0, onto: $1) }))
                 }
             }
+            UpdatesGroup(updater: meter.updater)
         }
         .formStyle(.grouped)
         .scrollDisabled(true)
