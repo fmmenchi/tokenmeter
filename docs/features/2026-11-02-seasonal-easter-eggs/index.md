@@ -13,7 +13,7 @@ and a corner piece on the cards. A bit of humour, and nothing that changes what 
 |        |            |
 | :----- | :--------- |
 | Date   | 2026-11-02 |
-| Status | in design  |
+| Status | in build   |
 
 ## Intent
 
@@ -28,11 +28,11 @@ The colours of the theme are a separate feature, the skins, and come after this 
 
 ## The nucleus
 
-| Part                | Page                      | Status |
-| :------------------ | :------------------------ | :----- |
-| Proposal            | [Proposal](./proposal.md) | chosen |
-| Implementation plan | not written yet           |        |
-| Decisions           | none expected             |        |
+| Part                | Page                      | Status   |
+| :------------------ | :------------------------ | :------- |
+| Proposal            | [Proposal](./proposal.md) | chosen   |
+| Implementation plan | [Plan](./plan.md)         | accepted |
+| Decisions           | none expected             |          |
 
 ## Related
 
