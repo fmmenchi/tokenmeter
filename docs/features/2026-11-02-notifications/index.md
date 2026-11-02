@@ -12,7 +12,7 @@ The app tells you with a notification when a window is running out, so you do no
 |        |            |
 | :----- | :--------- |
 | Date   | 2026-11-02 |
-| Status | in design  |
+| Status | in build   |
 
 ## Intent
 
@@ -24,11 +24,11 @@ remaining quota and the pace, and nothing from the network.
 
 ## The nucleus
 
-| Part                | Page                      | Status |
-| :------------------ | :------------------------ | :----- |
-| Proposal            | [Proposal](./proposal.md) | chosen |
-| Implementation plan | not written yet           |        |
-| Decisions           | not written yet           |        |
+| Part                | Page                                        | Status   |
+| :------------------ | :------------------------------------------ | :------- |
+| Proposal            | [Proposal](./proposal.md)                   | chosen   |
+| Implementation plan | [Plan](./plan.md)                           | accepted |
+| Decisions           | [ADR 0012](../../adr/0012-limit-notices.md) | accepted |
 
 ## Related
 
