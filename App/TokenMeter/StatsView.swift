@@ -29,12 +29,17 @@ struct StatsView: View {
             if !meter.storeAvailable {
                 Text("The history could not be opened, so there are no stats. The quota in the other view is not affected.")
                     .font(.caption).foregroundStyle(.secondary)
+            } else if meter.isIngesting && meter.stats.isEmpty {
+                // The first pass reads every log the CLIs still keep, which takes a minute or two once: say so instead of
+                // drawing cards that claim nothing is kept.
+                HStack(spacing: 8) {
+                    ProgressView().controlSize(.small)
+                    Text("Reading what the logs still hold. It takes a minute or two, once.").font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             } else if let snapshot = meter.snapshot {
                 ForEach(snapshot.providers, id: \.provider) { provider in
                     StatsCard(snapshot: provider, stats: meter.stats.first { $0.provider == provider.provider })
-                }
-                if meter.isIngesting && meter.stats.isEmpty {
-                    Text("Reading what the logs still hold…").font(.caption2).foregroundStyle(.secondary)
                 }
                 Text("Seen on this Mac. The quota is for the whole account; the tokens are only those this Mac counted.")
                     .font(.caption2).foregroundStyle(.secondary)
