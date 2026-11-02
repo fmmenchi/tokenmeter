@@ -19,8 +19,10 @@ final class Meter {
 
     // MARK: Usage stats (ADR 0010)
 
-    /// What the stats view says for each provider, from the store; empty until the first pass has run.
-    private(set) var stats: [ProviderStats] = []
+    /// What the stats view says for each provider, from the store, for every range, so that choosing a range is a lookup and the view
+    /// does not draw the old range while the new one is worked out. Empty until the first pass has run.
+    private(set) var statsByRange: [StatsRange: [ProviderStats]] = [:]
+    var stats: [ProviderStats] { statsByRange[statsRange] ?? [] }
     /// True while the ingestor is reading, so the view can say it is reading the history.
     private(set) var isIngesting = false
     /// False when the store could not be opened: the stats view says so, and nothing else depends on it.
@@ -30,10 +32,7 @@ final class Meter {
         didSet { UserDefaults.standard.set(showsStats, forKey: Meter.showsStatsKey) }
     }
     var statsRange = StatsRange(rawValue: UserDefaults.standard.string(forKey: Meter.statsRangeKey) ?? "") ?? .quarter {
-        didSet {
-            UserDefaults.standard.set(statsRange.rawValue, forKey: Meter.statsRangeKey)
-            computeStatsInBackground()
-        }
+        didSet { UserDefaults.standard.set(statsRange.rawValue, forKey: Meter.statsRangeKey) }
     }
     /// The one stats card that is open to its detail, so the panel keeps a height that fits the screen: opening another closes this
     /// one, and a click on it closes it. Nil until the person chooses, and then the first card is open; "" is none. Kept across launches.
@@ -43,6 +42,7 @@ final class Meter {
         openStatsCard = current == card ? "" : card
         UserDefaults.standard.set(openStatsCard, forKey: Meter.openStatsCardKey)
     }
+    private var lastStatsAt = Date.distantPast
     private let usageStore: UsageStore?
     private let ingestor: UsageIngestor?
     private static let showsStatsKey = "panelShowsStats"
@@ -118,34 +118,31 @@ final class Meter {
     private func ingestInBackground() {
         guard let ingestor, let usageStore, !isIngesting else { return }
         isIngesting = true
-        let range = statsRange
+        // The figures are worked out again when something new was read, and at least every ten minutes: a window ends with time.
+        let due = statsByRange.isEmpty || Date().timeIntervalSince(lastStatsAt) > 600
         Task(priority: .utility) {
-            let computed = await Task.detached(priority: .utility) { () -> [ProviderStats] in
-                ingestor.ingest()
-                return Self.computeStats(store: usageStore, range: range)
+            let computed = await Task.detached(priority: .utility) { () -> [StatsRange: [ProviderStats]]? in
+                let read = ingestor.ingest()
+                return read.messages > 0 || due ? Self.computeStats(store: usageStore) : nil
             }.value
-            stats = computed
+            if let computed {
+                statsByRange = computed
+                lastStatsAt = Date()
+            }
             isIngesting = false
         }
     }
 
-    /// A change of range needs no new reading, only the same facts seen from another date.
-    private func computeStatsInBackground() {
-        guard let usageStore else { return }
-        let range = statsRange
-        Task(priority: .utility) {
-            let computed = await Task.detached(priority: .utility) { Self.computeStats(store: usageStore, range: range) }.value
-            if range == statsRange { stats = computed }
-        }
-    }
-
-    /// The configured providers, as the collector reads them (ADR 0003), each with its windows and its family rules.
-    nonisolated private static func computeStats(store: UsageStore, range: StatsRange) -> [ProviderStats] {
+    /// Every range from the same facts: the configured providers, as the collector reads them (ADR 0003), each with its windows and
+    /// its family rules. A few queries for each, so a change of range needs no wait.
+    nonisolated private static func computeStats(store: UsageStore) -> [StatsRange: [ProviderStats]] {
         let configured = ((try? ProviderConfigFile.load()) ?? nil)?.providers ?? ProviderConfigFile.seed().providers
-        return configured.map {
-            UsageStats.stats(for: Provider(rawValue: $0.id), windows: $0.windows, families: $0.usage?.families ?? [],
-                             store: store, range: range)
-        }
+        return Dictionary(uniqueKeysWithValues: StatsRange.allCases.map { range in
+            (range, configured.map {
+                UsageStats.stats(for: Provider(rawValue: $0.id), windows: $0.windows, families: $0.usage?.families ?? [],
+                                 store: store, range: range)
+            })
+        })
     }
 
     /// ADR 0002: Claude Code writes a copy of the usage, including each model's limit, when it runs `/usage`. Ask it to,
