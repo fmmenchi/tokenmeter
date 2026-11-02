@@ -46,6 +46,8 @@ final class Meter {
     private static let showsStatsKey = "panelShowsStats"
     private static let statsRangeKey = "statsRange"
     private static let expandedStatsKey = "statsExpandedProviders"
+    /// The id under which the card for all providers is open or closed, next to the ids of the providers.
+    static let allProvidersCard = "all-providers"
 
     enum FixState: Equatable {
         case running

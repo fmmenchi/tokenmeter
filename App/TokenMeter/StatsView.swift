@@ -1,3 +1,4 @@
+import Charts
 import SwiftUI
 import TokenMeterCore
 
@@ -43,6 +44,13 @@ struct StatsView: View {
                               isExpanded: meter.expandedStats.contains(provider.provider.rawValue),
                               onToggle: { meter.toggleStatsDetail(provider.provider.rawValue) })
                 }
+                let shown = Set(snapshot.providers.map(\.provider))
+                let shares = UsageStats.crossProviders(meter.stats.filter { shown.contains($0.provider) })
+                if shares.count > 0 {
+                    AllProvidersCard(shares: shares, titles: Dictionary(uniqueKeysWithValues: snapshot.providers.map { ($0.provider, $0.title) }),
+                                     isExpanded: meter.expandedStats.contains(Meter.allProvidersCard),
+                                     onToggle: { meter.toggleStatsDetail(Meter.allProvidersCard) })
+                }
                 Text("Seen on this Mac. The quota is for the whole account; the tokens are only those this Mac counted.")
                     .font(.caption2).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             } else {
@@ -82,7 +90,9 @@ private struct StatsCard: View {
             .help(isExpanded ? "Hide the detail" : "Show the detail")
             .accessibilityLabel("\(snapshot.title): \(isExpanded ? "hide" : "show") the detail")
             if let stats, stats.since != nil || stats.windows.contains(where: { $0.closed > 0 }) {
-                ForEach(stats.windows.filter { windowNames.contains($0.name) }, id: \.windowMinutes) {
+                let windows = stats.windows.filter { windowNames.contains($0.name) }
+                if isExpanded { VerdictBox(verdict: UsageStats.verdict(windows)) }
+                ForEach(windows, id: \.windowMinutes) {
                     WindowHistory(stats: $0, showsRows: isExpanded)
                 }
                 if isExpanded {
@@ -169,43 +179,206 @@ extension StatsCard {
     }
 }
 
-/// The tokens by model of one provider: the first three, the rest behind a button and what is small as "Other".
+/// The colour of the nth slice of a ring or a bar: the accent in a lighter shade for each, and grey for "the rest".
+private func shade(_ index: Int, base: Color = .accentColor) -> Color { base.opacity([1, 0.6, 0.3, 0.15][min(index, 3)]) }
+
+/// A share that is not nothing never reads as 0%.
+private func percent(_ fraction: Double) -> String {
+    let rounded = Int((fraction * 100).rounded())
+    return rounded == 0 && fraction > 0 ? "<1%" : "\(rounded)%"
+}
+
+/// The tokens by model of one provider as a ring with its legend: the first three, and what is behind them as one slice that a
+/// button opens. Under 2% is "Other".
 private struct ModelList: View {
     let models: ModelBreakdown
     @State private var expanded = false
 
+    private var rest: [ModelShare] { models.more + (models.other.map { [$0] } ?? []) }
+
     var body: some View {
         if models.total > 0 {
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 6) {
                 Text("Tokens by model").font(.caption2.weight(.semibold)).foregroundStyle(.secondary).textCase(.uppercase)
-                ForEach(models.shown, id: \.name) { row($0) }
-                if !models.more.isEmpty {
-                    if expanded { ForEach(models.more, id: \.name) { row($0) } }
-                    Button(expanded ? "Show fewer" : "\(models.more.count) more model\(models.more.count == 1 ? "" : "s")…") {
-                        expanded.toggle()
+                HStack(spacing: 12) {
+                    ring
+                    VStack(alignment: .leading, spacing: 4) {
+                        ForEach(Array(models.shown.enumerated()), id: \.element.name) { legend($1, color: shade($0)) }
+                        if !rest.isEmpty { restRow }
                     }
-                    .buttonStyle(.link).font(.caption2)
                 }
-                if let other = models.other { row(other) }
+                if expanded { ForEach(rest, id: \.name) { legend($0, color: .secondary.opacity(0.5)) } }
             }
         } else if models.unknownTokens > 0 {
             Text("This provider does not say which model the tokens are for.").font(.caption2).foregroundStyle(.secondary)
         }
     }
 
-    /// A share that is not nothing never reads as 0%.
-    private static func percent(_ fraction: Double) -> String {
-        let rounded = Int((fraction * 100).rounded())
-        return rounded == 0 && fraction > 0 ? "<1%" : "\(rounded)%"
+    private var ring: some View {
+        let slices = models.shown.enumerated().map { ($0, $1.tokens, shade($0)) }
+            + (rest.isEmpty ? [] : [(models.shown.count, rest.map(\.tokens).reduce(0, +), Color.secondary.opacity(0.5))])
+        return Chart(slices, id: \.0) { slice in
+            SectorMark(angle: .value("Tokens", slice.1), innerRadius: .ratio(0.62), angularInset: 1).foregroundStyle(slice.2)
+        }
+        .chartLegend(.hidden)
+        .frame(width: 64, height: 64)
+        .accessibilityLabel("Tokens by model")
     }
 
-    private func row(_ share: ModelShare) -> some View {
-        HStack(spacing: 8) {
-            Text(share.name).font(.caption2.weight(.medium)).frame(width: 72, alignment: .leading).lineLimit(1)
-                .truncationMode(.middle)
-            QuotaBar(fraction: share.fraction, tint: .accentColor, height: 4)
-            Text(Self.percent(share.fraction)).font(.caption2.bold().monospacedDigit()).frame(width: 34, alignment: .trailing)
+    @ViewBuilder private var restRow: some View {
+        Button(expanded ? "Show fewer" : "\(rest.count) more model\(rest.count == 1 ? "" : "s")…") { expanded.toggle() }
+            .buttonStyle(.link).font(.caption2)
+    }
+
+    private func legend(_ share: ModelShare, color: Color) -> some View {
+        HStack(spacing: 6) {
+            RoundedRectangle(cornerRadius: 2).fill(color).frame(width: 9, height: 9)
+            Text(share.name).font(.caption2.weight(.medium)).lineLimit(1).truncationMode(.middle)
+            Spacer(minLength: 4)
+            Text(share.tokens.compactTokens).font(.caption2).foregroundStyle(.secondary)
+            Text(percent(share.fraction)).font(.caption2.bold().monospacedDigit()).frame(width: 32, alignment: .trailing)
         }
         .help("\(share.name): \(share.tokens.compactTokens) tokens, input plus output")
+    }
+}
+
+/// The word of a provider's card and what it rests on, in a sentence (ADR 0010).
+private struct VerdictBox: View {
+    let verdict: Verdict
+
+    private func label(_ name: String) -> String { name == "5h" ? "5-hour" : name == "7d" ? "weekly" : name }
+
+    private var word: String {
+        switch verdict.word {
+        case .wait: "Wait"
+        case .stay: "Stay"
+        case .moveDown: "Move down"
+        }
+    }
+
+    private var headline: String {
+        switch verdict.reason {
+        case .fewWindows(let window, let seen, let needed):
+            window.map { "\(seen) of \(needed) \(label($0)) windows seen, so there is no verdict yet." }
+                ?? "No window has been seen to end, so there is no verdict yet."
+        case .hitCeiling(let window, let hits, let closed): "You hit the ceiling in \(hits) of \(closed) of the \(label(window)) windows."
+        case .incompleteReadings(let window): "The ceiling was not reached, but some \(label(window)) windows were seen long before their end."
+        case .littleMargin(let window, let left): "The \(label(window)) window went down to \(Int(left.rounded()))% left or less."
+        case .plentyOfMargin(let window, let left): "You never went below \(Int(left.rounded()))% left in the \(label(window)) windows."
+        }
+    }
+
+    private var detail: String {
+        switch verdict.reason {
+        case .fewWindows: "A window counts when the app has seen it end."
+        case .hitCeiling: "A smaller plan would have stopped you."
+        case .incompleteReadings: "The readings are not complete enough to say you could move down."
+        case .littleMargin: "Moving down would leave little room."
+        case .plentyOfMargin: "A smaller plan may be enough. This is the quota seen on this Mac's readings, not a promise."
+        }
+    }
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 8) {
+            Text(word).font(.caption.weight(.semibold)).padding(.horizontal, 8).padding(.vertical, 2)
+                .background(Capsule().fill(verdict.word == .moveDown ? Color.accentColor.opacity(0.2) : Color.primary.opacity(0.12)))
+            VStack(alignment: .leading, spacing: 2) {
+                Text(headline).font(.caption.weight(.semibold)).fixedSize(horizontal: false, vertical: true)
+                Text(detail).font(.caption2).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(8)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(RoundedRectangle(cornerRadius: 8).fill(Color.primary.opacity(0.06)))
+    }
+}
+
+/// Every provider's tokens against one total: a bar closed, and the models under their provider, indented, open.
+private struct AllProvidersCard: View {
+    let shares: [ProviderShare]
+    let titles: [Provider: String]
+    let isExpanded: Bool
+    let onToggle: () -> Void
+
+    private let palette: [Color] = [.accentColor, .gray, .orange, .purple, .teal]
+    private func color(_ provider: Int) -> Color { palette[provider % palette.count] }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Button(action: onToggle) {
+                HStack {
+                    Text("All providers").font(.subheadline.weight(.semibold))
+                    Spacer()
+                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down").font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .help(isExpanded ? "Hide the detail" : "Show the detail")
+            .accessibilityLabel("All providers: \(isExpanded ? "hide" : "show") the detail")
+            bar
+            if isExpanded {
+                VStack(alignment: .leading, spacing: 4) {
+                    ForEach(Array(shares.enumerated()), id: \.element.provider) { index, share in
+                        providerRow(share, color: color(index))
+                        ForEach(Array(share.models.enumerated()), id: \.element.name) { rank, model in
+                            modelRow(model, color: shade(rank, base: color(index)))
+                        }
+                    }
+                }
+            } else {
+                Text(shares.map { "\(titles[$0.provider] ?? $0.provider.rawValue) \(percent($0.fraction))" }.joined(separator: " · "))
+                    .font(.caption2).foregroundStyle(.secondary).lineLimit(1)
+            }
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(RoundedRectangle(cornerRadius: 10).fill(Color.primary.opacity(0.07)))
+        .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(Color.primary.opacity(0.1)))
+        .contentShape(RoundedRectangle(cornerRadius: 10))
+        .onTapGesture(perform: onToggle)
+    }
+
+    /// One segment for each model, in its provider's colour and a lighter shade for each after the first.
+    private var bar: some View {
+        GeometryReader { proxy in
+            HStack(spacing: 2) {
+                ForEach(Array(shares.enumerated()), id: \.element.provider) { index, share in
+                    ForEach(Array(share.models.enumerated()), id: \.element.name) { rank, model in
+                        Rectangle().fill(shade(rank, base: color(index))).frame(width: max(2, proxy.size.width * model.fraction))
+                    }
+                }
+            }
+            .clipShape(Capsule())
+        }
+        .frame(height: 10)
+        .accessibilityLabel("Tokens by provider and model")
+    }
+
+    private func providerRow(_ share: ProviderShare, color: Color) -> some View {
+        HStack(spacing: 6) {
+            RoundedRectangle(cornerRadius: 2).fill(color).frame(width: 9, height: 9)
+            Text(titles[share.provider] ?? share.provider.rawValue).font(.caption2.weight(.semibold))
+            Spacer()
+            Text("\(share.tokens.compactTokens) · \(percent(share.fraction))").font(.caption2).foregroundStyle(.secondary)
+        }
+        .padding(.top, 3)
+    }
+
+    private func modelRow(_ share: ModelShare, color: Color) -> some View {
+        HStack(spacing: 6) {
+            Path { path in
+                path.move(to: CGPoint(x: 0, y: 0)); path.addLine(to: CGPoint(x: 0, y: 5))
+                path.addQuadCurve(to: CGPoint(x: 3, y: 8), control: CGPoint(x: 0, y: 8)); path.addLine(to: CGPoint(x: 8, y: 8))
+            }
+            .stroke(Color.secondary.opacity(0.6), lineWidth: 1).frame(width: 8, height: 8).offset(y: -4)
+            RoundedRectangle(cornerRadius: 2).fill(color).frame(width: 9, height: 9)
+            Text(share.name).font(.caption2.weight(.medium)).lineLimit(1).truncationMode(.middle)
+            Spacer(minLength: 4)
+            Text(share.tokens.compactTokens).font(.caption2).foregroundStyle(.secondary)
+            Text(percent(share.fraction)).font(.caption2.bold().monospacedDigit()).frame(width: 32, alignment: .trailing)
+        }
+        .padding(.leading, 12)
     }
 }
