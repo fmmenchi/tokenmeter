@@ -20,20 +20,12 @@ makes each provider a card, with a choice of windows and an order set in Setting
 - **The app applies them when it writes the snapshot**, so the widget keeps drawing what it is given and computes nothing
   ([ADR 0001](./0001-stack-swiftui-widgetkit.md)). Settings reads the unfiltered list of providers and windows from the
   app, not from the snapshot.
-- **The choice is a set of windows by name**, taken from the windows the provider declares, never from a fixed list. The
-  interface offers each window and "Both" (all); no provider and no window is named in the common code. At least one
-  window always stays visible. (Superseded in part by [ADR 0037](./0037-a-window-exists-only-if-the-data-lists-it.md): the
-  windows are chosen one by one, with no "Both", and choosing none hides the provider.)
+- **The choice is a set of windows by name**, taken from the windows the provider declares, never from a fixed list; no provider
+  and no window is named in the common code. At least one window always stays shown.
 - **A hidden window is out of every figure shown.** The menu-bar percentage is the lowest of the visible windows, and a
   hidden one raises no problem.
-- **The card uses system colours only** (`Color.primary` at 7% for its fill and at 10% for its hairline, the text styles and
-  the existing tints), so the light and the dark appearance both hold without a value written for either.
 
 ## Consequences
 
 - The widget's order follows the person, which is the practical reason to reorder: the medium widget shows the first card.
 - A preference for a provider that leaves `providers.json` stays in the defaults and does nothing; no cleanup is needed.
-- The design system now defines a dark theme beside the light one, with the macOS system dark values marked assumed.
-- The reorder is a drag of the row's handle and two arrows, because a `List`'s own move gesture does not work in a grouped
-  `Form` on macOS.
-- Not verified: the widget in the dark appearance on the desktop.

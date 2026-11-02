@@ -1,6 +1,6 @@
 # ADR 0002 — Metric and data sources
 
-Status: proposed (metric accepted by Fabio; sources need verification)
+Status: accepted (the metric and the local logs as sources); the user-set limits are replaced by [ADR 0009](./0009-remove-user-set-limits.md) and the token count by [ADR 0040](./0040-a-windows-tokens-are-counted-in-its-own-period.md)
 
 ## Context
 

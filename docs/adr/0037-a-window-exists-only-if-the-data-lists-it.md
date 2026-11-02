@@ -25,16 +25,9 @@ of limits with only `weekly_all` and `weekly_scoped`, and the status line has on
   models that are part of them.
 - No plan is named in the code. Which windows exist comes from the data, so a plan that gains or loses a window needs no
   release. A provider without `existsIf` is unchanged, ChatGPT included: its logs declare their own windows.
-- **Settings** offers a **selector** built from the windows that exist: one segment for each, chosen independently, in the
-  accent colour when on. A provider with one window has one segment; there is no "Both" and no menu, so the same control
-  serves any number of windows. This replaces the choice of one window or both of
-  [ADR 0035](./0035-provider-cards-order-and-windows-are-preferences.md).
-- **A model is a sub-segment under its window**, joined by the bracket of the bars, and is on unless the person turned it
-  off (`DisplayPreferences.hiddenModels`), so a model a plan gains later shows up. It is disabled while its window is off,
-  and selecting the window turns it on again.
-- **Choosing no window hides the provider**, the same preference as the eye of [ADR 0036](./0036-a-provider-can-be-hidden.md),
-  and choosing any window shows it again. The one provider left shown cannot lose its last window. Showing a provider with
-  the eye selects every window.
+- **Settings** offers the windows that exist, one by one, so the same control serves any number of windows, and a model under
+  the window it is part of. A model is on unless the person turned it off (`DisplayPreferences.hiddenModels`), so a model a plan
+  gains later shows up. Hiding a provider is [ADR 0041](./0041-the-provider-switch-alone-hides-a-provider.md)'s.
 - A preference saved for a window that is gone does no harm: if nothing it names is left, every window shows.
 - An existing `providers.json` gets `existsIf` on the `claude` 5-hour window once, with a backup, as in
   [ADR 0033](./0033-add-the-claude-integration-to-an-existing-providers-file.md) and ADR 0034.
