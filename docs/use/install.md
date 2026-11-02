@@ -13,14 +13,17 @@ sidebar_position: 2
 
 ## Download
 
-The current release is [v0.1.0](https://github.com/fmmenchi/tokenmeter/releases/tag/v0.1.0). It is signed with a Developer ID
+The current release is [v0.2.0](https://github.com/fmmenchi/tokenmeter/releases/tag/v0.2.0). It is signed with a Developer ID
 certificate and notarized by Apple, so it opens with a double click. It is not on the Mac App Store: the app reads the logs and
 settings of the CLIs, which the App Store sandbox does not allow.
 
-1. Download `TokenMeter-v0.1.0.zip` from the release page and open it. Its SHA-256 is in `TokenMeter-v0.1.0.zip.sha256` and in the
+1. Download `TokenMeter-v0.2.0.zip` from the release page and open it. Its SHA-256 is in `TokenMeter-v0.2.0.zip.sha256` and in the
    release notes.
 2. Drag `TokenMeter.app` to `/Applications` and open it.
 3. A gauge icon appears in the menu bar. There is no Dock icon.
+
+To update, quit the app, drag the new `TokenMeter.app` over the old one in `/Applications` and open it. Your settings and the history the stats
+are drawn from stay where they are.
 
 To build it yourself instead, follow [Build and Run](../develop/build-and-run.md), which needs Xcode, XcodeGen and an Apple
 developer account.
