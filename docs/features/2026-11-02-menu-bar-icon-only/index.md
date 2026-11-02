@@ -10,10 +10,10 @@ date: 2026-11-02
 The menu-bar item is the gauge icon and nothing else, like the other apps in the bar. A dot on the icon says something in
 the panel is worth a look.
 
-|        |                  |
-| :----- | :--------------- |
-| Date   | 2026-11-02       |
-| Status | in design, built |
+|        |                         |
+| :----- | :---------------------- |
+| Date   | 2026-11-02              |
+| Status | implemented, 2026-11-02 |
 
 ## Intent
 
@@ -29,7 +29,7 @@ template image, so the dot has the colour of the icon and the menu bar's own, li
 | Part                | Page                      | Status |
 | :------------------ | :------------------------ | :----- |
 | Proposal            | [Proposal](./proposal.md) | chosen |
-| Implementation plan | [Plan](./plan.md)         | built  |
+| Implementation plan | [Plan](./plan.md)         | done   |
 | Decisions           | none                      |        |
 
 No ADR: it is a choice of what the bar shows, not of structure.

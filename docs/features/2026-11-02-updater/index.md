@@ -10,10 +10,10 @@ date: 2026-11-02
 The app knows when a new version is out, tells you, and installs it: it quits, replaces itself and the widget it carries,
 opens again and runs its migrations. Your history is kept, not read again from nothing.
 
-|        |            |
-| :----- | :--------- |
-| Date   | 2026-11-02 |
-| Status | in build   |
+|        |                         |
+| :----- | :---------------------- |
+| Date   | 2026-11-02              |
+| Status | implemented, 2026-11-02 |
 
 ## Intent
 
@@ -28,7 +28,7 @@ you keep. It can be turned off in Settings. It contacts one address, once a day,
 | Part                | Page                                  | Status   |
 | :------------------ | :------------------------------------ | :------- |
 | Proposal            | [Proposal](./proposal.md)             | chosen   |
-| Implementation plan | [Plan](./plan.md)                     | accepted |
+| Implementation plan | [Plan](./plan.md)                     | done     |
 | Decisions           | [ADR 0011](../../adr/0011-updates.md) | accepted |
 
 ## Related
