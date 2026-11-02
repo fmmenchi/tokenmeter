@@ -17,6 +17,29 @@ final class Meter {
     /// Interface state of the fixes being run, by problem id. Not in the model or the snapshot (the plan of the feature).
     private(set) var fixStates: [String: FixState] = [:]
 
+    // MARK: Usage stats (ADR 0010)
+
+    /// What the stats view says for each provider, from the store; empty until the first pass has run.
+    private(set) var stats: [ProviderStats] = []
+    /// True while the ingestor is reading, so the view can say it is reading the history.
+    private(set) var isIngesting = false
+    /// False when the store could not be opened: the stats view says so, and nothing else depends on it.
+    private(set) var storeAvailable = false
+    /// Which view the panel shows. Kept across launches.
+    var showsStats = UserDefaults.standard.bool(forKey: Meter.showsStatsKey) {
+        didSet { UserDefaults.standard.set(showsStats, forKey: Meter.showsStatsKey) }
+    }
+    var statsRange = StatsRange(rawValue: UserDefaults.standard.string(forKey: Meter.statsRangeKey) ?? "") ?? .quarter {
+        didSet {
+            UserDefaults.standard.set(statsRange.rawValue, forKey: Meter.statsRangeKey)
+            computeStatsInBackground()
+        }
+    }
+    private let usageStore: UsageStore?
+    private let ingestor: UsageIngestor?
+    private static let showsStatsKey = "panelShowsStats"
+    private static let statsRangeKey = "statsRange"
+
     enum FixState: Equatable {
         case running
         case failed(String)
@@ -38,6 +61,19 @@ final class Meter {
     private static let log = Logger(subsystem: "com.fmmenchi.tokenmeter.app", category: "snapshot")
 
     init() {
+        let folder = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?
+            .appendingPathComponent("TokenMeter", isDirectory: true)
+        do {
+            guard let folder else { throw UsageStore.Failure(description: "no Application Support folder") }
+            let opened = try UsageStore(url: folder.appendingPathComponent("usage.sqlite"))
+            usageStore = opened
+            ingestor = UsageIngestor(store: opened)
+            storeAvailable = true
+        } catch {
+            usageStore = nil
+            ingestor = nil
+            Self.log.error("Could not open the usage store: \(error.localizedDescription, privacy: .public)")
+        }
         LaunchAtLogin.enableOnFirstRun()
         launchAtLogin = LaunchAtLogin.isEnabled
         setUpClaudeStatusLine()
@@ -63,6 +99,42 @@ final class Meter {
         base = await Task.detached { collector.snapshot() }.value
         publish()
         refreshClaudeUsageIfDue(force: userInitiated)
+        ingestInBackground()
+    }
+
+    /// ADR 0010: after the snapshot, off the main thread at utility priority, so the panel never waits for the store. The
+    /// first pass reads every file the CLIs still keep; later ones only what is new.
+    private func ingestInBackground() {
+        guard let ingestor, let usageStore, !isIngesting else { return }
+        isIngesting = true
+        let range = statsRange
+        Task(priority: .utility) {
+            let computed = await Task.detached(priority: .utility) { () -> [ProviderStats] in
+                ingestor.ingest()
+                return Self.computeStats(store: usageStore, range: range)
+            }.value
+            stats = computed
+            isIngesting = false
+        }
+    }
+
+    /// A change of range needs no new reading, only the same facts seen from another date.
+    private func computeStatsInBackground() {
+        guard let usageStore else { return }
+        let range = statsRange
+        Task(priority: .utility) {
+            let computed = await Task.detached(priority: .utility) { Self.computeStats(store: usageStore, range: range) }.value
+            if range == statsRange { stats = computed }
+        }
+    }
+
+    /// The configured providers, as the collector reads them (ADR 0003), each with its windows and its family rules.
+    nonisolated private static func computeStats(store: UsageStore, range: StatsRange) -> [ProviderStats] {
+        let configured = ((try? ProviderConfigFile.load()) ?? nil)?.providers ?? ProviderConfigFile.seed().providers
+        return configured.map {
+            UsageStats.stats(for: Provider(rawValue: $0.id), windows: $0.windows, families: $0.usage?.families ?? [],
+                             store: store, range: range)
+        }
     }
 
     /// ADR 0002: Claude Code writes a copy of the usage, including each model's limit, when it runs `/usage`. Ask it to,

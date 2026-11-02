@@ -49,6 +49,142 @@ final class ConfiguredSourceTests: XCTestCase {
         XCTAssertNotNil(configured.quotaUpdatedAt)
     }
 
+    func testAnEventCarriesItsModelAndAKeyThatIdentifiesIt() throws {
+        let dir = try tempDir()
+        let lines = [
+            #"{"type":"assistant","timestamp":"2026-10-28T10:00:00.000Z","requestId":"r1","message":{"id":"m1","model":"claude-fable-5-1","usage":{"output_tokens":10}}}"#,
+            #"{"type":"assistant","timestamp":"2026-10-28T10:00:01.000Z","requestId":"r1","message":{"id":"m1","model":"claude-fable-5-1","usage":{"output_tokens":50}}}"#,
+            #"{"type":"assistant","timestamp":"2026-10-28T10:00:02.000Z","requestId":"r2","message":{"id":"m2","usage":{"output_tokens":7}}}"#,
+            #"{"type":"assistant","timestamp":"2026-10-28T10:00:03.000Z","message":{"model":"claude-opus-5-5","usage":{"output_tokens":3}}}"#,
+        ].joined(separator: "\n") + "\n"
+        try lines.write(to: dir.appendingPathComponent("s.jsonl"), atomically: true, encoding: .utf8)
+        let config = """
+        {"id":"c","title":"C","windows":[300],
+         "log":{"root":"\(dir.path)","contains":"\\"usage\\":","where":{"type":"assistant"},"timestamp":"timestamp"},
+         "usage":{"mode":"perEvent","dedupeBy":["message.id","requestId"],"model":"message.model",
+           "tokens":{"output":"message.usage.output_tokens"}}}
+        """
+
+        let events = try source(config).read(since: epoch).events
+
+        XCTAssertEqual(events.map(\.tokens.output), [50, 7, 3], "the repeated message counts once")
+        XCTAssertEqual(events.map(\.model), ["claude-fable-5-1", nil, "claude-opus-5-5"], "a line with no model leaves it empty")
+        XCTAssertEqual(events[0].key, "message.id=m1\u{1f}requestId=r1")
+        XCTAssertEqual(events[2].key, "s.jsonl|2026-10-28T10:00:03.000Z", "a line with no ids is known by where it was read")
+        XCTAssertEqual(Set(events.compactMap(\.key)).count, 3)
+    }
+
+    func testACumulativeEventIsKnownByItsFileAndItsTime() throws {
+        let dir = try tempDir()
+        try """
+        {"ts":"2026-10-28T10:00:01.000Z","used":{"total":10}}
+        {"ts":"2026-10-28T10:00:02.000Z","used":{"total":25}}
+
+        """.write(to: dir.appendingPathComponent("rollout-a.jsonl"), atomically: true, encoding: .utf8)
+        let config = """
+        {"id":"x","title":"X","windows":[60],"log":{"root":"\(dir.path)","timestamp":"ts"},
+         "usage":{"mode":"cumulative","tokens":{"output":"used.total"}}}
+        """
+
+        let events = try source(config).read(since: epoch).events
+
+        XCTAssertEqual(events.map(\.key), ["rollout-a.jsonl|2026-10-28T10:00:01.000Z", "rollout-a.jsonl|2026-10-28T10:00:02.000Z"])
+        XCTAssertEqual(events.map(\.model), [nil, nil])
+    }
+
+    func testEveryWindowALogReportedIsKeptWithItsHighestPercentage() throws {
+        let dir = try tempDir()
+        func line(_ ts: String, primary: Double, resets: Int, weekly: Double) -> String {
+            #"{"timestamp":"\#(ts)","type":"event_msg","payload":{"type":"token_count","info":{"total_token_usage":{"input_tokens":1,"output_tokens":1}},"rate_limits":{"primary":{"used_percent":\#(primary),"window_minutes":300,"resets_at":\#(resets)},"secondary":{"used_percent":\#(weekly),"window_minutes":10080,"resets_at":1793500000}}}}"#
+        }
+        let lines = [
+            line("2026-10-28T10:00:00.000Z", primary: 10, resets: 1793000000, weekly: 5),
+            line("2026-10-28T10:30:00.000Z", primary: 40, resets: 1793000000, weekly: 7),
+            line("2026-10-28T10:45:00.000Z", primary: 35, resets: 1793000000, weekly: 7),
+            line("2026-10-28T16:00:00.000Z", primary: 3, resets: 1793018000, weekly: 9),
+        ].joined(separator: "\n") + "\n"
+        try lines.write(to: dir.appendingPathComponent("rollout-a.jsonl"), atomically: true, encoding: .utf8)
+        let config = """
+        {"id":"codex3","title":"Codex 3","windows":[300,10080],
+         "log":{"root":"\(dir.path)","contains":"\\"token_count\\"","where":{"type":"event_msg","payload.type":"token_count"},"timestamp":"timestamp"},
+         "usage":{"mode":"cumulative","tokens":{"output":"payload.info.total_token_usage.output_tokens"}},
+         "quota":{"windows":[
+           {"at":"payload.rate_limits.primary","minutesPath":"window_minutes","usedPercent":"used_percent","resetsAt":"resets_at"},
+           {"at":"payload.rate_limits.secondary","minutesPath":"window_minutes","usedPercent":"used_percent","resetsAt":"resets_at"}]}}
+        """
+
+        let configured = try source(config).read(since: epoch)
+
+        XCTAssertEqual(configured.quotas.map(\.usedPercent), [3, 9], "the last reading of each length is as it was")
+        let history = configured.history
+        XCTAssertEqual(history.map(\.windowMinutes), [300, 300, 10080])
+        XCTAssertEqual(history.map(\.usedPercent), [40, 3, 9], "a window keeps the highest percentage, not the last")
+        let first = LogDate.parse("2026-10-28T10:00:00.000Z")!
+        let last = LogDate.parse("2026-10-28T10:45:00.000Z")!
+        XCTAssertEqual(history[0].firstObserved, first)
+        XCTAssertEqual(history[0].lastObserved, last)
+        XCTAssertEqual(history[0].resetsAt, Date(timeIntervalSince1970: 1793000000))
+        XCTAssertEqual(history[2].firstObserved, first, "the weekly window is one window across the lines")
+    }
+
+    func testReadingTheSameLogAgainAddsNoWindow() throws {
+        let dir = try tempDir()
+        let file = dir.appendingPathComponent("rollout-a.jsonl")
+        let line = #"{"timestamp":"2026-10-28T10:00:00.000Z","payload":{"rate_limits":{"primary":{"used_percent":12,"window_minutes":300,"resets_at":1793000000}}}}"# + "\n"
+        try line.write(to: file, atomically: true, encoding: .utf8)
+        let config = """
+        {"id":"codex4","title":"Codex 4","windows":[300],
+         "log":{"root":"\(dir.path)","timestamp":"timestamp"},
+         "quota":{"windows":[{"at":"payload.rate_limits.primary","minutesPath":"window_minutes","usedPercent":"used_percent","resetsAt":"resets_at"}]}}
+        """
+        let codex = try source(config)
+        XCTAssertEqual(codex.read(since: epoch).history.count, 1)
+        XCTAssertEqual(codex.read(since: epoch).history.count, 1, "a second read of the same bytes")
+        let handle = try FileHandle(forWritingTo: file)
+        try handle.seekToEnd()
+        try handle.write(contentsOf: Data(line.replacingOccurrences(of: "12", with: "30").replacingOccurrences(of: "10:00:00", with: "10:05:00").utf8))
+        try handle.close()
+        let after = codex.read(since: epoch).history
+        XCTAssertEqual(after.count, 1)
+        XCTAssertEqual(after.first?.usedPercent, 30)
+    }
+
+    func testTheTokensAfterATurnLineBelongToItsModelAlsoAcrossReads() throws {
+        let dir = try tempDir()
+        let file = dir.appendingPathComponent("rollout-a.jsonl")
+        func count(_ ts: String, total: Int) -> String {
+            #"{"timestamp":"\#(ts)","type":"event_msg","payload":{"type":"token_count","info":{"total_token_usage":{"output_tokens":\#(total)}}}}"# + "\n"
+        }
+        func turn(_ ts: String, model: String?) -> String {
+            let model = model.map { #","model":"\#($0)""# } ?? ""
+            return #"{"timestamp":"\#(ts)","type":"turn_context","payload":{"cwd":"x"\#(model)}}"# + "\n"
+        }
+        try (count("2026-10-28T10:00:01.000Z", total: 10) + turn("2026-10-28T10:00:02.000Z", model: "gpt-6-astra")
+             + count("2026-10-28T10:00:03.000Z", total: 20) + turn("2026-10-28T10:00:04.000Z", model: nil)
+             + count("2026-10-28T10:00:05.000Z", total: 25) + turn("2026-10-28T10:00:06.000Z", model: "gpt-6-nova")
+             + count("2026-10-28T10:00:07.000Z", total: 30)).write(to: file, atomically: true, encoding: .utf8)
+        let config = """
+        {"id":"x","title":"X","windows":[60],
+         "log":{"root":"\(dir.path)","contains":"\\"token_count\\"","where":{"type":"event_msg","payload.type":"token_count"},"timestamp":"timestamp",
+                "context":{"contains":"\\"turn_context\\"","where":{"type":"turn_context"},"model":"payload.model"}},
+         "usage":{"mode":"cumulative","tokens":{"output":"payload.info.total_token_usage.output_tokens"}}}
+        """
+        let codex = try source(config)
+
+        let events = codex.read(since: epoch).events
+
+        XCTAssertEqual(events.map(\.tokens.output), [10, 10, 5, 5])
+        XCTAssertEqual(events.map(\.model), [nil, "gpt-6-astra", "gpt-6-astra", "gpt-6-nova"],
+                       "before any turn line there is no model, a turn line with none changes nothing, and a new one replaces it")
+
+        let handle = try FileHandle(forWritingTo: file)
+        try handle.seekToEnd()
+        try handle.write(contentsOf: Data(count("2026-10-28T10:00:08.000Z", total: 41).utf8))
+        try handle.close()
+        XCTAssertEqual(codex.read(since: epoch).events.last?.model, "gpt-6-nova", "the model is kept for the next read of the file")
+        XCTAssertEqual(codex.read(since: epoch).events.last?.tokens.output, 11)
+    }
+
     func testConfigReadsCumulativeUsageAndQuotaFromTheLog() throws {
         let dir = try tempDir()
         func line(_ ts: String, input: Int, cached: Int, out: Int, limits: String) -> String {

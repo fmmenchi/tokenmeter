@@ -103,6 +103,48 @@ public struct ProviderConfigFile: Decodable, Sendable {
         return .migrated
     }
 
+    /// Adds to the `usage` of Claude and ChatGPT in an existing file what the usage store needs and the file lacks: the path
+    /// of the model's name and the rules that turn it into a family (ADR 0010). Each is added once and only when absent, so
+    /// what the person wrote stays; the original is kept as `.bak`, as for the Claude integration.
+    @discardableResult
+    public static func addUsageFacts(to url: URL = defaultURL) -> MigrationOutcome {
+        guard let data = try? Data(contentsOf: url),
+              var object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
+              object["version"] as? Int == 1,
+              var providers = object["providers"] as? [[String: Any]] else { return .untouched }
+        var changed = false
+        for (index, entry) in providers.enumerated() {
+            guard let id = entry["id"] as? String else { continue }
+            var updated = entry
+            if let facts = DefaultProviders.usageFacts[id], var usage = entry["usage"] as? [String: Any] {
+                if usage["model"] == nil, let model = facts.model {
+                    usage["model"] = model
+                    changed = true
+                }
+                if usage["families"] == nil {
+                    usage["families"] = facts.families
+                    changed = true
+                }
+                updated["usage"] = usage
+            }
+            if let context = DefaultProviders.logContext(for: id), var log = entry["log"] as? [String: Any], log["context"] == nil {
+                log["context"] = context
+                updated["log"] = log
+                changed = true
+            }
+            providers[index] = updated
+        }
+        guard changed else { return .untouched }
+        object["providers"] = providers
+        let backup = url.appendingPathExtension("tokenmeter.bak")
+        guard let output = try? JSONSerialization.data(
+            withJSONObject: object, options: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]) else { return .untouched }
+        try? FileManager.default.removeItem(at: backup)
+        guard (try? FileManager.default.copyItem(at: url, to: backup)) != nil,
+              (try? (output + Data("\n".utf8)).write(to: url, options: .atomic)) != nil else { return .untouched }
+        return .migrated
+    }
+
     static func decode(_ data: Data, origin: String) throws -> ProviderConfigFile {
         let file: ProviderConfigFile
         do {
@@ -144,6 +186,16 @@ public struct ProviderConfig: Decodable, Sendable {
         public let `where`: [String: String]?
         /// ISO 8601 timestamp path.
         public let timestamp: String
+        /// A line that says which model the lines after it belong to, as Codex does at the start of each turn (ADR 0010).
+        public let context: Context?
+
+        public struct Context: Decodable, Sendable {
+            /// Cheap byte filter, as `Log.contains`.
+            public let contains: String
+            public let `where`: [String: String]?
+            /// The path of the model's name in the line.
+            public let model: String
+        }
     }
 
     public struct Usage: Decodable, Sendable {
@@ -151,6 +203,22 @@ public struct ProviderConfig: Decodable, Sendable {
         public let mode: Mode
         public let dedupeBy: [String]?
         public let tokens: Tokens
+        /// The path of the model's name in a line, so the tokens can be told apart by model (ADR 0010).
+        public let model: String?
+        /// Ordered rules that turn a model's name into the family it is shown as; the first that matches wins, and a name
+        /// that matches none is shown as it is (ADR 0010).
+        public let families: [Family]?
+
+        public struct Family: Decodable, Sendable, Equatable {
+            /// A fragment of the model's name, compared without case.
+            public let contains: String
+            public let family: String
+
+            public init(contains: String, family: String) {
+                self.contains = contains
+                self.family = family
+            }
+        }
     }
 
     public struct Tokens: Decodable, Sendable {

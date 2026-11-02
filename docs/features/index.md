@@ -25,7 +25,9 @@ are [ADRs](../adr), and its overview links them.
 
 ## In design and build
 
-Nothing at the moment.
+| Feature                                                                                                                 | Date       | Pages                                                                                                                                                    |
+| :---------------------------------------------------------------------------------------------------------------------- | :--------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Usage stats](./2026-11-02-usage-stats/index.md): a second view in the panel, from facts the app has seen, no estimates | 2026-11-02 | [Overview](./2026-11-02-usage-stats/index.md), [Proposal](./2026-11-02-usage-stats/proposal.md), [Implementation plan](./2026-11-02-usage-stats/plan.md) |
 
 ## The pattern: from idea to implemented
 

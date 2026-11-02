@@ -13,7 +13,9 @@ struct MenuContent: View {
                     state: meter.fixStates[problem.id], onFix: { meter.runFix(problem) },
                     onDismiss: { meter.dismiss(problem) })
             }
-            if let snapshot = meter.snapshot {
+            if meter.showsStats {
+                StatsView(meter: meter)
+            } else if let snapshot = meter.snapshot {
                 ForEach(snapshot.providers, id: \.provider) {
                     ProviderCard(snapshot: $0, problemCount: snapshot.problemCount(for: $0), showsPace: true)
                 }
@@ -31,14 +33,17 @@ struct MenuContent: View {
                 ProgressView()
             }
             Divider()
-            HStack {
-                Button {
+            HStack(spacing: 6) {
+                IconButton(systemName: "arrow.clockwise", label: "Refresh", isBusy: meter.isRefreshing) {
                     Task { await meter.refresh(userInitiated: true) }
-                } label: {
-                    if meter.isRefreshing { ProgressView().controlSize(.small) } else { Text("Refresh") }
                 }
                 .disabled(meter.isRefreshing)
-                Button("Settings…") {
+                // The icon says where it takes you: to the stats from the quota, back to the quota from the stats (ADR 0010).
+                IconButton(systemName: meter.showsStats ? "speedometer" : "chart.bar.fill",
+                           label: meter.showsStats ? "Show the current quota" : "Show the stats") {
+                    meter.showsStats.toggle()
+                }
+                IconButton(systemName: "gearshape", label: "Settings") {
                     // An accessory app cannot show a regular window in front: become a regular app
                     // while Settings is open (SettingsView puts it back on disappear).
                     NSApplication.shared.setActivationPolicy(.regular)
@@ -46,7 +51,7 @@ struct MenuContent: View {
                     openWindow(id: SettingsWindow.id)
                 }
                 Spacer()
-                Button("Quit") { NSApplication.shared.terminate(nil) }
+                IconButton(systemName: "power", label: "Quit") { NSApplication.shared.terminate(nil) }
             }
         }
         .padding(12)
@@ -57,5 +62,29 @@ struct MenuContent: View {
     private func title(of topic: String) -> String {
         meter.snapshot?.providers.first { $0.provider.rawValue == topic }?.title
             ?? (topic == Problem.general ? "General" : topic)
+    }
+}
+
+/// A button that is an icon, with the name a screen reader says and the tooltip a pointer shows.
+private struct IconButton: View {
+    let systemName: String
+    let label: String
+    var isBusy = false
+    let action: () -> Void
+    @State private var hovering = false
+
+    var body: some View {
+        Button(action: action) {
+            Group {
+                if isBusy { ProgressView().controlSize(.small) } else { Image(systemName: systemName) }
+            }
+            .frame(width: 28, height: 24)
+            .background(RoundedRectangle(cornerRadius: 6).fill(Color.primary.opacity(hovering ? 0.14 : 0.07)))
+            .contentShape(RoundedRectangle(cornerRadius: 6))
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering = $0 }
+        .help(label)
+        .accessibilityLabel(label)
     }
 }

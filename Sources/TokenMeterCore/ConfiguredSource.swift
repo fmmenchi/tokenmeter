@@ -9,15 +9,35 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
     private struct FileState {
         var offset: UInt64 = 0
         var previous = TokenCounts()
+        /// The model the last context line named: the tokens that follow belong to it (ADR 0010).
+        var model: String?
         var byKey: [String: UsageEvent] = [:]
         var anonymous: [UsageEvent] = []
         var quotas: [Int: (Date, ReportedQuota)] = [:]
+        var history: [WindowKey: WindowReading] = [:]
         var plan: (Date, String)?
+    }
+
+    /// One window of one length: its reset time to the minute, as in the store (ADR 0010).
+    private struct WindowKey: Hashable {
+        let minutes: Int
+        let resets: Int
+    }
+
+    private static func note(_ reading: WindowReading, in history: inout [WindowKey: WindowReading]) {
+        let key = WindowKey(minutes: reading.windowMinutes, resets: Int((reading.resetsAt.timeIntervalSince1970 / 60).rounded()))
+        guard let known = history[key] else {
+            history[key] = reading
+            return
+        }
+        history[key] = WindowReading(
+            windowMinutes: known.windowMinutes, resetsAt: known.resetsAt, usedPercent: max(known.usedPercent, reading.usedPercent),
+            firstObserved: min(known.firstObserved, reading.firstObserved), lastObserved: max(known.lastObserved, reading.lastObserved))
     }
 
     private let lock = NSLock()
     private var states: [URL: FileState] = [:]
-    private let marker: Data
+    private let markers: [Data]
 
     public init(_ config: ProviderConfig, home: URL = FileManager.default.homeDirectoryForCurrentUser) {
         self.config = config
@@ -26,7 +46,7 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
             provider: Provider(rawValue: config.id), title: config.title,
             windows: config.windows.map { WindowSpec(name: Self.label(minutes: $0), duration: TimeInterval($0) * 60) },
             setupHint: config.setupHint)
-        marker = Data((config.log?.contains ?? "{").utf8)
+        markers = [Data((config.log?.contains ?? "{").utf8)] + (config.log?.context.map { [Data($0.contains.utf8)] } ?? [])
     }
 
     static func label(minutes: Int) -> String {
@@ -45,6 +65,7 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
             let logged = scan(log, since: since)
             lock.unlock()
             reading.events = logged.events
+            reading.history = logged.history
             quotas = logged.quotas
             plan = logged.plan
         }
@@ -118,37 +139,23 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
     // MARK: Log scanning
 
     private func scan(_ log: ProviderConfig.Log, since: Date)
-        -> (events: [UsageEvent], quotas: [Int: (Date, ReportedQuota)], plan: (Date, String)?) {
+        -> (events: [UsageEvent], quotas: [Int: (Date, ReportedQuota)], history: [WindowReading], plan: (Date, String)?) {
         let files = LogFiles.jsonl(under: expand(log.root), modifiedSince: since)
         states = states.filter { files.contains($0.key) }
 
         var events: [UsageEvent] = []
         var quotas: [Int: (Date, ReportedQuota)] = [:]
+        var history: [WindowKey: WindowReading] = [:]
         var plan: (Date, String)?
         for file in files {
             var state = states[file] ?? FileState()
-            let (lines, next) = LogFiles.newLines(in: file, from: state.offset, containing: marker)
-            if next < state.offset { state = FileState() }
-            state.offset = next
-            for data in lines {
-                guard let root = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
-                      (log.where ?? [:]).allSatisfy({ Self.string(Self.value($0.key, in: root)) == $0.value }),
-                      let stamp = Self.string(Self.value(log.timestamp, in: root)), let date = LogDate.parse(stamp)
-                else { continue }
-                if let usage = config.usage { record(usage, root, date, into: &state) }
-                if let quota = config.quota, quota.file == nil {
-                    for window in quota.windows where window.each == nil {
-                        guard let reported = Self.quota(window, in: root, observedAt: date),
-                              let minutes = reported.windowMinutes,
-                              state.quotas[minutes] == nil || date > state.quotas[minutes]!.0 else { continue }
-                        state.quotas[minutes] = (date, reported)
-                    }
-                }
-                if let spec = config.plan, spec.file == nil, let label = Self.planLabel(spec, in: root),
-                   state.plan == nil || date > state.plan!.0 {
-                    state.plan = (date, label)
-                }
+            if LogFiles.size(of: file) < state.offset { state = FileState() }
+            let next = LogFiles.scanNewLines(in: file, from: state.offset, containing: markers) { data in
+                // Each line is decoded in a pool of its own: a log of hundreds of megabytes would otherwise keep every
+                // decoded line alive until the pass ends.
+                autoreleasepool { process(data, of: file, log: log, into: &state) }
             }
+            state.offset = next
             state.byKey = state.byKey.filter { $0.value.date >= since }
             state.anonymous.removeAll { $0.date < since }
             states[file] = state
@@ -157,11 +164,42 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
             for (minutes, candidate) in state.quotas where quotas[minutes] == nil || candidate.0 > quotas[minutes]!.0 {
                 quotas[minutes] = candidate
             }
+            for reading in state.history.values { Self.note(reading, in: &history) }
         }
-        return (events.sorted { $0.date < $1.date }, quotas, plan)
+        return (events.sorted { $0.date < $1.date }, quotas, history.values.sorted { $0.resetsAt < $1.resetsAt }, plan)
     }
 
-    private func record(_ usage: ProviderConfig.Usage, _ root: [String: Any], _ date: Date, into state: inout FileState) {
+    /// One line of a log: the model of a turn, the tokens, the reading of a window and the plan it carries.
+    private func process(_ data: Data, of file: URL, log: ProviderConfig.Log, into state: inout FileState) {
+        guard let root = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] else { return }
+        if let context = log.context, (context.where ?? [:]).allSatisfy({ Self.string(Self.value($0.key, in: root)) == $0.value }),
+           let name = Self.string(Self.value(context.model, in: root)) {
+            state.model = name
+            return
+        }
+        guard (log.where ?? [:]).allSatisfy({ Self.string(Self.value($0.key, in: root)) == $0.value }),
+              let stamp = Self.string(Self.value(log.timestamp, in: root)), let date = LogDate.parse(stamp)
+        else { return }
+        if let usage = config.usage { record(usage, root, date, origin: "\(file.lastPathComponent)|\(stamp)", into: &state) }
+        if let quota = config.quota, quota.file == nil {
+            for window in quota.windows where window.each == nil {
+                guard let reported = Self.quota(window, in: root, observedAt: date),
+                      let minutes = reported.windowMinutes else { continue }
+                if let resets = reported.resetsAt {
+                    Self.note(WindowReading(windowMinutes: minutes, resetsAt: resets, usedPercent: reported.usedPercent,
+                                            firstObserved: date, lastObserved: date), in: &state.history)
+                }
+                if state.quotas[minutes] == nil || date > state.quotas[minutes]!.0 { state.quotas[minutes] = (date, reported) }
+            }
+        }
+        if let spec = config.plan, spec.file == nil, let label = Self.planLabel(spec, in: root),
+           state.plan == nil || date > state.plan!.0 {
+            state.plan = (date, label)
+        }
+    }
+
+    private func record(_ usage: ProviderConfig.Usage, _ root: [String: Any], _ date: Date, origin: String,
+                        into state: inout FileState) {
         func count(_ field: ProviderConfig.Field?) -> Int {
             guard let field else { return 0 }
             let value = Self.number(Self.value(field.path, in: root)) ?? 0
@@ -171,17 +209,20 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
         let current = TokenCounts(input: count(tokens.input), output: count(tokens.output),
                                   cacheRead: count(tokens.cacheRead), cacheWrite: count(tokens.cacheWrite))
         let provider = info.provider
+        let model = usage.model.flatMap { Self.string(Self.value($0, in: root)) } ?? state.model
         switch usage.mode {
         case .perEvent:
-            let event = UsageEvent(provider: provider, date: date, tokens: current)
-            // The paths a line has make its key; a line with none is never merged with another.
+            // The paths a line has make its key; a line with none is never merged with another, and its key is where it was
+            // read from, so reading it again is the same event (ADR 0010).
             let keys = (usage.dedupeBy ?? []).compactMap { path in
                 Self.string(Self.value(path, in: root)).map { "\(path)=\($0)" }
             }
+            let key = keys.isEmpty ? origin : keys.joined(separator: "\u{1f}")
+            let event = UsageEvent(provider: provider, date: date, tokens: current, model: model, key: key)
             if keys.isEmpty {
                 state.anonymous.append(event)
             } else {
-                state.byKey[keys.joined(separator: "\u{1f}")] = event
+                state.byKey[key] = event
             }
         case .cumulative:
             let delta = TokenCounts(
@@ -189,7 +230,9 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
                 cacheRead: max(current.cacheRead - state.previous.cacheRead, 0),
                 cacheWrite: max(current.cacheWrite - state.previous.cacheWrite, 0))
             state.previous = current
-            if delta.total > 0 { state.anonymous.append(UsageEvent(provider: provider, date: date, tokens: delta)) }
+            if delta.total > 0 {
+                state.anonymous.append(UsageEvent(provider: provider, date: date, tokens: delta, model: model, key: origin))
+            }
         }
     }
 

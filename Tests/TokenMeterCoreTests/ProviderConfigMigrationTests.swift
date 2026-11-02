@@ -62,6 +62,66 @@ final class ProviderConfigMigrationTests: XCTestCase {
     func testTheSeedCarriesTheField() {
         XCTAssertEqual(ProviderConfigFile.seed().providers.first { $0.id == "claude" }?.integration, "claude-status-line")
     }
+
+    // MARK: Usage facts (ADR 0010)
+
+    private let withUsage = #"{"version":1,"providers":[{"id":"claude","title":"Claude","windows":[300],"usage":{"mode":"perEvent","tokens":{}}},{"id":"chatgpt","title":"ChatGPT","windows":[300],"usage":{"mode":"cumulative","tokens":{},"families":[{"contains":"mine","family":"Mine"}]}}]}"#
+
+    private func usage(of id: String) throws -> ProviderConfig.Usage? {
+        try ProviderConfigFile.load(from: url)?.providers.first { $0.id == id }?.usage
+    }
+
+    func testUsageFactsAreAddedOnceAndWhatThePersonWroteStays() throws {
+        try write(withUsage)
+        XCTAssertEqual(ProviderConfigFile.addUsageFacts(to: url), .migrated)
+        XCTAssertEqual(try usage(of: "claude")?.model, "message.model")
+        XCTAssertEqual(try usage(of: "claude")?.families?.map(\.family), ["Fable", "Sonnet", "Opus", "Haiku"])
+        XCTAssertEqual(try usage(of: "chatgpt")?.families, [.init(contains: "mine", family: "Mine")], "the person's rules stay")
+        XCTAssertNil(try usage(of: "chatgpt")?.model)
+        XCTAssertEqual(try String(contentsOf: url.appendingPathExtension("tokenmeter.bak")), withUsage)
+
+        let after = try Data(contentsOf: url)
+        XCTAssertEqual(ProviderConfigFile.addUsageFacts(to: url), .untouched)
+        XCTAssertEqual(try Data(contentsOf: url), after, "the second run changes nothing")
+    }
+
+    func testTheBackupIsTheFileAsItWasBeforeThisMigration() throws {
+        try write(withUsage)
+        try Data("a backup of an earlier migration".utf8).write(to: url.appendingPathExtension("tokenmeter.bak"))
+        XCTAssertEqual(ProviderConfigFile.addUsageFacts(to: url), .migrated)
+        XCTAssertEqual(try String(contentsOf: url.appendingPathExtension("tokenmeter.bak")), withUsage)
+    }
+
+    func testUsageFactsLeaveAnotherFileAlone() throws {
+        XCTAssertEqual(ProviderConfigFile.addUsageFacts(to: url), .untouched, "no file")
+        try write(#"{"version":2,"providers":[{"id":"claude","usage":{}}]}"#)
+        XCTAssertEqual(ProviderConfigFile.addUsageFacts(to: url), .untouched, "another version")
+        try write(#"{"version":1,"providers":[{"id":"claude","title":"Claude","windows":[300]},{"id":"other","title":"O","windows":[60],"usage":{"mode":"perEvent","tokens":{}}}]}"#)
+        XCTAssertEqual(ProviderConfigFile.addUsageFacts(to: url), .untouched, "no usage to add to, and a provider it does not know")
+    }
+
+    func testTheLogOfCodexGainsTheLineThatNamesTheModelOnce() throws {
+        try write(#"{"version":1,"providers":[{"id":"chatgpt","title":"ChatGPT","windows":[300],"log":{"root":"r","timestamp":"timestamp"},"usage":{"mode":"cumulative","tokens":{}}}]}"#)
+        XCTAssertEqual(ProviderConfigFile.addUsageFacts(to: url), .migrated)
+        let log = try ProviderConfigFile.load(from: url)?.providers.first?.log
+        XCTAssertEqual(log?.context?.model, "payload.model")
+        XCTAssertEqual(log?.context?.where, ["type": "turn_context"])
+        XCTAssertEqual(ProviderConfigFile.addUsageFacts(to: url), .untouched)
+        XCTAssertEqual(log?.context?.contains, ProviderConfigFile.seed().providers.first { $0.id == "chatgpt" }?.log?.context?.contains,
+                       "the same as the seed")
+    }
+
+    func testTheSeedAndTheMigrationSayTheSame() throws {
+        let seed = ProviderConfigFile.seed().providers
+        for id in ["claude", "chatgpt"] {
+            try write(#"{"version":1,"providers":[{"id":"\#(id)","title":"T","windows":[300],"usage":{"mode":"perEvent","tokens":{}}}]}"#)
+            ProviderConfigFile.addUsageFacts(to: url)
+            let migrated = try usage(of: id)
+            let seeded = seed.first { $0.id == id }?.usage
+            XCTAssertEqual(migrated?.families, seeded?.families, id)
+            if id == "claude" { XCTAssertEqual(migrated?.model, seeded?.model) }
+        }
+    }
 }
 
 final class ModelLimitMigrationTests: XCTestCase {
