@@ -83,6 +83,11 @@ struct QuotaBar: View {
                     Capsule().fill(tint)
                         .frame(width: max(proxy.size.height, proxy.size.width * min(max(fraction, 0), 1)))
                 }
+            }
+            .frame(width: proxy.size.width, height: proxy.size.height)
+            // The mark is drawn over the bar and takes no part in its size. Inside the same stack it made the stack taller than the
+            // bar and the track and the fill, which are flexible, grew with it: a bar with a mark was 14 points thick, one without 10.
+            .overlay(alignment: .leading) {
                 if let mark {
                     Capsule().fill(mark.runsOut ? Color.orange : Color.primary)
                         .frame(width: 2, height: proxy.size.height + 4)
