@@ -26,7 +26,12 @@ final class Meter {
 
     /// Picked again each time the panel opens, from the event of that day, and kept while it stays open.
     func rollEasterEgg(now: Date = Date()) {
-        easterEgg = Occasion.active(on: now).map { EasterEgg.random(for: $0) }
+        #if DEBUG
+        let occasion = DevOptions.occasion ?? Occasion.active(on: now)
+        #else
+        let occasion = Occasion.active(on: now)
+        #endif
+        easterEgg = occasion.map { EasterEgg.random(for: $0) }
     }
 
     // MARK: Notices (ADR 0012)
