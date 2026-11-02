@@ -37,8 +37,10 @@ If you do not use one of the two tools, its entry stays empty; the other keeps w
 
 **No credits, no quota, no money.**
 
-- It makes **no network request of its own**. Every 15 minutes it asks Claude Code to run its own `/usage`, so Claude's quota is
-  the account's; Claude Code uses its own credentials and tokenmeter never sees them.
+- It makes **one network request of its own**: once a day it asks GitHub for the list of versions, to say whether an update is
+  out ([Updates](./updates.md)). It sends nothing about you or your use, and you can turn it off. Every 15 minutes it also asks
+  Claude Code to run its own `/usage`, so Claude's quota is the account's; Claude Code uses its own credentials and tokenmeter
+  never sees them.
 - It needs **no login, no API key and no token**, and never asks for one.
 - It does not send messages to a model, so it does not use up your plan. It only reads files that
   already exist.

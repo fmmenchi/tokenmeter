@@ -1,0 +1,31 @@
+---
+title: Changelog
+sidebar_label: Changelog
+sidebar_position: 10
+---
+
+# Changelog
+
+What changed in each version, newest first. The update window and the panel notice open this page at the version they offer.
+
+## 0.3.0 {#v0-3-0}
+
+Not released yet.
+
+- **The app updates itself.** It looks once a day, tells you, and installs when you agree; there is a switch and a **Check now** in
+  Settings ([Updates](./updates.md)).
+- **The menu bar is the icon**, as other apps have it. The percentage and the "▲ N" are gone; a **dot** on the icon says that the
+  panel lists a problem, or that an update waits.
+- **A launch reads only what changed.** The app remembers when it last read each provider and does not read every log again at
+  each start, so an update or a restart no longer repeats the first minute or two of the stats.
+
+## 0.2.0 {#v0-2-0}
+
+- **Stats**: a second view of the panel, behind the chart icon, that says how each window ended, whether you hit the ceiling and
+  which models used the tokens ([Reading the Stats](./stats.md)).
+- The app asks Claude Code to run `/usage` every 15 minutes, so Claude's quota is the account's.
+- Signed with a Developer ID certificate and notarized.
+
+## 0.1.0 {#v0-1-0}
+
+- The first release: the menu-bar panel, the widget and the Settings, for Claude and ChatGPT.
