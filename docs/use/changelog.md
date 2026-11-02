@@ -6,7 +6,7 @@ sidebar_position: 10
 
 # Changelog
 
-What changed in each version, newest first. The update window and the panel notice open this page at the version they offer.
+What changed in each version, newest first. The update window shows the notes of the version it offers, taken from this page, and links here for the rest.
 
 ## 0.4.0 {#v0-4-0}
 

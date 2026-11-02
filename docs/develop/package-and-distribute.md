@@ -78,14 +78,16 @@ download the app again, so the copy matters.
 **For each release**, after the steps above:
 
 ```bash
-# 1. raise CURRENT_PROJECT_VERSION by one (and set MARKETING_VERSION), commit, and tag v<MARKETING_VERSION>
+# 1. raise CURRENT_PROJECT_VERSION by one, set MARKETING_VERSION, write the version in docs/use/changelog.md and make its page of notes:
+./scripts/release-notes.sh  #    apps/docusaurus/static/release-notes/v<version>.html; commit all of it, then tag v<MARKETING_VERSION>
 ./scripts/sign-release.sh   # refuses without the key or the tag
 ./scripts/notarize.sh       # the signature below is of this final zip
 ./scripts/appcast.sh        # writes dist/appcast.xml, refuses a build number that does not go up
 ```
 
-Then publish the release with the zip, its `.sha256` and `dist/appcast.xml` attached, and add the version to
-[the changelog](../use/changelog.md), whose anchor `#v<version with dashes>` the feed points to. Publishing asks first, as notarizing does.
+Push `main` first, so that the docs site serves the page of notes the feed points to (`/release-notes/v<version>.html`, a clean page
+made from [the changelog](../use/changelog.md), which is where the notes are written), then publish the release with the zip, its
+`.sha256` and `dist/appcast.xml` attached. Pushing and publishing ask first, as notarizing does.
 
 Checked by hand, not by a test, before the first release with the updater: the check from the menu with a click, an update served
 from a local feed with the widget on the desktop watched, an update of a build that has a store, the address of the feed as the
