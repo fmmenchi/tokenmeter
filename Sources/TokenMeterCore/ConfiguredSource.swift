@@ -149,36 +149,13 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
         var plan: (Date, String)?
         for file in files {
             var state = states[file] ?? FileState()
-            let (lines, next) = LogFiles.newLines(in: file, from: state.offset, containing: markers)
-            if next < state.offset { state = FileState() }
-            state.offset = next
-            for data in lines {
-                guard let root = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] else { continue }
-                if let context = log.context, (context.where ?? [:]).allSatisfy({ Self.string(Self.value($0.key, in: root)) == $0.value }),
-                   let name = Self.string(Self.value(context.model, in: root)) {
-                    state.model = name
-                    continue
-                }
-                guard (log.where ?? [:]).allSatisfy({ Self.string(Self.value($0.key, in: root)) == $0.value }),
-                      let stamp = Self.string(Self.value(log.timestamp, in: root)), let date = LogDate.parse(stamp)
-                else { continue }
-                if let usage = config.usage { record(usage, root, date, origin: "\(file.lastPathComponent)|\(stamp)", into: &state) }
-                if let quota = config.quota, quota.file == nil {
-                    for window in quota.windows where window.each == nil {
-                        guard let reported = Self.quota(window, in: root, observedAt: date),
-                              let minutes = reported.windowMinutes else { continue }
-                        if let resets = reported.resetsAt {
-                            Self.note(WindowReading(windowMinutes: minutes, resetsAt: resets, usedPercent: reported.usedPercent,
-                                                    firstObserved: date, lastObserved: date), in: &state.history)
-                        }
-                        if state.quotas[minutes] == nil || date > state.quotas[minutes]!.0 { state.quotas[minutes] = (date, reported) }
-                    }
-                }
-                if let spec = config.plan, spec.file == nil, let label = Self.planLabel(spec, in: root),
-                   state.plan == nil || date > state.plan!.0 {
-                    state.plan = (date, label)
-                }
+            if LogFiles.size(of: file) < state.offset { state = FileState() }
+            let next = LogFiles.scanNewLines(in: file, from: state.offset, containing: markers) { data in
+                // Each line is decoded in a pool of its own: a log of hundreds of megabytes would otherwise keep every
+                // decoded line alive until the pass ends.
+                autoreleasepool { process(data, of: file, log: log, into: &state) }
             }
+            state.offset = next
             state.byKey = state.byKey.filter { $0.value.date >= since }
             state.anonymous.removeAll { $0.date < since }
             states[file] = state
@@ -190,6 +167,35 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
             for reading in state.history.values { Self.note(reading, in: &history) }
         }
         return (events.sorted { $0.date < $1.date }, quotas, history.values.sorted { $0.resetsAt < $1.resetsAt }, plan)
+    }
+
+    /// One line of a log: the model of a turn, the tokens, the reading of a window and the plan it carries.
+    private func process(_ data: Data, of file: URL, log: ProviderConfig.Log, into state: inout FileState) {
+        guard let root = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] else { return }
+        if let context = log.context, (context.where ?? [:]).allSatisfy({ Self.string(Self.value($0.key, in: root)) == $0.value }),
+           let name = Self.string(Self.value(context.model, in: root)) {
+            state.model = name
+            return
+        }
+        guard (log.where ?? [:]).allSatisfy({ Self.string(Self.value($0.key, in: root)) == $0.value }),
+              let stamp = Self.string(Self.value(log.timestamp, in: root)), let date = LogDate.parse(stamp)
+        else { return }
+        if let usage = config.usage { record(usage, root, date, origin: "\(file.lastPathComponent)|\(stamp)", into: &state) }
+        if let quota = config.quota, quota.file == nil {
+            for window in quota.windows where window.each == nil {
+                guard let reported = Self.quota(window, in: root, observedAt: date),
+                      let minutes = reported.windowMinutes else { continue }
+                if let resets = reported.resetsAt {
+                    Self.note(WindowReading(windowMinutes: minutes, resetsAt: resets, usedPercent: reported.usedPercent,
+                                            firstObserved: date, lastObserved: date), in: &state.history)
+                }
+                if state.quotas[minutes] == nil || date > state.quotas[minutes]!.0 { state.quotas[minutes] = (date, reported) }
+            }
+        }
+        if let spec = config.plan, spec.file == nil, let label = Self.planLabel(spec, in: root),
+           state.plan == nil || date > state.plan!.0 {
+            state.plan = (date, label)
+        }
     }
 
     private func record(_ usage: ProviderConfig.Usage, _ root: [String: Any], _ date: Date, origin: String,
