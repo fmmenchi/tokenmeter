@@ -64,6 +64,10 @@ public final class UsageStore: @unchecked Sendable {
 
     public struct Failure: Error, Equatable, CustomStringConvertible {
         public let description: String
+
+        public init(description: String) {
+            self.description = description
+        }
     }
 
     public let url: URL
