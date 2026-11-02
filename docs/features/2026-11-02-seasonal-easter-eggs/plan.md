@@ -34,16 +34,16 @@ flowchart LR
 
 ## Order
 
-| Step | Commit                                                                            | Files                                                                  |
-| :--- | :-------------------------------------------------------------------------------- | :--------------------------------------------------------------------- |
-| 1    | `feat(core): the weeks of Halloween, Christmas and Easter`                        | `Occasions.swift`, `OccasionsTests.swift`                              |
-| 2    | `feat(core): the pieces of each event and the pick`                               | `EasterEgg.swift`, `EasterEggTests.swift`                              |
-| 3    | `feat(app): the pieces of Halloween` and the same for Christmas and Easter        | 12 PNG images each, as data                                            |
-| 4    | `feat(app): the icon in place of the tick, and the corner of a card`              | `EasterEggEnvironment.swift`, `UsageViews.swift`, `ProviderCard.swift` |
-| 5    | `feat(app): the panel rolls the pick each time it opens`                          | `Meter.swift`, `MenuContent.swift`                                     |
-| 6    | `docs(use): the easter eggs, the licences and the changelog`                      | `use/seasonal-easter-eggs.md`, `use/licenses.md`, `use/changelog.md`   |
-| 7    | `docs(develop): the occasions in the core API and the pieces in the architecture` | `core-api.md`, `architecture.md`, `AGENTS.md`                          |
-| 8    | Reconciliation, on a `docs/` branch after the merge                               | the Views and the Design System, the status, the row                   |
+| Step | Commit                                                                              | Files                                                                                                |
+| :--- | :---------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------- |
+| 1    | `feat(core): the weeks of Halloween, Christmas and Easter, and the pick of a piece` | `EasterEggs/Occasion.swift`, `EasterEggs/EasterEgg.swift`, `EasterEggsTests.swift`                   |
+| 2    | merged into step 1: the weeks and the pick are one folder and one test file         |                                                                                                      |
+| 3    | `feat(app): the pieces of Halloween` and the same for Christmas and Easter          | 12 PNG images each, as data                                                                          |
+| 4    | `feat(app): the icon in place of the pace tick, and the corner piece of a card`     | `Shared/EasterEggs/EasterEggs.swift`, `UsageViews.swift`, `ProviderCard.swift`                       |
+| 5    | `feat(app): the panel rolls the pick of the easter egg each time it opens`          | `Meter.swift`, `MenuContent.swift`                                                                   |
+| 6    | `docs(use)`: the easter eggs and the changelog, then a page of licences             | `use/seasonal-easter-eggs.md`, `use/changelog.md`, `use/licenses.md`, `Licenses/Sparkle-LICENSE.txt` |
+| 7    | `docs(develop): the occasions in the core API and the pieces in the architecture`   | `core-api.md`, `architecture.md`, `AGENTS.md`                                                        |
+| 8    | Reconciliation, on a `docs/` branch after the merge                                 | the Views and the Design System, the status, the row                                                 |
 
 The images of step 3 are data, not code: they are the 36 pieces, twelve for each event, so each commit is bigger than three
 files by nature.
