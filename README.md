@@ -15,7 +15,8 @@ cp Local.xcconfig.example Local.xcconfig   # put your team ID in it
 ./scripts/install.sh                       # builds, installs in /Applications, sets up the Claude status line
 ```
 
-It reads only files Claude Code and the Codex CLI leave on your machine: no credentials, no network.
+It reads only files Claude Code and the Codex CLI leave on your machine: no credentials, and no data from the network. Its one
+request, once a day, is for the list of versions that says whether an update is out; you can turn it off.
 
 ## Where to go next
 

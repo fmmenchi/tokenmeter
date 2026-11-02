@@ -6,8 +6,9 @@ sidebar_position: 5
 
 # Data sources
 
-tokenmeter has no network access of its own and holds no credentials. Everything comes from files
-the two CLIs leave on your machine.
+tokenmeter reads no data from the network and holds no credentials. Everything comes from files
+the two CLIs leave on your machine. The one request the app makes of its own, once a day, is for the list of versions that says
+whether an update is out ([ADR 0011](../adr/0011-updates.md)); it carries nothing about you.
 
 | Provider | Quota (percent left, reset time)       | Tokens                          |
 | -------- | -------------------------------------- | ------------------------------- |

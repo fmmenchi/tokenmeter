@@ -9,9 +9,14 @@ configFiles:
 packages:
   TokenMeterCore:
     path: .
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    exactVersion: 2.10.1
 settings:
   base:
     SWIFT_VERSION: '6.0'
+    MARKETING_VERSION: '0.3.0'
+    CURRENT_PROJECT_VERSION: '2'
     CODE_SIGN_STYLE: Automatic
 targets:
   TokenMeter:
@@ -24,6 +29,7 @@ targets:
         buildPhase: resources
     dependencies:
       - package: TokenMeterCore
+      - package: Sparkle
       - target: TokenMeterWidget
     entitlements:
       path: App/TokenMeter/TokenMeter.entitlements
@@ -35,10 +41,24 @@ targets:
       path: App/TokenMeter/Info.plist
       properties:
         LSUIElement: true
+        CFBundleShortVersionString: '$(MARKETING_VERSION)'
+        CFBundleVersion: '$(CURRENT_PROJECT_VERSION)'
+        SUFeedURL: '$(SU_FEED_URL)'
+        SUPublicEDKey: '$(SU_PUBLIC_ED_KEY)'
+        SUEnableAutomaticChecks: true
+        SUAutomaticallyUpdate: false
+        SUAllowsAutomaticUpdates: true
+        SUScheduledCheckInterval: 86400
+        SUEnableSystemProfiling: false
         AppGroupIdentifier: '$(TeamIdentifierPrefix)tokenmeter'
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.fmmenchi.tokenmeter.app
+        # ADR 0011: the list of versions is a file attached to each release, and the public half of the signing key is here (the private
+        # half is in the author's keychain and never in the repository). A build without the key does not start the updater, and the
+        # release scripts refuse without it.
+        SU_FEED_URL: 'https://github.com/fmmenchi/tokenmeter/releases/latest/download/appcast.xml'
+        SU_PUBLIC_ED_KEY: 'UBGO84FZajDQo69SP0l/iVF92C71ADqksiJsAEPp/yM='
         ENABLE_HARDENED_RUNTIME: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
   TokenMeterWidget:
@@ -56,6 +76,8 @@ targets:
     info:
       path: Widget/TokenMeterWidget/Info.plist
       properties:
+        CFBundleShortVersionString: '$(MARKETING_VERSION)'
+        CFBundleVersion: '$(CURRENT_PROJECT_VERSION)'
         AppGroupIdentifier: '$(TeamIdentifierPrefix)tokenmeter'
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension

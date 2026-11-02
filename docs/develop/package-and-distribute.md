@@ -58,6 +58,39 @@ A release workflow in CI is not written until the same credentials exist as repo
 To build, install and set up the status line in one go, use `./scripts/install.sh`
 ([Install and Run](./build-and-run.md)).
 
+## Step 4: Publish a version the app can update to
+
+The app looks once a day for `appcast.xml`, attached to the latest release, and installs what it finds when the user agrees
+([ADR 0011](../adr/0011-updates.md)). Updates are signed with a key that only you have.
+
+**Once**, make the key. Run it yourself, in a terminal: it keeps the private half in your login keychain and prints the public
+half, and the private half is never pasted into a chat, a script or the repository.
+
+```bash
+.build/xcode/SourcePackages/artifacts/sparkle/Sparkle/bin/generate_keys
+.build/xcode/SourcePackages/artifacts/sparkle/Sparkle/bin/generate_keys -x ~/tokenmeter-update-key   # a copy: put it in a password manager, then delete the file
+```
+
+Put the public key it printed in `project.yml` as `SU_PUBLIC_ED_KEY` and commit it. Until it is there, `sign-release.sh` and
+`appcast.sh` refuse and a build does not look for updates. If the key is lost, no installed copy can update itself and people
+download the app again, so the copy matters.
+
+**For each release**, after the steps above:
+
+```bash
+# 1. raise CURRENT_PROJECT_VERSION by one (and set MARKETING_VERSION), commit, and tag v<MARKETING_VERSION>
+./scripts/sign-release.sh   # refuses without the key or the tag
+./scripts/notarize.sh       # the signature below is of this final zip
+./scripts/appcast.sh        # writes dist/appcast.xml, refuses a build number that does not go up
+```
+
+Then publish the release with the zip, its `.sha256` and `dist/appcast.xml` attached, and add the version to
+[the changelog](../use/changelog.md), whose anchor `#v<version with dashes>` the feed points to. Publishing asks first, as notarizing does.
+
+Checked by hand, not by a test, before the first release with the updater: the check from the menu with a click, an update served
+from a local feed with the widget on the desktop watched, an update of a build that has a store, the address of the feed as the
+redirect of the latest release, and a download with Gatekeeper's quarantine. A release says which of these it did not do.
+
 ## Related
 
 - [Install and Run](./build-and-run.md)

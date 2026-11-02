@@ -16,6 +16,8 @@ final class Meter {
     private(set) var problems: [Problem] = []
     /// Interface state of the fixes being run, by problem id. Not in the model or the snapshot (the plan of the feature).
     private(set) var fixStates: [String: FixState] = [:]
+    /// The app updating itself (ADR 0011). Here so that the dot and the panel read it with the problems.
+    let updater = Updater()
 
     // MARK: Usage stats (ADR 0010)
 
@@ -91,9 +93,10 @@ final class Meter {
         }
     }
 
-    /// Whether the menu bar item carries its dot: something the panel lists, and that is worth opening it for. The count and the
-    /// detail are in the panel; one figure across several providers says nothing about any of them, so the bar shows none.
-    var needsAttention: Bool { !problems.isEmpty }
+    /// Whether the menu bar item carries its dot: something the panel lists, and that is worth opening it for, a problem or an update
+    /// that waits. The count and the detail are in the panel; one figure across several providers says nothing about any of them,
+    /// so the bar shows none.
+    var needsAttention: Bool { !problems.isEmpty || updater.hasUpdate }
 
     func refresh(userInitiated: Bool = false) async {
         guard !isRefreshing else { return }
