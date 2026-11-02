@@ -7,7 +7,7 @@ sidebar_position: 3
 # Settings switches, implementation plan
 
 How the preferences change and how Settings draws a switch for the provider and one for each window, and the order it is
-built in. The decision is [ADR 0041](../../adr/0041-the-provider-switch-alone-hides-a-provider.md).
+built in. The decision is [ADR 0006](../../adr/0006-display-preferences.md).
 
 ## The pieces
 

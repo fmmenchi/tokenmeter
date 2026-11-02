@@ -1,6 +1,6 @@
 import Foundation
 
-/// Puts the problems of every source in one list (ADR 0031). It reads nothing itself: each source hands over what it found.
+/// Puts the problems of every source in one list (ADR 0005). It reads nothing itself: each source hands over what it found.
 public enum ProblemDetector {
     /// `general` problems first, then each provider's in the order given (the order of `providers.json`).
     /// A repeated `id` keeps its first occurrence.
@@ -12,7 +12,7 @@ public enum ProblemDetector {
 
 extension ProblemDetector {
     /// The problems of the app and of each configured provider's integration. A provider whose `integration` names
-    /// nothing the app knows is itself a `general` problem, not a crash (ADR 0031).
+    /// nothing the app knows is itself a `general` problem, not a crash (ADR 0005).
     public static func detect(general: [Problem], providers: [ProviderConfig], integrations: Integrations,
                               context: ProblemContext) -> [Problem] {
         var unknown: [Problem] = []

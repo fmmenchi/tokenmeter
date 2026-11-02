@@ -7,7 +7,7 @@ sidebar_position: 3
 # Pace on the bars, implementation plan
 
 How the mark, the hover, the `i` and the widget phrase are worked out and drawn, and the order they are built in. The
-decision is [ADR 0039](../../adr/0039-the-pace-is-drawn-on-the-bar.md).
+decision is [ADR 0002](../../adr/0002-quota-model-and-data-sources.md).
 
 ## The pieces
 
@@ -52,7 +52,7 @@ Three files at most per step, the gate green, and `xcodebuild` for the steps tha
 | Step | Adds                                                                                                        | Tests that show it works                                                                                                                                          |
 | :--- | :---------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1    | the ADR, the proposal and this plan                                                                         | the docs build                                                                                                                                                    |
-| 2    | in core: the fraction ahead, the hover text for a lasting window and the short phrase                       | the fraction is `(resetsAt − observedAt) / length`; remaining under it means runs out, over it lasts; no value under ADR 0038's conditions; the phrase is rounded |
+| 2    | in core: the fraction ahead, the hover text for a lasting window and the short phrase                       | the fraction is `(resetsAt − observedAt) / length`; remaining under it means runs out, over it lasts; no value under ADR 0002's conditions; the phrase is rounded |
 | 3    | the mark on `QuotaBar`, the hover on the bar, the permanent line removed, in the panel                      | `xcodebuild`; the panel on screen, light and dark; a bar with and without a mark                                                                                  |
 | 4    | the mark and the hover on a model's thin bar                                                                | `xcodebuild`; Fable on screen; the model's reset is its window's                                                                                                  |
 | 5    | the `i` beside the provider's name, with its popover, `x` and Learn more                                    | `xcodebuild`; the popover on screen; the panel stays open while it is; the link opens the docs                                                                    |

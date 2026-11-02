@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The windows a provider's card can show, one row each with a switch, chosen independently (ADR 0041). The rows are the
+/// The windows a provider's card can show, one row each with a switch, chosen independently (ADR 0006). The rows are the
 /// windows the data lists, so a plan with one has one. A model's limit is a row under the window it is part of, indented and
 /// joined by the same bracket as in the bars, with the same switch; it is off, and cannot be chosen, while its window is off.
 /// The last window that is on cannot be turned off: the provider's own switch is what hides it. While the provider is off

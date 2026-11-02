@@ -1,6 +1,6 @@
 import Foundation
 
-/// What the person hid. A problem stays hidden until its message changes (ADR 0030).
+/// What the person hid. A problem stays hidden until its message changes (ADR 0005).
 public protocol Dismissals: Sendable {
     func isHidden(_ problem: Problem) -> Bool
     func hide(_ problem: Problem)

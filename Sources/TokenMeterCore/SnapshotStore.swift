@@ -2,7 +2,7 @@ import Foundation
 
 /// Reads and writes the snapshot the host app hands to the widget.
 public struct SnapshotStore: Sendable {
-    /// The App Group id, put in the Info.plist at build time as `<TeamID>.tokenmeter` (ADR 0023);
+    /// The App Group id, put in the Info.plist at build time as `<TeamID>.tokenmeter` (ADR 0001);
     /// nil in a process that has none (the probe, the tests).
     public static var appGroup: String? {
         Bundle.main.object(forInfoDictionaryKey: "AppGroupIdentifier") as? String

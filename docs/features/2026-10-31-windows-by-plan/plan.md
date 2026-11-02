@@ -7,7 +7,7 @@ sidebar_position: 3
 # Windows by plan, implementation plan
 
 How a window gets dropped when the plan lacks it, and the order in which it was built. The decision is
-[ADR 0037](../../adr/0037-a-window-exists-only-if-the-data-lists-it.md).
+[ADR 0002](../../adr/0002-quota-model-and-data-sources.md).
 
 ## The pieces
 

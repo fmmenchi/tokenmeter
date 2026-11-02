@@ -1,7 +1,7 @@
 import SwiftUI
 import TokenMeterCore
 
-/// One problem in the panel: its topic, message, a fix when there is one, Dismiss and Learn more (ADR 0030).
+/// One problem in the panel: its topic, message, a fix when there is one, Dismiss and Learn more (ADR 0005).
 struct ProblemBanner: View {
     let problem: Problem
     let topicTitle: String

@@ -7,7 +7,7 @@ sidebar_position: 3
 # Hide a provider, implementation plan
 
 How a provider gets hidden, and the order in which it is built. The decision is
-[ADR 0036](../../adr/0036-a-provider-can-be-hidden.md); this page is the map from it to commits. It extends
+[ADR 0006](../../adr/0006-display-preferences.md); this page is the map from it to commits. It extends
 [Provider cards](../2026-10-30-provider-cards/plan.md).
 
 ## Intent
@@ -66,10 +66,10 @@ Steps 1 to 3 are one commit each and leave the gate green. Step 4 is the close, 
 | Rule                                                | Why                                                   |
 | :-------------------------------------------------- | :---------------------------------------------------- |
 | The preference is applied in the core, never drawn. | The surfaces stay a drawing of a snapshot (ADR 0001). |
-| The common code names no provider.                  | The same rule as ADR 0015 to 0018.                    |
+| The common code names no provider.                  | The same rule as ADR 0003.                            |
 | The eye is its own view in its own file.            | It is a component of the design system.               |
 
 ## Related
 
 - [Proposal](./proposal.md) and [overview](./index.md)
-- [ADR 0036](../../adr/0036-a-provider-can-be-hidden.md)
+- [ADR 0006](../../adr/0006-display-preferences.md)

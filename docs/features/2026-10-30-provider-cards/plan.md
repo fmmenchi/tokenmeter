@@ -7,7 +7,7 @@ sidebar_position: 3
 # Provider cards, implementation plan
 
 How the cards get their order and their windows, and the order in which it is built. The decisions are in
-[ADR 0035](../../adr/0035-provider-cards-order-and-windows-are-preferences.md); this page is the map from them to commits.
+[ADR 0006](../../adr/0006-display-preferences.md); this page is the map from them to commits.
 It builds on [Alerts with a fix](../2026-10-30-alerts-with-a-fix/index.md), whose banners sit above the cards.
 
 ## Intent
@@ -141,9 +141,9 @@ deleted when Fabio asks.
 | Rule                                                       | Why                                                   |
 | :--------------------------------------------------------- | :---------------------------------------------------- |
 | Preferences are read and applied in the core, never drawn. | The surfaces stay a drawing of a snapshot (ADR 0001). |
-| The common code names no provider and no window.           | The same rule as ADR 0015 to 0018.                    |
+| The common code names no provider and no window.           | The same rule as ADR 0003.                            |
 | The card uses system colours and their opacities only.     | Light and dark hold without a value for either.       |
-| `providers.json` is never written for a preference.        | The file is the user's (ADR 0033).                    |
+| `providers.json` is never written for a preference.        | The file is the user's (ADR 0003).                    |
 
 ## Open
 
@@ -154,4 +154,4 @@ deleted when Fabio asks.
 
 - [Proposal](./proposal.md) and [overview](./index.md)
 - [Architecture](../../develop/architecture.md) and [Core API](../../develop/core-api.md)
-- [ADR 0035](../../adr/0035-provider-cards-order-and-windows-are-preferences.md)
+- [ADR 0006](../../adr/0006-display-preferences.md)

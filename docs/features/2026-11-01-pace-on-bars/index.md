@@ -28,7 +28,7 @@ line. The permanent line of the panel goes.
 | :------------------ | :--------------------------------------------------------- | :------- |
 | Proposal            | [Proposal](./proposal.md)                                  | chosen   |
 | Implementation plan | [Implementation plan](./plan.md)                           | done     |
-| Decisions           | [ADR 0039](../../adr/0039-the-pace-is-drawn-on-the-bar.md) | accepted |
+| Decisions           | [ADR 0002](../../adr/0002-quota-model-and-data-sources.md) | accepted |
 
 ## Related
 

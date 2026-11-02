@@ -36,15 +36,15 @@ A `~` before the figure always means "not a fresh provider reading".
 
 :::info[Resets happen on their own]
 When a reported window's reset time passes, the bar turns into a **Reset** bar immediately, even
-if the data on disk is old ([ADR 0008](../adr/0008-remember-last-quota-and-flag-stale.md)). If
+if the data on disk is old ([ADR 0002](../adr/0002-quota-model-and-data-sources.md)). If
 there was use after the reset and no new quota was reported, the window stays **Unknown** rather
-than claiming to be full ([ADR 0007](../adr/0007-expired-window-reads-as-reset.md)).
+than claiming to be full ([ADR 0002](../adr/0002-quota-model-and-data-sources.md)).
 :::
 
 ## Reading the mark
 
 A bar says how much is left, not whether it lasts until the reset. The **mark** on the bar does: it is where the bar would
-end if the window were used steadily from its start to its reset ([ADR 0039](../adr/0039-the-pace-is-drawn-on-the-bar.md)).
+end if the window were used steadily from its start to its reset ([ADR 0002](../adr/0002-quota-model-and-data-sources.md)).
 
 - **A bar that ends before the mark** means you are going too fast: at this pace the quota runs out before the reset. The
   mark is orange then.
@@ -76,7 +76,7 @@ with no reset time, or one with less than a tenth of the window gone. A window w
 ## Tokens
 
 The line under a bar shows **input + output** tokens seen in that window's own period: from its start, which is its reset
-time minus its length, when the provider gave one ([ADR 0040](../adr/0040-a-windows-tokens-are-counted-in-its-own-period.md)),
+time minus its length, when the provider gave one ([ADR 0002](../adr/0002-quota-model-and-data-sources.md)),
 and over the last 5 hours or 7 days when it did not. Cache reads and cache
 writes are left out: they make up about 98% of the raw total and say nothing about plan use. The
 count comes from local CLI logs only, so it covers Claude Code and Codex and not the web or desktop

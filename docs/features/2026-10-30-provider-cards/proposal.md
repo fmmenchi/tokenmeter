@@ -8,7 +8,7 @@ sidebar_position: 2
 
 The design that was chosen from two variants, filled and outlined cards. It was drawn as a canvas of artboards in
 Claude, which is deleted once the feature is implemented; this page is what stays. The decisions behind it are in
-[ADR 0035](../../adr/0035-provider-cards-order-and-windows-are-preferences.md).
+[ADR 0006](../../adr/0006-display-preferences.md).
 
 ## Intent
 

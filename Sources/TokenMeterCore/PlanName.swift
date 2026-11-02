@@ -1,6 +1,6 @@
 import Foundation
 
-/// Turns a raw plan identifier into a label when no rule names it (ADR 0012, 0017).
+/// Turns a raw plan identifier into a label when no rule names it (ADR 0007, 0003).
 public enum PlanName {
     /// `team_plus` becomes `Team Plus`.
     public static func prettified(_ raw: String) -> String {

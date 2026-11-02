@@ -7,7 +7,7 @@ sidebar_position: 3
 # Burn rate, implementation plan
 
 How the line is worked out and drawn, and the order it is built in. The decision is
-[ADR 0038](../../adr/0038-a-window-says-when-it-runs-out-at-its-pace.md).
+[ADR 0002](../../adr/0002-quota-model-and-data-sources.md).
 
 ## The pieces
 

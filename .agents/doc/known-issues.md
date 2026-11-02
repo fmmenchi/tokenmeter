@@ -28,10 +28,10 @@ Decide in `pnpm-workspace.yaml` under `allowBuilds`; do not approve blindly.
 ## Claude quota is only as fresh as the last status-line render
 
 `~/.tokenmeter/claude-statusline.json` is written by `scripts/claude-statusline.sh`, which runs only
-while Claude Code renders its status line (ADR 0005). If the bars for Claude are empty, check that
+while Claude Code renders its status line (ADR 0002). If the bars for Claude are empty, check that
 `statusLine` in `~/.claude/settings.json` points at the script and that a session has run since.
 
 ## A first scan is slow
 
 The first collection after launch reads every log touched in 7 days (about 9 s for 7.5 GB, release
-build). Later refreshes read only appended bytes (ADR 0004). Do not call the readers on the main thread.
+build). Later refreshes read only appended bytes (ADR 0001). Do not call the readers on the main thread.

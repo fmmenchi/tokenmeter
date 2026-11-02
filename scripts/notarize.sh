@@ -1,5 +1,5 @@
 #!/bin/sh
-# Notarize the signed zip, staple the ticket and re-zip it (ADR 0021).
+# Notarize the signed zip, staple the ticket and re-zip it (ADR 0008).
 # Needs the keychain profile made once with: xcrun notarytool store-credentials tokenmeter-notary
 set -eu
 cd "$(dirname "$0")/.."

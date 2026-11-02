@@ -1,4 +1,4 @@
-/// The seed of `~/.tokenmeter/providers.json`: what the file holds the first time (ADR 0017, 0018).
+/// The seed of `~/.tokenmeter/providers.json`: what the file holds the first time (ADR 0003).
 /// A string constant rather than a resource: nothing to lose in the widget bundle.
 enum DefaultProviders {
     static let json = #"""

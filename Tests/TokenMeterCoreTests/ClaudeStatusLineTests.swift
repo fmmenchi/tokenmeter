@@ -82,7 +82,7 @@ final class ClaudeStatusLineTests: XCTestCase {
         XCTAssertEqual(try Data(contentsOf: URL(fileURLWithPath: command)), newer)
     }
 
-    // MARK: wrap and restore (ADR 0025)
+    // MARK: wrap and restore (ADR 0004)
 
     private var wrapper: String { home.appendingPathComponent(".tokenmeter/claude/statusline-wrapper.sh").path }
     private var saved: URL { home.appendingPathComponent(".tokenmeter/claude/original-statusline.json") }

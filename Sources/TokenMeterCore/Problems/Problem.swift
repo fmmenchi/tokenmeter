@@ -1,6 +1,6 @@
 import Foundation
 
-/// Something the person should know about, and sometimes can fix from the panel (ADR 0030).
+/// Something the person should know about, and sometimes can fix from the panel (ADR 0005).
 public struct Problem: Codable, Equatable, Sendable, Identifiable {
     /// A provider id, or `general` for what concerns the app itself.
     public typealias Topic = String
@@ -31,7 +31,7 @@ public struct Problem: Codable, Equatable, Sendable, Identifiable {
     }
 }
 
-/// What an integration says about one of its fixes: the interface draws these and knows nothing else about them (ADR 0031).
+/// What an integration says about one of its fixes: the interface draws these and knows nothing else about them (ADR 0005).
 public struct FixDescriptor: Equatable, Sendable {
     public let id: String
     /// The button, e.g. "Wrap it".
@@ -49,7 +49,7 @@ public struct FixDescriptor: Equatable, Sendable {
     }
 }
 
-/// A kind of problem the app knows about: the census (ADR 0030). A check only decides whether a kind applies and what its
+/// A kind of problem the app knows about: the census (ADR 0005). A check only decides whether a kind applies and what its
 /// message says this time; the topic, the explanation, the guide and the fix belong to the kind.
 public struct ProblemKind: Equatable, Sendable {
     /// `<topic>.<check>`; a problem of this kind has this id, or this id and `.<detail>`.

@@ -18,10 +18,10 @@ the Claude quota and the desktop widget are the next two guides.
 - macOS 14 or later, and Xcode with the Swift 6 toolchain.
 - [XcodeGen](https://github.com/yonaskolb/XcodeGen): `brew install xcodegen`.
 - An Apple signing team. The widget reads the snapshot through an App Group, and an App Group
-  needs a team ([ADR 0003](../adr/0003-host-app-widget-and-app-group.md)). A free Personal Team
+  needs a team ([ADR 0001](../adr/0001-app-architecture.md)). A free Personal Team
   builds and runs, but its provisioning profile lasts seven days: rerun `./scripts/install.sh` to
   renew it. The paid Apple Developer Program gives a profile that lasts a year
-  ([ADR 0020](../adr/0020-bundle-identifiers-under-the-paid-team.md)). The bundle identifiers are
+  ([ADR 0008](../adr/0008-signing-and-distribution.md)). The bundle identifiers are
   `com.fmmenchi.tokenmeter.app` and `.app.widget`; one that another team already registered cannot
   be registered by yours, so a fork changes them in `project.yml`.
 - Claude Code and/or the Codex CLI: both providers are read from what those tools leave on disk.
@@ -70,7 +70,7 @@ the snapshot.
 ## Step 4: Install it and let it start at login
 
 One command builds the app, installs it in `/Applications` and sets up the Claude status line
-([ADR 0019](../adr/0019-install-sets-up-the-claude-status-line.md)):
+([ADR 0004](../adr/0004-the-claude-status-line.md)):
 
 ```bash
 ./scripts/install.sh
@@ -84,7 +84,7 @@ alone and the script says so: see [Enable the Claude Quota](../use/enable-claude
 ![The Settings window with the Launch at login switch on](../assets/settings.png)
 
 The app **registers itself to start at login the first time it runs**
-([ADR 0011](../adr/0011-launch-at-login.md)). You will see it under System Settings, General, Login
+([ADR 0007](../adr/0007-login-item-plan-name-and-settings.md)). You will see it under System Settings, General, Login
 Items. **Settings…** in the panel has a **Launch at login** switch; if you turn it off the app never
 turns it back on. Run the copy in `/Applications`: the registration belongs to the copy that
 registered it.

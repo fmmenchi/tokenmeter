@@ -1,6 +1,6 @@
 import Foundation
 
-/// The one list of providers: exactly the entries of `providers.json`, all treated alike (ADR 0018).
+/// The one list of providers: exactly the entries of `providers.json`, all treated alike (ADR 0003).
 public enum Providers {
     /// Fresh sources each call: they keep per-file scanning state.
     public static func standard(

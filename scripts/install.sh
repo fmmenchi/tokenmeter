@@ -1,5 +1,5 @@
 #!/bin/sh
-# Builds the app, installs it in /Applications and sets up the Claude status line (ADR 0010, 0019).
+# Builds the app, installs it in /Applications and sets up the Claude status line (ADR 0008, 0004).
 set -eu
 cd "$(dirname "$0")/.."
 

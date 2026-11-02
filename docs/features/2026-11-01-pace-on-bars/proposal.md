@@ -6,7 +6,7 @@ sidebar_position: 2
 
 # Pace on the bars, proposal
 
-The design that was chosen. [ADR 0039](../../adr/0039-the-pace-is-drawn-on-the-bar.md) is the decision.
+The design that was chosen. [ADR 0002](../../adr/0002-quota-model-and-data-sources.md) is the decision.
 
 ![The chosen design in the light appearance: the menu-bar panel with the i open on its popover and the Learn more link, the panel with the hover on the Weekly bar saying when it runs out, and the medium widget with the date in short inside the Weekly detail line](./proposal-overview.png)
 
@@ -42,7 +42,7 @@ mark means you are going too fast. Hover the bar to see when."
 
 ## Rules
 
-- **The mark exists where ADR 0038's conditions hold, except that nothing used is fine and a stale figure counts**: a fresh, reported
+- **The mark exists where ADR 0002's conditions hold, except that nothing used is fine and a stale figure counts**: a fresh, reported
   figure with a reset time in the future and at least 10% of the window gone. Where nothing was used it lasts. A mark with the bar to its right says it lasts, and no mark says nothing can be said.
 - **The position is a fraction of the window**, `(resetsAt − observedAt) / length`, so it needs nothing the snapshot lacks.
 - **The date is rounded to the hour** and written as today, tomorrow or the weekday, in the hover and in the widget.

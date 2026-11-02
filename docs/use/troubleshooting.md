@@ -34,11 +34,11 @@ app; if both are wrong, it is in the data.
 | Widget says "Open tokenmeter once to publish usage" | The app is not running, or it could not write the snapshot.                            | Start the app. If it persists, check the App Group entitlement is in the signed build.                                          |
 | No gauge icon in the menu bar                       | The app is not running, or the icon is in the overflow.                                | `pgrep -fl TokenMeter`; relaunch; check menu-bar overflow.                                                                      |
 | The app does not start after a restart              | It never registered, you turned the switch off, or you ran a copy from a build folder. | Run the copy in `/Applications` and check the **Launch at login** switch in Settings and System Settings, General, Login Items. |
-| First launch takes several seconds to show data     | The first read scans a week of logs.                                                   | Expected; later refreshes read only new bytes ([ADR 0004](../adr/0004-incremental-log-scanning.md)).                            |
+| First launch takes several seconds to show data     | The first read scans a week of logs.                                                   | Expected; later refreshes read only new bytes ([ADR 0001](../adr/0001-app-architecture.md)).                                    |
 
 :::caution[App Group]
 The app writes `snapshot.json` into `~/Library/Group Containers/<TeamID>.tokenmeter/`
-([ADR 0023](../adr/0023-team-prefixed-app-group.md)); that was confirmed. Whether the widget reads it
+([ADR 0001](../adr/0001-app-architecture.md)); that was confirmed. Whether the widget reads it
 on the desktop was not. If the widget stays empty with the app running, look for a line starting
 `Could not write` in Console (subsystem `com.fmmenchi.tokenmeter.app`) first.
 :::

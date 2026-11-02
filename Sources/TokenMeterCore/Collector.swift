@@ -1,6 +1,6 @@
 import Foundation
 
-/// Collects every provider into one snapshot. It names no provider (ADR 0015).
+/// Collects every provider into one snapshot. It names no provider (ADR 0003).
 public struct Collector: Sendable {
     public var sources: [any ProviderSource]
 

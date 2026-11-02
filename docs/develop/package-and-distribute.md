@@ -12,7 +12,7 @@ Turn the build into a zip someone else can download.
 
 Building needs Xcode, XcodeGen and a signing team. A prebuilt zip removes that for whoever only
 wants the app. How far the zip runs depends on how it was signed
-([ADR 0010](../adr/0010-distribute-a-prebuilt-app.md)).
+([ADR 0008](../adr/0008-signing-and-distribution.md)).
 
 ## Step 1: Build the zip
 
@@ -37,7 +37,7 @@ The zip built here is signed with a development certificate and Gatekeeper rejec
 
 This needs the paid Apple Developer Program, a `Developer ID Application` certificate in your login
 keychain (Xcode → Settings → Accounts → Manage Certificates) and notarization credentials
-([ADR 0021](../adr/0021-developer-id-signing-and-notarization.md)). Store the credentials once; the
+([ADR 0008](../adr/0008-signing-and-distribution.md)). Store the credentials once; the
 command asks for an app-specific password from your Apple account, so nothing is written in a file:
 
 ```bash

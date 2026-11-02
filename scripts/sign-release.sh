@@ -1,5 +1,5 @@
 #!/bin/sh
-# Archive the app, export it signed with Developer ID and zip it into dist/ (ADR 0021).
+# Archive the app, export it signed with Developer ID and zip it into dist/ (ADR 0008).
 set -eu
 cd "$(dirname "$0")/.."
 

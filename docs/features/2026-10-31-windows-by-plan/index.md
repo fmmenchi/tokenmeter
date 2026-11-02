@@ -23,11 +23,11 @@ plan is named in the code, so a plan that gains or loses a window needs no relea
 
 ## The nucleus
 
-| Part                | Page                                                                    | Status             |
-| :------------------ | :---------------------------------------------------------------------- | :----------------- |
-| Proposal            | [Proposal](./proposal.md)                                               | built as chosen    |
-| Implementation plan | [Implementation plan](./plan.md)                                        | done, steps 1 to 5 |
-| Decisions           | [ADR 0037](../../adr/0037-a-window-exists-only-if-the-data-lists-it.md) | accepted           |
+| Part                | Page                                                       | Status             |
+| :------------------ | :--------------------------------------------------------- | :----------------- |
+| Proposal            | [Proposal](./proposal.md)                                  | built as chosen    |
+| Implementation plan | [Implementation plan](./plan.md)                           | done, steps 1 to 5 |
+| Decisions           | [ADR 0002](../../adr/0002-quota-model-and-data-sources.md) | accepted           |
 
 ## Related
 

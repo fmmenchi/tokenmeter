@@ -2,7 +2,7 @@ import AppKit
 import SwiftUI
 
 /// The place to grab a card: a tinted area that gets darker and shows an open hand under the pointer, so it reads as
-/// something to act on (ADR 0035).
+/// something to act on (ADR 0006).
 struct DragHandle: View {
     @State private var hovering = false
 

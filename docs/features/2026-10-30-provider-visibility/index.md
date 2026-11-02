@@ -23,11 +23,11 @@ every provider in `providers.json`.
 
 ## The nucleus
 
-| Part                | Page                                                   | Status                          |
-| :------------------ | :----------------------------------------------------- | :------------------------------ |
-| Proposal            | [Proposal](./proposal.md)                              | built as chosen: the eye button |
-| Implementation plan | [Implementation plan](./plan.md)                       | done, steps 1 to 4              |
-| Decisions           | [ADR 0036](../../adr/0036-a-provider-can-be-hidden.md) | accepted                        |
+| Part                | Page                                              | Status                          |
+| :------------------ | :------------------------------------------------ | :------------------------------ |
+| Proposal            | [Proposal](./proposal.md)                         | built as chosen: the eye button |
+| Implementation plan | [Implementation plan](./plan.md)                  | done, steps 1 to 4              |
+| Decisions           | [ADR 0006](../../adr/0006-display-preferences.md) | accepted                        |
 
 ## Related
 

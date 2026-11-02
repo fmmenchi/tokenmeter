@@ -23,7 +23,7 @@ that looks live is worse than an empty bar.
 
 tokenmeter holds no credentials and makes no network request. It reads files the two CLIs already
 leave on disk. The cost is freshness, since the files move only while a CLI runs, and
-[ADR 0006](../adr/0006-no-polling-of-provider-endpoints.md) accepts that trade.
+[ADR 0001](../adr/0001-app-architecture.md) accepts that trade.
 
 ### 3. Collect in one place, render in another
 
@@ -56,18 +56,18 @@ flowchart LR
 | **Shared views**       | `Shared`                       | The bar and rows, compiled into both targets so they look the same.                               |
 | **Status-line script** | `scripts/claude-statusline.sh` | Persists Claude Code's `rate_limits` for the Claude source.                                       |
 
-The split is [ADR 0001](../adr/0001-stack-swiftui-widgetkit.md) and
-[ADR 0003](../adr/0003-host-app-widget-and-app-group.md).
+The split is [ADR 0001](../adr/0001-app-architecture.md) and
+[ADR 0001](../adr/0001-app-architecture.md).
 
 ### The collection pipeline
 
 Every 60 seconds, and whenever the panel opens, the app:
 
 1. **Reads the logs incrementally.** Each file is parsed once and only newly appended, complete
-   lines are read afterwards ([ADR 0004](../adr/0004-incremental-log-scanning.md)).
+   lines are read afterwards ([ADR 0001](../adr/0001-app-architecture.md)).
 2. **Reads the quotas.** Claude's from the status-line file, Codex's from `rate_limits` in its logs.
    Providers are the entries of `~/.tokenmeter/providers.json`, all treated alike, Claude and
-   ChatGPT included ([ADR 0018](../adr/0018-the-config-file-is-the-only-source.md)).
+   ChatGPT included ([ADR 0003](../adr/0003-providers-in-one-config-file.md)).
 3. **Builds a window per provider and length** (`5h`, `7d`): tokens inside the window, plus the
    matching reported quota if there is one.
 4. **Writes `snapshot.json`** to the App Group and asks WidgetKit to reload.
@@ -84,8 +84,8 @@ flowchart TD
 ```
 
 At draw time a reported figure whose reset has passed is turned into `reset` again, so a bar never
-outlives its window ([ADR 0007](../adr/0007-expired-window-reads-as-reset.md),
-[ADR 0008](../adr/0008-remember-last-quota-and-flag-stale.md)).
+outlives its window ([ADR 0002](../adr/0002-quota-model-and-data-sources.md),
+[ADR 0002](../adr/0002-quota-model-and-data-sources.md)).
 
 ## Related
 

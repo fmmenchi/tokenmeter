@@ -1,7 +1,7 @@
 import Foundation
 
-/// How the person wants the providers shown: the order of the cards, which windows of each have a row (ADR 0035) and
-/// which providers are hidden (ADR 0036).
+/// How the person wants the providers shown: the order of the cards, which windows of each have a row (ADR 0006) and
+/// which providers are hidden (ADR 0006).
 /// Preferences of the app, keyed by provider id; `providers.json` is never written for them.
 public protocol DisplayPreferences: Sendable {
     /// Provider ids, first card first. A provider not in the list comes after the ones that are.
@@ -9,7 +9,7 @@ public protocol DisplayPreferences: Sendable {
     /// The windows (by name) shown for a provider; nil means every window.
     func windows(for provider: String) -> Set<String>?
     /// The models of a provider the person turned off, by window id. A model is on unless it is here, so one that appears
-    /// later, when a plan gains it, shows up (ADR 0037).
+    /// later, when a plan gains it, shows up (ADR 0002).
     func hiddenModels(for provider: String) -> Set<String>
     func setHiddenModels(_ models: Set<String>, for provider: String)
     /// Provider ids whose card is not shown. A hidden provider keeps its place in the order and its choice of windows.
@@ -32,7 +32,7 @@ public struct WindowChoice: Sendable {
 }
 
 extension DisplayPreferences {
-    /// The person chooses windows in Settings (ADR 0041). A window turned off never hides the provider: the provider's own
+    /// The person chooses windows in Settings (ADR 0006). A window turned off never hides the provider: the provider's own
     /// switch does that, so an empty choice is refused and the last window stays on. A window that was just selected turns
     /// its models on, as they are by default. Returns false when the choice was refused.
     @discardableResult
@@ -50,7 +50,7 @@ extension DisplayPreferences {
     }
 
     /// Shows or hides a provider with its switch. Neither touches its windows or its models: a provider that is shown again
-    /// comes back as it was (ADR 0041).
+    /// comes back as it was (ADR 0006).
     public func setShown(_ shown: Bool, for provider: String) {
         setHidden(!shown, for: provider)
     }

@@ -5,15 +5,15 @@ Operating contract for this repository.
 ## Project
 
 `tokenmeter` — a macOS widget and menu-bar item that monitors the remaining quota of Claude and
-ChatGPT plans. Stack: SwiftUI, WidgetKit, `MenuBarExtra` ([ADR 0001](./docs/adr/0001-stack-swiftui-widgetkit.md)).
-Metric and sources: [ADR 0002](./docs/adr/0002-metric-and-data-sources.md).
+ChatGPT plans. Stack: SwiftUI, WidgetKit, `MenuBarExtra` ([ADR 0001](./docs/adr/0001-app-architecture.md)).
+Metric and sources: [ADR 0002](./docs/adr/0002-quota-model-and-data-sources.md).
 
 Gate: `pnpm run check`. Spike: `swift run tokenmeter-probe`.
 
 ## Open decisions
 
-- **Claude remaining quota** — comes from the status line (ADR 0005); stale until a session runs.
-- **Notarized release** — signing works, the first Apple notarization is pending (ADR 0021); the widget on a notarized build is unverified.
+- **Claude remaining quota** — comes from the status line (ADR 0002); stale until a session runs.
+- **Notarized release** — signing works, the first Apple notarization is pending (ADR 0008); the widget on a notarized build is unverified.
 
 ## Topic index (`.agents/doc/`)
 

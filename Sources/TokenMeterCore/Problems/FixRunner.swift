@@ -1,6 +1,6 @@
 import Foundation
 
-/// Runs a problem's fix through the integration that declared it (ADR 0031).
+/// Runs a problem's fix through the integration that declared it (ADR 0005).
 public enum FixRunner {
     /// The descriptor of the fix a problem offers; nil when it offers none or nobody declared it.
     public static func descriptor(for problem: Problem, providers: [ProviderConfig],

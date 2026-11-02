@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The `i` beside a provider's name: a click opens a popover that explains the mark on the bars (ADR 0039). It closes with
+/// The `i` beside a provider's name: a click opens a popover that explains the mark on the bars (ADR 0002). It closes with
 /// its `x`, with a second click on the `i`, or with a click outside it.
 struct PaceInfo: View {
     @State private var shown = false

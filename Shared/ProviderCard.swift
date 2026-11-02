@@ -2,7 +2,7 @@ import SwiftUI
 import TokenMeterCore
 
 /// A provider drawn as a card: its block on a soft fill with a hairline, so the grouping reads on a light panel and on a
-/// dark one. Only system colours and their opacities, so both appearances hold (ADR 0035).
+/// dark one. Only system colours and their opacities, so both appearances hold (ADR 0006).
 struct ProviderCard: View {
     let snapshot: ProviderSnapshot
     var problemCount = 0

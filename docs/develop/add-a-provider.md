@@ -13,7 +13,7 @@ do not.
 ## Intent
 
 Show a third provider next to Claude and ChatGPT without touching the window maths, the bars or
-the panel. The split is in [ADR 0015](../adr/0015-provider-contract.md): the app owns what is the
+the panel. The split is in [ADR 0003](../adr/0003-providers-in-one-config-file.md): the app owns what is the
 same for everyone, and a provider declares only what is its own.
 
 ## Prerequisites
@@ -65,7 +65,7 @@ A provider that needs something set up, such as Claude's status line, can report
 summary, explanation, guide, fix), report them in `problems(in:)`, and run its fixes in `run(fix:in:)`. Register it
 with one line in the list the app passes to `Integrations`, and name it in the provider's `integration` field in
 `providers.json`. The detector, the panel and the widget do not change
-([ADR 0031](../adr/0031-problems-come-from-the-app-and-from-provider-integrations.md)). Test it on a throwaway home
+([ADR 0005](../adr/0005-problems.md)). Test it on a throwaway home
 folder, as `ClaudeIntegrationTests` does.
 
 ## Related

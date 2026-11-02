@@ -1,6 +1,6 @@
 import Foundation
 
-/// Finds projects whose own settings replace the status line tokenmeter relies on (ADR 0026).
+/// Finds projects whose own settings replace the status line tokenmeter relies on (ADR 0004).
 /// Read only: nothing is ever written to a project.
 public enum ProjectStatusLines {
     public struct Override: Equatable, Sendable {

@@ -1,6 +1,6 @@
 import Foundation
 
-/// The shape of `~/.tokenmeter/providers.json` (ADR 0016). Dotted paths and nothing else.
+/// The shape of `~/.tokenmeter/providers.json` (ADR 0003). Dotted paths and nothing else.
 public struct ProviderConfigFile: Decodable, Sendable {
     public let version: Int
     public let providers: [ProviderConfig]
@@ -18,7 +18,7 @@ public struct ProviderConfigFile: Decodable, Sendable {
         return try decode(Data(contentsOf: url), origin: url.path)
     }
 
-    /// Claude and ChatGPT as the file first holds them (ADR 0018). A starting point, never merged over
+    /// Claude and ChatGPT as the file first holds them (ADR 0003). A starting point, never merged over
     /// what the user has.
     public static func seed() -> ProviderConfigFile {
         // A constant checked by a test: failing here is a bug in the app, not a user error.
@@ -39,7 +39,7 @@ public struct ProviderConfigFile: Decodable, Sendable {
         case untouched
     }
 
-    /// The window that reads Claude's per-model limits from the usage copy Claude Code keeps (ADR 0034).
+    /// The window that reads Claude's per-model limits from the usage copy Claude Code keeps (ADR 0002).
     static func claudeModelLimits() -> [String: Any] { [
         "file": "~/.claude.json", "each": "cachedUsageUtilization.utilization.limits",
         "where": ["kind": "weekly_scoped"], "scope": "scope.model.display_name", "minutes": 10080,
@@ -47,14 +47,14 @@ public struct ProviderConfigFile: Decodable, Sendable {
         "observedAt": "cachedUsageUtilization.fetchedAtMs", "observedAtFormat": "epochMilliseconds",
     ] }
 
-    /// The rule that says Claude's 5-hour window exists only if the usage copy lists a session limit (ADR 0037).
+    /// The rule that says Claude's 5-hour window exists only if the usage copy lists a session limit (ADR 0002).
     static func claudeFiveHourExists() -> [String: Any] {
         ["file": "~/.claude.json", "each": "cachedUsageUtilization.utilization.limits", "where": ["kind": "session"],
          "observedAt": "cachedUsageUtilization.fetchedAtMs", "observedAtFormat": "epochMilliseconds"]
     }
 
     /// Adds to the `claude` entry of an existing file what a newer version needs and the file lacks: its `integration`
-    /// (ADR 0033), the window for its per-model limits (ADR 0034) and the rule for its 5 hours (ADR 0037). The only changes the app makes to a file that is
+    /// (ADR 0003), the window for its per-model limits (ADR 0002) and the rule for its 5 hours (ADR 0002). The only changes the app makes to a file that is
     /// already there; each is added once and only when absent, and the original is kept as `.bak`.
     @discardableResult
     public static func addClaudeIntegration(to url: URL = defaultURL) -> MigrationOutcome {
@@ -129,7 +129,7 @@ public struct ProviderConfig: Decodable, Sendable {
     public let title: String
     public let windows: [Int]
     public let setupHint: String?
-    /// The id of the integration that reports this provider's problems and fixes them (ADR 0031); nil when it has none.
+    /// The id of the integration that reports this provider's problems and fixes them (ADR 0005); nil when it has none.
     public let integration: String?
     public let log: Log?
     public let usage: Usage?
@@ -188,7 +188,7 @@ public struct ProviderConfig: Decodable, Sendable {
             /// A file of its own for this window, instead of the quota's.
             public let file: String?
             /// A path to a list of limits: one window for each entry that matches `where`, with the paths below read inside
-            /// the entry (ADR 0034). Without it the window is the one object at `at`.
+            /// the entry (ADR 0002). Without it the window is the one object at `at`.
             public let each: String?
             /// Fields an entry of `each` must equal, by path inside the entry.
             public let `where`: [String: String]?
@@ -197,7 +197,7 @@ public struct ProviderConfig: Decodable, Sendable {
             /// Where the file says when its figures were fetched, from the file's root; the file's age when absent.
             public let observedAt: String?
             public let observedAtFormat: TimeFormat?
-            /// The window exists only if a list names it (ADR 0037); without it the window is always there.
+            /// The window exists only if a list names it (ADR 0002); without it the window is always there.
             public let existsIf: ExistsIf?
             /// The object holding the fields below; the line or file root when absent.
             public let at: String?
@@ -210,7 +210,7 @@ public struct ProviderConfig: Decodable, Sendable {
     }
 
     /// A list that says whether a window exists: one entry of `each` must match `where`. The list is believed only while
-    /// it is fresh (`maxAgeHours`, 6 by default); otherwise nothing is said and the window stays (ADR 0037).
+    /// it is fresh (`maxAgeHours`, 6 by default); otherwise nothing is said and the window stays (ADR 0002).
     public struct ExistsIf: Decodable, Sendable {
         public let file: String
         public let each: String
