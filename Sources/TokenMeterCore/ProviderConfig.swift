@@ -151,6 +151,22 @@ public struct ProviderConfig: Decodable, Sendable {
         public let mode: Mode
         public let dedupeBy: [String]?
         public let tokens: Tokens
+        /// The path of the model's name in a line, so the tokens can be told apart by model (ADR 0010).
+        public let model: String?
+        /// Ordered rules that turn a model's name into the family it is shown as; the first that matches wins, and a name
+        /// that matches none is shown as it is (ADR 0010).
+        public let families: [Family]?
+
+        public struct Family: Decodable, Sendable, Equatable {
+            /// A fragment of the model's name, compared without case.
+            public let contains: String
+            public let family: String
+
+            public init(contains: String, family: String) {
+                self.contains = contains
+                self.family = family
+            }
+        }
     }
 
     public struct Tokens: Decodable, Sendable {

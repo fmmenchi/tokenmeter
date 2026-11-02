@@ -47,11 +47,17 @@ public struct UsageEvent: Equatable, Sendable {
     public let provider: Provider
     public let date: Date
     public let tokens: TokenCounts
+    /// The model that produced the tokens, when the source says it (ADR 0010).
+    public let model: String?
+    /// Identifies the event for its provider, so reading it again is the same event; nil when the source cannot say.
+    public let key: String?
 
-    public init(provider: Provider, date: Date, tokens: TokenCounts) {
+    public init(provider: Provider, date: Date, tokens: TokenCounts, model: String? = nil, key: String? = nil) {
         self.provider = provider
         self.date = date
         self.tokens = tokens
+        self.model = model
+        self.key = key
     }
 }
 
