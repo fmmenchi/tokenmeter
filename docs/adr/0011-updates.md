@@ -1,6 +1,6 @@
 # ADR 0011 — Updates: Sparkle, a feed attached to each release, and a build number that goes up
 
-Status: proposed (2026-11-02)
+Status: accepted (2026-11-02, with the plan of the [updates](../features/2026-11-02-updater/plan.md))
 
 ## Context
 

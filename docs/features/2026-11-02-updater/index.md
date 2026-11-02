@@ -13,7 +13,7 @@ opens again and runs its migrations. Your history is kept, not read again from n
 |        |            |
 | :----- | :--------- |
 | Date   | 2026-11-02 |
-| Status | in design  |
+| Status | in build   |
 
 ## Intent
 
@@ -28,8 +28,8 @@ you keep. It can be turned off in Settings. It contacts one address, once a day,
 | Part                | Page                                  | Status   |
 | :------------------ | :------------------------------------ | :------- |
 | Proposal            | [Proposal](./proposal.md)             | chosen   |
-| Implementation plan | [Plan](./plan.md)                     | proposed |
-| Decisions           | [ADR 0011](../../adr/0011-updates.md) | proposed |
+| Implementation plan | [Plan](./plan.md)                     | accepted |
+| Decisions           | [ADR 0011](../../adr/0011-updates.md) | accepted |
 
 ## Related
 
