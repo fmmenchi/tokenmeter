@@ -24,6 +24,7 @@ It reads only files Claude Code and the Codex CLI leave on your machine: no cred
 | install it and keep it running        | [Install and Run](https://fmmenchi.github.io/tokenmeter/develop/build-and-run)           |
 | see the Claude quota                  | [Enable the Claude Quota](https://fmmenchi.github.io/tokenmeter/use/enable-claude-quota) |
 | understand a bar, a colour or the `~` | [Reading the Bars](https://fmmenchi.github.io/tokenmeter/use/bars)                       |
+| read how my use is going              | [Reading the Stats](https://fmmenchi.github.io/tokenmeter/use/stats)                     |
 | add another AI tool from a JSON file  | [Configure Providers](https://fmmenchi.github.io/tokenmeter/use/configure-providers)     |
 | know why it works this way            | [Decisions (ADRs)](https://fmmenchi.github.io/tokenmeter/adr)                            |
 

@@ -11,16 +11,16 @@ How the pieces fit, where each file goes and which rules keep it that way. The r
 
 ## The pieces
 
-| Path                        | What it is                                                                                              |
-| :-------------------------- | :------------------------------------------------------------------------------------------------------ |
-| `Sources/TokenMeterCore`    | A Swift package target: log reading, window maths, the `Snapshot`, the problems and their fixes. No UI. |
-| `Sources/tokenmeter-probe`  | A terminal tool that prints each provider's windows. Not a product surface.                             |
-| `App/TokenMeter`            | The host app: menu-bar item, panel, Settings, refresh loop, launch at login.                            |
-| `Widget/TokenMeterWidget`   | The WidgetKit extension. It only draws a `Snapshot`.                                                    |
-| `Tests/TokenMeterCoreTests` | XCTest; fixtures go to a temp directory, never to real logs.                                            |
-| `project.yml`               | XcodeGen spec for the app and widget; `TokenMeter.xcodeproj` is generated.                              |
-| `scripts/`                  | Installer, status-line script, signing and notarization ([commands](./commands.md)).                    |
-| `docs/`, `apps/docusaurus`  | This site: content in `docs/`, the Docusaurus app in `apps/docusaurus`.                                 |
+| Path                        | What it is                                                                                                                                  |
+| :-------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Sources/TokenMeterCore`    | A Swift package target: log reading, window maths, the `Snapshot`, the problems and their fixes, the usage store and the statistics. No UI. |
+| `Sources/tokenmeter-probe`  | A terminal tool that prints each provider's windows. Not a product surface.                                                                 |
+| `App/TokenMeter`            | The host app: menu-bar item, panel, Settings, refresh loop, launch at login.                                                                |
+| `Widget/TokenMeterWidget`   | The WidgetKit extension. It only draws a `Snapshot`.                                                                                        |
+| `Tests/TokenMeterCoreTests` | XCTest; fixtures go to a temp directory, never to real logs.                                                                                |
+| `project.yml`               | XcodeGen spec for the app and widget; `TokenMeter.xcodeproj` is generated.                                                                  |
+| `scripts/`                  | Installer, status-line script, signing and notarization ([commands](./commands.md)).                                                        |
+| `docs/`, `apps/docusaurus`  | This site: content in `docs/`, the Docusaurus app in `apps/docusaurus`.                                                                     |
 
 ## Data flow
 
@@ -44,6 +44,10 @@ How the pieces fit, where each file goes and which rules keep it that way. The r
 4. **Showing.** `Meter` (the app's `@Observable` model) runs the collector off the main actor, once at
    launch and every 60 seconds, publishes the snapshot to the panel, writes it to the App Group
    container and asks WidgetKit to reload.
+5. **Keeping.** After each refresh, off the main actor, `UsageIngestor` reads the same files with sources of its own (the first
+   pass reads everything the tools still keep, later ones only what is new) and puts them in `UsageStore`, a SQLite file of facts
+   (messages and readings of a window) with a unique key each. `UsageStats` draws the stats view from that file with pure
+   functions, never from the logs ([ADR 0010](../adr/0010-the-usage-store.md)). The widget does not read the store.
 
 ## The window maths
 

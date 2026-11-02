@@ -31,10 +31,13 @@ developer account.
 - **Claude quota**: the app sets up Claude's status line itself at every launch when Claude Code is
   installed ([Enable the Claude Quota](./enable-claude-quota.md)). Without it the Claude bars show tokens used but not what is left.
 - **Widget**: [Add the Widget](./add-the-widget.md).
+- **Stats**: the chart icon of the panel. The first launch of a version with the stats reads every log the tools still keep, which
+  takes a minute or two once ([Reading the Stats](./stats.md)).
 
 ## Uninstall
 
-Quit the app from the panel, delete `/Applications/TokenMeter.app`, and remove `~/.tokenmeter/`. If
+Quit the app from the panel, delete `/Applications/TokenMeter.app`, and remove `~/.tokenmeter/` and
+`~/Library/Application Support/TokenMeter/` (the history the stats are drawn from). If
 you set the Claude status line, remove the `statusLine` entry from `~/.claude/settings.json` (the
 installer left a `settings.json.tokenmeter.bak` with the original).
 
