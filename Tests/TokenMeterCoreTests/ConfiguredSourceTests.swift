@@ -92,6 +92,63 @@ final class ConfiguredSourceTests: XCTestCase {
         XCTAssertEqual(events.map(\.model), [nil, nil])
     }
 
+    func testEveryWindowALogReportedIsKeptWithItsHighestPercentage() throws {
+        let dir = try tempDir()
+        func line(_ ts: String, primary: Double, resets: Int, weekly: Double) -> String {
+            #"{"timestamp":"\#(ts)","type":"event_msg","payload":{"type":"token_count","info":{"total_token_usage":{"input_tokens":1,"output_tokens":1}},"rate_limits":{"primary":{"used_percent":\#(primary),"window_minutes":300,"resets_at":\#(resets)},"secondary":{"used_percent":\#(weekly),"window_minutes":10080,"resets_at":1793500000}}}}"#
+        }
+        let lines = [
+            line("2026-10-28T10:00:00.000Z", primary: 10, resets: 1793000000, weekly: 5),
+            line("2026-10-28T10:30:00.000Z", primary: 40, resets: 1793000000, weekly: 7),
+            line("2026-10-28T10:45:00.000Z", primary: 35, resets: 1793000000, weekly: 7),
+            line("2026-10-28T16:00:00.000Z", primary: 3, resets: 1793018000, weekly: 9),
+        ].joined(separator: "\n") + "\n"
+        try lines.write(to: dir.appendingPathComponent("rollout-a.jsonl"), atomically: true, encoding: .utf8)
+        let config = """
+        {"id":"codex3","title":"Codex 3","windows":[300,10080],
+         "log":{"root":"\(dir.path)","contains":"\\"token_count\\"","where":{"type":"event_msg","payload.type":"token_count"},"timestamp":"timestamp"},
+         "usage":{"mode":"cumulative","tokens":{"output":"payload.info.total_token_usage.output_tokens"}},
+         "quota":{"windows":[
+           {"at":"payload.rate_limits.primary","minutesPath":"window_minutes","usedPercent":"used_percent","resetsAt":"resets_at"},
+           {"at":"payload.rate_limits.secondary","minutesPath":"window_minutes","usedPercent":"used_percent","resetsAt":"resets_at"}]}}
+        """
+
+        let configured = try source(config).read(since: epoch)
+
+        XCTAssertEqual(configured.quotas.map(\.usedPercent), [3, 9], "the last reading of each length is as it was")
+        let history = configured.history
+        XCTAssertEqual(history.map(\.windowMinutes), [300, 300, 10080])
+        XCTAssertEqual(history.map(\.usedPercent), [40, 3, 9], "a window keeps the highest percentage, not the last")
+        let first = LogDate.parse("2026-10-28T10:00:00.000Z")!
+        let last = LogDate.parse("2026-10-28T10:45:00.000Z")!
+        XCTAssertEqual(history[0].firstObserved, first)
+        XCTAssertEqual(history[0].lastObserved, last)
+        XCTAssertEqual(history[0].resetsAt, Date(timeIntervalSince1970: 1793000000))
+        XCTAssertEqual(history[2].firstObserved, first, "the weekly window is one window across the lines")
+    }
+
+    func testReadingTheSameLogAgainAddsNoWindow() throws {
+        let dir = try tempDir()
+        let file = dir.appendingPathComponent("rollout-a.jsonl")
+        let line = #"{"timestamp":"2026-10-28T10:00:00.000Z","payload":{"rate_limits":{"primary":{"used_percent":12,"window_minutes":300,"resets_at":1793000000}}}}"# + "\n"
+        try line.write(to: file, atomically: true, encoding: .utf8)
+        let config = """
+        {"id":"codex4","title":"Codex 4","windows":[300],
+         "log":{"root":"\(dir.path)","timestamp":"timestamp"},
+         "quota":{"windows":[{"at":"payload.rate_limits.primary","minutesPath":"window_minutes","usedPercent":"used_percent","resetsAt":"resets_at"}]}}
+        """
+        let codex = try source(config)
+        XCTAssertEqual(codex.read(since: epoch).history.count, 1)
+        XCTAssertEqual(codex.read(since: epoch).history.count, 1, "a second read of the same bytes")
+        let handle = try FileHandle(forWritingTo: file)
+        try handle.seekToEnd()
+        try handle.write(contentsOf: Data(line.replacingOccurrences(of: "12", with: "30").replacingOccurrences(of: "10:00:00", with: "10:05:00").utf8))
+        try handle.close()
+        let after = codex.read(since: epoch).history
+        XCTAssertEqual(after.count, 1)
+        XCTAssertEqual(after.first?.usedPercent, 30)
+    }
+
     func testConfigReadsCumulativeUsageAndQuotaFromTheLog() throws {
         let dir = try tempDir()
         func line(_ ts: String, input: Int, cached: Int, out: Int, limits: String) -> String {

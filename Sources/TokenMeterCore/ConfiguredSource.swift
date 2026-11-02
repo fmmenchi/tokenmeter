@@ -12,7 +12,25 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
         var byKey: [String: UsageEvent] = [:]
         var anonymous: [UsageEvent] = []
         var quotas: [Int: (Date, ReportedQuota)] = [:]
+        var history: [WindowKey: WindowReading] = [:]
         var plan: (Date, String)?
+    }
+
+    /// One window of one length: its reset time to the minute, as in the store (ADR 0010).
+    private struct WindowKey: Hashable {
+        let minutes: Int
+        let resets: Int
+    }
+
+    private static func note(_ reading: WindowReading, in history: inout [WindowKey: WindowReading]) {
+        let key = WindowKey(minutes: reading.windowMinutes, resets: Int((reading.resetsAt.timeIntervalSince1970 / 60).rounded()))
+        guard let known = history[key] else {
+            history[key] = reading
+            return
+        }
+        history[key] = WindowReading(
+            windowMinutes: known.windowMinutes, resetsAt: known.resetsAt, usedPercent: max(known.usedPercent, reading.usedPercent),
+            firstObserved: min(known.firstObserved, reading.firstObserved), lastObserved: max(known.lastObserved, reading.lastObserved))
     }
 
     private let lock = NSLock()
@@ -45,6 +63,7 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
             let logged = scan(log, since: since)
             lock.unlock()
             reading.events = logged.events
+            reading.history = logged.history
             quotas = logged.quotas
             plan = logged.plan
         }
@@ -118,12 +137,13 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
     // MARK: Log scanning
 
     private func scan(_ log: ProviderConfig.Log, since: Date)
-        -> (events: [UsageEvent], quotas: [Int: (Date, ReportedQuota)], plan: (Date, String)?) {
+        -> (events: [UsageEvent], quotas: [Int: (Date, ReportedQuota)], history: [WindowReading], plan: (Date, String)?) {
         let files = LogFiles.jsonl(under: expand(log.root), modifiedSince: since)
         states = states.filter { files.contains($0.key) }
 
         var events: [UsageEvent] = []
         var quotas: [Int: (Date, ReportedQuota)] = [:]
+        var history: [WindowKey: WindowReading] = [:]
         var plan: (Date, String)?
         for file in files {
             var state = states[file] ?? FileState()
@@ -139,9 +159,12 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
                 if let quota = config.quota, quota.file == nil {
                     for window in quota.windows where window.each == nil {
                         guard let reported = Self.quota(window, in: root, observedAt: date),
-                              let minutes = reported.windowMinutes,
-                              state.quotas[minutes] == nil || date > state.quotas[minutes]!.0 else { continue }
-                        state.quotas[minutes] = (date, reported)
+                              let minutes = reported.windowMinutes else { continue }
+                        if let resets = reported.resetsAt {
+                            Self.note(WindowReading(windowMinutes: minutes, resetsAt: resets, usedPercent: reported.usedPercent,
+                                                    firstObserved: date, lastObserved: date), in: &state.history)
+                        }
+                        if state.quotas[minutes] == nil || date > state.quotas[minutes]!.0 { state.quotas[minutes] = (date, reported) }
                     }
                 }
                 if let spec = config.plan, spec.file == nil, let label = Self.planLabel(spec, in: root),
@@ -157,8 +180,9 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
             for (minutes, candidate) in state.quotas where quotas[minutes] == nil || candidate.0 > quotas[minutes]!.0 {
                 quotas[minutes] = candidate
             }
+            for reading in state.history.values { Self.note(reading, in: &history) }
         }
-        return (events.sorted { $0.date < $1.date }, quotas, plan)
+        return (events.sorted { $0.date < $1.date }, quotas, history.values.sorted { $0.resetsAt < $1.resetsAt }, plan)
     }
 
     private func record(_ usage: ProviderConfig.Usage, _ root: [String: Any], _ date: Date, origin: String,
