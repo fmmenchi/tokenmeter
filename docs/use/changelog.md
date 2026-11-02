@@ -8,6 +8,15 @@ sidebar_position: 10
 
 What changed in each version, newest first. The update window shows the notes of the version it offers, taken from this page, and links here for the rest.
 
+## 0.5.0 {#v0-5-0}
+
+Not released yet.
+
+- **Seasonal easter eggs**: in the week of Halloween, Christmas and Easter, a small icon on the bars and a corner piece on
+  the cards, picked at random each time you open the panel ([Seasonal easter eggs](./seasonal-easter-eggs.md)).
+- **A bar with a pace tick is as thick as one without**: the Weekly bar was 40% thicker than the 5-hour bar when it had a tick.
+- A page of **[Licences](./licenses.md)**.
+
 ## 0.4.0 {#v0-4-0}
 
 Released on 2026-11-02.
