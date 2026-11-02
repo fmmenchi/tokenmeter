@@ -9,6 +9,9 @@ configFiles:
 packages:
   TokenMeterCore:
     path: .
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    exactVersion: 2.10.1
 settings:
   base:
     SWIFT_VERSION: '6.0'
@@ -26,6 +29,7 @@ targets:
         buildPhase: resources
     dependencies:
       - package: TokenMeterCore
+      - package: Sparkle
       - target: TokenMeterWidget
     entitlements:
       path: App/TokenMeter/TokenMeter.entitlements
@@ -39,10 +43,21 @@ targets:
         LSUIElement: true
         CFBundleShortVersionString: '$(MARKETING_VERSION)'
         CFBundleVersion: '$(CURRENT_PROJECT_VERSION)'
+        SUFeedURL: '$(SU_FEED_URL)'
+        SUPublicEDKey: '$(SU_PUBLIC_ED_KEY)'
+        SUEnableAutomaticChecks: true
+        SUAutomaticallyUpdate: false
+        SUAllowsAutomaticUpdates: true
+        SUScheduledCheckInterval: 86400
+        SUEnableSystemProfiling: false
         AppGroupIdentifier: '$(TeamIdentifierPrefix)tokenmeter'
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.fmmenchi.tokenmeter.app
+        # ADR 0011: the list of versions is a file attached to each release. The public half of the signing key is empty until
+        # the author makes the key; the updater does not start without it, and the release script refuses to build without it.
+        SU_FEED_URL: 'https://github.com/fmmenchi/tokenmeter/releases/latest/download/appcast.xml'
+        SU_PUBLIC_ED_KEY: ''
         ENABLE_HARDENED_RUNTIME: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
   TokenMeterWidget:
