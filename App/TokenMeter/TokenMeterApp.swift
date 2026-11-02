@@ -9,11 +9,8 @@ struct TokenMeterApp: App {
         MenuBarExtra {
             MenuContent(meter: meter)
         } label: {
-            Label {
-                Text(meter.menuBarTitle)
-            } icon: {
-                Image(nsImage: MenuBarIcon.image)
-            }
+            Image(nsImage: meter.needsAttention ? MenuBarIcon.withDot : MenuBarIcon.image)
+                .accessibilityLabel(meter.needsAttention ? "tokenmeter, needs attention" : "tokenmeter")
         }
         .menuBarExtraStyle(.window)
 

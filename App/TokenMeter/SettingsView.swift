@@ -61,8 +61,6 @@ struct SettingsView: View {
                             target: provider.id, dragging: $dragging, dropTarget: $dropTarget,
                             move: { meter.moveProvider($0, onto: $1) }))
                 }
-                Text("The percentage in the menu bar counts only the providers and windows you show.")
-                    .font(.caption).foregroundStyle(.secondary)
             }
         }
         .formStyle(.grouped)

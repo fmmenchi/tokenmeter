@@ -105,13 +105,12 @@ Each provider is a card in the panel and in the widget. In **Settings, Providers
 - **Drag** a provider, or use its **arrows**, to move its card. The medium widget shows one card fully, so the first card is the one you see
   there.
 - **Turn a provider on or off** with the switch at the end of its row. A provider that is off has no card in the panel or the
-  widget and is not in the menu-bar percentage; its row stays, with its windows dimmed, and turning it on gives it back with
+  widget; its row stays, with its windows dimmed, and turning it on gives it back with
   its place and its windows as they were. It is the only way to hide a provider. One provider always stays on. A provider
   that is off still shows its problems in the panel.
 - **Choose the windows** a card shows. Under the provider each window the plan has is a row with a switch; turn on as many
   as you like. The last one that is on cannot be turned off: turn the provider off instead. A plan that lacks a window
   (Ultra has no 5-hour limit) does not list it. A model's limit, such as Fable, is a row under its window, indented, and is on with it by default; it is dimmed while its window is off.
-- The percentage in the menu bar counts only the providers and windows you show.
 
 The order and the choice are kept by the app, per provider, and never written to `providers.json`. A provider you add
 goes last. Both the light and the dark appearance are respected.

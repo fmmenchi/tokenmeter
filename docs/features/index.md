@@ -26,7 +26,9 @@ are [ADRs](../adr), and its overview links them.
 
 ## In design and build
 
-Nothing at the moment.
+| Feature                                                                                                             | Date       | Pages                                                                                                                                                                         |
+| :------------------------------------------------------------------------------------------------------------------ | :--------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Menu bar: icon only](./2026-11-02-menu-bar-icon-only/index.md): the bar is the icon, a dot says it is worth a look | 2026-11-02 | [Overview](./2026-11-02-menu-bar-icon-only/index.md), [Proposal](./2026-11-02-menu-bar-icon-only/proposal.md), [Implementation plan](./2026-11-02-menu-bar-icon-only/plan.md) |
 
 ## The pattern: from idea to implemented
 
