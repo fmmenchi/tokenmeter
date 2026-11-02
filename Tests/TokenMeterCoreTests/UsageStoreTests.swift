@@ -92,6 +92,61 @@ final class UsageStoreTests: XCTestCase {
         XCTAssertEqual(Set(stored.map(\.scope)), [nil, "Fable"])
     }
 
+    func testResetTimesEitherSideOfARoundingBoundaryAreOneWindow() throws {
+        let store = try UsageStore(url: try fileURL())
+        // 29 and 31 seconds past a minute: rounded to the minute they are two windows, and they are one.
+        store.upsert([reading(percent: 47, resets: 604_800 + 29, first: 100, last: 200), reading(percent: 31, resets: 604_800 + 31, first: 50, last: 150)])
+        let stored = store.readings(provider: chatgpt)
+        XCTAssertEqual(stored.count, 1)
+        XCTAssertEqual(stored[0].usedPercent, 47)
+        XCTAssertEqual(stored[0].firstObserved, Date(timeIntervalSince1970: 50))
+        XCTAssertEqual(stored[0].lastObserved, Date(timeIntervalSince1970: 200))
+    }
+
+    func testTheToleranceIsTwoMinutes() throws {
+        let store = try UsageStore(url: try fileURL())
+        store.upsert([reading(percent: 10, resets: 604_800), reading(percent: 20, resets: 604_800 + 119), reading(percent: 30, resets: 604_800 + 300)])
+        XCTAssertEqual(store.readings(provider: chatgpt).map(\.usedPercent), [20, 30], "119 seconds is the same window, five minutes is not")
+    }
+
+    func testAFileOfTheFirstVersionHasItsSplitWindowsPutBackTogether() throws {
+        let url = try fileURL()
+        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        var db: OpaquePointer?
+        XCTAssertEqual(sqlite3_open(url.path, &db), SQLITE_OK)
+        let sql = """
+            CREATE TABLE messages(provider TEXT NOT NULL, key TEXT NOT NULL, at REAL NOT NULL, model TEXT, input INTEGER NOT NULL,
+              output INTEGER NOT NULL, cache_read INTEGER NOT NULL, cache_write INTEGER NOT NULL, PRIMARY KEY(provider, key)) WITHOUT ROWID;
+            CREATE TABLE readings(provider TEXT NOT NULL, window_minutes INTEGER NOT NULL, scope TEXT NOT NULL, resets_at INTEGER NOT NULL,
+              used_percent REAL NOT NULL, first_observed REAL, last_observed REAL, source TEXT NOT NULL,
+              PRIMARY KEY(provider, window_minutes, scope, resets_at)) WITHOUT ROWID;
+            INSERT INTO readings VALUES('chatgpt', 10080, '', 604800, 47, 100, 200, 'log');
+            INSERT INTO readings VALUES('chatgpt', 10080, '', 604860, 31, 50, 150, 'log');
+            INSERT INTO readings VALUES('chatgpt', 10080, '', 1209600, 19, 300, 400, 'log');
+            INSERT INTO readings VALUES('chatgpt', 300, '', 604800, 5, 10, 20, 'log');
+            PRAGMA user_version = 1;
+            """
+        XCTAssertEqual(sqlite3_exec(db, sql, nil, nil, nil), SQLITE_OK)
+        sqlite3_close(db)
+
+        let store = try UsageStore(url: url)
+
+        let weekly = store.readings(provider: chatgpt).filter { $0.windowMinutes == 10_080 }
+        XCTAssertEqual(weekly.map(\.usedPercent), [47, 19], "the two that were one window are one, the other stays")
+        XCTAssertEqual(weekly[0].firstObserved, Date(timeIntervalSince1970: 50))
+        XCTAssertEqual(weekly[0].lastObserved, Date(timeIntervalSince1970: 200))
+        XCTAssertEqual(store.readings(provider: chatgpt).filter { $0.windowMinutes == 300 }.count, 1, "another length is not merged")
+
+        var raw: OpaquePointer?
+        XCTAssertEqual(sqlite3_open_v2(url.path, &raw, SQLITE_OPEN_READONLY, nil), SQLITE_OK)
+        defer { sqlite3_close(raw) }
+        var statement: OpaquePointer?
+        XCTAssertEqual(sqlite3_prepare_v2(raw, "PRAGMA user_version", -1, &statement, nil), SQLITE_OK)
+        defer { sqlite3_finalize(statement) }
+        XCTAssertEqual(sqlite3_step(statement), SQLITE_ROW)
+        XCTAssertEqual(Int(sqlite3_column_int64(statement, 0)), 2)
+    }
+
     func testClosingAndOpeningAgainKeepsEverything() throws {
         let url = try fileURL()
         do {

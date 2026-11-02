@@ -10,7 +10,11 @@ import SQLite3
 ///
 /// One object serialises its calls, so a writer on a background queue and the panel reading do not meet.
 public final class UsageStore: @unchecked Sendable {
-    public static let schemaVersion = 1
+    public static let schemaVersion = 2
+    /// Two readings of the same window can name a reset time that differs by a second or two, and a rounding to the minute
+    /// splits them when they fall either side of a boundary: those within this many seconds are one window. Different windows
+    /// of one length are at least five hours apart.
+    static let sameWindowWithin: Int64 = 120
 
     public struct Message: Equatable, Sendable {
         public let provider: Provider
@@ -107,6 +111,7 @@ public final class UsageStore: @unchecked Sendable {
         // A file that is not a database fails on the first real statement.
         let version = try scalarInt("PRAGMA user_version")
         if version > Self.schemaVersion { throw Failure(description: "newer schema \(version)") }
+        if version == 1 { mergeNearbyReadings() }
         if version == 0 {
             try exec("""
                 CREATE TABLE IF NOT EXISTS messages(
@@ -120,7 +125,76 @@ public final class UsageStore: @unchecked Sendable {
                   PRIMARY KEY(provider, window_minutes, scope, resets_at)) WITHOUT ROWID;
                 PRAGMA user_version = \(Self.schemaVersion);
                 """)
+        } else if version == 1 {
+            try exec("PRAGMA user_version = \(Self.schemaVersion)")
         }
+    }
+
+    /// Version 1 keyed a window by its reset time rounded to the minute, which split one window into two when the time fell
+    /// either side of a boundary. This puts them back together: the highest percentage, the first and the last time seen.
+    private func mergeNearbyReadings() {
+        struct Row {
+            let provider: String, window: Int64, scope: String, resets: Int64
+            let used: Double, first: Double?, last: Double?
+        }
+        let rows = rows("""
+            SELECT provider, window_minutes, scope, resets_at, used_percent, first_observed, last_observed FROM readings
+            ORDER BY provider, window_minutes, scope, resets_at
+            """) { statement -> Row in
+            Row(provider: String(cString: sqlite3_column_text(statement, 0)), window: sqlite3_column_int64(statement, 1),
+                scope: String(cString: sqlite3_column_text(statement, 2)), resets: sqlite3_column_int64(statement, 3),
+                used: sqlite3_column_double(statement, 4), first: Self.date(statement, 5)?.timeIntervalSince1970,
+                last: Self.date(statement, 6)?.timeIntervalSince1970)
+        }
+        var groups: [[Row]] = []
+        for row in rows {
+            if let head = groups.last?.first, head.provider == row.provider, head.window == row.window, head.scope == row.scope,
+               row.resets - head.resets <= Self.sameWindowWithin {
+                groups[groups.count - 1].append(row)
+            } else {
+                groups.append([row])
+            }
+        }
+        transaction {
+            for group in groups where group.count > 1 {
+                let head = group[0]
+                for row in group.dropFirst() {
+                    run("DELETE FROM readings WHERE provider = ? AND window_minutes = ? AND scope = ? AND resets_at = ?",
+                        [head.provider, row.window, head.scope, row.resets])
+                }
+                let used = group.map(\.used).max() ?? head.used
+                let first = group.compactMap(\.first).min()
+                let last = group.compactMap(\.last).max()
+                run("""
+                    UPDATE readings SET used_percent = ?, first_observed = ?, last_observed = ?
+                    WHERE provider = ? AND window_minutes = ? AND scope = ? AND resets_at = ?
+                    """, [used, first, last, head.provider, head.window, head.scope, head.resets])
+            }
+        }
+    }
+
+    private func run(_ sql: String, _ values: [Any?]) {
+        guard let statement = prepare(sql) else { return }
+        defer { sqlite3_finalize(statement) }
+        for (offset, value) in values.enumerated() {
+            let index = Int32(offset + 1)
+            switch value {
+            case let text as String: sqlite3_bind_text(statement, index, text, -1, Self.transient)
+            case let number as Int64: sqlite3_bind_int64(statement, index, number)
+            case let number as Double: sqlite3_bind_double(statement, index, number)
+            default: sqlite3_bind_null(statement, index)
+            }
+        }
+        sqlite3_step(statement)
+    }
+
+    /// The reset time a window of this provider, length and scope already has within the tolerance of `resets`, if any.
+    private func existingReset(_ provider: String, _ window: Int, _ scope: String, near resets: Int64) -> Int64? {
+        rows("""
+            SELECT resets_at FROM readings WHERE provider = ? AND window_minutes = ? AND scope = ? AND resets_at BETWEEN ? AND ?
+            ORDER BY ABS(resets_at - ?) LIMIT 1
+            """, binds: [provider, Double(window), scope, Double(resets - Self.sameWindowWithin), Double(resets + Self.sameWindowWithin),
+                         Double(resets)]) { sqlite3_column_int64($0, 0) }.first
     }
 
     private var message: String { db.map { String(cString: sqlite3_errmsg($0)) } ?? "no database" }
@@ -156,8 +230,8 @@ public final class UsageStore: @unchecked Sendable {
         return added
     }
 
-    /// A reading of a window already there keeps the highest percentage, the first time it was seen and the last. The time of
-    /// reset is taken to the minute: two readings of the same window can differ by a fraction of a second.
+    /// A reading of a window already there keeps the highest percentage, the first time it was seen and the last. A reset time
+    /// within two minutes of a window that is there is that window: two readings of one window can differ by a second or two.
     public func upsert(_ readings: [Reading]) {
         lock.lock()
         defer { lock.unlock() }
@@ -181,7 +255,9 @@ public final class UsageStore: @unchecked Sendable {
                 bind(statement, 1, item.provider.rawValue)
                 sqlite3_bind_int64(statement, 2, Int64(item.windowMinutes))
                 bind(statement, 3, item.scope ?? "")
-                sqlite3_bind_int64(statement, 4, Self.minute(item.resetsAt))
+                let resets = Self.minute(item.resetsAt)
+                sqlite3_bind_int64(statement, 4, existingReset(item.provider.rawValue, item.windowMinutes, item.scope ?? "",
+                                                                near: resets) ?? resets)
                 sqlite3_bind_double(statement, 5, item.usedPercent)
                 bind(statement, 6, item.firstObserved)
                 bind(statement, 7, item.lastObserved)
