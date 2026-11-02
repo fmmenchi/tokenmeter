@@ -54,10 +54,11 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.fmmenchi.tokenmeter.app
-        # ADR 0011: the list of versions is a file attached to each release. The public half of the signing key is empty until
-        # the author makes the key; the updater does not start without it, and the release script refuses to build without it.
+        # ADR 0011: the list of versions is a file attached to each release, and the public half of the signing key is here (the private
+        # half is in the author's keychain and never in the repository). A build without the key does not start the updater, and the
+        # release scripts refuse without it.
         SU_FEED_URL: 'https://github.com/fmmenchi/tokenmeter/releases/latest/download/appcast.xml'
-        SU_PUBLIC_ED_KEY: ''
+        SU_PUBLIC_ED_KEY: 'UBGO84FZajDQo69SP0l/iVF92C71ADqksiJsAEPp/yM='
         ENABLE_HARDENED_RUNTIME: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
   TokenMeterWidget:
