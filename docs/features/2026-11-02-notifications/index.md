@@ -9,10 +9,10 @@ date: 2026-11-02
 
 The app tells you with a notification when a window is running out, so you do not have to open the panel to find out.
 
-|        |            |
-| :----- | :--------- |
-| Date   | 2026-11-02 |
-| Status | in build   |
+|        |                         |
+| :----- | :---------------------- |
+| Date   | 2026-11-02              |
+| Status | implemented, 2026-11-02 |
 
 ## Intent
 
