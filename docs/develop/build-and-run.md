@@ -108,3 +108,11 @@ numbers you expect and the panel does not, the problem is in the app, not in the
 - [Enable the Claude Quota](../use/enable-claude-quota.md)
 - [Add the Widget](../use/add-the-widget.md)
 - [Troubleshooting](../use/troubleshooting.md)
+
+## The developer menu of a debug build
+
+A debug build, the one `./scripts/preview.sh` makes, has a hammer button in the panel's row of buttons. Its menu forces the event
+that the [seasonal easter eggs](../use/seasonal-easter-eggs.md) are drawn for (Halloween, Christmas, Easter, or the real
+calendar) and picks the pieces again, so they can be seen outside their week. It is in `App/TokenMeter/EasterEggs/DevMenu.swift`,
+wrapped in `#if DEBUG`: a release does not contain it (the symbols are absent from the release binary), and nobody who installs
+the app can reach it. It is a deliberate exception to the rule of no mock modes, asked for by the author.
