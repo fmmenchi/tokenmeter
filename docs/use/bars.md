@@ -84,14 +84,14 @@ apps, and it does not match how the plans count.
 
 ## The panel
 
-![The menu-bar panel with its two providers, the quota-age lines and the Refresh, Settings and Quit buttons](../assets/panel.png)
+![The menu-bar panel with its two providers, the quota-age lines and a row of four icons: refresh, the stats, Settings and quit](../assets/panel.png)
 
-| Element                                     | Meaning                                                                                                       |
-| :------------------------------------------ | :------------------------------------------------------------------------------------------------------------ |
-| `Claude quota from 3 hours ago`             | When the status line last wrote Claude's quota.                                                               |
-| `Claude quota: status line has not run yet` | The status line is not set up or no session has run. See [Enable the Claude Quota](./enable-claude-quota.md). |
-| Orange warning about the App Group          | No signing team: the widget cannot read the snapshot.                                                         |
-| **Refresh**                                 | Re-reads now and shows a spinner while it works.                                                              |
+| Element                                     | Meaning                                                                                                                                                        |
+| :------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Claude quota from 3 hours ago`             | When the status line last wrote Claude's quota.                                                                                                                |
+| `Claude quota: status line has not run yet` | The status line is not set up or no session has run. See [Enable the Claude Quota](./enable-claude-quota.md).                                                  |
+| Orange warning about the App Group          | No signing team: the widget cannot read the snapshot.                                                                                                          |
+| The row of icons                            | Refresh (re-reads now, with a spinner while it works), the chart that opens the [stats](./stats.md), Settings, and Quit. Each has a name that a pointer shows. |
 
 The panel also refreshes by itself whenever it opens. The menu-bar item itself is the gauge icon.
 
