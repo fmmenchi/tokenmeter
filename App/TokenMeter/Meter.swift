@@ -19,6 +19,19 @@ final class Meter {
     /// The app updating itself (ADR 0011). Here so that the dot and the panel read it with the problems.
     let updater = Updater()
 
+    // MARK: Notices (ADR 0012)
+
+    /// The kinds of notice the person turned on. None at first: a notice is something the person asked for.
+    private(set) var enabledNotices: Set<NoticeKind> = Set(
+        (UserDefaults.standard.stringArray(forKey: Meter.noticeKindsKey) ?? []).compactMap(NoticeKind.init(rawValue:)))
+    /// Where the permission of macOS stands; nothing is posted until it is allowed.
+    private(set) var noticePermission = Notifier.Permission.unknown
+    var noticesBlocked: Bool { noticePermission == .denied }
+    @ObservationIgnored private let notifier = Notifier()
+    /// What was already told, kept across launches so a restart does not tell it again.
+    @ObservationIgnored private var noticeLedger = (UserDefaults.standard.data(forKey: Meter.noticeLedgerKey)
+        .flatMap { try? JSONDecoder().decode(NoticeLedger.self, from: $0) }) ?? NoticeLedger()
+
     // MARK: Usage stats (ADR 0010)
 
     /// What the stats view says for each provider, from the store, for every range, so that choosing a range is a lookup and the view
@@ -45,6 +58,8 @@ final class Meter {
     private var lastStatsAt = Date.distantPast
     private let usageStore: UsageStore?
     private let ingestor: UsageIngestor?
+    private static let noticeKindsKey = "noticeKinds"
+    private static let noticeLedgerKey = "noticeLedger"
     private static let statsRangeKey = "statsRange"
     private static let openStatsCardKey = "statsOpenCard"
     /// The id of the card for all providers, next to the ids of the providers.
@@ -87,6 +102,7 @@ final class Meter {
         LaunchAtLogin.enableOnFirstRun()
         launchAtLogin = LaunchAtLogin.isEnabled
         setUpClaudeStatusLine()
+        Task { await refreshNoticePermission() }
         Task { await refresh() }
         timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
             Task { @MainActor in await self?.refresh() }
@@ -263,6 +279,7 @@ final class Meter {
         cardProviders = makeCardProviders()
         let result = base.applying(preferences).with(problems: problems)
         snapshot = result
+        deliverNotices(now: Date())
         if let store {
             do {
                 try store.write(result)
@@ -271,6 +288,30 @@ final class Meter {
                 Self.log.error("Could not write \(store.url.path, privacy: .public): \(error.localizedDescription, privacy: .public)")
             }
         }
+    }
+
+    /// A switch of Settings. The permission of macOS is asked the first time one is turned on, and a notice still due is told at once.
+    func setNotice(_ kind: NoticeKind, enabled: Bool) {
+        if enabled { enabledNotices.insert(kind) } else { enabledNotices.remove(kind) }
+        UserDefaults.standard.set(enabledNotices.map(\.rawValue).sorted(), forKey: Self.noticeKindsKey)
+        guard enabled else { return }
+        Task {
+            noticePermission = await notifier.requestIfNeeded()
+            deliverNotices(now: Date())
+        }
+    }
+
+    /// Settings asks again each time it opens, because the person may have changed it in System Settings.
+    func refreshNoticePermission() async {
+        noticePermission = await notifier.permission()
+    }
+
+    private func deliverNotices(now: Date) {
+        guard !enabledNotices.isEmpty, noticePermission == .allowed, let snapshot else { return }
+        let outcome = LimitNotices.evaluate(snapshot: snapshot, enabled: enabledNotices, ledger: noticeLedger, now: now)
+        noticeLedger = outcome.ledger
+        if let data = try? JSONEncoder().encode(noticeLedger) { UserDefaults.standard.set(data, forKey: Self.noticeLedgerKey) }
+        for notice in outcome.notices { notifier.post(notice) }
     }
 
     func setAutoSetUpClaude(_ enabled: Bool) {
