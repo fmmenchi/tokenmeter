@@ -127,6 +127,21 @@ The order of the cards and the windows each shows are preferences of the app, no
 
 The app applies them when it writes the snapshot, so the widget draws what it is given.
 
+## Limit notices
+
+When a window is running out ([ADR 0012](../adr/0012-limit-notices.md)). The rule is a pure function of the core, with no framework and
+no clock of its own; the app keeps what was told and shows the notification.
+
+| Type                    | What it is                                                                                                                             |
+| :---------------------- | :------------------------------------------------------------------------------------------------------------------------------------- |
+| `NoticeKind`            | `almostOut`, `willRunOut`, `runningLow`, in the order of their urgency.                                                                |
+| `LimitNotices.evaluate` | The snapshot, the kinds that are on, a `NoticeLedger` and `now` in; the `LimitNotice`s that are due and the ledger to keep out.        |
+| `NoticeLedger`          | What was told, by identifier, each with the reset moment of its window; `prune(now:)` drops an entry a day after its reset. `Codable`. |
+| `LimitNotice`           | The identifier (provider, window id, reset moment, kind), the kind, the provider's title and the window as it reads at `now`.          |
+
+It counts only a reported figure that is recent (`WindowUsage.staleAfter`) with a reset still ahead, posts only the most urgent
+kind that is due for a window and writes the others due as told, and never writes a kind that is off.
+
 ## Model limits
 
 A model's limit is a window with a scope ([ADR 0002](../adr/0002-quota-model-and-data-sources.md)).

@@ -14,6 +14,7 @@ Gate: `pnpm run check`. Spike: `swift run tokenmeter-probe`.
 
 - **Claude remaining quota** — comes from the status line (ADR 0002); stale until a session runs.
 - **Updates** — Sparkle ([ADR 0011](./docs/adr/0011-updates.md)), released in v0.3.0 (2026-11-02), the first version that can update itself and so installed by hand; the signing key's public half is in `project.yml` and a backup of the private half was made by the author in a password manager (not verified by the agent). Unverified: the widget refreshing after a real update, the check started from the menu with a click, a download with Gatekeeper's quarantine, a migration run by a real update, and the feed read by the app itself (curl read it).
+- **Notifications** — built on `feat/notifications` ([ADR 0012](./docs/adr/0012-limit-notices.md)), not released: the rule is tested in the core; unverified are the permission prompt, a notice on a real Mac, a click on it, Focus modes and the page the button opens in System Settings.
 - **Notarized release** — v0.3.0 is published, signed and notarized (ADR 0008); the widget was verified on the author's Mac with the Developer ID build of v0.2.0, and the double click on another Mac is unverified.
 
 ## Topic index (`.agents/doc/`)
