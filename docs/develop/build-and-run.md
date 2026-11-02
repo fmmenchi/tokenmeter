@@ -85,7 +85,7 @@ alone and the script says so: see [Enable the Claude Quota](../use/enable-claude
 
 The app **registers itself to start at login the first time it runs**
 ([ADR 0007](../adr/0007-login-item-plan-name-and-settings.md)). You will see it under System Settings, General, Login
-Items. **Settings…** in the panel has a **Launch at login** switch; if you turn it off the app never
+Items. The Settings icon of the panel opens a window with a **Launch at login** switch; if you turn it off the app never
 turns it back on. Run the copy in `/Applications`: the registration belongs to the copy that
 registered it.
 

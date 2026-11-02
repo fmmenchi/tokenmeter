@@ -9,7 +9,7 @@ sidebar_position: 2
 The design that was chosen. It was drawn as a canvas in Claude, which is deleted once the feature is implemented; this
 page is what stays. **Every number in the images is a sample**, not real use.
 
-![The panel in its two views: on the left the current quota with an icon of bars in the row of buttons; on the right the stats view, with a card for each provider, the first three models of Claude and a gauge icon that takes back to the current quota](./proposal-panel.png)
+![The panel as built, in its two views: on the left the current quota with a chart icon in the row of icons; on the right the stats view, with its first card open to a verdict and a ring of the models, the other cards closed to a line for each window, the card for all providers, and a gauge icon that takes back to the current quota](./proposal-panel.png)
 
 ![The widget as it is today, with a small chip next to the plan capsule that says Stay](./proposal-widget.png)
 
