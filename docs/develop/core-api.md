@@ -142,6 +142,19 @@ no clock of its own; the app keeps what was told and shows the notification.
 It counts only a reported figure that is recent (`WindowUsage.staleAfter`) with a reset still ahead, posts only the most urgent
 kind that is due for a window and writes the others due as told, and never writes a kind that is off.
 
+## Seasonal easter eggs
+
+The week of an event and what the panel carries in it, in the folder `Sources/TokenMeterCore/EasterEggs/` and its one test file
+([proposal](../features/2026-11-02-seasonal-easter-eggs/proposal.md)).
+
+| Type             | What it is                                                                                                                                                          |
+| :--------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Occasion`       | `halloween`, `christmas`, `easter`. `active(on:calendar:)` says which one's week it is, in the person's own calendar; Easter is worked out (`easterSunday(year:)`). |
+| `Occasion.marks` | The names of the six icons for the bars of an event, and `corners` the six pieces for the cards, as the app's images are named.                                     |
+| `EasterEgg`      | One mark and one corner of an event. `pick(for:seed:)` is the same for the same seed; `random(for:)` is what the panel calls.                                       |
+
+The views that draw them are in `Shared/EasterEggs/` and the 36 images in `App/TokenMeter/EasterEggs/Pieces/`.
+
 ## Model limits
 
 A model's limit is a window with a scope ([ADR 0002](../adr/0002-quota-model-and-data-sources.md)).

@@ -53,6 +53,10 @@ How the pieces fit, where each file goes and which rules keep it that way. The r
    draws, keeps the ledger it returns in the user defaults and hands each due notice to `Notifier`, which posts it to the system
    ([ADR 0012](../adr/0012-limit-notices.md)). The rule is in the core; the widget does not read the ledger.
 
+7. **Smiling.** In the week of an event, `Meter.rollEasterEgg` picks from the core an icon and a corner piece each time the panel
+   opens, and the panel hands them to its views through the environment; `Shared/EasterEggs/` draws them and the widget never
+   sets the value. Everything of the feature is in four folders: the core, `Shared/`, the images and the tests.
+
 ## The window maths
 
 For each window a provider declares (`5h`, `7d`), the builder sums the tokens whose date falls inside

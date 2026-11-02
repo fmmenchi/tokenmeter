@@ -19,6 +19,16 @@ final class Meter {
     /// The app updating itself (ADR 0011). Here so that the dot and the panel read it with the problems.
     let updater = Updater()
 
+    // MARK: Easter eggs (feature "seasonal easter eggs")
+
+    /// What the panel carries in the week of an event: an icon for the bars and a piece for the cards. Nil on every other day.
+    private(set) var easterEgg: EasterEgg?
+
+    /// Picked again each time the panel opens, from the event of that day, and kept while it stays open.
+    func rollEasterEgg(now: Date = Date()) {
+        easterEgg = Occasion.active(on: now).map { EasterEgg.random(for: $0) }
+    }
+
     // MARK: Notices (ADR 0012)
 
     /// The kinds of notice the person turned on. None at first: a notice is something the person asked for.
