@@ -304,6 +304,8 @@ final class Meter {
     /// Settings asks again each time it opens, because the person may have changed it in System Settings.
     func refreshNoticePermission() async {
         noticePermission = await notifier.permission()
+        // Allowed just now: whatever is due is told at once.
+        deliverNotices(now: Date())
     }
 
     private func deliverNotices(now: Date) {

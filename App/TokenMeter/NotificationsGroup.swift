@@ -31,8 +31,12 @@ struct NotificationsGroup: View {
         } header: {
             Text("Notifications")
         }
-        // The person may have changed it in System Settings since this window last opened.
+        // The person may have changed it in System Settings: when this window opens, and again each time the app comes back to the front,
+        // which is what happens on returning from System Settings with this window still open.
         .task { await meter.refreshNoticePermission() }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            Task { await meter.refreshNoticePermission() }
+        }
     }
 
     private var blockedRow: some View {
