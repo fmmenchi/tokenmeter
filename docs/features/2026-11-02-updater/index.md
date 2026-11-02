@@ -25,11 +25,11 @@ you keep. It can be turned off in Settings. It contacts one address, once a day,
 
 ## The nucleus
 
-| Part                | Page                      | Status |
-| :------------------ | :------------------------ | :----- |
-| Proposal            | [Proposal](./proposal.md) | chosen |
-| Implementation plan | not written yet           |        |
-| Decisions           | not written yet           |        |
+| Part                | Page                                  | Status   |
+| :------------------ | :------------------------------------ | :------- |
+| Proposal            | [Proposal](./proposal.md)             | chosen   |
+| Implementation plan | [Plan](./plan.md)                     | proposed |
+| Decisions           | [ADR 0011](../../adr/0011-updates.md) | proposed |
 
 ## Related
 
