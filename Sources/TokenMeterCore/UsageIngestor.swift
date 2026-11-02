@@ -2,9 +2,10 @@ import Foundation
 
 /// Puts what the sources see into the usage store (ADR 0010).
 ///
-/// It has sources of its own, not the snapshot's: the first pass reads every file the CLIs still keep, the next ones only what
-/// is new, and neither shares state with the collector that draws the panel, so the panel never waits for the store. Everything
-/// it writes is inserted under a unique key, so reading a file twice, or overlapping passes, change nothing.
+/// It has sources of its own, not the snapshot's: the first pass for a provider reads every file the CLIs still keep, and every
+/// pass after it, in this launch or the next, only the files changed since the last one finished (a little before it, to be safe).
+/// It shares no state with the collector that draws the panel, so the panel never waits for the store. Everything it writes is
+/// inserted under a unique key, so reading a file twice, or overlapping passes, change nothing.
 public final class UsageIngestor: @unchecked Sendable {
     public struct Summary: Equatable, Sendable {
         public var messages = 0
@@ -14,8 +15,7 @@ public final class UsageIngestor: @unchecked Sendable {
     private let sources: [any ProviderSource]
     private let store: UsageStore
     private let lock = NSLock()
-    private var firstPassDone = false
-    /// After the first pass, how far back a pass looks. Overlap is harmless and covers a pass that was missed.
+    /// How far before the last pass a pass looks. Overlap is harmless: it covers a clock that moved and a pass that was cut short.
     private let overlap: TimeInterval
 
     public init(sources: [any ProviderSource] = Providers.standard(), store: UsageStore, overlap: TimeInterval = 2 * 86_400) {
@@ -29,10 +29,11 @@ public final class UsageIngestor: @unchecked Sendable {
     public func ingest(now: Date = Date()) -> Summary {
         lock.lock()
         defer { lock.unlock() }
-        let since = firstPassDone ? now.addingTimeInterval(-overlap) : .distantPast
         var summary = Summary()
         for source in sources {
             let provider = source.info.provider
+            // A provider that was never read, a new one or a first launch, is read whole; any other, from its last pass.
+            let since = store.lastIngest(provider: provider).map { $0.addingTimeInterval(-overlap) } ?? .distantPast
             let reading = source.read(since: since)
 
             let messages = reading.events.compactMap { event -> UsageStore.Message? in
@@ -55,8 +56,9 @@ public final class UsageIngestor: @unchecked Sendable {
             }
             store.upsert(logged + live)
             summary.readings += logged.count + live.count
+            // Only once the provider was read to the end: a pass that stops halfway leaves the old mark, and the next starts there.
+            store.setLastIngest(now, provider: provider)
         }
-        firstPassDone = true
         return summary
     }
 }
