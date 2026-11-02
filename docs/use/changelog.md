@@ -10,7 +10,7 @@ What changed in each version, newest first. The update window and the panel noti
 
 ## 0.4.0 {#v0-4-0}
 
-Not released yet.
+Released on 2026-11-02.
 
 - **Notifications**, off until you turn them on: _almost out_ (under 10% left), _running low_ (under 30%) and _will run out before
   the reset_, each told once for a window and its reset ([Notifications](./notifications.md)).
