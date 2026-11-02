@@ -91,12 +91,9 @@ final class Meter {
         }
     }
 
-    /// Lowest known remaining fraction across providers, for the menu bar label.
-    var menuBarTitle: String {
-        let fractions = snapshot?.providers.flatMap(\.windows).compactMap(\.remainingFraction) ?? []
-        let percent = fractions.min().map { "\(Int(($0 * 100).rounded()))%" } ?? "tokenmeter"
-        return problems.isEmpty ? percent : "\(percent)  ▲ \(problems.count)"
-    }
+    /// Whether the menu bar item carries its dot: something the panel lists, and that is worth opening it for. The count and the
+    /// detail are in the panel; one figure across several providers says nothing about any of them, so the bar shows none.
+    var needsAttention: Bool { !problems.isEmpty }
 
     func refresh(userInitiated: Bool = false) async {
         guard !isRefreshing else { return }
