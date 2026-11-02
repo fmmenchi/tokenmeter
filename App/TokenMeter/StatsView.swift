@@ -39,17 +39,20 @@ struct StatsView: View {
                         .foregroundStyle(.secondary)
                 }
             } else if let snapshot = meter.snapshot {
+                // One card is open at a time; until the person chooses, the first.
+                let first = snapshot.providers.first?.provider.rawValue
+                let open = meter.openStatsCard ?? first
                 ForEach(snapshot.providers, id: \.provider) { provider in
                     StatsCard(snapshot: provider, stats: meter.stats.first { $0.provider == provider.provider },
-                              isExpanded: !meter.collapsedStats.contains(provider.provider.rawValue),
-                              onToggle: { meter.toggleStatsDetail(provider.provider.rawValue) })
+                              isExpanded: open == provider.provider.rawValue,
+                              onToggle: { meter.toggleStatsDetail(provider.provider.rawValue, defaultOpen: first) })
                 }
                 let shown = Set(snapshot.providers.map(\.provider))
                 let shares = UsageStats.crossProviders(meter.stats.filter { shown.contains($0.provider) })
                 if shares.count > 0 {
                     AllProvidersCard(shares: shares, titles: Dictionary(uniqueKeysWithValues: snapshot.providers.map { ($0.provider, $0.title) }),
-                                     isExpanded: !meter.collapsedStats.contains(Meter.allProvidersCard),
-                                     onToggle: { meter.toggleStatsDetail(Meter.allProvidersCard) })
+                                     isExpanded: open == Meter.allProvidersCard,
+                                     onToggle: { meter.toggleStatsDetail(Meter.allProvidersCard, defaultOpen: first) })
                 }
                 Text("Seen on this Mac. The quota is for the whole account; the tokens are only those this Mac counted.")
                     .font(.caption2).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
