@@ -29,7 +29,9 @@ are [ADRs](../adr), and its overview links them.
 
 ## In design and build
 
-Nothing at the moment.
+| Feature                                                                                                                                                                      | Date       | Pages                                                                                                             |
+| :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------- | :---------------------------------------------------------------------------------------------------------------- |
+| [Seasonal easter eggs](./2026-11-02-seasonal-easter-eggs/index.md): in the week of Halloween, Christmas and Easter, a small icon on the bars and a corner piece on the cards | 2026-11-02 | [Overview](./2026-11-02-seasonal-easter-eggs/index.md), [Proposal](./2026-11-02-seasonal-easter-eggs/proposal.md) |
 
 ## The pattern: from idea to implemented
 
