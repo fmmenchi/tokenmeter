@@ -149,6 +149,42 @@ final class ConfiguredSourceTests: XCTestCase {
         XCTAssertEqual(after.first?.usedPercent, 30)
     }
 
+    func testTheTokensAfterATurnLineBelongToItsModelAlsoAcrossReads() throws {
+        let dir = try tempDir()
+        let file = dir.appendingPathComponent("rollout-a.jsonl")
+        func count(_ ts: String, total: Int) -> String {
+            #"{"timestamp":"\#(ts)","type":"event_msg","payload":{"type":"token_count","info":{"total_token_usage":{"output_tokens":\#(total)}}}}"# + "\n"
+        }
+        func turn(_ ts: String, model: String?) -> String {
+            let model = model.map { #","model":"\#($0)""# } ?? ""
+            return #"{"timestamp":"\#(ts)","type":"turn_context","payload":{"cwd":"x"\#(model)}}"# + "\n"
+        }
+        try (count("2026-10-28T10:00:01.000Z", total: 10) + turn("2026-10-28T10:00:02.000Z", model: "gpt-6-astra")
+             + count("2026-10-28T10:00:03.000Z", total: 20) + turn("2026-10-28T10:00:04.000Z", model: nil)
+             + count("2026-10-28T10:00:05.000Z", total: 25) + turn("2026-10-28T10:00:06.000Z", model: "gpt-6-nova")
+             + count("2026-10-28T10:00:07.000Z", total: 30)).write(to: file, atomically: true, encoding: .utf8)
+        let config = """
+        {"id":"x","title":"X","windows":[60],
+         "log":{"root":"\(dir.path)","contains":"\\"token_count\\"","where":{"type":"event_msg","payload.type":"token_count"},"timestamp":"timestamp",
+                "context":{"contains":"\\"turn_context\\"","where":{"type":"turn_context"},"model":"payload.model"}},
+         "usage":{"mode":"cumulative","tokens":{"output":"payload.info.total_token_usage.output_tokens"}}}
+        """
+        let codex = try source(config)
+
+        let events = codex.read(since: epoch).events
+
+        XCTAssertEqual(events.map(\.tokens.output), [10, 10, 5, 5])
+        XCTAssertEqual(events.map(\.model), [nil, "gpt-6-astra", "gpt-6-astra", "gpt-6-nova"],
+                       "before any turn line there is no model, a turn line with none changes nothing, and a new one replaces it")
+
+        let handle = try FileHandle(forWritingTo: file)
+        try handle.seekToEnd()
+        try handle.write(contentsOf: Data(count("2026-10-28T10:00:08.000Z", total: 41).utf8))
+        try handle.close()
+        XCTAssertEqual(codex.read(since: epoch).events.last?.model, "gpt-6-nova", "the model is kept for the next read of the file")
+        XCTAssertEqual(codex.read(since: epoch).events.last?.tokens.output, 11)
+    }
+
     func testConfigReadsCumulativeUsageAndQuotaFromTheLog() throws {
         let dir = try tempDir()
         func line(_ ts: String, input: Int, cached: Int, out: Int, limits: String) -> String {
