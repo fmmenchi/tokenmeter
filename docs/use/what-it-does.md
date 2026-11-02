@@ -13,6 +13,7 @@ A small Mac app that shows, in the menu bar, how much of your **Claude** and **C
 - A **gauge icon** in the menu bar, and nothing else. A **dot** on its corner says that the panel lists a problem worth a look.
 - A **panel** when you click it: for each provider, a bar for the **5-hour window** and one for the
   **weekly window**, with the time to reset and the tokens used.
+- **Notifications**, if you turn them on, when a window is running out ([Notifications](./notifications.md)).
 - A **chart icon** that switches the panel to the **stats**: how each window ended, whether you hit the ceiling and which models used
   the tokens ([Reading the Stats](./stats.md)). The panel always opens on the current quota.
 - Optionally the same bars as a **desktop widget**.
