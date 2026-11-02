@@ -22,7 +22,8 @@ settings of the CLIs, which the App Store sandbox does not allow.
 2. Drag `TokenMeter.app` to `/Applications` and open it.
 3. A gauge icon appears in the menu bar. There is no Dock icon.
 
-To update, quit the app, drag the new `TokenMeter.app` over the old one in `/Applications` and open it. Your settings and the history the stats
+From the first version with updates, the app updates itself ([Updates](./updates.md)). Until then, or if you turned that off, quit
+the app, drag the new `TokenMeter.app` over the old one in `/Applications` and open it. Your settings and the history the stats
 are drawn from stay where they are.
 
 To build it yourself instead, follow [Build and Run](../develop/build-and-run.md), which needs Xcode, XcodeGen and an Apple
