@@ -9,9 +9,9 @@ final class UsageIngestorTests: XCTestCase {
         return url
     }
 
-    private func claude(logs: URL, quota: URL) throws -> ConfiguredSource {
+    private func claude(logs: URL, quota: URL, id: String = "claude") throws -> ConfiguredSource {
         let json = """
-        {"id":"claude","title":"Claude","windows":[300,10080],
+        {"id":"\(id)","title":"Claude","windows":[300,10080],
          "log":{"root":"\(logs.path)","contains":"\\"usage\\":","where":{"type":"assistant"},"timestamp":"timestamp"},
          "usage":{"mode":"perEvent","dedupeBy":["message.id","requestId"],"model":"message.model",
            "tokens":{"input":"message.usage.input_tokens","output":"message.usage.output_tokens"}},
@@ -80,6 +80,41 @@ final class UsageIngestorTests: XCTestCase {
         try append(line("2026-10-28T11:00:00.000Z", id: "m2", output: 5) + "\n", to: file)
         XCTAssertEqual(rig.ingestor.ingest(now: now).messages, 1, "only the new line")
         XCTAssertEqual(rig.store.messageCount(), 2)
+    }
+
+    func testALaterLaunchReadsOnlyWhatChangedSinceTheLastPass() throws {
+        let rig = try rig()
+        let first = LogDate.parse("2026-10-29T00:00:00.000Z")!
+        try append(line("2026-10-28T10:00:00.000Z", id: "m1", output: 10) + "\n", to: rig.logs.appendingPathComponent("a.jsonl"))
+        XCTAssertEqual(rig.ingestor.ingest(now: first).messages, 1)
+        XCTAssertEqual(rig.store.lastIngest(provider: .claude), first, "the pass left its mark")
+
+        // A file nobody touched since long before the mark, which only a full read would find, and one written since.
+        let ancient = rig.logs.appendingPathComponent("ancient.jsonl")
+        try append(line("2026-01-05T10:00:00.000Z", id: "old", output: 4) + "\n", to: ancient)
+        try FileManager.default.setAttributes([.modificationDate: Date(timeIntervalSince1970: 1_767_000_000)], ofItemAtPath: ancient.path)
+        try append(line("2026-10-29T09:00:00.000Z", id: "m2", output: 5) + "\n", to: rig.logs.appendingPathComponent("b.jsonl"))
+
+        let relaunched = UsageIngestor(sources: [try claude(logs: rig.logs, quota: rig.quota)], store: rig.store)
+        let later = LogDate.parse("2026-10-30T00:00:00.000Z")!
+        XCTAssertEqual(relaunched.ingest(now: later).messages, 1, "only the file that changed since the last pass")
+        XCTAssertEqual(rig.store.messageCount(), 2)
+        XCTAssertEqual(rig.store.lastIngest(provider: .claude), later)
+    }
+
+    func testAProviderThatWasNeverReadIsReadWholeEvenAfterOthersWere() throws {
+        let rig = try rig()
+        let now = LogDate.parse("2026-10-29T00:00:00.000Z")!
+        let ancient = rig.logs.appendingPathComponent("ancient.jsonl")
+        try append(line("2026-01-05T10:00:00.000Z", id: "old", output: 4) + "\n", to: ancient)
+        try FileManager.default.setAttributes([.modificationDate: Date(timeIntervalSince1970: 1_767_000_000)], ofItemAtPath: ancient.path)
+        XCTAssertEqual(rig.ingestor.ingest(now: now).messages, 1)
+
+        // Another account on the same Mac, added later to providers.json: it has no mark, so its old files count.
+        let second = UsageIngestor(sources: [try claude(logs: rig.logs, quota: rig.quota, id: "claude-work")], store: rig.store)
+        XCTAssertEqual(second.ingest(now: now).messages, 1)
+        XCTAssertEqual(rig.store.messageCount(provider: Provider(rawValue: "claude-work")), 1)
+        XCTAssertEqual(rig.store.lastIngest(provider: Provider(rawValue: "claude-work")), now)
     }
 
     func testTwoIngestorsOverTheSameFilesDoNotDoubleTheCount() throws {

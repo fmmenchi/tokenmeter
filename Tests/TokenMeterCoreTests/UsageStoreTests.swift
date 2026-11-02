@@ -144,7 +144,44 @@ final class UsageStoreTests: XCTestCase {
         XCTAssertEqual(sqlite3_prepare_v2(raw, "PRAGMA user_version", -1, &statement, nil), SQLITE_OK)
         defer { sqlite3_finalize(statement) }
         XCTAssertEqual(sqlite3_step(statement), SQLITE_ROW)
-        XCTAssertEqual(Int(sqlite3_column_int64(statement, 0)), 2)
+        XCTAssertEqual(Int(sqlite3_column_int64(statement, 0)), UsageStore.schemaVersion)
+    }
+
+    func testWhenAProviderWasLastReadIsKeptForEachProvider() throws {
+        let url = try fileURL()
+        let store = try UsageStore(url: url)
+        XCTAssertNil(store.lastIngest(provider: claude))
+        store.setLastIngest(Date(timeIntervalSince1970: 1_000), provider: claude)
+        store.setLastIngest(Date(timeIntervalSince1970: 2_000), provider: chatgpt)
+        store.setLastIngest(Date(timeIntervalSince1970: 3_000), provider: claude)
+        XCTAssertEqual(store.lastIngest(provider: claude), Date(timeIntervalSince1970: 3_000), "the later mark replaces the earlier")
+        XCTAssertEqual(store.lastIngest(provider: chatgpt), Date(timeIntervalSince1970: 2_000))
+        XCTAssertEqual(try UsageStore(url: url).lastIngest(provider: claude), Date(timeIntervalSince1970: 3_000), "kept across opens")
+    }
+
+    func testAFileOfVersionTwoGainsTheTableOfWhatWasLastRead() throws {
+        let url = try fileURL()
+        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        var db: OpaquePointer?
+        XCTAssertEqual(sqlite3_open(url.path, &db), SQLITE_OK)
+        let sql = """
+            CREATE TABLE messages(provider TEXT NOT NULL, key TEXT NOT NULL, at REAL NOT NULL, model TEXT, input INTEGER NOT NULL,
+              output INTEGER NOT NULL, cache_read INTEGER NOT NULL, cache_write INTEGER NOT NULL, PRIMARY KEY(provider, key)) WITHOUT ROWID;
+            CREATE TABLE readings(provider TEXT NOT NULL, window_minutes INTEGER NOT NULL, scope TEXT NOT NULL, resets_at INTEGER NOT NULL,
+              used_percent REAL NOT NULL, first_observed REAL, last_observed REAL, source TEXT NOT NULL,
+              PRIMARY KEY(provider, window_minutes, scope, resets_at)) WITHOUT ROWID;
+            INSERT INTO messages VALUES('claude', 'k', 100, 'm', 1, 2, 3, 4);
+            PRAGMA user_version = 2;
+            """
+        XCTAssertEqual(sqlite3_exec(db, sql, nil, nil, nil), SQLITE_OK)
+        sqlite3_close(db)
+
+        let store = try UsageStore(url: url)
+
+        XCTAssertEqual(store.messageCount(), 1, "what was kept stays")
+        XCTAssertNil(store.lastIngest(provider: claude), "and nothing says it was read, so the next pass reads everything once")
+        store.setLastIngest(Date(timeIntervalSince1970: 5), provider: claude)
+        XCTAssertEqual(store.lastIngest(provider: claude), Date(timeIntervalSince1970: 5))
     }
 
     func testClosingAndOpeningAgainKeepsEverything() throws {

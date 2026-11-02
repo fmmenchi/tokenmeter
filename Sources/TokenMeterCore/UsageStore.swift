@@ -10,7 +10,7 @@ import SQLite3
 ///
 /// One object serialises its calls, so a writer on a background queue and the panel reading do not meet.
 public final class UsageStore: @unchecked Sendable {
-    public static let schemaVersion = 2
+    public static let schemaVersion = 3
     /// Two readings of the same window can name a reset time that differs by a second or two, and a rounding to the minute
     /// splits them when they fall either side of a boundary: those within this many seconds are one window. Different windows
     /// of one length are at least five hours apart.
@@ -123,11 +123,33 @@ public final class UsageStore: @unchecked Sendable {
                   provider TEXT NOT NULL, window_minutes INTEGER NOT NULL, scope TEXT NOT NULL, resets_at INTEGER NOT NULL,
                   used_percent REAL NOT NULL, first_observed REAL, last_observed REAL, source TEXT NOT NULL,
                   PRIMARY KEY(provider, window_minutes, scope, resets_at)) WITHOUT ROWID;
+                CREATE TABLE IF NOT EXISTS meta(key TEXT PRIMARY KEY, value TEXT NOT NULL) WITHOUT ROWID;
                 PRAGMA user_version = \(Self.schemaVersion);
                 """)
-        } else if version == 1 {
+        } else if version < Self.schemaVersion {
+            // From a file of an earlier version: the table of what was last read, which that version did not have.
+            try exec("CREATE TABLE IF NOT EXISTS meta(key TEXT PRIMARY KEY, value TEXT NOT NULL) WITHOUT ROWID")
             try exec("PRAGMA user_version = \(Self.schemaVersion)")
         }
+    }
+
+    // MARK: What was last read
+
+    /// When the last complete pass over a provider's files started, so the next launch reads only what changed since and not
+    /// everything again; nil when none ever finished (ADR 0010).
+    public func lastIngest(provider: Provider) -> Date? {
+        lock.lock()
+        defer { lock.unlock() }
+        return rows("SELECT value FROM meta WHERE key = ?", binds: ["last_ingest." + provider.rawValue]) {
+            Double(String(cString: sqlite3_column_text($0, 0))).map { Date(timeIntervalSince1970: $0) }
+        }.first ?? nil
+    }
+
+    public func setLastIngest(_ date: Date, provider: Provider) {
+        lock.lock()
+        defer { lock.unlock() }
+        run("INSERT INTO meta(key, value) VALUES(?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+            ["last_ingest." + provider.rawValue, String(date.timeIntervalSince1970)])
     }
 
     /// Version 1 keyed a window by its reset time rounded to the minute, which split one window into two when the time fell
