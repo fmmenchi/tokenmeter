@@ -23,13 +23,12 @@ are [ADRs](../adr), and its overview links them.
 | [Pace on the bars](./2026-11-01-pace-on-bars/index.md): a mark on the bar says whether the quota lasts, a hover says when it runs out | 2026-11-01 | [Overview](./2026-11-01-pace-on-bars/index.md), [Proposal](./2026-11-01-pace-on-bars/proposal.md), [Implementation plan](./2026-11-01-pace-on-bars/plan.md)                      |
 | [Settings switches](./2026-11-01-settings-switches/index.md): a switch hides a provider, a switch for each window under it            | 2026-11-01 | [Overview](./2026-11-01-settings-switches/index.md), [Proposal](./2026-11-01-settings-switches/proposal.md)                                                                      |
 | [Usage stats](./2026-11-02-usage-stats/index.md): a second view in the panel, from facts the app has seen, no estimates               | 2026-11-02 | [Overview](./2026-11-02-usage-stats/index.md), [Proposal](./2026-11-02-usage-stats/proposal.md), [Implementation plan](./2026-11-02-usage-stats/plan.md)                         |
+| [Menu bar: icon only](./2026-11-02-menu-bar-icon-only/index.md): the bar is the icon, a dot says it is worth a look                   | 2026-11-02 | [Overview](./2026-11-02-menu-bar-icon-only/index.md), [Proposal](./2026-11-02-menu-bar-icon-only/proposal.md), [Implementation plan](./2026-11-02-menu-bar-icon-only/plan.md)    |
+| [Updates](./2026-11-02-updater/index.md): the app tells you about a new version and installs it, widget included                      | 2026-11-02 | [Overview](./2026-11-02-updater/index.md), [Proposal](./2026-11-02-updater/proposal.md), [Implementation plan](./2026-11-02-updater/plan.md)                                     |
 
 ## In design and build
 
-| Feature                                                                                                             | Date       | Pages                                                                                                                                                                         |
-| :------------------------------------------------------------------------------------------------------------------ | :--------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Menu bar: icon only](./2026-11-02-menu-bar-icon-only/index.md): the bar is the icon, a dot says it is worth a look | 2026-11-02 | [Overview](./2026-11-02-menu-bar-icon-only/index.md), [Proposal](./2026-11-02-menu-bar-icon-only/proposal.md), [Implementation plan](./2026-11-02-menu-bar-icon-only/plan.md) |
-| [Updates](./2026-11-02-updater/index.md): the app tells you about a new version and installs it, widget included    | 2026-11-02 | [Overview](./2026-11-02-updater/index.md), [Proposal](./2026-11-02-updater/proposal.md), [Implementation plan](./2026-11-02-updater/plan.md)                                  |
+Nothing at the moment.
 
 ## The pattern: from idea to implemented
 

@@ -10,7 +10,7 @@ What changed in each version, newest first. The update window and the panel noti
 
 ## 0.3.0 {#v0-3-0}
 
-Not released yet.
+Released on 2026-11-02. It is the first version that updates itself, so it is installed by hand over v0.2.0 or v0.1.0.
 
 - **The app updates itself.** It looks once a day, tells you, and installs when you agree; there is a switch and a **Check now** in
   Settings ([Updates](./updates.md)).
