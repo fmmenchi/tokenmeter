@@ -12,6 +12,8 @@ packages:
 settings:
   base:
     SWIFT_VERSION: '6.0'
+    MARKETING_VERSION: '0.3.0'
+    CURRENT_PROJECT_VERSION: '2'
     CODE_SIGN_STYLE: Automatic
 targets:
   TokenMeter:
@@ -35,6 +37,8 @@ targets:
       path: App/TokenMeter/Info.plist
       properties:
         LSUIElement: true
+        CFBundleShortVersionString: '$(MARKETING_VERSION)'
+        CFBundleVersion: '$(CURRENT_PROJECT_VERSION)'
         AppGroupIdentifier: '$(TeamIdentifierPrefix)tokenmeter'
     settings:
       base:
@@ -56,6 +60,8 @@ targets:
     info:
       path: Widget/TokenMeterWidget/Info.plist
       properties:
+        CFBundleShortVersionString: '$(MARKETING_VERSION)'
+        CFBundleVersion: '$(CURRENT_PROJECT_VERSION)'
         AppGroupIdentifier: '$(TeamIdentifierPrefix)tokenmeter'
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
