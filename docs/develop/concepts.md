@@ -21,8 +21,9 @@ that looks live is worse than an empty bar.
 
 ### 2. Read, do not call
 
-tokenmeter holds no credentials and makes no network request. It reads files the two CLIs already
-leave on disk. The cost is freshness, since the files move only while a CLI runs, and
+tokenmeter holds no credentials and requests no data from the network. It reads files the two CLIs already
+leave on disk. (The one request it makes, once a day, is for the list of versions, for the updates of
+[ADR 0011](../adr/0011-updates.md).) The cost is freshness, since the files move only while a CLI runs, and
 [ADR 0001](../adr/0001-app-architecture.md) accepts that trade.
 
 ### 3. Collect in one place, render in another
