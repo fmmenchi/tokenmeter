@@ -39,7 +39,9 @@ struct StatsView: View {
                 }
             } else if let snapshot = meter.snapshot {
                 ForEach(snapshot.providers, id: \.provider) { provider in
-                    StatsCard(snapshot: provider, stats: meter.stats.first { $0.provider == provider.provider })
+                    StatsCard(snapshot: provider, stats: meter.stats.first { $0.provider == provider.provider },
+                              isExpanded: meter.expandedStats.contains(provider.provider.rawValue),
+                              onToggle: { meter.toggleStatsDetail(provider.provider.rawValue) })
                 }
                 Text("Seen on this Mac. The quota is for the whole account; the tokens are only those this Mac counted.")
                     .font(.caption2).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
@@ -54,25 +56,43 @@ struct StatsView: View {
 private struct StatsCard: View {
     let snapshot: ProviderSnapshot
     let stats: ProviderStats?
+    let isExpanded: Bool
+    let onToggle: () -> Void
 
     /// The windows the provider has now: a plan without the 5 hours does not list them.
     private var windowNames: Set<String> { Set(snapshot.windows.map(\.window).filter { $0.scope == nil }.map(\.name)) }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 6) {
-                Text(snapshot.title).font(.subheadline.weight(.semibold))
-                if let plan = snapshot.plan {
-                    Text(plan).font(.caption.weight(.medium)).padding(.horizontal, 6).padding(.vertical, 1)
-                        .background(Capsule().fill(Color.primary.opacity(0.12)))
+            // The title row is the button for the keyboard and for screen readers; a click anywhere on the card does the same.
+            Button(action: onToggle) {
+                HStack(spacing: 6) {
+                    Text(snapshot.title).font(.subheadline.weight(.semibold))
+                    if let plan = snapshot.plan {
+                        Text(plan).font(.caption.weight(.medium)).padding(.horizontal, 6).padding(.vertical, 1)
+                            .background(Capsule().fill(Color.primary.opacity(0.12)))
+                    }
+                    Spacer()
+                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down").font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
                 }
+                .contentShape(Rectangle())
             }
+            .buttonStyle(.plain)
+            .help(isExpanded ? "Hide the detail" : "Show the detail")
+            .accessibilityLabel("\(snapshot.title): \(isExpanded ? "hide" : "show") the detail")
             if let stats, stats.since != nil || stats.windows.contains(where: { $0.closed > 0 }) {
-                ForEach(stats.windows.filter { windowNames.contains($0.name) }, id: \.windowMinutes) { WindowHistory(stats: $0) }
-                ModelList(models: stats.models)
-                if let since = stats.since {
-                    Text("Kept since \(since, format: .dateTime.month(.abbreviated).day().year())")
-                        .font(.caption2).foregroundStyle(.secondary)
+                ForEach(stats.windows.filter { windowNames.contains($0.name) }, id: \.windowMinutes) {
+                    WindowHistory(stats: $0, showsRows: isExpanded)
+                }
+                if isExpanded {
+                    ModelList(models: stats.models)
+                    if let since = stats.since {
+                        Text("Kept since \(since, format: .dateTime.month(.abbreviated).day().year())")
+                            .font(.caption2).foregroundStyle(.secondary)
+                    }
+                } else if let line = modelLine(stats.models) {
+                    Text(line).font(.caption2).foregroundStyle(.secondary).lineLimit(1)
                 }
             } else {
                 Text("Nothing is kept for \(snapshot.title) yet.").font(.caption).foregroundStyle(.secondary)
@@ -83,12 +103,16 @@ private struct StatsCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(RoundedRectangle(cornerRadius: 10).fill(Color.primary.opacity(0.07)))
         .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(Color.primary.opacity(0.1)))
+        // The whole card opens and closes, not only its title row; a button inside it (the models' "more") keeps its own click.
+        .contentShape(RoundedRectangle(cornerRadius: 10))
+        .onTapGesture(perform: onToggle)
     }
 }
 
-/// How the last windows of one length ended, newest first, and whether the ceiling was reached.
+/// How the last windows of one length ended, newest first, and whether the ceiling was reached. Closed, it is the one line.
 private struct WindowHistory: View {
     let stats: WindowStats
+    let showsRows: Bool
 
     private var label: String { WindowSpec(name: stats.name, duration: 0).label }
 
@@ -99,7 +123,7 @@ private struct WindowHistory: View {
                 Spacer()
                 summary
             }
-            ForEach(stats.outcomes, id: \.resetsAt) { OutcomeRow(outcome: $0) }
+            if showsRows { ForEach(stats.outcomes, id: \.resetsAt) { OutcomeRow(outcome: $0) } }
         }
     }
 
@@ -132,6 +156,16 @@ private struct OutcomeRow: View {
         .help(outcome.approximate
               ? "The last reading was a good while before the window ended, so it may have ended with less."
               : "The highest use seen in this window.")
+    }
+}
+
+extension StatsCard {
+    /// The closed card's line for the models: the first three and what is behind them, "Opus 77% · Sonnet 14% · Fable 9% · 2 more".
+    fileprivate func modelLine(_ models: ModelBreakdown) -> String? {
+        guard models.total > 0 else { return nil }
+        let shown = models.shown.map { "\($0.name) \(Int(($0.fraction * 100).rounded()))%" }
+        let rest = models.more.count + (models.other == nil ? 0 : 1)
+        return (shown + (rest > 0 ? ["\(rest) more"] : [])).joined(separator: " · ")
     }
 }
 
