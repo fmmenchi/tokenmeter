@@ -106,6 +106,10 @@ the stats view are new. The Views gain the Stats view of the panel and the panel
 - **The model of a Codex turn was built** (step 6) and gives five names on the author's Mac.
 - **The migration ran on the author's `providers.json`** the first time a probe loaded it, and added only the new fields, with
   the file as it was kept as the backup.
+- **The design changed after the first merge.** The window A was liked better than the panel alone, so the stats cards open on a
+  click to the view of A: a verdict (from percentages, with the rules in the ADR), a ring of the models and a card for all providers.
+  A real look at the running panel also found a weekly window of ChatGPT shown twice (a reset time rounded to the minute) and a text
+  that was cut; both were fixed, the first with a repair of the file when it is opened.
 - Step 3 went in two commits, the types and then the reading, so that each stayed at three files.
 
 ## What is not known
