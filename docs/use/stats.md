@@ -10,6 +10,8 @@ What the stats view of the panel says, and what it leaves out on purpose.
 
 ## Open it
 
+![The stats view of the panel: a range control, the first card open with its verdict and a ring of the models, the second card closed to a line for each window, and the card for all providers](../assets/stats.png)
+
 The row of icons at the bottom of the panel has a chart. Click it and the panel shows the stats instead of the current
 quota; the icon becomes a gauge, and a click on it takes you back. The panel remembers which one you left it on.
 
