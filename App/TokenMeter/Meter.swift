@@ -27,10 +27,8 @@ final class Meter {
     private(set) var isIngesting = false
     /// False when the store could not be opened: the stats view says so, and nothing else depends on it.
     private(set) var storeAvailable = false
-    /// Which view the panel shows. Kept across launches.
-    var showsStats = UserDefaults.standard.bool(forKey: Meter.showsStatsKey) {
-        didSet { UserDefaults.standard.set(showsStats, forKey: Meter.showsStatsKey) }
-    }
+    /// Which view the panel shows. Not kept: the panel opens on the current quota, and the stats are one click away.
+    var showsStats = false
     var statsRange = StatsRange(rawValue: UserDefaults.standard.string(forKey: Meter.statsRangeKey) ?? "") ?? .quarter {
         didSet { UserDefaults.standard.set(statsRange.rawValue, forKey: Meter.statsRangeKey) }
     }
@@ -45,7 +43,6 @@ final class Meter {
     private var lastStatsAt = Date.distantPast
     private let usageStore: UsageStore?
     private let ingestor: UsageIngestor?
-    private static let showsStatsKey = "panelShowsStats"
     private static let statsRangeKey = "statsRange"
     private static let openStatsCardKey = "statsOpenCard"
     /// The id of the card for all providers, next to the ids of the providers.

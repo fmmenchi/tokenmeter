@@ -56,6 +56,8 @@ struct MenuContent: View {
         }
         .padding(12)
         .frame(width: 300)
+        // Every time the panel opens it shows the current quota: the stats are for when they are asked for.
+        .onAppear { meter.showsStats = false }
         .task { await meter.refresh() }
     }
 
