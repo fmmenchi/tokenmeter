@@ -31,7 +31,14 @@ this page is what stays. The notification itself is drawn by macOS, not by the a
   the reset; when a window resets the notices arm again.
 - **Only what you show.** A window or a provider you turned off in Settings does not notify.
 - **Only a recent reading.** A figure the app marks with "~" because it is old does not notify: it may already have changed.
-- **One line, no emoji**: "Claude · Weekly: 9% left, resets in 2d 6h".
+- **One line, no emoji**: a title "Claude · Weekly" and under it "9% left · resets in 2d 6h".
+- **One notice at a time for a window.** When several are due at once, only the most urgent is shown, in the order _almost out_,
+  _will run out_, _running low_; the others due at that moment count as told. A jump from 50% to 8% says "almost out" once, not
+  three times.
+- **A switch that is off tells nothing and remembers nothing**: turning it on later tells whatever is still due, so turning one on at
+  25% tells it at once, because it is true.
+- **Told once is kept**, for each window and reset, and forgotten a day after the reset. Nothing is told while macOS has the
+  permission denied; Settings says so.
 - **No network, no credentials.**
 
 ## Decisions that were proposed and not answered
