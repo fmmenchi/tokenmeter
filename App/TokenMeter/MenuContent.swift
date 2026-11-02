@@ -7,6 +7,9 @@ struct MenuContent: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
+            if case .available(let version, let notes) = meter.updater.state {
+                UpdateNotice(version: version, notes: notes) { meter.updater.checkNow() }
+            }
             ForEach(meter.problems) { problem in
                 ProblemBanner(
                     problem: problem, topicTitle: title(of: problem.topic), fix: meter.fixDescriptor(for: problem),
