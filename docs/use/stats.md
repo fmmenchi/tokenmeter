@@ -21,10 +21,11 @@ always the latest few (four for a month, six for the longer ranges, eight for th
 
 ## A card for each provider, closed or open
 
-Each provider that is on has a card, in the order of Settings. A card is **open** to its detail: the verdict, the windows that ended
-and the models as a ring. **A click anywhere on a card closes it** to one line for each window (what the app saw) and one for the
-models, and which cards are closed is remembered. **All providers** is a card of its own: open, the models under their provider,
-indented, against one total; closed, a bar.
+Each provider that is on has a card, in the order of Settings. **One card is open at a time**, so the panel keeps a height that
+fits the screen: the first one until you choose, then the one you opened last, which the panel remembers. Open, a card has the
+verdict, the windows that ended and the models as a ring; closed, one line for each window (what the app saw) and one for the models.
+**A click anywhere on a card opens it and closes the one that was open**, and a click on the open one closes it. **All providers** is a
+card of its own, and counts as one of them: open, the models under their provider, indented, against one total; closed, a bar.
 
 ### The verdict
 

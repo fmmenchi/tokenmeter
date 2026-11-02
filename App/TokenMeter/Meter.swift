@@ -35,18 +35,20 @@ final class Meter {
             computeStatsInBackground()
         }
     }
-    /// The stats cards the person closed to one line for each window; every other card is open to its detail. Kept across launches.
-    private(set) var collapsedStats = Set(UserDefaults.standard.stringArray(forKey: Meter.collapsedStatsKey) ?? [])
-    func toggleStatsDetail(_ card: String) {
-        if collapsedStats.contains(card) { collapsedStats.remove(card) } else { collapsedStats.insert(card) }
-        UserDefaults.standard.set(Array(collapsedStats).sorted(), forKey: Meter.collapsedStatsKey)
+    /// The one stats card that is open to its detail, so the panel keeps a height that fits the screen: opening another closes this
+    /// one, and a click on it closes it. Nil until the person chooses, and then the first card is open; "" is none. Kept across launches.
+    private(set) var openStatsCard = UserDefaults.standard.string(forKey: Meter.openStatsCardKey)
+    func toggleStatsDetail(_ card: String, defaultOpen: String?) {
+        let current = openStatsCard ?? defaultOpen
+        openStatsCard = current == card ? "" : card
+        UserDefaults.standard.set(openStatsCard, forKey: Meter.openStatsCardKey)
     }
     private let usageStore: UsageStore?
     private let ingestor: UsageIngestor?
     private static let showsStatsKey = "panelShowsStats"
     private static let statsRangeKey = "statsRange"
-    private static let collapsedStatsKey = "statsCollapsedCards"
-    /// The id under which the card for all providers is kept open or closed, next to the ids of the providers.
+    private static let openStatsCardKey = "statsOpenCard"
+    /// The id of the card for all providers, next to the ids of the providers.
     static let allProvidersCard = "all-providers"
 
     enum FixState: Equatable {
