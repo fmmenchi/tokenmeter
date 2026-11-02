@@ -15,5 +15,6 @@ struct ProviderCard: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(RoundedRectangle(cornerRadius: 10).fill(Color.primary.opacity(0.07)))
             .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(Color.primary.opacity(0.1)))
+            .easterEggCorner()
     }
 }

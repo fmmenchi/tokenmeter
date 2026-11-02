@@ -74,6 +74,7 @@ struct QuotaBar: View {
     let tint: Color
     var height: CGFloat = 10
     var mark: Pace?
+    @Environment(\.easterEgg) private var easterEgg
 
     var body: some View {
         GeometryReader { proxy in
@@ -88,7 +89,10 @@ struct QuotaBar: View {
             // The mark is drawn over the bar and takes no part in its size. Inside the same stack it made the stack taller than the
             // bar and the track and the fill, which are flexible, grew with it: a bar with a mark was 14 points thick, one without 10.
             .overlay(alignment: .leading) {
-                if let mark {
+                if let mark, let easterEgg, !mark.runsOut, height >= EasterEggMark.size / 2 {
+                    EasterEggMark(egg: easterEgg, position: mark.aheadFraction, barWidth: proxy.size.width)
+                        .accessibilityLabel("Where a steady use would put the bar")
+                } else if let mark {
                     Capsule().fill(mark.runsOut ? Color.orange : Color.primary)
                         .frame(width: 2, height: proxy.size.height + 4)
                         .background(Capsule().fill(Color(nsColor: .windowBackgroundColor)).padding(-1))
