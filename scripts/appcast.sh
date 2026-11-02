@@ -37,7 +37,6 @@ sign=${SIGN_UPDATE:-$(ls .build/xcode/SourcePackages/artifacts/sparkle/Sparkle/b
 [ -x "$sign" ] || { echo "Sparkle's sign_update was not found: build the app once with xcodebuild" >&2; exit 1; }
 signature=$("$sign" "$zip")   # sparkle:edSignature="..." length="..."
 
-anchor="v$(echo "$version" | tr . -)"
 date=$(LC_ALL=C date -u +"%a, %d %b %Y %H:%M:%S +0000")
 out=${OUT_DIR:-dist}/appcast.xml
 mkdir -p "$(dirname "$out")"
@@ -52,7 +51,7 @@ cat > "$out" <<XML
       <sparkle:version>$build</sparkle:version>
       <sparkle:shortVersionString>$version</sparkle:shortVersionString>
       <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <sparkle:releaseNotesLink>$site/use/changelog#$anchor</sparkle:releaseNotesLink>
+      <sparkle:releaseNotesLink>$site/release-notes/v$version.html</sparkle:releaseNotesLink>
       <enclosure url="$repo/releases/download/v$version/$(basename "$zip")" type="application/octet-stream" $signature/>
     </item>
   </channel>
