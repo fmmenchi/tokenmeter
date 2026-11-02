@@ -13,8 +13,8 @@ Gate: `pnpm run check`. Spike: `swift run tokenmeter-probe`.
 ## Open decisions
 
 - **Claude remaining quota** — comes from the status line (ADR 0002); stale until a session runs.
-- **Updates** — built with Sparkle ([ADR 0011](./docs/adr/0011-updates.md)), not released: the signing key was made on 2026-11-02 and its public half is in `project.yml`; a backup copy of the private half was made by the author in a password manager (not verified by the agent), and unverified are the widget refreshing after a real update, the check started from the menu with a click and a download with Gatekeeper's quarantine are unverified.
-- **Notarized release** — v0.2.0 is published, signed and notarized (ADR 0008); the widget was verified on the author's Mac with the Developer ID build, and the double click on another Mac is unverified.
+- **Updates** — Sparkle ([ADR 0011](./docs/adr/0011-updates.md)), released in v0.3.0 (2026-11-02), the first version that can update itself and so installed by hand; the signing key's public half is in `project.yml` and a backup of the private half was made by the author in a password manager (not verified by the agent). Unverified: the widget refreshing after a real update, the check started from the menu with a click, a download with Gatekeeper's quarantine, a migration run by a real update, and the feed read by the app itself (curl read it).
+- **Notarized release** — v0.3.0 is published, signed and notarized (ADR 0008); the widget was verified on the author's Mac with the Developer ID build of v0.2.0, and the double click on another Mac is unverified.
 
 ## Topic index (`.agents/doc/`)
 
