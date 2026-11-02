@@ -8,6 +8,13 @@ sidebar_position: 10
 
 What changed in each version, newest first. The update window and the panel notice open this page at the version they offer.
 
+## 0.4.0 {#v0-4-0}
+
+Not released yet.
+
+- **Notifications**, off until you turn them on: _almost out_ (under 10% left), _running low_ (under 30%) and _will run out before
+  the reset_, each told once for a window and its reset ([Notifications](./notifications.md)).
+
 ## 0.3.0 {#v0-3-0}
 
 Released on 2026-11-02. It is the first version that updates itself, so it is installed by hand over v0.2.0 or v0.1.0.

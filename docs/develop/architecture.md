@@ -49,6 +49,10 @@ How the pieces fit, where each file goes and which rules keep it that way. The r
    (messages and readings of a window) with a unique key each. `UsageStats` draws the stats view from that file with pure
    functions, never from the logs ([ADR 0010](../adr/0010-the-usage-store.md)). The widget does not read the store.
 
+6. **Telling.** After each snapshot, if a notice is on and macOS allows it, `Meter` calls `LimitNotices.evaluate` with the snapshot it
+   draws, keeps the ledger it returns in the user defaults and hands each due notice to `Notifier`, which posts it to the system
+   ([ADR 0012](../adr/0012-limit-notices.md)). The rule is in the core; the widget does not read the ledger.
+
 ## The window maths
 
 For each window a provider declares (`5h`, `7d`), the builder sums the tokens whose date falls inside
