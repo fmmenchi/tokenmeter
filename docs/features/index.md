@@ -28,7 +28,9 @@ are [ADRs](../adr), and its overview links them.
 
 ## In design and build
 
-Nothing at the moment.
+| Feature                                                                                                                     | Date       | Pages                                                                                               |
+| :-------------------------------------------------------------------------------------------------------------------------- | :--------- | :-------------------------------------------------------------------------------------------------- |
+| [Notifications](./2026-11-02-notifications/index.md): a notice when a window is running out, once for each window and reset | 2026-11-02 | [Overview](./2026-11-02-notifications/index.md), [Proposal](./2026-11-02-notifications/proposal.md) |
 
 ## The pattern: from idea to implemented
 
