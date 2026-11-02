@@ -46,8 +46,8 @@ on the desktop was not. If the widget stays empty with the app running, look for
 ## Problems the app reports
 
 The app looks for these itself and lists each one in the panel with **Dismiss** and **Learn more**; a chip with the count
-sits beside the provider in the widget and the panel, and the total follows the percentage in the menu bar. **Dismiss**
-hides a problem until its message changes.
+sits beside the provider in the widget and the panel, and a dot on the menu-bar icon says there is at least one. **Dismiss**
+hides a problem until its message changes, and the dot goes with it.
 
 | Problem                              | Topic   | Cause                                                                    | Fix                                                                                                       |
 | :----------------------------------- | :------ | :----------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------- |
