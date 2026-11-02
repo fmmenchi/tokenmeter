@@ -4,9 +4,9 @@ Status: accepted (2026-11-02, with the plan of the [usage stats](../features/202
 
 ## Context
 
-The app holds the last reading and re-reads logs that the CLIs keep for a while: Claude Code prunes its own, and the oldest
-log on the author's Mac is a month old, Codex's a week. Nothing says how a window ended, or which models used the tokens, once
-a log is gone. The statistics need a past, and the past can only be kept by writing it down when it is seen.
+The app holds the last reading and re-reads logs that the CLIs keep for a while: the oldest Claude file on the author's Mac is a
+month old (though a resumed session carries older messages, back to July), Codex's a week. Nothing says how a window ended, or
+which models used the tokens, once a log is gone. The statistics need a past, and the past can only be kept by writing it down when it is seen.
 
 Checked on 2026-11-02 against the author's files, reading only field names, dates and numbers:
 
@@ -55,14 +55,19 @@ Checked on 2026-11-02 against the author's files, reading only field names, date
 - The past of a statistic starts the day the app first runs this version, plus what the logs still hold. A month of Claude
   and a week of Codex at the start, in the author's case. A window the app did not see is shown as not observed.
 - Readings come from the whole account (the percentage), and tokens from this Mac (the logs). The panel says which is which.
-- The first read of every file costs time that was not measured; it runs once, off the main thread.
+- The first read of every file takes time: 1,304 files and 7.4 GB took about 95 seconds of one core on the author's Mac, once, off
+  the main thread.
 - A fact cannot be corrected by the provider afterwards: what was seen is what is kept. A model with no rule shows its raw name.
 - A migration touches the user's `providers.json` again, the same way as before.
 
+## Verified while building
+
+- SQLite from the system library builds in Swift 6 in the package and in the app, with the write-ahead log, and adds no dependency.
+- The first pass over 7.4 GB kept the app around 240 MB once a file was read in chunks and each line decoded in a pool of its
+  own; read whole, it took 2.8 GB.
+
 ## Not verified
 
-- SQLite from the system library in Swift 6 with the write-ahead log, in this package and in the app.
-- How long the first read of a month of logs takes, and how much memory the ingestor's copy of the sources holds.
 - That the percentage in `~/.claude.json` is refreshed when Claude Code is not otherwise open: the app asks for it, and the
   outcome is logged but was not checked against a long run.
 - A window of Codex that spans two files with the same resets time: the highest percentage wins, which was not tested on real

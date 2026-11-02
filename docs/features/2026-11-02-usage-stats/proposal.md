@@ -50,12 +50,12 @@ headline, and a pie of the split between input, output and cache is not drawn.
 
 Checked on 2026-11-02 against the author's own files, reading only field names, dates and numbers.
 
-| Source                                      | What it holds                                                                                                     | How far back          | Used for                      |
-| :------------------------------------------ | :---------------------------------------------------------------------------------------------------------------- | :-------------------- | :---------------------------- |
-| Claude logs (`~/.claude/projects`)          | tokens and model for each message; 14 refusals for the weekly limit                                               | 2026-10-04            | tokens, models, hit ceiling   |
-| `~/.claude.json` (`cachedUsageUtilization`) | the last quota percentages of the account, with the time; the app asks Claude Code to refresh it every 15 minutes | the last reading only | Claude quota, from now on     |
-| Codex logs (`~/.codex/sessions`)            | tokens, the model of the turn, and `rate_limits` with percentage                                                  | 2026-10-26            | ChatGPT quota, tokens, models |
-| Status line file (`~/.tokenmeter`)          | the last reading Claude Code sent                                                                                 | the last reading only | the present quota, as today   |
+| Source                                      | What it holds                                                                                                     | How far back                                                                    | Used for                      |
+| :------------------------------------------ | :---------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------ | :---------------------------- |
+| Claude logs (`~/.claude/projects`)          | tokens and model for each message; 14 refusals for the weekly limit                                               | 2026-07-10 (resumed sessions carry old messages; the oldest file is 2026-10-04) | tokens, models, hit ceiling   |
+| `~/.claude.json` (`cachedUsageUtilization`) | the last quota percentages of the account, with the time; the app asks Claude Code to refresh it every 15 minutes | the last reading only                                                           | Claude quota, from now on     |
+| Codex logs (`~/.codex/sessions`)            | tokens, the model of the turn, and `rate_limits` with percentage                                                  | 2026-10-26                                                                      | ChatGPT quota, tokens, models |
+| Status line file (`~/.tokenmeter`)          | the last reading Claude Code sent                                                                                 | the last reading only                                                           | the present quota, as today   |
 
 Things that were found and shape the design:
 

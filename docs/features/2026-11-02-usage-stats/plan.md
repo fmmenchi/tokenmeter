@@ -95,16 +95,25 @@ list shows one row for the provider.
 The close step names the components of the Design System: **StatsToggle** and **IconBar** (the four icons) and the cards of
 the stats view are new. The Views gain the Stats view of the panel and the panel with icons.
 
-## What is not known until it is built
+## Settled by building
 
-- **SQLite from the system library in Swift 6**, in the package and in the app, with the write-ahead log. Step 2 is a spike
-  first: if the module does not build in both, the plan stops there and says so.
-- **How long the first read of all the files takes.** The ingestor runs it once off the main thread, and the figure goes into
-  the Develop page.
-- **A window of Codex split across two files with the same time of reset**: the highest percentage wins.
-- **Whether `/usage` keeps refreshing `~/.claude.json` without a session open.** The app asks for it and logs the outcome;
-  a long run is the only test.
-- **The migration on the author's own `providers.json`**, which is not the seed. It is tried on a copy before it runs.
+- **SQLite from the system library builds** in the package and in the app, with the write-ahead log, and adds no dependency.
+- **The first pass is long and, as first written, was heavy.** It reads 1,304 files and 7.4 GB in about 95 seconds of one core.
+  Reading each file whole and keeping every decoded line took 2.8 GB; reading in chunks, with a pool for each line, keeps the app
+  near 240 MB. It was a commit of its own, after the first preview showed it.
+- **The history is longer than the dates of the files say.** A resumed Claude session copies old messages into a new file, so the
+  messages go back to 2026-07-10 though the oldest file is from October. 81,929 Claude and 2,435 Codex messages were kept.
+- **The model of a Codex turn was built** (step 6) and gives five names on the author's Mac.
+- **The migration ran on the author's `providers.json`** the first time a probe loaded it, and added only the new fields, with
+  the file as it was kept as the backup.
+- Step 3 went in two commits, the types and then the reading, so that each stayed at three files.
+
+## What is not known
+
+- **A window of Codex split across two files with the same time of reset**: the highest percentage wins; not tested on real logs.
+- **Whether `/usage` keeps refreshing `~/.claude.json` over a long run with no session open.** The app asks for it and logs the
+  outcome; a long run is the only test.
+- **How the view looks and feels**: the panel was built and started, not looked at by whoever wrote it.
 
 ## Left for later versions
 
