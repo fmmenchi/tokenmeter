@@ -78,6 +78,9 @@ decision and the plan come next, and are not part of this page.
 
 ## Versions
 
+Version 1 is implemented (2026-11-02): the store, the ingestor, the stats and the stats view behind the icon, with the range. Versions 2 and 3
+are not.
+
 | Version | What it adds                                                                                                                                                       |
 | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1       | The store of facts, and the stats view behind the icon with its range (1 month to Lifetime): the ceiling hit, the quota left at the end of each window, the models |
@@ -95,12 +98,13 @@ decision and the plan come next, and are not part of this page.
   readable past five slices.
 - **A second widget** with the verdicts only: kept for version 3.
 
-## Not drawn yet
+## Settled by building
 
-- The rows of the quota left at the end of each window, inside the card, and the states "not observed" and "no use seen
-  here". The first design had them in a window of its own.
-- The dark appearance: the design system defines the light one only.
-- How the chip looks for a provider with two windows, and with a verdict that is "wait".
+- The rows of the quota left at the end of each window are in the card, and so are the states "not observed" and "Reading what
+  the logs still hold" while the first pass runs. What the card says when a provider has nothing kept is "Nothing is kept for it yet."
+- The range control is in version 1, with the four ranges; the verdict and the chip in the widget are not.
+- The dark appearance is not drawn: the design system defines the light one only.
+- How the chip looks for a provider with two windows, and with a verdict that is "wait", was not designed: it belongs to version 2.
 
 ## Not verified
 

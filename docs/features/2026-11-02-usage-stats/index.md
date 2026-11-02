@@ -10,10 +10,10 @@ date: 2026-11-02
 The panel gets a second view, behind an icon, that says how your use is going over time: how much quota was left at
 the end of each window, whether you hit the ceiling, and which models took the tokens.
 
-|        |            |
-| :----- | :--------- |
-| Date   | 2026-11-02 |
-| Status | in build   |
+|        |                         |
+| :----- | :---------------------- |
+| Date   | 2026-11-02              |
+| Status | implemented, 2026-11-02 |
 
 ## Intent
 
@@ -28,11 +28,11 @@ three models by tokens. A verdict (stay, move down) and a chip in the widget com
 
 ## The nucleus
 
-| Part                | Page                                          | Status    |
-| :------------------ | :-------------------------------------------- | :-------- |
-| Proposal            | [Proposal](./proposal.md)                     | in design |
-| Implementation plan | [Plan](./plan.md)                             | approved  |
-| Decisions           | [ADR 0010](../../adr/0010-the-usage-store.md) | accepted  |
+| Part                | Page                                          | Status   |
+| :------------------ | :-------------------------------------------- | :------- |
+| Proposal            | [Proposal](./proposal.md)                     | chosen   |
+| Implementation plan | [Plan](./plan.md)                             | done     |
+| Decisions           | [ADR 0010](../../adr/0010-the-usage-store.md) | accepted |
 
 ## Related
 
