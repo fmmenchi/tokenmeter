@@ -15,9 +15,9 @@ enum LogFiles {
         return result
     }
 
-    /// Complete lines containing `marker` appended after `offset`, and the offset to resume from.
+    /// Complete lines containing any of `markers` appended after `offset`, and the offset to resume from.
     /// A trailing partial line (still being written) is left for the next call.
-    static func newLines(in file: URL, from offset: UInt64, containing marker: Data) -> (lines: [Data], offset: UInt64) {
+    static func newLines(in file: URL, from offset: UInt64, containing markers: [Data]) -> (lines: [Data], offset: UInt64) {
         guard let handle = try? FileHandle(forReadingFrom: file) else { return ([], offset) }
         defer { try? handle.close() }
         let size = (try? handle.seekToEnd()) ?? 0
@@ -31,7 +31,7 @@ enum LogFiles {
         while lineStart <= lastNewline {
             let end = data[lineStart...].firstIndex(of: UInt8(ascii: "\n"))!
             let line = data[lineStart..<end]
-            if line.range(of: marker) != nil { lines.append(Data(line)) }
+            if markers.contains(where: { line.range(of: $0) != nil }) { lines.append(Data(line)) }
             lineStart = data.index(after: end)
         }
         return (lines, start + UInt64(data.distance(from: data.startIndex, to: lastNewline)) + 1)

@@ -9,6 +9,8 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
     private struct FileState {
         var offset: UInt64 = 0
         var previous = TokenCounts()
+        /// The model the last context line named: the tokens that follow belong to it (ADR 0010).
+        var model: String?
         var byKey: [String: UsageEvent] = [:]
         var anonymous: [UsageEvent] = []
         var quotas: [Int: (Date, ReportedQuota)] = [:]
@@ -35,7 +37,7 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
 
     private let lock = NSLock()
     private var states: [URL: FileState] = [:]
-    private let marker: Data
+    private let markers: [Data]
 
     public init(_ config: ProviderConfig, home: URL = FileManager.default.homeDirectoryForCurrentUser) {
         self.config = config
@@ -44,7 +46,7 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
             provider: Provider(rawValue: config.id), title: config.title,
             windows: config.windows.map { WindowSpec(name: Self.label(minutes: $0), duration: TimeInterval($0) * 60) },
             setupHint: config.setupHint)
-        marker = Data((config.log?.contains ?? "{").utf8)
+        markers = [Data((config.log?.contains ?? "{").utf8)] + (config.log?.context.map { [Data($0.contains.utf8)] } ?? [])
     }
 
     static func label(minutes: Int) -> String {
@@ -147,12 +149,17 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
         var plan: (Date, String)?
         for file in files {
             var state = states[file] ?? FileState()
-            let (lines, next) = LogFiles.newLines(in: file, from: state.offset, containing: marker)
+            let (lines, next) = LogFiles.newLines(in: file, from: state.offset, containing: markers)
             if next < state.offset { state = FileState() }
             state.offset = next
             for data in lines {
-                guard let root = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
-                      (log.where ?? [:]).allSatisfy({ Self.string(Self.value($0.key, in: root)) == $0.value }),
+                guard let root = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] else { continue }
+                if let context = log.context, (context.where ?? [:]).allSatisfy({ Self.string(Self.value($0.key, in: root)) == $0.value }),
+                   let name = Self.string(Self.value(context.model, in: root)) {
+                    state.model = name
+                    continue
+                }
+                guard (log.where ?? [:]).allSatisfy({ Self.string(Self.value($0.key, in: root)) == $0.value }),
                       let stamp = Self.string(Self.value(log.timestamp, in: root)), let date = LogDate.parse(stamp)
                 else { continue }
                 if let usage = config.usage { record(usage, root, date, origin: "\(file.lastPathComponent)|\(stamp)", into: &state) }
@@ -196,7 +203,7 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
         let current = TokenCounts(input: count(tokens.input), output: count(tokens.output),
                                   cacheRead: count(tokens.cacheRead), cacheWrite: count(tokens.cacheWrite))
         let provider = info.provider
-        let model = usage.model.flatMap { Self.string(Self.value($0, in: root)) }
+        let model = usage.model.flatMap { Self.string(Self.value($0, in: root)) } ?? state.model
         switch usage.mode {
         case .perEvent:
             // The paths a line has make its key; a line with none is never merged with another, and its key is where it was

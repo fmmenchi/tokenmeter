@@ -180,6 +180,16 @@ public struct ProviderConfig: Decodable, Sendable {
         public let `where`: [String: String]?
         /// ISO 8601 timestamp path.
         public let timestamp: String
+        /// A line that says which model the lines after it belong to, as Codex does at the start of each turn (ADR 0010).
+        public let context: Context?
+
+        public struct Context: Decodable, Sendable {
+            /// Cheap byte filter, as `Log.contains`.
+            public let contains: String
+            public let `where`: [String: String]?
+            /// The path of the model's name in the line.
+            public let model: String
+        }
     }
 
     public struct Usage: Decodable, Sendable {
