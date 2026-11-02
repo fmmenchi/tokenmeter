@@ -1,10 +1,10 @@
 # ADR 0029 — Design in artifacts instead of Figma
 
-Status: accepted (2026-10-30); supersedes [ADR 0028](./0028-a-skill-to-keep-the-widget-and-figma-aligned.md)
+Status: accepted (2026-10-30); replaces the first design of this, a Figma file kept aligned by a skill
 
 ## Context
 
-[ADR 0028](./0028-a-skill-to-keep-the-widget-and-figma-aligned.md) put the design in a Figma file, written
+The first design of this put the design in a Figma file, written
 through Figma's MCP server. On Fabio's Starter plan that server allows 20 calls a month to his seat; one
 session built the first copy and the first proposal and used them up, before the proposal was ever looked
 at. A paid seat would lift the limit, at a cost for one person's occasional use.
@@ -28,7 +28,7 @@ The design lives in artifacts, in three kinds, and the flow goes one way:
   discarded, its canvas is deleted. Deleting is permanent and breaks the link, so it happens only when Fabio
   asks, each time. No history of proposals is kept, by choice.
 
-Three skills replace the three of ADR 0028, with the same rules:
+Three skills, with the same rules as the Figma ones had:
 
 - **`design-proposal`** writes a new proposal canvas only, after a text proposal and the same four rules
   (build from the design system, no hand-written values, keep the canonical names, never delete a state).

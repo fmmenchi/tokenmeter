@@ -59,16 +59,16 @@ Unlike the panel, the probe prints the raw token total including cache reads.
 
 `snapshot.json` is what the widget renders. Dates are ISO 8601.
 
-| Field                        | Type           | Description                                                                                                                |
-| :--------------------------- | :------------- | :------------------------------------------------------------------------------------------------------------------------- |
-| `generatedAt`                | date           | When the app built the snapshot.                                                                                           |
-| `providers[].provider`       | string         | The provider id, for example `claude` or `chatgpt`.                                                                        |
-| `providers[].title`          | string         | Display name. Older snapshots lack it and show the id.                                                                     |
-| `providers[].plan`           | string, option | Subscription label such as `Ultra`.                                                                                        |
-| `providers[].quotaUpdatedAt` | date, optional | When the provider's quota was last written.                                                                                |
-| `providers[].setupHint`      | string, option | Shown while no quota has been seen.                                                                                        |
-| `providers[].windows[]`      | array          | One entry per window the provider declares, `5h` then `7d` today.                                                          |
-| `notices[]`                  | string array   | Sentences the widget and panel show in orange; absent in older files ([ADR 0027](../adr/0027-notices-in-the-snapshot.md)). |
+| Field                        | Type           | Description                                                                                                                        |
+| :--------------------------- | :------------- | :--------------------------------------------------------------------------------------------------------------------------------- |
+| `generatedAt`                | date           | When the app built the snapshot.                                                                                                   |
+| `providers[].provider`       | string         | The provider id, for example `claude` or `chatgpt`.                                                                                |
+| `providers[].title`          | string         | Display name. Older snapshots lack it and show the id.                                                                             |
+| `providers[].plan`           | string, option | Subscription label such as `Ultra`.                                                                                                |
+| `providers[].quotaUpdatedAt` | date, optional | When the provider's quota was last written.                                                                                        |
+| `providers[].setupHint`      | string, option | Shown while no quota has been seen.                                                                                                |
+| `providers[].windows[]`      | array          | One entry per window the provider declares, `5h` then `7d` today.                                                                  |
+| `notices[]`                  | string array   | Sentences the widget and panel show in orange; absent in older files ([ADR 0030](../adr/0030-problems-with-a-topic-and-a-fix.md)). |
 
 Each window:
 

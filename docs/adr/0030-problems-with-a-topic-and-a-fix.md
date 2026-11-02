@@ -1,10 +1,10 @@
 # ADR 0030 — Problems with a topic and an optional fix
 
-Status: accepted (2026-10-30); replaces the notices of [ADR 0027](./0027-notices-in-the-snapshot.md)
+Status: accepted (2026-10-30); replaces the first design of this, a list of notices in the snapshot
 
 ## Context
 
-The app can tell about one problem today, as a string in `Snapshot.notices` ([ADR 0027](./0027-notices-in-the-snapshot.md)):
+The app can tell about one problem today, as a string in `Snapshot.notices`:
 projects that override the Claude status line. Other messages are scattered: the App Group warning in the panel, the
 status line captions and the Wrap it and Restore original buttons in Settings. A proposal, `TokenMeter Proposal ·
 problems`, chose how to show them: on the widget a small chip with a count on the provider the problems are about, on
@@ -26,7 +26,7 @@ A **problem** replaces the notice string:
   (`ClaudeStatusLine.wrap`). A problem without a fix shows no fix button. `guide` is an optional docs path.
 - `Snapshot` carries `problems: [Problem]`, empty by default and absent from older files; `notices` is removed.
 - The app computes the problems, not the collector: another status line in use and projects that override it (topic
-  `claude`), no App Group (topic `general`). Projects are checked at most every 10 minutes, as in ADR 0027.
+  `claude`), no App Group (topic `general`). Projects are checked at most every 10 minutes, as the notices were before it.
 - **Where they show:** the widget puts a chip with a count next to the provider's name, counting only that topic's
   problems; the menu-bar item puts the same chip, with the total, after the percentage; the panel shows one banner per
   problem with its topic, message, detail, the fix or "Learn more", and Dismiss.
