@@ -13,7 +13,7 @@ Gate: `pnpm run check`. Spike: `swift run tokenmeter-probe`.
 ## Open decisions
 
 - **Claude remaining quota** — comes from the status line (ADR 0002); stale until a session runs.
-- **Notarized release** — signing works, the first Apple notarization is pending (ADR 0008); the widget on a notarized build is unverified.
+- **Notarized release** — v0.1.0 is published, signed and notarized (ADR 0008); the widget was verified on the author's Mac with the Developer ID build, and the double click on another Mac is unverified.
 
 ## Topic index (`.agents/doc/`)
 

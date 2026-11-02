@@ -13,18 +13,17 @@ sidebar_position: 2
 
 ## Download
 
-:::caution[Not published yet]
-A signed and notarized download, the one that opens with a double click on any Mac, is built by the
-scripts in [Package and Distribute](../develop/package-and-distribute.md) and is **not published
-yet**. Until it is, installing means building the app: follow
-[Build and Run](../develop/build-and-run.md), which needs Xcode, XcodeGen and an Apple developer account.
-:::
+The current release is [v0.1.0](https://github.com/fmmenchi/tokenmeter/releases/tag/v0.1.0). It is signed with a Developer ID
+certificate and notarized by Apple, so it opens with a double click. It is not on the Mac App Store: the app reads the logs and
+settings of the CLIs, which the App Store sandbox does not allow.
 
-Once a release exists, the steps will be:
-
-1. Download `TokenMeter-<version>.zip` from the project's releases page and open it.
+1. Download `TokenMeter-v0.1.0.zip` from the release page and open it. Its SHA-256 is in `TokenMeter-v0.1.0.zip.sha256` and in the
+   release notes.
 2. Drag `TokenMeter.app` to `/Applications` and open it.
 3. A gauge icon appears in the menu bar. There is no Dock icon.
+
+To build it yourself instead, follow [Build and Run](../develop/build-and-run.md), which needs Xcode, XcodeGen and an Apple
+developer account.
 
 ## After the first launch
 
