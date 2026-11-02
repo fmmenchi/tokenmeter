@@ -28,7 +28,7 @@ check "first feed: exit 0" "$(run)" 0
 feedfile="$work/out/appcast.xml"
 check "the version" "$(sed -n 's/.*<sparkle:shortVersionString>\(.*\)<\/sparkle:shortVersionString>.*/\1/p' "$feedfile")" 0.3.0
 check "the build" "$(sed -n 's/.*<sparkle:version>\(.*\)<\/sparkle:version>.*/\1/p' "$feedfile")" 2
-check "the notes link, with the version as an anchor" "$(sed -n 's/.*<sparkle:releaseNotesLink>\(.*\)<\/sparkle:releaseNotesLink>.*/\1/p' "$feedfile")" "https://fmmenchi.github.io/tokenmeter/use/changelog#v0-3-0"
+check "the notes link is the clean page of the version" "$(sed -n 's/.*<sparkle:releaseNotesLink>\(.*\)<\/sparkle:releaseNotesLink>.*/\1/p' "$feedfile")" "https://fmmenchi.github.io/tokenmeter/release-notes/v0.3.0.html"
 check "the download is the release's asset" "$(grep -c 'url="https://github.com/fmmenchi/tokenmeter/releases/download/v0.3.0/TokenMeter-v0.3.0.zip"' "$feedfile")" 1
 check "the signature and the length are the signer's" "$(grep -c 'sparkle:edSignature="TESTSIGNATURE" length="3"' "$feedfile")" 1
 
