@@ -6,6 +6,12 @@ cd "$(dirname "$0")/.."
 team=$(sed -n 's/^DEVELOPMENT_TEAM *= *//p' Local.xcconfig)
 [ -n "$team" ] || { echo "Set DEVELOPMENT_TEAM in Local.xcconfig" >&2; exit 1; }
 
+# ADR 0011: a release the app can update to needs the public half of the signing key and a tag that names the version.
+field() { sed -n "s/^ *$1: *'\{0,1\}\([^']*\)'\{0,1\} *\$/\1/p" project.yml | head -1; }
+[ -n "$(field SU_PUBLIC_ED_KEY)" ] || { echo "SU_PUBLIC_ED_KEY is empty in project.yml: make the signing key first (docs: package and distribute)" >&2; exit 1; }
+[ "$(git describe --tags --exact-match 2>/dev/null)" = "v$(field MARKETING_VERSION)" ] || {
+  echo "HEAD must be tagged v$(field MARKETING_VERSION), the MARKETING_VERSION in project.yml" >&2; exit 1; }
+
 work=.build/release-sign
 rm -rf "$work"
 mkdir -p "$work" dist
