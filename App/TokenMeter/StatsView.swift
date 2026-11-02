@@ -41,14 +41,14 @@ struct StatsView: View {
             } else if let snapshot = meter.snapshot {
                 ForEach(snapshot.providers, id: \.provider) { provider in
                     StatsCard(snapshot: provider, stats: meter.stats.first { $0.provider == provider.provider },
-                              isExpanded: meter.expandedStats.contains(provider.provider.rawValue),
+                              isExpanded: !meter.collapsedStats.contains(provider.provider.rawValue),
                               onToggle: { meter.toggleStatsDetail(provider.provider.rawValue) })
                 }
                 let shown = Set(snapshot.providers.map(\.provider))
                 let shares = UsageStats.crossProviders(meter.stats.filter { shown.contains($0.provider) })
                 if shares.count > 0 {
                     AllProvidersCard(shares: shares, titles: Dictionary(uniqueKeysWithValues: snapshot.providers.map { ($0.provider, $0.title) }),
-                                     isExpanded: meter.expandedStats.contains(Meter.allProvidersCard),
+                                     isExpanded: !meter.collapsedStats.contains(Meter.allProvidersCard),
                                      onToggle: { meter.toggleStatsDetail(Meter.allProvidersCard) })
                 }
                 Text("Seen on this Mac. The quota is for the whole account; the tokens are only those this Mac counted.")
