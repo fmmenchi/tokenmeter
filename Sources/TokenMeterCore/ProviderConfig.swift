@@ -114,18 +114,24 @@ public struct ProviderConfigFile: Decodable, Sendable {
               var providers = object["providers"] as? [[String: Any]] else { return .untouched }
         var changed = false
         for (index, entry) in providers.enumerated() {
-            guard let id = entry["id"] as? String, let facts = DefaultProviders.usageFacts[id],
-                  var usage = entry["usage"] as? [String: Any] else { continue }
-            if usage["model"] == nil, let model = facts.model {
-                usage["model"] = model
-                changed = true
-            }
-            if usage["families"] == nil {
-                usage["families"] = facts.families
-                changed = true
-            }
+            guard let id = entry["id"] as? String else { continue }
             var updated = entry
-            updated["usage"] = usage
+            if let facts = DefaultProviders.usageFacts[id], var usage = entry["usage"] as? [String: Any] {
+                if usage["model"] == nil, let model = facts.model {
+                    usage["model"] = model
+                    changed = true
+                }
+                if usage["families"] == nil {
+                    usage["families"] = facts.families
+                    changed = true
+                }
+                updated["usage"] = usage
+            }
+            if let context = DefaultProviders.logContext(for: id), var log = entry["log"] as? [String: Any], log["context"] == nil {
+                log["context"] = context
+                updated["log"] = log
+                changed = true
+            }
             providers[index] = updated
         }
         guard changed else { return .untouched }

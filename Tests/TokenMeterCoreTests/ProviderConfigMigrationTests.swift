@@ -100,6 +100,17 @@ final class ProviderConfigMigrationTests: XCTestCase {
         XCTAssertEqual(ProviderConfigFile.addUsageFacts(to: url), .untouched, "no usage to add to, and a provider it does not know")
     }
 
+    func testTheLogOfCodexGainsTheLineThatNamesTheModelOnce() throws {
+        try write(#"{"version":1,"providers":[{"id":"chatgpt","title":"ChatGPT","windows":[300],"log":{"root":"r","timestamp":"timestamp"},"usage":{"mode":"cumulative","tokens":{}}}]}"#)
+        XCTAssertEqual(ProviderConfigFile.addUsageFacts(to: url), .migrated)
+        let log = try ProviderConfigFile.load(from: url)?.providers.first?.log
+        XCTAssertEqual(log?.context?.model, "payload.model")
+        XCTAssertEqual(log?.context?.where, ["type": "turn_context"])
+        XCTAssertEqual(ProviderConfigFile.addUsageFacts(to: url), .untouched)
+        XCTAssertEqual(log?.context?.contains, ProviderConfigFile.seed().providers.first { $0.id == "chatgpt" }?.log?.context?.contains,
+                       "the same as the seed")
+    }
+
     func testTheSeedAndTheMigrationSayTheSame() throws {
         let seed = ProviderConfigFile.seed().providers
         for id in ["claude", "chatgpt"] {

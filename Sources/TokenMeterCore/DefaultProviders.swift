@@ -64,7 +64,8 @@ enum DefaultProviders {
             "root": "~/.codex/sessions",
             "contains": "\"token_count\"",
             "where": { "type": "event_msg", "payload.type": "token_count" },
-            "timestamp": "timestamp"
+            "timestamp": "timestamp",
+            "context": { "contains": "\"turn_context\"", "where": { "type": "turn_context" }, "model": "payload.model" }
           },
           "usage": {
             "mode": "cumulative",
@@ -100,4 +101,9 @@ enum DefaultProviders {
         ]),
         "chatgpt": (nil, [["contains": "gpt", "family": "GPT"]]),
     ]
+
+    /// The line that names the model of a Codex turn, added to the `log` of an existing file (ADR 0010).
+    static func logContext(for id: String) -> [String: Any]? {
+        id == "chatgpt" ? ["contains": "\"turn_context\"", "where": ["type": "turn_context"], "model": "payload.model"] : nil
+    }
 }
