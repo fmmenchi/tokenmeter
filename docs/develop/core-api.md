@@ -18,15 +18,16 @@ public protocol ProviderSource: Sendable {
 }
 ```
 
-| Type              | Fields                                                                       |
-| :---------------- | :--------------------------------------------------------------------------- |
-| `Provider`        | A string-backed id: `.claude`, `.chatgpt`, or `Provider(rawValue:)`.         |
-| `ProviderInfo`    | `provider`, `title`, `windows: [WindowSpec]`, `setupHint`.                   |
-| `ProviderReading` | `events: [UsageEvent]`, `quotas: [ReportedQuota]`, `plan`, `quotaUpdatedAt`. |
-| `UsageEvent`      | `provider`, `date`, `tokens: TokenCounts`.                                   |
-| `ReportedQuota`   | `usedPercent`, `windowMinutes`, `resetsAt`, `observedAt`.                    |
-| `TokenCounts`     | `input`, `output`, `cacheRead`, `cacheWrite`, `total`, and `+`.              |
-| `WindowSpec`      | `name`, `duration`; `.session` (`5h`) and `.week` (`7d`).                    |
+| Type              | Fields                                                                                                   |
+| :---------------- | :------------------------------------------------------------------------------------------------------- |
+| `Provider`        | A string-backed id: `.claude`, `.chatgpt`, or `Provider(rawValue:)`.                                     |
+| `ProviderInfo`    | `provider`, `title`, `windows: [WindowSpec]`, `setupHint`.                                               |
+| `ProviderReading` | `events: [UsageEvent]`, `quotas: [ReportedQuota]`, `history: [WindowReading]`, `plan`, `quotaUpdatedAt`. |
+| `UsageEvent`      | `provider`, `date`, `tokens: TokenCounts`, `model`, `key` (both optional).                               |
+| `WindowReading`   | `windowMinutes`, `resetsAt`, `usedPercent`, `firstObserved`, `lastObserved`: a window a log reported.    |
+| `ReportedQuota`   | `usedPercent`, `windowMinutes`, `resetsAt`, `observedAt`.                                                |
+| `TokenCounts`     | `input`, `output`, `cacheRead`, `cacheWrite`, `total`, and `+`.                                          |
+| `WindowSpec`      | `name`, `duration`; `.session` (`5h`) and `.week` (`7d`).                                                |
 
 `read(since:)` must not throw and must tolerate bad lines: return what it could read.
 
@@ -41,6 +42,28 @@ public protocol ProviderSource: Sendable {
 | `PlanName.prettified(_:)`                      | `team_plus` to `Team Plus`.                                                        |
 
 Pass a throwaway `home:` in tests so nothing reads the real `~`.
+
+## The usage store and the statistics
+
+```swift
+let store = try UsageStore(url: url)                    // makes the file and its folder; an unreadable file is made again empty
+let ingestor = UsageIngestor(store: store)              // its own sources: the first pass reads every file, then what is new
+ingestor.ingest()                                       // safe from any queue; a second read adds nothing
+let stats = UsageStats.stats(for: .claude, windows: [300, 10080], families: rules, store: store, range: .quarter)
+```
+
+| Symbol                                                    | Does                                                                                                                   |
+| :-------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------- |
+| `UsageStore(url:)`                                        | The SQLite file of facts ([ADR 0010](../adr/0010-the-usage-store.md)); throws only when a newer version wrote it.      |
+| `insert(_:)`, `upsert(_:)`                                | Messages are ignored when their key is there; a reading keeps the highest percentage and the first and last time seen. |
+| `modelTotals`, `readings`, `oldest`                       | What the statistics read.                                                                                              |
+| `UsageIngestor(sources:store:overlap:)`                   | Puts what the sources see into the store; `ingest(now:)` returns how many messages and readings were seen.             |
+| `UsageStats.stats(for:windows:families:store:range:now:)` | A provider's card: the windows that closed, whether the ceiling was hit, and the models by family.                     |
+| `UsageStats.outcomes`, `breakdown`, `family`              | The same pieces, pure, for tests and other views.                                                                      |
+| `StatsRange`                                              | `.month`, `.quarter`, `.year`, `.lifetime`, and where each starts.                                                     |
+
+The statistics are pure functions of the facts: the same facts give the same figures. A window with no reading is absent, never
+estimated.
 
 ## Collecting
 
