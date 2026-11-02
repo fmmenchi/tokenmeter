@@ -20,7 +20,7 @@ left, as a bar for the 5-hour window and one for the weekly window.
 
 ## What it looks like
 
-![The menu-bar panel: a card for Claude (Ultra) with a 5-hour and a weekly bar and a model's limit, each with a mark where the quota would end at a steady use, and a card for ChatGPT (Team), with when each quota was read](./assets/panel.png)
+![The menu-bar panel: a card for Claude (Ultra) with a 5-hour and a weekly bar and a model's limit, each with a mark where the quota would end at a steady use, and a card for ChatGPT (Team), with when each quota was read, and a row of four icons below](./assets/panel.png)
 
 The panel as it looks on a Mac with both CLIs installed: a stale reading is dimmed and marked
 `~`, as the weekly ChatGPT bar is. [Reading the Bars](./use/bars.md) explains every state.
