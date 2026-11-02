@@ -38,6 +38,10 @@ public struct WindowStats: Equatable, Sendable {
     public let closed: Int
     public let hits: Int
     public let lastHit: Date?
+    /// The least that was left in any window of the range, at most that much (nil with no window).
+    public let lowestLeft: Double?
+    /// How many of those windows were seen long before their end, so they may have ended with less.
+    public let approximate: Int
 
     /// The name the window has in the snapshot ("5h", "7d"), so a view labels it as it labels the cards.
     public var name: String { ConfiguredSource.label(minutes: windowMinutes) }
@@ -61,6 +65,33 @@ public struct ModelBreakdown: Equatable, Sendable {
     public let unknownTokens: Int
 }
 
+/// The word on a provider's card, from percentages only: it never looks at tokens and never says "move up", because the size of
+/// the other plans is not known (ADR 0010).
+public struct Verdict: Equatable, Sendable {
+    public enum Word: Equatable, Sendable { case wait, stay, moveDown }
+
+    public enum Reason: Equatable, Sendable {
+        /// Fewer windows than needed have ended in the range, in the window that has the most.
+        case fewWindows(window: String?, seen: Int, needed: Int)
+        case hitCeiling(window: String, hits: Int, closed: Int)
+        /// No ceiling reached, but a reading was seen long before the end of its window: it may have ended with less.
+        case incompleteReadings(window: String)
+        case littleMargin(window: String, left: Double)
+        case plentyOfMargin(window: String, left: Double)
+    }
+
+    public let word: Word
+    public let reason: Reason
+}
+
+/// One provider's share of all the tokens, with its models as shares of the same total.
+public struct ProviderShare: Equatable, Sendable {
+    public let provider: Provider
+    public let tokens: Int
+    public let fraction: Double
+    public let models: [ModelShare]
+}
+
 public struct ProviderStats: Equatable, Sendable {
     public let provider: Provider
     public let windows: [WindowStats]
@@ -79,6 +110,47 @@ public enum UsageStats {
 
     /// A reading seen more than a tenth of the window before it ended may have ended higher.
     static let approximateAfter = 0.1
+
+    /// Windows of one length that must have ended in the range before a verdict is given.
+    public static let windowsNeeded = 4
+    /// The margin, in percent left, below which no window went for a card to say it could move down.
+    public static let marginForMoveDown = 60.0
+
+    /// The verdict of a provider's card. Wait while no window length has ended `windowsNeeded` times in the range. Stay when
+    /// the ceiling was reached in any of the windows that count. Move down only when none was reached, every reading was seen near
+    /// the end of its window and the lowest margin was `marginForMoveDown` or more. Anything else is Stay, with what is missing.
+    public static func verdict(_ windows: [WindowStats]) -> Verdict {
+        let counting = windows.filter { $0.closed >= windowsNeeded }
+        guard !counting.isEmpty else {
+            let most = windows.max { $0.closed < $1.closed }
+            return Verdict(word: .wait, reason: .fewWindows(window: most?.name, seen: most?.closed ?? 0, needed: windowsNeeded))
+        }
+        if let worst = counting.filter({ $0.hits > 0 }).max(by: { Double($0.hits) / Double($0.closed) < Double($1.hits) / Double($1.closed) }) {
+            return Verdict(word: .stay, reason: .hitCeiling(window: worst.name, hits: worst.hits, closed: worst.closed))
+        }
+        if let partial = counting.first(where: { $0.approximate > 0 }) {
+            return Verdict(word: .stay, reason: .incompleteReadings(window: partial.name))
+        }
+        let tightest = counting.min { ($0.lowestLeft ?? 100) < ($1.lowestLeft ?? 100) }!
+        let left = tightest.lowestLeft ?? 100
+        return left >= marginForMoveDown
+            ? Verdict(word: .moveDown, reason: .plentyOfMargin(window: tightest.name, left: left))
+            : Verdict(word: .stay, reason: .littleMargin(window: tightest.name, left: left))
+    }
+
+    /// Every provider's tokens by family, with each share taken from the grand total: what the card for all providers draws.
+    public static func crossProviders(_ stats: [ProviderStats]) -> [ProviderShare] {
+        let grand = stats.map(\.models.total).reduce(0, +)
+        guard grand > 0 else { return [] }
+        return stats.filter { $0.models.total > 0 }.map { provider in
+            let models = (provider.models.shown + provider.models.more + (provider.models.other.map { [$0] } ?? [])).map {
+                ModelShare(name: $0.name, tokens: $0.tokens, fraction: Double($0.tokens) / Double(grand))
+            }
+            return ProviderShare(provider: provider.provider, tokens: provider.models.total,
+                                 fraction: Double(provider.models.total) / Double(grand), models: models)
+        }
+        .sorted { $0.tokens > $1.tokens }
+    }
 
     /// The windows of one length, of the provider as a whole, that closed before `now` and inside the range, newest first.
     public static func outcomes(_ readings: [UsageStore.Reading], windowMinutes: Int, now: Date, range: StatsRange,
@@ -140,7 +212,8 @@ public enum UsageStats {
             let all = outcomes(readings, windowMinutes: minutes, now: now, range: range, calendar: calendar)
             let hits = all.filter(\.hit)
             return WindowStats(windowMinutes: minutes, outcomes: Array(all.prefix(rows(for: minutes, range: range))),
-                               closed: all.count, hits: hits.count, lastHit: hits.map(\.resetsAt).max())
+                               closed: all.count, hits: hits.count, lastHit: hits.map(\.resetsAt).max(),
+                               lowestLeft: all.map(\.leftAtMost).min(), approximate: all.filter(\.approximate).count)
         }
         return ProviderStats(provider: provider, windows: windowStats,
                              models: breakdown(store.modelTotals(provider: provider, since: start), rules: families),

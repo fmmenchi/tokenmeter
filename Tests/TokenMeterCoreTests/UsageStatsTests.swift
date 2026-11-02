@@ -161,4 +161,69 @@ final class UsageStatsTests: XCTestCase {
         XCTAssertEqual(stats.windows.map(\.closed), [0, 0])
         XCTAssertEqual(stats.models.total, 0)
     }
+
+    // MARK: Verdict
+
+    private func window(_ minutes: Int = 10_080, closed: Int, hits: Int = 0, lowest: Double? = 80, approximate: Int = 0) -> WindowStats {
+        WindowStats(windowMinutes: minutes, outcomes: [], closed: closed, hits: hits, lastHit: nil, lowestLeft: lowest,
+                    approximate: approximate)
+    }
+
+    func testThereIsNoVerdictUntilAWindowLengthHasEndedFourTimes() {
+        XCTAssertEqual(UsageStats.verdict([window(closed: 3), window(300, closed: 2)]),
+                       Verdict(word: .wait, reason: .fewWindows(window: "7d", seen: 3, needed: 4)))
+        XCTAssertEqual(UsageStats.verdict([]), Verdict(word: .wait, reason: .fewWindows(window: nil, seen: 0, needed: 4)))
+    }
+
+    func testReachingTheCeilingIsStayAndNamesTheWindowThatWentThereMostOften() {
+        XCTAssertEqual(UsageStats.verdict([window(closed: 5, hits: 1)]),
+                       Verdict(word: .stay, reason: .hitCeiling(window: "7d", hits: 1, closed: 5)))
+        XCTAssertEqual(UsageStats.verdict([window(closed: 4, hits: 1), window(300, closed: 8, hits: 3)]),
+                       Verdict(word: .stay, reason: .hitCeiling(window: "5h", hits: 3, closed: 8)), "3 of 8 is more often than 1 of 4")
+    }
+
+    func testAWindowLengthThatHasNotEndedEnoughTimesDoesNotCount() {
+        let verdict = UsageStats.verdict([window(closed: 3, hits: 3), window(300, closed: 6, hits: 0, lowest: 90)])
+        XCTAssertEqual(verdict, Verdict(word: .moveDown, reason: .plentyOfMargin(window: "5h", left: 90)),
+                       "the three weekly windows that reached the ceiling are too few to say anything")
+    }
+
+    func testMoveDownNeedsAHundredMinusSixtyOfMarginAndReadingsSeenNearTheEnd() {
+        XCTAssertEqual(UsageStats.verdict([window(closed: 4, lowest: 60)]).word, .moveDown, "exactly 60% left is enough")
+        XCTAssertEqual(UsageStats.verdict([window(closed: 4, lowest: 59.9)]),
+                       Verdict(word: .stay, reason: .littleMargin(window: "7d", left: 59.9)))
+        XCTAssertEqual(UsageStats.verdict([window(closed: 4, lowest: 95, approximate: 1)]),
+                       Verdict(word: .stay, reason: .incompleteReadings(window: "7d")),
+                       "a window seen long before its end may have ended with less: it cannot say move down")
+    }
+
+    func testTheTightestWindowDecides() {
+        let verdict = UsageStats.verdict([window(closed: 4, lowest: 90), window(300, closed: 6, lowest: 70)])
+        XCTAssertEqual(verdict, Verdict(word: .moveDown, reason: .plentyOfMargin(window: "5h", left: 70)))
+    }
+
+    // MARK: All providers
+
+    private func providerStats(_ provider: Provider, _ totals: [(String, Int)]) -> ProviderStats {
+        ProviderStats(provider: provider, windows: [], models: UsageStats.breakdown(
+            totals.map { UsageStore.ModelTotal(model: $0.0, input: 0, output: $0.1, messages: 1) }, rules: rules), since: nil)
+    }
+
+    func testAllProvidersShareOneTotalAndTheLargestComesFirst() {
+        let shares = UsageStats.crossProviders([
+            providerStats(.chatgpt, [("gpt-6", 200)]),
+            providerStats(.claude, [("claude-opus-5", 600), ("claude-sonnet-5", 200)]),
+            providerStats(Provider(rawValue: "empty"), []),
+        ])
+        XCTAssertEqual(shares.map(\.provider), [.claude, .chatgpt], "an empty provider is left out")
+        XCTAssertEqual(shares.map(\.fraction), [0.8, 0.2])
+        XCTAssertEqual(shares[0].models.map(\.name), ["Opus", "Sonnet"])
+        XCTAssertEqual(shares[0].models.map(\.fraction), [0.6, 0.2], "a model's share is of all the tokens, not of its provider")
+        XCTAssertEqual(shares[1].models.map(\.tokens), [200])
+    }
+
+    func testNothingCountedGivesNoShares() {
+        XCTAssertEqual(UsageStats.crossProviders([providerStats(.claude, [])]), [])
+        XCTAssertEqual(UsageStats.crossProviders([]), [])
+    }
 }

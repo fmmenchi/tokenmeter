@@ -42,6 +42,11 @@ Checked on 2026-11-02 against the author's files, reading only field names, date
   the quota left at the end as _at least_ what was seen, and the share of each model family. The same facts give the same
   figures, which is what the tests check. A window with no reading is **not observed** and is not drawn, and a figure that
   would need an estimate is not offered: no size of a plan in tokens, no verdict from tokens.
+- **The verdict is a function of percentages only**, never of tokens (`UsageStats.verdict`): _Wait_ while no window length has ended
+  four times in the range; _Stay_ when the ceiling was reached in any window that counts; _Move down_ only when it was not, every
+  reading was seen near the end of its window and the lowest margin was 60% left or more; anything else is _Stay_, with what is
+  missing. It never says _Move up_, because the size of the other plans is not known. The four windows and the 60% are a choice, not
+  a measurement, and are constants of the code.
 - **A model is shown by family**, from rules in `providers.json` (a fragment of the name and the family it means), so a new
   model does not need a release; without a rule the raw name is shown. `<synthetic>` is not a model. Versions of a family add up.
 - **A new field of `providers.json`** (`usage.model`, `usage.families`) reaches a file that already exists by a migration,

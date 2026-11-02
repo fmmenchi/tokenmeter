@@ -78,8 +78,9 @@ decision and the plan come next, and are not part of this page.
 
 ## Versions
 
-Version 1 is implemented (2026-11-02): the store, the ingestor, the stats and the stats view behind the icon, with the range. Versions 2 and 3
-are not.
+Version 1 is implemented (2026-11-02): the store, the ingestor, the stats and the stats view behind the icon, with the range. The
+verdict, the ring of the models and the card for all providers came in the same day, after the design was changed to cards that
+open on a click (the detail of the window that was first drawn). The chip in the widget and the second widget are not.
 
 | Version | What it adds                                                                                                                                                       |
 | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- |

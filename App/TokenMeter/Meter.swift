@@ -35,10 +35,19 @@ final class Meter {
             computeStatsInBackground()
         }
     }
+    /// The providers whose stats card is open to its detail; the others show one line for each window. Kept across launches.
+    private(set) var expandedStats = Set(UserDefaults.standard.stringArray(forKey: Meter.expandedStatsKey) ?? [])
+    func toggleStatsDetail(_ provider: String) {
+        if expandedStats.contains(provider) { expandedStats.remove(provider) } else { expandedStats.insert(provider) }
+        UserDefaults.standard.set(Array(expandedStats).sorted(), forKey: Meter.expandedStatsKey)
+    }
     private let usageStore: UsageStore?
     private let ingestor: UsageIngestor?
     private static let showsStatsKey = "panelShowsStats"
     private static let statsRangeKey = "statsRange"
+    private static let expandedStatsKey = "statsExpandedProviders"
+    /// The id under which the card for all providers is open or closed, next to the ids of the providers.
+    static let allProvidersCard = "all-providers"
 
     enum FixState: Equatable {
         case running
