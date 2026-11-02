@@ -10,7 +10,7 @@ What changed in each version, newest first. The update window shows the notes of
 
 ## 0.5.0 {#v0-5-0}
 
-Not released yet.
+Released on 2026-11-02.
 
 - **Seasonal easter eggs**: in the week of Halloween, Christmas and Easter, a small icon on the bars and a corner piece on
   the cards, picked at random each time you open the panel ([Seasonal easter eggs](./seasonal-easter-eggs.md)).

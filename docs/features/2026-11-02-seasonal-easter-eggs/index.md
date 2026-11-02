@@ -10,10 +10,10 @@ date: 2026-11-02
 For a week around Halloween, Christmas and Easter, the panel carries two small details: an icon of the event on the bars,
 and a corner piece on the cards. A bit of humour, and nothing that changes what the panel says.
 
-|        |            |
-| :----- | :--------- |
-| Date   | 2026-11-02 |
-| Status | in build   |
+|        |                         |
+| :----- | :---------------------- |
+| Date   | 2026-11-02              |
+| Status | implemented, 2026-11-02 |
 
 ## Intent
 
