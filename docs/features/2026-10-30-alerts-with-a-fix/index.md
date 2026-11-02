@@ -24,11 +24,11 @@ problems and solutions of its own, and the common code never names a provider.
 
 ## The nucleus
 
-| Part                | Page                                                                                                                                                                                                                                        | Status                                      |
-| :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------------------------ |
-| Proposal            | [Proposal](./proposal.md)                                                                                                                                                                                                                   | built as chosen; changes listed in the page |
-| Implementation plan | [Implementation plan](./plan.md)                                                                                                                                                                                                            | done, steps 1 to 10                         |
-| Decisions           | [ADR 0030](../../adr/0030-problems-with-a-topic-and-a-fix.md), [ADR 0031](../../adr/0031-problems-come-from-the-app-and-from-provider-integrations.md), [ADR 0032](../../adr/0032-a-features-section-groups-proposal-plan-and-decisions.md) | accepted                                    |
+| Part                | Page                                                                                                                                                   | Status                                      |
+| :------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------ |
+| Proposal            | [Proposal](./proposal.md)                                                                                                                              | built as chosen; changes listed in the page |
+| Implementation plan | [Implementation plan](./plan.md)                                                                                                                       | done, steps 1 to 10                         |
+| Decisions           | [ADR 0030](../../adr/0030-problems-with-a-topic-and-a-fix.md), [ADR 0031](../../adr/0031-problems-come-from-the-app-and-from-provider-integrations.md) | accepted                                    |
 
 ## Related
 

@@ -17,12 +17,13 @@ Gate: `pnpm run check`. Spike: `swift run tokenmeter-probe`.
 
 ## Topic index (`.agents/doc/`)
 
-| Topic                                         | Read when                                            |
-| --------------------------------------------- | ---------------------------------------------------- |
-| [architecture](./.agents/doc/architecture.md) | deciding where a file goes, quota-source rules       |
-| [workflow](./.agents/doc/workflow.md)         | ADRs, commits, branches, hooks, CI                   |
-| [features](./.agents/doc/features.md)         | designing or building a feature: proposal, ADR, plan |
-| [known-issues](./.agents/doc/known-issues.md) | something odd with logs, Swift 6 or pnpm             |
+| Topic                                           | Read when                                            |
+| ----------------------------------------------- | ---------------------------------------------------- |
+| [architecture](./.agents/doc/architecture.md)   | deciding where a file goes, quota-source rules       |
+| [workflow](./.agents/doc/workflow.md)           | ADRs, commits, branches, hooks, CI                   |
+| [features](./.agents/doc/features.md)           | designing or building a feature: proposal, ADR, plan |
+| [documentation](./.agents/doc/documentation.md) | writing or moving a page in `docs/`                  |
+| [known-issues](./.agents/doc/known-issues.md)   | something odd with logs, Swift 6 or pnpm             |
 
 ## How we work
 
