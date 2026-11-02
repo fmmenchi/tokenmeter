@@ -28,7 +28,7 @@ struct StatsView: View {
 
             if !meter.storeAvailable {
                 Text("The history could not be opened, so there are no stats. The quota in the other view is not affected.")
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             } else if meter.isIngesting && meter.stats.isEmpty {
                 // The first pass reads every log the CLIs still keep, which takes a minute or two once: say so instead of
                 // drawing cards that claim nothing is kept.
@@ -42,7 +42,7 @@ struct StatsView: View {
                     StatsCard(snapshot: provider, stats: meter.stats.first { $0.provider == provider.provider })
                 }
                 Text("Seen on this Mac. The quota is for the whole account; the tokens are only those this Mac counted.")
-                    .font(.caption2).foregroundStyle(.secondary)
+                    .font(.caption2).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             } else {
                 ProgressView()
             }
@@ -76,6 +76,7 @@ private struct StatsCard: View {
                 }
             } else {
                 Text("Nothing is kept for \(snapshot.title) yet.").font(.caption).foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
         .padding(10)
@@ -158,13 +159,19 @@ private struct ModelList: View {
         }
     }
 
+    /// A share that is not nothing never reads as 0%.
+    private static func percent(_ fraction: Double) -> String {
+        let rounded = Int((fraction * 100).rounded())
+        return rounded == 0 && fraction > 0 ? "<1%" : "\(rounded)%"
+    }
+
     private func row(_ share: ModelShare) -> some View {
         HStack(spacing: 8) {
-            Text(share.name).font(.caption2.weight(.medium)).frame(width: 54, alignment: .leading).lineLimit(1)
+            Text(share.name).font(.caption2.weight(.medium)).frame(width: 72, alignment: .leading).lineLimit(1)
+                .truncationMode(.middle)
             QuotaBar(fraction: share.fraction, tint: .accentColor, height: 4)
-            Text("\(Int((share.fraction * 100).rounded()))%").font(.caption2.bold().monospacedDigit())
-                .frame(width: 34, alignment: .trailing)
+            Text(Self.percent(share.fraction)).font(.caption2.bold().monospacedDigit()).frame(width: 34, alignment: .trailing)
         }
-        .help("\(share.tokens.compactTokens) tokens, input plus output")
+        .help("\(share.name): \(share.tokens.compactTokens) tokens, input plus output")
     }
 }
