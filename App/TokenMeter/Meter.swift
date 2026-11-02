@@ -12,7 +12,7 @@ final class Meter {
     private(set) var launchAtLogin = false
     private(set) var autoSetUpClaude = UserDefaults.standard.object(forKey: Meter.autoSetUpKey) as? Bool ?? true
     private(set) var claudeStatusLine: ClaudeStatusLine.Outcome?
-    /// The problems the person has not hidden (ADR 0030); the panel draws these and the snapshot carries them.
+    /// The problems the person has not hidden (ADR 0005); the panel draws these and the snapshot carries them.
     private(set) var problems: [Problem] = []
     /// Interface state of the fixes being run, by problem id. Not in the model or the snapshot (the plan of the feature).
     private(set) var fixStates: [String: FixState] = [:]
@@ -65,7 +65,7 @@ final class Meter {
         refreshClaudeUsageIfDue(force: userInitiated)
     }
 
-    /// ADR 0034: Claude Code writes a copy of the usage, including each model's limit, when it runs `/usage`. Ask it to,
+    /// ADR 0002: Claude Code writes a copy of the usage, including each model's limit, when it runs `/usage`. Ask it to,
     /// on a slow timer and when the person refreshes, in the background and only while the Claude quota switch is on.
     /// Claude Code reads its own credentials; tokenmeter handles none.
     private func refreshClaudeUsageIfDue(force: Bool) {
@@ -81,9 +81,9 @@ final class Meter {
         }
     }
 
-    /// A provider as Settings lists it: every window it has, and which of them its card shows (ADR 0035).
+    /// A provider as Settings lists it: every window it has, and which of them its card shows (ADR 0006).
     struct CardProvider: Identifiable {
-        /// A model's limit, a part of the window named `parent`: a switch of its own in Settings (ADR 0034).
+        /// A model's limit, a part of the window named `parent`: a switch of its own in Settings (ADR 0002).
         struct Model: Identifiable {
             let id: String
             let label: String
@@ -152,7 +152,7 @@ final class Meter {
         publish()
     }
 
-    /// Hides or shows a provider's card with its switch. The last shown provider cannot be hidden. Its windows are kept (ADR 0041).
+    /// Hides or shows a provider's card with its switch. The last shown provider cannot be hidden. Its windows are kept (ADR 0006).
     func setProviderShown(_ shown: Bool, for provider: String) {
         guard shown || canHide(provider) else { return }
         preferences.setShown(shown, for: provider)
@@ -163,7 +163,7 @@ final class Meter {
         cardProviders.filter(\.isShown).contains { $0.id != provider }
     }
 
-    /// The person chooses windows. The last one cannot be turned off, and a window never hides the provider (ADR 0041).
+    /// The person chooses windows. The last one cannot be turned off, and a window never hides the provider (ADR 0006).
     func setShownWindows(_ windows: Set<String>, for provider: String) {
         guard let card = cardProviders.first(where: { $0.id == provider }) else { return }
         let choice = WindowChoice(windows: card.windows, models: Dictionary(uniqueKeysWithValues: card.models.map {
@@ -202,7 +202,7 @@ final class Meter {
         setUpClaudeStatusLine()
     }
 
-    /// Restore original stays in Settings (ADR 0030); the wrap itself is a fix in the panel.
+    /// Restore original stays in Settings (ADR 0005); the wrap itself is a fix in the panel.
     func restoreClaudeStatusLine() {
         do {
             _ = try ClaudeStatusLine.restore()
@@ -217,7 +217,7 @@ final class Meter {
         Bundle.main.url(forResource: "claude-statusline", withExtension: "sh").flatMap { try? Data(contentsOf: $0) }
     }
 
-    /// ADR 0024: only while the switch is on, at every launch and when it is turned on.
+    /// ADR 0004: only while the switch is on, at every launch and when it is turned on.
     private func setUpClaudeStatusLine() {
         guard autoSetUpClaude else { claudeStatusLine = nil; return }
         guard let script = claudeScript else { return }
@@ -234,7 +234,7 @@ final class Meter {
         Integrations([ClaudeIntegration(script: claudeScript, enabled: autoSetUpClaude)])
     }
 
-    /// ADR 0030: in the background at utility priority, at most every 10 minutes between changes.
+    /// ADR 0005: in the background at utility priority, at most every 10 minutes between changes.
     private func detectProblemsIfDue() {
         if let last = lastDetection, Date().timeIntervalSince(last) < 600 { return }
         detectProblems()
@@ -246,7 +246,7 @@ final class Meter {
         let integrations = makeIntegrations()
         Task(priority: .utility) {
             let (found, configured) = await Task.detached(priority: .utility) {
-                // A file that cannot be used falls back to the seed, as the collector does (ADR 0018).
+                // A file that cannot be used falls back to the seed, as the collector does (ADR 0003).
                 let configured = ((try? ProviderConfigFile.load()) ?? nil)?.providers ?? ProviderConfigFile.seed().providers
                 let found = ProblemDetector.detect(
                     general: AppProblems.check(hasAppGroup: hasAppGroup), providers: configured,

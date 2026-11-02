@@ -1,6 +1,6 @@
 import Foundation
 
-/// Sets up the Claude Code status line that leaves the quota on disk (ADR 0005, 0024).
+/// Sets up the Claude Code status line that leaves the quota on disk (ADR 0002, 0004).
 /// It never replaces a status line someone else set, and never touches a settings file it cannot read.
 public enum ClaudeStatusLine {
     public enum Outcome: Equatable, Sendable {
@@ -8,7 +8,7 @@ public enum ClaudeStatusLine {
         case notInstalled
         case set
         case alreadySet
-        /// Another status line was wrapped, so both it and tokenmeter's script get the input (ADR 0025).
+        /// Another status line was wrapped, so both it and tokenmeter's script get the input (ADR 0004).
         case wrapped
         /// Another status line is in use; it was left alone. Carries its command.
         case otherStatusLine(String)
@@ -101,7 +101,7 @@ public enum ClaudeStatusLine {
         home.appendingPathComponent(".tokenmeter/claude/original-statusline.json")
     }
 
-    /// Wraps another status line (ADR 0025): `statusLine.command` becomes a script that gives the same
+    /// Wraps another status line (ADR 0004): `statusLine.command` becomes a script that gives the same
     /// input to tokenmeter's script and to the original command, and prints only the original's output.
     public static func wrap(script: Data, home: URL = FileManager.default.homeDirectoryForCurrentUser) throws -> WrapOutcome {
         let fileManager = FileManager.default
@@ -136,7 +136,7 @@ public enum ClaudeStatusLine {
         let quoted = original.replacingOccurrences(of: "'", with: "'\\''")
         let body = """
         #!/bin/sh
-        # Wraps the status line that was set before tokenmeter (ADR 0025). Restore it from tokenmeter's Settings.
+        # Wraps the status line that was set before tokenmeter (ADR 0004). Restore it from tokenmeter's Settings.
         input=$(cat)
         printf '%s' "$input" | '\(tokenmeter.path)' >/dev/null 2>&1
         printf '%s' "$input" | sh -c '\(quoted)'

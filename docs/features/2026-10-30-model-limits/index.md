@@ -24,11 +24,11 @@ no model and no provider, and it appears only when the data has it.
 
 ## The nucleus
 
-| Part                | Page                                                          | Status                          |
-| :------------------ | :------------------------------------------------------------ | :------------------------------ |
-| Proposal            | [Proposal](./proposal.md)                                     | built as chosen: a bracket line |
-| Implementation plan | [Implementation plan](./plan.md)                              | done, steps 1 to 6              |
-| Decisions           | [ADR 0034](../../adr/0034-limits-can-be-scoped-to-a-model.md) | accepted                        |
+| Part                | Page                                                       | Status                          |
+| :------------------ | :--------------------------------------------------------- | :------------------------------ |
+| Proposal            | [Proposal](./proposal.md)                                  | built as chosen: a bracket line |
+| Implementation plan | [Implementation plan](./plan.md)                           | done, steps 1 to 6              |
+| Decisions           | [ADR 0002](../../adr/0002-quota-model-and-data-sources.md) | accepted                        |
 
 ## Related
 

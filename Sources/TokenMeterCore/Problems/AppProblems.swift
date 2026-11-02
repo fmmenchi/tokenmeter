@@ -1,6 +1,6 @@
 import Foundation
 
-/// The checks of the app itself, topic `general` (ADR 0030). Each takes what it needs and does no I/O.
+/// The checks of the app itself, topic `general` (ADR 0005). Each takes what it needs and does no I/O.
 public enum AppProblems {
     public static let noAppGroup = ProblemKind(
         id: "general.appgroup", topic: Problem.general, summary: "The widget cannot read the data",

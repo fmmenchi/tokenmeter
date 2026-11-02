@@ -3,7 +3,7 @@ import Foundation
 public struct WindowSpec: Codable, Equatable, Sendable {
     public let name: String
     public let duration: TimeInterval
-    /// What the window applies to when it is not the provider as a whole: a model's name, from the data (ADR 0034). A
+    /// What the window applies to when it is not the provider as a whole: a model's name, from the data (ADR 0002). A
     /// scoped window is a part of the unscoped window of the same name.
     public let scope: String?
 
@@ -25,7 +25,7 @@ public struct WindowUsage: Codable, Equatable, Sendable {
         /// Percentage reported by the provider in its own logs.
         case reported
         /// The last reported window has expired and nothing was used since: it is full again.
-        /// Inferred, not reported (ADR 0007).
+        /// Inferred, not reported (ADR 0002).
         case reset
         /// Consumption only; no remaining quota can be stated.
         case consumptionOnly
@@ -51,7 +51,7 @@ public struct WindowUsage: Codable, Equatable, Sendable {
     }
 
     /// The window as it reads at `now`. A reported figure whose reset time has
-    /// passed is no longer valid, however old the snapshot: it reads as reset (ADR 0007/0008).
+    /// passed is no longer valid, however old the snapshot: it reads as reset (ADR 0002/0008).
     public func resolved(at now: Date) -> WindowUsage {
         guard source == .reported, let resetsAt, resetsAt <= now else { return self }
         return WindowUsage(window: window, tokens: tokens, remainingFraction: 1, source: .reset,
@@ -64,11 +64,11 @@ public struct ProviderSnapshot: Codable, Equatable, Sendable {
     /// Display name; falls back to the provider id for a snapshot written before it existed.
     public let title: String
     public let windows: [WindowUsage]
-    /// Subscription label such as "Max 20x"; nil when the CLI recorded none (ADR 0012).
+    /// Subscription label such as "Max 20x"; nil when the CLI recorded none (ADR 0007).
     public let plan: String?
     /// When the provider's quota was last written; nil if it never was.
     public let quotaUpdatedAt: Date?
-    /// Shown while no quota has been seen; nil when the provider has nothing to set up (ADR 0015).
+    /// Shown while no quota has been seen; nil when the provider has nothing to set up (ADR 0003).
     public let setupHint: String?
 
     public init(provider: Provider, title: String? = nil, windows: [WindowUsage], plan: String? = nil,
@@ -99,7 +99,7 @@ public struct ProviderSnapshot: Codable, Equatable, Sendable {
 public struct Snapshot: Codable, Equatable, Sendable {
     public let generatedAt: Date
     public let providers: [ProviderSnapshot]
-    /// What the person should know about, visible ones only; written by the app, not the collector (ADR 0030).
+    /// What the person should know about, visible ones only; written by the app, not the collector (ADR 0005).
     public let problems: [Problem]
 
     public init(generatedAt: Date, providers: [ProviderSnapshot], problems: [Problem] = []) {
@@ -124,7 +124,7 @@ public struct Snapshot: Codable, Equatable, Sendable {
 
 extension Snapshot {
     /// The snapshot as the person wants to see it: providers in their order, hidden ones left out, and for each only the
-    /// windows they chose (ADR 0035, 0036). A provider whose choice matches none of its windows shows them all, and one
+    /// windows they chose (ADR 0006). A provider whose choice matches none of its windows shows them all, and one
     /// provider always stays: if every provider is hidden, the first in order is shown.
     public func applying(_ preferences: any DisplayPreferences) -> Snapshot {
         let order = preferences.ordered(providers.map(\.provider.rawValue))
@@ -136,7 +136,7 @@ extension Snapshot {
             let chosen = preferences.windows(for: id)
             let offModels = preferences.hiddenModels(for: id)
             // The provider's own windows follow the choice (all when none, or when it names none of them). A model's window
-            // is a part of the one of the same name: it shows with it, on by default, unless it was turned off (ADR 0037).
+            // is a part of the one of the same name: it shows with it, on by default, unless it was turned off (ADR 0002).
             let own = provider.windows.filter { $0.window.scope == nil }
             let ownKept = chosen.map { set in own.filter { set.contains($0.window.id) } }.flatMap { $0.isEmpty ? nil : $0 } ?? own
             let names = Set(ownKept.map(\.window.name))
@@ -166,7 +166,7 @@ public enum SnapshotBuilder {
         absent: Set<Int> = [],
         now: Date = Date()
     ) -> ProviderSnapshot {
-        // A window the plan does not have is not drawn, and neither are the models that were part of it (ADR 0037).
+        // A window the plan does not have is not drawn, and neither are the models that were part of it (ADR 0002).
         let gone = windows.filter { spec in absent.contains { abs(Double($0) * 60 - spec.duration) < 60 } }
         let windows = windows.filter { spec in !gone.contains(spec) }
         let usages = windows.map { spec -> WindowUsage in
@@ -181,7 +181,7 @@ public enum SnapshotBuilder {
                 return $0.resetsAt.map { $0 > now } ?? true
             }) {
                 // A window whose reset time is known counts its tokens in its own period, the one its percentage is about
-                // (ADR 0040), and not in the last `duration`, which differs once the provider moves the boundary.
+                // (ADR 0002), and not in the last `duration`, which differs once the provider moves the boundary.
                 let own = reported.resetsAt.map { max($0.addingTimeInterval(-spec.duration), rolling) }
                 return WindowUsage(window: spec, tokens: own.map { counted(since: $0) } ?? tokens,
                                    remainingFraction: max(0, 1 - reported.usedPercent / 100),
@@ -197,7 +197,7 @@ public enum SnapshotBuilder {
             return WindowUsage(window: spec, tokens: tokens, remainingFraction: nil,
                                source: .consumptionOnly, resetsAt: nil, observedAt: nil)
         }
-        // A model's limit is a window of its own, a part of the one with the same length (ADR 0034). It has no token count.
+        // A model's limit is a window of its own, a part of the one with the same length (ADR 0002). It has no token count.
         let scoped = reported.compactMap { quota -> WindowUsage? in
             guard let scope = quota.scope, let minutes = quota.windowMinutes,
                   let parent = windows.first(where: { abs(Double(minutes) * 60 - $0.duration) < 60 }) else { return nil }

@@ -75,7 +75,7 @@ struct SettingsView: View {
 }
 
 /// One provider in the list: its name with a switch that shows or hides its card, and the windows it shows, chosen in a
-/// `WindowToggles` with a switch for each window the data lists (ADR 0035, 0037, 0041).
+/// `WindowToggles` with a switch for each window the data lists (ADR 0006, 0002, 0006).
 private struct ProviderRow: View {
     let provider: Meter.CardProvider
     let isFirst: Bool
@@ -111,7 +111,7 @@ private struct ProviderRow: View {
                     .disabled(!canHide)
                     .help(canHide ? "" : "One provider always stays on")
             }
-            // A provider that is off keeps its list, dimmed, with the choice it has (ADR 0041).
+            // A provider that is off keeps its list, dimmed, with the choice it has (ADR 0006).
             WindowToggles(
                 rows: provider.windows.map { id in
                     WindowToggles.Row(

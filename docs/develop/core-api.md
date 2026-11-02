@@ -66,15 +66,15 @@ let one = Collector(sources: [mySource]).snapshot(now: date) // your own list, f
 for a fresh one, now for one that is out of date), `runsOutAt`, when the quota runs out at the pace since the window began
 if that is before the reset (nil for a stale figure), `isStale` and `runsOut`. It is nil when nothing can be estimated.
 `runsOut(at:)` is its `runsOutAt`, `paceFigureText(at:)` is what the figure on the bar's label line says while the pointer is on the bar, and `runsOutShortText(at:)` is
-the phrase for the widget ([ADR 0038](../adr/0038-a-window-says-when-it-runs-out-at-its-pace.md),
-[ADR 0039](../adr/0039-the-pace-is-drawn-on-the-bar.md)). The JSON shape is in
+the phrase for the widget ([ADR 0002](../adr/0002-quota-model-and-data-sources.md),
+[ADR 0002](../adr/0002-quota-model-and-data-sources.md)). The JSON shape is in
 [Commands and Files](./commands.md#the-snapshot); older snapshots without `title` or `problems` still decode.
 
 ## Problems
 
 What the app tells the person is a `Problem`, not a string
-([ADR 0030](../adr/0030-problems-with-a-topic-and-a-fix.md),
-[ADR 0031](../adr/0031-problems-come-from-the-app-and-from-provider-integrations.md)). Everything is in
+([ADR 0005](../adr/0005-problems.md),
+[ADR 0005](../adr/0005-problems.md)). Everything is in
 `Sources/TokenMeterCore/Problems/`.
 
 | Type                  | What it is                                                                                                          |
@@ -89,12 +89,12 @@ What the app tells the person is a `Problem`, not a string
 
 `providers.json` names a provider's integration in an optional `integration` field; the registry maps it to code, and
 an unknown id is a `general` problem, not a crash. An existing file whose `claude` entry lacks the field gets it once,
-with a backup ([ADR 0033](../adr/0033-add-the-claude-integration-to-an-existing-providers-file.md)).
+with a backup ([ADR 0003](../adr/0003-providers-in-one-config-file.md)).
 
 ## Display preferences
 
 The order of the cards and the windows each shows are preferences of the app, not of `providers.json`
-([ADR 0035](../adr/0035-provider-cards-order-and-windows-are-preferences.md), [ADR 0036](../adr/0036-a-provider-can-be-hidden.md)).
+([ADR 0006](../adr/0006-display-preferences.md)).
 
 | Type                         | What it is                                                                                      |
 | :--------------------------- | :---------------------------------------------------------------------------------------------- |
@@ -106,17 +106,17 @@ The app applies them when it writes the snapshot, so the widget draws what it is
 
 ## Model limits
 
-A model's limit is a window with a scope ([ADR 0034](../adr/0034-limits-can-be-scoped-to-a-model.md)).
+A model's limit is a window with a scope ([ADR 0002](../adr/0002-quota-model-and-data-sources.md)).
 
-| Type                              | What it is                                                                                                                                    |
-| :-------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
-| `WindowSpec.scope`                | A model's name, from the data; `WindowSpec.id` is the name, and the scope after a colon for a scoped window.                                  |
-| `ReportedQuota.scope`             | The model a reported limit applies to; the builder makes it a window of its own under the one of the same length.                             |
-| `ClaudeUsageRefresh`              | `locate`, `run` and `refresh`: ask Claude Code to refresh its usage copy by running its own `/usage`.                                         |
-| `ProviderReading.absent`          | Lengths in minutes of windows the plan lacks, when fresh data says so ([ADR 0037](../adr/0037-a-window-exists-only-if-the-data-lists-it.md)). |
-| `DisplayPreferences.hiddenModels` | The models of a provider the person turned off; a model is on unless it is here.                                                              |
-| `DisplayPreferences.select`       | The windows the person chose: an empty choice is refused, it never hides the provider, and a window just chosen turns its models on.          |
-| `ProviderConfig.ExistsIf`         | A list that says whether a window exists: `file`, `each`, `where`, `observedAt` and `maxAgeHours` (6 by default).                             |
+| Type                              | What it is                                                                                                                           |
+| :-------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------- |
+| `WindowSpec.scope`                | A model's name, from the data; `WindowSpec.id` is the name, and the scope after a colon for a scoped window.                         |
+| `ReportedQuota.scope`             | The model a reported limit applies to; the builder makes it a window of its own under the one of the same length.                    |
+| `ClaudeUsageRefresh`              | `locate`, `run` and `refresh`: ask Claude Code to refresh its usage copy by running its own `/usage`.                                |
+| `ProviderReading.absent`          | Lengths in minutes of windows the plan lacks, when fresh data says so ([ADR 0002](../adr/0002-quota-model-and-data-sources.md)).     |
+| `DisplayPreferences.hiddenModels` | The models of a provider the person turned off; a model is on unless it is here.                                                     |
+| `DisplayPreferences.select`       | The windows the person chose: an empty choice is refused, it never hides the provider, and a window just chosen turns its models on. |
+| `ProviderConfig.ExistsIf`         | A list that says whether a window exists: `file`, `each`, `where`, `observedAt` and `maxAgeHours` (6 by default).                    |
 
 A quota window in `providers.json` can read a list: `each` (the path to it), `where` (fields an entry must equal), `scope`
 (the path of the model's name inside an entry), a `file` of its own and `observedAt` (when the file was fetched). No model is

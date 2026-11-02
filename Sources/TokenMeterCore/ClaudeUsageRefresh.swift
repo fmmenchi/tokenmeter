@@ -1,6 +1,6 @@
 import Foundation
 
-/// Asks Claude Code to refresh the usage copy it keeps in `~/.claude.json`, by running its own `/usage` (ADR 0034).
+/// Asks Claude Code to refresh the usage copy it keeps in `~/.claude.json`, by running its own `/usage` (ADR 0002).
 /// Claude Code reads its own credentials; tokenmeter handles none and calls no API.
 public enum ClaudeUsageRefresh {
     public enum Outcome: Equatable, Sendable {

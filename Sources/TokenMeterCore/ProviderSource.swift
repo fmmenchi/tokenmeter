@@ -1,6 +1,6 @@
 import Foundation
 
-/// What a provider is: constants it declares once (ADR 0015).
+/// What a provider is: constants it declares once (ADR 0003).
 public struct ProviderInfo: Sendable {
     public let provider: Provider
     public let title: String
@@ -23,7 +23,7 @@ public struct ProviderReading: Sendable {
     public var plan: String?
     /// When the provider last wrote its quota; nil if it never did.
     public var quotaUpdatedAt: Date?
-    /// Lengths in minutes of windows the plan does not have, when fresh data says so (ADR 0037).
+    /// Lengths in minutes of windows the plan does not have, when fresh data says so (ADR 0002).
     public var absent: Set<Int>
 
     public init(events: [UsageEvent] = [], quotas: [ReportedQuota] = [], plan: String? = nil,

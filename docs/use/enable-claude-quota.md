@@ -20,7 +20,7 @@ and only token counts show. ChatGPT needs no setup.
 copies the script to `~/.tokenmeter/` and sets `statusLine` in `~/.claude/settings.json`. If you
 install Claude Code after tokenmeter, the next launch picks it up. It never replaces a status line
 you already have, writes `settings.json.tokenmeter.bak` before changing the file, and leaves an
-unreadable file alone ([ADR 0024](../adr/0024-the-app-sets-up-the-claude-status-line.md)). The Settings
+unreadable file alone ([ADR 0004](../adr/0004-the-claude-status-line.md)). The Settings
 window says what it did, and its switch **Set up the Claude quota automatically** turns this off.
 
 **Doing it yourself.** When building from source, `./scripts/install.sh` runs this step before the app
@@ -33,7 +33,7 @@ opens. To do only this step:
 It does what the app does: copies the script, sets only the `statusLine` key, writes the backup first,
 and does nothing if it is already set. If you already have a different status line it leaves it alone
 and exits with status 2. Without Claude Code it creates nothing
-([ADR 0019](../adr/0019-install-sets-up-the-claude-status-line.md)).
+([ADR 0004](../adr/0004-the-claude-status-line.md)).
 
 By hand, the setting is:
 
@@ -49,7 +49,7 @@ To undo it, delete those lines and turn the Settings switch off, or the next lau
 :::tip[You already have a status line?]
 The app leaves it alone and lists it as a problem in the panel. Click **Wrap it** there: your status line keeps
 printing exactly what it printed, and tokenmeter gets the same input beside it
-([ADR 0025](../adr/0025-wrap-an-existing-claude-status-line.md)). The app saves your original setting
+([ADR 0004](../adr/0004-the-claude-status-line.md)). The app saves your original setting
 in `~/.tokenmeter/claude/original-statusline.json`, puts a wrapper in `~/.tokenmeter/claude/`, and
 writes `settings.json.tokenmeter.bak` first. **Restore original** in Settings puts it all back. If you later
 change `statusLine` by hand, the app does not overwrite it. It never wraps by itself.
@@ -70,8 +70,8 @@ bars stay frozen.
 In the background, at launch and then at most every 10 minutes, tokenmeter looks, read only, at the
 projects you used in the last 30 days. It adds a problem to the panel naming the ones that override it, and a chip with the count
 beside Claude in the widget; nothing blocks
-([ADR 0026](../adr/0026-warn-when-a-project-overrides-the-status-line.md),
-[ADR 0030](../adr/0030-problems-with-a-topic-and-a-fix.md)). It never writes to a
+([ADR 0004](../adr/0004-the-claude-status-line.md),
+[ADR 0005](../adr/0005-problems.md)). It never writes to a
 project: a tracked `.claude/settings.json` would carry a path from your home into a shared repository.
 To fix one, make that project's command also pipe its input to the tokenmeter script. In
 `.claude/settings.local.json`, which git ignores, that is:
@@ -111,7 +111,7 @@ it to: with **Set up the Claude quota automatically** on, the **Refresh** button
 `claude -p "/usage"` in the background, in `~/.tokenmeter/claude/`, without a session file. Claude Code reads its own
 credentials; tokenmeter reads none. If `claude` is not in `~/.local/bin`, `/opt/homebrew/bin`, `/usr/local/bin` or your
 `PATH`, the figure stays as old as the copy and reads with `~`. In **Settings, Providers**, a switch under Claude's windows
-turns the line off. See [ADR 0034](../adr/0034-limits-can-be-scoped-to-a-model.md).
+turns the line off. See [ADR 0002](../adr/0002-quota-model-and-data-sources.md).
 
 ## A plan without the 5-hour limit
 
@@ -119,10 +119,10 @@ Some plans do not have every window (Ultra, formerly Max 20x, has no 5-hour limi
 has: when the usage copy Claude Code keeps in `~/.claude.json` is recent (at most six hours old), lists your other limits and
 does not list the 5-hour one, the 5 hours row is not drawn and **Settings, Providers** says so. If the copy cannot be read, is
 older or Claude Code is not there, the row stays with "unknown", because nothing says the plan lacks it. See
-[ADR 0037](../adr/0037-a-window-exists-only-if-the-data-lists-it.md).
+[ADR 0002](../adr/0002-quota-model-and-data-sources.md).
 
 ## Related
 
 - [Data Sources](../develop/data-sources.md)
-- [ADR 0005: Claude quota from the status line](../adr/0005-claude-quota-from-statusline.md)
-- [ADR 0006: No polling of provider endpoints](../adr/0006-no-polling-of-provider-endpoints.md)
+- [ADR 0002: Claude quota from the status line](../adr/0002-quota-model-and-data-sources.md)
+- [ADR 0001: No polling of provider endpoints](../adr/0001-app-architecture.md)

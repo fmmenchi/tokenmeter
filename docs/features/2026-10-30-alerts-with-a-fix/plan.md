@@ -6,8 +6,8 @@ sidebar_position: 3
 
 # Alerts with a fix, implementation plan
 
-How the app will detect problems, show them and fix them, and the order in which it gets built. The code follows it, step by step: the decisions are [ADR 0030](../../adr/0030-problems-with-a-topic-and-a-fix.md) (what a problem is, how it
-shows and what its actions do) and [ADR 0031](../../adr/0031-problems-come-from-the-app-and-from-provider-integrations.md)
+How the app will detect problems, show them and fix them, and the order in which it gets built. The code follows it, step by step: the decisions are [ADR 0005](../../adr/0005-problems.md) (what a problem is, how it
+shows and what its actions do) and [ADR 0005](../../adr/0005-problems.md)
 (where the code lives). This page is the map from them to commits.
 
 ## Intent
@@ -252,11 +252,11 @@ not build, so they are built with `xcodebuild` and looked at.
 | Ids are stable and follow `<topic>.<check>[.<detail>]`.    | Dismiss is keyed by id.                              |
 | `Meter` orchestrates; it holds no check.                   | It does not turn into a catch-all.                   |
 | The widget reads `Snapshot.problems` and computes nothing. | The widget stays a drawing of a snapshot (ADR 0001). |
-| The common code names no provider; an integration may.     | The same rule as ADR 0015 to 0018.                   |
+| The common code names no provider; an integration may.     | The same rule as ADR 0003.                           |
 
 ## Settled
 
-The open points of ADR 0030 were settled while building, with the defaults it proposed: **Restore original** stays in
+The open points of ADR 0005 were settled while building, with the defaults it proposed: **Restore original** stays in
 Settings, the `general` problems are not counted in the widget, and Dismiss lasts until the message changes.
 
 ## Related
@@ -264,4 +264,4 @@ Settings, the `general` problems are not counted in the widget, and Dismiss last
 - [Proposal](./proposal.md) and [overview](./index.md)
 - [Architecture](../../develop/architecture.md) and [Core API](../../develop/core-api.md)
 - [Add a Provider](../../develop/add-a-provider.md): the integration is an extension of it
-- [ADR 0030](../../adr/0030-problems-with-a-topic-and-a-fix.md) and [ADR 0031](../../adr/0031-problems-come-from-the-app-and-from-provider-integrations.md)
+- [ADR 0005](../../adr/0005-problems.md)

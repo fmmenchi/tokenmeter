@@ -13,7 +13,7 @@ enum LaunchAtLogin {
         }
     }
 
-    /// Registers once, on first run. Afterwards the user's switch is the only authority (ADR 0011).
+    /// Registers once, on first run. Afterwards the user's switch is the only authority (ADR 0007).
     static func enableOnFirstRun() {
         let defaults = UserDefaults.standard
         guard !defaults.bool(forKey: decidedKey) else { return }

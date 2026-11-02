@@ -24,11 +24,11 @@ code names none of them. The light and the dark appearance both hold, because th
 
 ## The nucleus
 
-| Part                | Page                                                                           | Status                        |
-| :------------------ | :----------------------------------------------------------------------------- | :---------------------------- |
-| Proposal            | [Proposal](./proposal.md)                                                      | built as chosen: filled cards |
-| Implementation plan | [Implementation plan](./plan.md)                                               | done, steps 1 to 7            |
-| Decisions           | [ADR 0035](../../adr/0035-provider-cards-order-and-windows-are-preferences.md) | accepted                      |
+| Part                | Page                                              | Status                        |
+| :------------------ | :------------------------------------------------ | :---------------------------- |
+| Proposal            | [Proposal](./proposal.md)                         | built as chosen: filled cards |
+| Implementation plan | [Implementation plan](./plan.md)                  | done, steps 1 to 7            |
+| Decisions           | [ADR 0006](../../adr/0006-display-preferences.md) | accepted                      |
 
 ## Related
 

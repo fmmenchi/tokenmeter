@@ -17,7 +17,7 @@ final class SnapshotTests: XCTestCase {
         XCTAssertEqual(snap.windows[1].tokens.total, 100)
     }
 
-    // MARK: ADR 0040: a window's tokens are counted in its own period
+    // MARK: ADR 0002: a window's tokens are counted in its own period
 
     func testAReportedWindowCountsItsTokensFromTheStartOfItsOwnPeriod() {
         // A 5-hour window that began 1h ago: 10 tokens 30 min ago are in it, 90 tokens 3h ago are in the last 5 hours but
@@ -278,13 +278,13 @@ final class ModelLimitTests: XCTestCase {
 
         preferences.setWindows(["5h", "7d"], for: "claude")
         XCTAssertEqual(all.applying(preferences).providers[0].windows.map { $0.window.id }, ["5h", "7d", "7d:Fable"],
-                       "a model is on unless the person turned it off (ADR 0037)")
+                       "a model is on unless the person turned it off (ADR 0002)")
 
         preferences.setModel("7d:Fable", shown: false, for: "claude")
         XCTAssertEqual(all.applying(preferences).providers[0].windows.map { $0.window.id }, ["5h", "7d"], "the model is off")
     }
 
-    // ADR 0037: a model is on unless the person turned it off, and shows only with its window.
+    // ADR 0002: a model is on unless the person turned it off, and shows only with its window.
     private let weeklyAndFable: [WindowSpec] = [.week, WindowSpec(name: "7d", duration: 604_800, scope: "Fable")]
 
     func testAModelShowsByDefaultAndWithoutItsWindowDoesNot() {

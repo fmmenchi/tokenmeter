@@ -1,6 +1,6 @@
 import Foundation
 
-/// Where a window stands against a steady use of its quota (ADR 0038, ADR 0039).
+/// Where a window stands against a steady use of its quota (ADR 0002, ADR 0002).
 public struct Pace: Equatable, Sendable {
     /// The share of the window still ahead: where the bar would end at a steady use. For a fresh figure it is the share when the
     /// figure was observed, and the quota runs out before the reset exactly when what is left is under it. For a figure that is
@@ -9,7 +9,7 @@ public struct Pace: Equatable, Sendable {
     /// When the quota runs out at the pace it has had since the window began; nil when it lasts until the reset, and for a
     /// figure that is out of date, which gives no moment.
     public let runsOutAt: Date?
-    /// The figure is older than `WindowUsage.staleAfter`: it can only have gone down since (ADR 0008).
+    /// The figure is older than `WindowUsage.staleAfter`: it can only have gone down since (ADR 0002).
     public let isStale: Bool
     /// The quota runs out before the reset. For a figure that is out of date this is only said when the reading itself is
     /// already under `aheadFraction`: then it runs out even if nothing was used since.
@@ -17,15 +17,15 @@ public struct Pace: Equatable, Sendable {
 }
 
 extension WindowUsage {
-    /// A reported figure older than this no longer counts as live (ADR 0008).
+    /// A reported figure older than this no longer counts as live (ADR 0002).
     public static let staleAfter: TimeInterval = 10 * 60
 
-    /// Less of the window than this has gone: the pace says too little to be believed (ADR 0038).
+    /// Less of the window than this has gone: the pace says too little to be believed (ADR 0002).
     public static let minimumElapsed = 0.10
 
     /// The pace of the window. Nil when nothing can be estimated: not a reported figure, no reset time, or too little of the
-    /// window gone (ADR 0038). Where nothing was used it lasts, so it has a mark and no moment it runs out (ADR 0039). A
-    /// figure that is out of date has a mark too, measured now, and no moment (ADR 0039).
+    /// window gone (ADR 0002). Where nothing was used it lasts, so it has a mark and no moment it runs out (ADR 0002). A
+    /// figure that is out of date has a mark too, measured now, and no moment (ADR 0002).
     public func pace(at now: Date) -> Pace? {
         guard source == .reported, let remainingFraction, let resetsAt, let observedAt,
               resetsAt > now, window.duration > 0 else { return nil }
@@ -46,13 +46,13 @@ extension WindowUsage {
         return Pace(aheadFraction: ahead, runsOutAt: moment, isStale: false, runsOut: moment != nil)
     }
 
-    /// When the quota runs out at the pace it has had since the window began, if that is before the reset (ADR 0038).
+    /// When the quota runs out at the pace it has had since the window began, if that is before the reset (ADR 0002).
     /// Nil when it lasts, and when nothing can be estimated.
     public func runsOut(at now: Date) -> Date? {
         pace(at: now)?.runsOutAt
     }
 
-    /// What the figure on the bar's label line says while the pointer is on the bar (ADR 0039): the date where the quota runs
+    /// What the figure on the bar's label line says while the pointer is on the bar (ADR 0002): the date where the quota runs
     /// out ("out Thu 6 pm"), and for a figure that is out of date the same with a tilde ("~out Thu 6 pm"), only where the bar
     /// is already before the mark. Nil otherwise, and then the figure stays as it is: where the quota lasts there is no date
     /// to give, and the mark already says it. Short, because it takes the place of "20% left".
@@ -83,7 +83,7 @@ extension WindowUsage {
         return moment >= now && moment < resetsAt ? moment : nil
     }
 
-    /// The same moment in short, for the widget's detail line (ADR 0039): "out Thu 6 pm". Nil when it lasts, and when
+    /// The same moment in short, for the widget's detail line (ADR 0002): "out Thu 6 pm". Nil when it lasts, and when
     /// nothing can be estimated.
     public func runsOutShortText(at now: Date, calendar: Calendar = .current) -> String? {
         guard let moment = runsOut(at: now) else { return nil }

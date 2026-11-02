@@ -1,7 +1,7 @@
 import XCTest
 @testable import TokenMeterCore
 
-/// ADR 0038: when a window runs out at the pace it has had since it began.
+/// ADR 0002: when a window runs out at the pace it has had since it began.
 final class RunOutTests: XCTestCase {
     private var calendar: Calendar {
         var calendar = Calendar(identifier: .gregorian)
@@ -56,7 +56,7 @@ final class RunOutTests: XCTestCase {
         XCTAssertEqual(window.paceFigureText(at: now, calendar: calendar), "out Fri 12 pm")
     }
 
-    // MARK: the mark and the hover (ADR 0039)
+    // MARK: the mark and the hover (ADR 0002)
 
     func testTheMarkIsTheShareOfTheWindowStillAheadWhenTheFigureWasObserved() throws {
         // 2h of 5h gone: 3/5 ahead, whether it runs out (40% left) or lasts (80% left).
@@ -92,7 +92,7 @@ final class RunOutTests: XCTestCase {
         XCTAssertNil(usage(left: 0.5, observed: 20 * 60).pace(at: start.addingTimeInterval(20 * 60)), "too early")
     }
 
-    // MARK: a figure that is out of date (ADR 0039)
+    // MARK: a figure that is out of date (ADR 0002)
 
     func testAStaleFigureHasAMarkMeasuredNowAndNoMoment() throws {
         // 2h of 5h gone when it was read, and it is now 3h: 2/5 of the window is ahead now, not 3/5.

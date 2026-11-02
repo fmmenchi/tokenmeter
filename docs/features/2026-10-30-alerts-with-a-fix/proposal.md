@@ -8,7 +8,7 @@ sidebar_position: 2
 
 The design that was chosen from four variants. It was drawn as a canvas of artboards in Claude, which is deleted once
 the feature is implemented; this page is what stays. The decisions behind it are in
-[ADR 0030](../../adr/0030-problems-with-a-topic-and-a-fix.md).
+[ADR 0005](../../adr/0005-problems.md).
 
 ## Intent
 

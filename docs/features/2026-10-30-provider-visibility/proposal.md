@@ -8,7 +8,7 @@ sidebar_position: 2
 
 The design that was chosen from two variants, an eye button and a text button. It was drawn as a canvas of artboards in
 Claude, which is deleted once the feature is implemented; this page is what stays. The decisions behind it are in
-[ADR 0036](../../adr/0036-a-provider-can-be-hidden.md).
+[ADR 0006](../../adr/0006-display-preferences.md).
 
 ## The proposal
 

@@ -7,7 +7,7 @@ sidebar_position: 3
 # Model limits, implementation plan
 
 How a model's limit is read, kept and shown, and the order in which it was built. The decision is
-[ADR 0034](../../adr/0034-limits-can-be-scoped-to-a-model.md).
+[ADR 0002](../../adr/0002-quota-model-and-data-sources.md).
 
 ## The pieces
 

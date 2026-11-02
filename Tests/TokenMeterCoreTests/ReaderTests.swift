@@ -1,7 +1,7 @@
 import XCTest
 @testable import TokenMeterCore
 
-/// The seed providers (ADR 0018) run end to end against a temporary home directory.
+/// The seed providers (ADR 0003) run end to end against a temporary home directory.
 final class ReaderTests: XCTestCase {
     private var home: URL!
 

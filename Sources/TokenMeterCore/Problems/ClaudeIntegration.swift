@@ -1,6 +1,6 @@
 import Foundation
 
-/// What Claude needs beyond its logs: a status line that leaves the quota on disk (ADR 0005, 0025, 0026).
+/// What Claude needs beyond its logs: a status line that leaves the quota on disk (ADR 0002, 0004).
 /// The first integration; it wraps `ClaudeStatusLine` and `ProjectStatusLines`.
 public struct ClaudeIntegration: ProviderIntegration {
     public static let wrapStatusLine = "wrapStatusLine"

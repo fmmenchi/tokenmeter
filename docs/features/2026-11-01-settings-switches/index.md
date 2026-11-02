@@ -26,11 +26,11 @@ off. A provider that is off keeps its list, dimmed, and the choice is kept for w
 
 ## The nucleus
 
-| Part                | Page                                                                     | Status   |
-| :------------------ | :----------------------------------------------------------------------- | :------- |
-| Proposal            | [Proposal](./proposal.md)                                                | chosen   |
-| Implementation plan | [Implementation plan](./plan.md)                                         | done     |
-| Decisions           | [ADR 0041](../../adr/0041-the-provider-switch-alone-hides-a-provider.md) | accepted |
+| Part                | Page                                              | Status   |
+| :------------------ | :------------------------------------------------ | :------- |
+| Proposal            | [Proposal](./proposal.md)                         | chosen   |
+| Implementation plan | [Implementation plan](./plan.md)                  | done     |
+| Decisions           | [ADR 0006](../../adr/0006-display-preferences.md) | accepted |
 
 ## Related
 

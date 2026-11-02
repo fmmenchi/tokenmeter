@@ -33,14 +33,14 @@ How the pieces fit, where each file goes and which rules keep it that way. The r
 
 1. **Sources.** `Providers.standard()` reads `~/.tokenmeter/providers.json` and builds one
    `ConfiguredSource` per entry. If the file is missing the app writes a seed with Claude and ChatGPT
-   ([ADR 0016](../adr/0016-providers-declared-in-a-config-file.md), [0018](../adr/0018-the-config-file-is-the-only-source.md)).
+   ([ADR 0003](../adr/0003-providers-in-one-config-file.md), [0018](../adr/0003-providers-in-one-config-file.md)).
    A broken file is never overwritten: the seed runs for that launch.
 2. **Reading.** A source's `read(since:)` returns a `ProviderReading`: usage events, quotas the
    provider itself reported, a plan name. It scans incrementally and keeps per-file state, so a source
-   instance is long-lived ([ADR 0004](../adr/0004-incremental-log-scanning.md)).
+   instance is long-lived ([ADR 0001](../adr/0001-app-architecture.md)).
 3. **Collecting.** `Collector.snapshot(now:)` asks every source for the last seven days and hands each
    reading to `SnapshotBuilder`, which builds the windows a provider declares. It never names a
-   provider ([ADR 0015](../adr/0015-provider-contract.md)).
+   provider ([ADR 0003](../adr/0003-providers-in-one-config-file.md)).
 4. **Showing.** `Meter` (the app's `@Observable` model) runs the collector off the main actor, once at
    launch and every 60 seconds, publishes the snapshot to the panel, writes it to the App Group
    container and asks WidgetKit to reload.
@@ -49,7 +49,7 @@ How the pieces fit, where each file goes and which rules keep it that way. The r
 
 For each window a provider declares (`5h`, `7d`), the builder sums the tokens whose date falls inside
 it and attaches the remaining fraction **only if** it can say where it came from
-([ADR 0007](../adr/0007-expired-window-reads-as-reset.md)). `WindowUsage.source` is one of:
+([ADR 0002](../adr/0002-quota-model-and-data-sources.md)). `WindowUsage.source` is one of:
 
 | `source`          | Meaning                                                                     |
 | :---------------- | :-------------------------------------------------------------------------- |
@@ -64,8 +64,8 @@ any age of the snapshot, so a stale file never shows a stale percentage as curre
 
 The widget cannot read your logs, so the host app does the collecting and the widget renders what it
 finds in `snapshot.json`, inside the App Group container
-`<TeamID>.tokenmeter` ([ADR 0003](../adr/0003-host-app-widget-and-app-group.md),
-[0023](../adr/0023-team-prefixed-app-group.md)). The app is unsandboxed because it reads
+`<TeamID>.tokenmeter` ([ADR 0001](../adr/0001-app-architecture.md),
+[0023](../adr/0001-app-architecture.md)). The app is unsandboxed because it reads
 other tools' files; the widget is sandboxed. An App Group needs a signing team, which is why a build
 needs `DEVELOPMENT_TEAM` in `Local.xcconfig`.
 

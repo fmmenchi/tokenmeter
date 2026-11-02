@@ -9,7 +9,7 @@ sidebar_position: 2
 The design that was chosen: a card without the windows the plan lacks, Settings without a choice of one window, and the row
 kept while nothing is known. It was drawn as a canvas of artboards in Claude, which is deleted once the feature is
 implemented; this page is what stays. The decisions behind it are in
-[ADR 0037](../../adr/0037-a-window-exists-only-if-the-data-lists-it.md).
+[ADR 0002](../../adr/0002-quota-model-and-data-sources.md).
 
 ## The proposal
 

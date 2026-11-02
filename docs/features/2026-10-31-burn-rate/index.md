@@ -22,11 +22,11 @@ nothing is said. Without a fresh figure, or too early in the window, nothing can
 
 ## The nucleus
 
-| Part                | Page                                                                     | Status             |
-| :------------------ | :----------------------------------------------------------------------- | :----------------- |
-| Proposal            | [Proposal](./proposal.md)                                                | built as chosen    |
-| Implementation plan | [Implementation plan](./plan.md)                                         | done, steps 1 to 4 |
-| Decisions           | [ADR 0038](../../adr/0038-a-window-says-when-it-runs-out-at-its-pace.md) | accepted           |
+| Part                | Page                                                       | Status             |
+| :------------------ | :--------------------------------------------------------- | :----------------- |
+| Proposal            | [Proposal](./proposal.md)                                  | built as chosen    |
+| Implementation plan | [Implementation plan](./plan.md)                           | done, steps 1 to 4 |
+| Decisions           | [ADR 0002](../../adr/0002-quota-model-and-data-sources.md) | accepted           |
 
 ## Related
 

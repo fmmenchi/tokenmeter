@@ -1,5 +1,5 @@
 #!/bin/sh
-# Build the Release app and zip it into dist/ (ADR 0010).
+# Build the Release app and zip it into dist/ (ADR 0008).
 set -eu
 cd "$(dirname "$0")/.."
 

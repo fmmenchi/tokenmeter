@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// A small count of problems, next to a provider's name in the widget and the panel (ADR 0030).
+/// A small count of problems, next to a provider's name in the widget and the panel (ADR 0005).
 struct NoticeChip: View {
     let count: Int
 

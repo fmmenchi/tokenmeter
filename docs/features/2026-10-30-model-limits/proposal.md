@@ -8,7 +8,7 @@ sidebar_position: 2
 
 The design that was chosen after several rounds: a thin line joined to Weekly's bar by a bracket (variant S2), a switch of the
 design system in Settings, and Settings drawn from the current screen. It was drawn as a canvas of artboards in Claude, which is deleted once the feature is implemented;
-this page is what stays. The decisions behind it are in [ADR 0034](../../adr/0034-limits-can-be-scoped-to-a-model.md).
+this page is what stays. The decisions behind it are in [ADR 0002](../../adr/0002-quota-model-and-data-sources.md).
 
 ## The proposal
 

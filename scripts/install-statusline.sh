@@ -1,5 +1,5 @@
 #!/bin/sh
-# Installs the Claude Code status line for tokenmeter (ADR 0019): copies the script to ~/.tokenmeter and
+# Installs the Claude Code status line for tokenmeter (ADR 0004): copies the script to ~/.tokenmeter and
 # points `statusLine` in ~/.claude/settings.json at it, only when no other status line is set.
 # Without Claude Code (no ~/.claude) there is nothing to set up and nothing is created.
 # Exit status: 0 done, already done or nothing to do, 2 another status line is set (left alone), 1 failure.

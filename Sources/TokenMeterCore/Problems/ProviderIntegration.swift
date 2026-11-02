@@ -17,7 +17,7 @@ public enum FixResult: Equatable, Sendable {
     case failed(String)
 }
 
-/// What one provider adds beyond reading its quota: its own problems and the fixes for them (ADR 0031).
+/// What one provider adds beyond reading its quota: its own problems and the fixes for them (ADR 0005).
 /// One implementation per provider that needs one; nothing outside it names the provider.
 public protocol ProviderIntegration: Sendable {
     var id: String { get }

@@ -67,7 +67,7 @@ extension Int {
 }
 
 /// A thick, filled bar. SwiftUI's `ProgressView` collapses to a hairline in menus and widgets.
-/// A `mark` is where the bar would end at a steady use (ADR 0039): the quota runs out before the reset when the bar ends
+/// A `mark` is where the bar would end at a steady use (ADR 0002): the quota runs out before the reset when the bar ends
 /// before it, and the mark is orange then. A figure that is out of date has its bar at half strength, and the mark with it.
 struct QuotaBar: View {
     let fraction: Double?
@@ -99,11 +99,11 @@ struct QuotaBar: View {
 struct WindowRow: View {
     let usage: WindowUsage
     @State private var hovering = false
-    /// The limits of models that are part of this window, drawn right under its bar (ADR 0034).
+    /// The limits of models that are part of this window, drawn right under its bar (ADR 0002).
     var models: [WindowUsage] = []
-    /// Draw the mark on the bar and the hover that says when the quota runs out (ADR 0039). The widget does not.
+    /// Draw the mark on the bar and the hover that says when the quota runs out (ADR 0002). The widget does not.
     var showsPace = false
-    /// Say in the detail line, in short, when the quota runs out (ADR 0039). It is the widget's answer: it has no hover.
+    /// Say in the detail line, in short, when the quota runs out (ADR 0002). It is the widget's answer: it has no hover.
     var showsRunOut = false
 
     var body: some View {
@@ -112,7 +112,7 @@ struct WindowRow: View {
             HStack(alignment: .firstTextBaseline) {
                 Text(usage.window.label).font(.caption.weight(.medium))
                 Spacer()
-                // While the pointer is on the bar the figure says when the quota runs out (ADR 0039); the label does not move.
+                // While the pointer is on the bar the figure says when the quota runs out (ADR 0002); the label does not move.
                 let say = hovering && showsPace ? usage.paceFigureText(at: Date()) : nil
                 Text(say ?? (usage.remainingFraction == nil ? "unknown" : "\(usage.remainingText) left"))
                     .font(.caption.bold().monospacedDigit())
@@ -167,10 +167,10 @@ private struct Bracket: Shape {
 }
 
 /// A model's limit, a part of the window above it: a bracket, the name, a thin bar and the figure on one line, right
-/// under that window's bar (ADR 0034). The share of the week and the reset are in the help text.
+/// under that window's bar (ADR 0002). The share of the week and the reset are in the help text.
 struct ScopedWindowRow: View {
     let usage: WindowUsage
-    /// Draw the mark on the thin bar and say in its figure when it runs out (ADR 0039). The widget does not.
+    /// Draw the mark on the thin bar and say in its figure when it runs out (ADR 0002). The widget does not.
     var showsPace = false
     @State private var hovering = false
 
@@ -181,7 +181,7 @@ struct ScopedWindowRow: View {
                 .frame(minWidth: 30, alignment: .leading)
             QuotaBar(fraction: usage.remainingFraction, tint: usage.tint, height: 4,
                      mark: showsPace ? usage.pace(at: Date()) : nil)
-            // The figure is as wide as what it says, and the bar gives way to it, smoothly (ADR 0039).
+            // The figure is as wide as what it says, and the bar gives way to it, smoothly (ADR 0002).
             let say = hovering && showsPace ? usage.paceFigureText(at: Date()) : nil
             Text(say ?? (usage.remainingFraction == nil ? "unknown" : "\(usage.remainingText) left"))
                 .font(.caption.bold().monospacedDigit())

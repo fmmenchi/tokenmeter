@@ -1,6 +1,6 @@
 import Foundation
 
-/// A provider declared in `providers.json` instead of written in Swift (ADR 0016).
+/// A provider declared in `providers.json` instead of written in Swift (ADR 0003).
 public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
     public let info: ProviderInfo
     private let config: ProviderConfig
@@ -80,7 +80,7 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
     }
 
     /// True only when the list can be believed and does not name the window: the file is readable, the list is not empty and
-    /// it was written recently enough. Anything else says nothing, so the window stays (ADR 0037).
+    /// it was written recently enough. Anything else says nothing, so the window stays (ADR 0002).
     private func absent(_ rule: ProviderConfig.ExistsIf) -> Bool {
         let url = expand(rule.file)
         guard let root = Self.object(at: url), let entries = Self.value(rule.each, in: root) as? [[String: Any]],
@@ -96,7 +96,7 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
         }
     }
 
-    /// The limits of a list in a file: one for each entry that matches, with what it applies to (ADR 0034).
+    /// The limits of a list in a file: one for each entry that matches, with what it applies to (ADR 0002).
     private func listed(_ window: ProviderConfig.Quota.Window, quotaFile: String?) -> [ReportedQuota] {
         guard let file = window.file ?? quotaFile, let list = window.each else { return [] }
         let url = expand(file)
@@ -238,7 +238,7 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
         return URL(fileURLWithPath: path)
     }
 
-    /// The first matching rule's label, else the raw value capitalised (ADR 0017).
+    /// The first matching rule's label, else the raw value capitalised (ADR 0003).
     static func planLabel(_ spec: ProviderConfig.Plan, in root: [String: Any]) -> String? {
         for rule in spec.labels ?? [] {
             guard let seen = string(value(rule.path ?? spec.path, in: root))?.lowercased() else { continue }
