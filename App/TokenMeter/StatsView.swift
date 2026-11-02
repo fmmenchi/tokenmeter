@@ -340,16 +340,23 @@ private struct AllProvidersCard: View {
         .onTapGesture(perform: onToggle)
     }
 
-    /// One segment for each model, in its provider's colour and a lighter shade for each after the first.
+    /// One segment for each model, in its provider's colour and a lighter shade for each after the first. The segments and the 2 points
+    /// between them are laid out to the width of the bar, and one under half a percent is left out: it would be a hairline.
     private var bar: some View {
-        GeometryReader { proxy in
-            HStack(spacing: 2) {
-                ForEach(Array(shares.enumerated()), id: \.element.provider) { index, share in
-                    ForEach(Array(share.models.enumerated()), id: \.element.name) { rank, model in
-                        Rectangle().fill(shade(rank, base: color(index))).frame(width: max(2, proxy.size.width * model.fraction))
-                    }
+        let segments = shares.enumerated().flatMap { index, share in
+            share.models.enumerated().filter { $0.element.fraction >= 0.005 }.map { (provider: index, rank: $0.offset, share: $0.element) }
+        }
+        let total = segments.map(\.share.fraction).reduce(0, +)
+        return GeometryReader { proxy in
+            let spacing: CGFloat = 2
+            let room = proxy.size.width - spacing * CGFloat(max(segments.count - 1, 0))
+            HStack(spacing: spacing) {
+                ForEach(Array(segments.enumerated()), id: \.offset) { _, segment in
+                    Rectangle().fill(shade(segment.rank, base: color(segment.provider)))
+                        .frame(width: total > 0 ? room * segment.share.fraction / total : 0)
                 }
             }
+            .frame(width: proxy.size.width, alignment: .leading)
             .clipShape(Capsule())
         }
         .frame(height: 10)
