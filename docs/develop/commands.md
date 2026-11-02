@@ -81,6 +81,14 @@ Each window:
 | `resetsAt`          | date, optional                             | When the provider says the window resets.   |
 | `observedAt`        | date, optional                             | When the provider last reported the figure. |
 
+## The app icon
+
+The icon is a dark rounded square with a dial: a green, orange and red arc, which repeat the thresholds of the bars, and a
+white needle. It is the `AppIcon` set in `App/TokenMeter/Assets.xcassets`. The master is drawn in SwiftUI by
+`tools/icon/main.swift` (`swift tools/icon/main.swift out.png`) and scaled with `sips` to the sizes the set needs; the PNGs are
+committed, so a build needs no extra step. The menu-bar item draws the same gauge as a monochrome template image
+(`App/TokenMeter/MenuBarIcon.swift`), so it follows the light and the dark menu bar. The widget has no icon of its own.
+
 ## Related
 
 - [Reading the Bars](../use/bars.md)
