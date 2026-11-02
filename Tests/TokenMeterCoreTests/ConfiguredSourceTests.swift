@@ -49,6 +49,49 @@ final class ConfiguredSourceTests: XCTestCase {
         XCTAssertNotNil(configured.quotaUpdatedAt)
     }
 
+    func testAnEventCarriesItsModelAndAKeyThatIdentifiesIt() throws {
+        let dir = try tempDir()
+        let lines = [
+            #"{"type":"assistant","timestamp":"2026-10-28T10:00:00.000Z","requestId":"r1","message":{"id":"m1","model":"claude-fable-5-1","usage":{"output_tokens":10}}}"#,
+            #"{"type":"assistant","timestamp":"2026-10-28T10:00:01.000Z","requestId":"r1","message":{"id":"m1","model":"claude-fable-5-1","usage":{"output_tokens":50}}}"#,
+            #"{"type":"assistant","timestamp":"2026-10-28T10:00:02.000Z","requestId":"r2","message":{"id":"m2","usage":{"output_tokens":7}}}"#,
+            #"{"type":"assistant","timestamp":"2026-10-28T10:00:03.000Z","message":{"model":"claude-opus-5-5","usage":{"output_tokens":3}}}"#,
+        ].joined(separator: "\n") + "\n"
+        try lines.write(to: dir.appendingPathComponent("s.jsonl"), atomically: true, encoding: .utf8)
+        let config = """
+        {"id":"c","title":"C","windows":[300],
+         "log":{"root":"\(dir.path)","contains":"\\"usage\\":","where":{"type":"assistant"},"timestamp":"timestamp"},
+         "usage":{"mode":"perEvent","dedupeBy":["message.id","requestId"],"model":"message.model",
+           "tokens":{"output":"message.usage.output_tokens"}}}
+        """
+
+        let events = try source(config).read(since: epoch).events
+
+        XCTAssertEqual(events.map(\.tokens.output), [50, 7, 3], "the repeated message counts once")
+        XCTAssertEqual(events.map(\.model), ["claude-fable-5-1", nil, "claude-opus-5-5"], "a line with no model leaves it empty")
+        XCTAssertEqual(events[0].key, "message.id=m1\u{1f}requestId=r1")
+        XCTAssertEqual(events[2].key, "s.jsonl|2026-10-28T10:00:03.000Z", "a line with no ids is known by where it was read")
+        XCTAssertEqual(Set(events.compactMap(\.key)).count, 3)
+    }
+
+    func testACumulativeEventIsKnownByItsFileAndItsTime() throws {
+        let dir = try tempDir()
+        try """
+        {"ts":"2026-10-28T10:00:01.000Z","used":{"total":10}}
+        {"ts":"2026-10-28T10:00:02.000Z","used":{"total":25}}
+
+        """.write(to: dir.appendingPathComponent("rollout-a.jsonl"), atomically: true, encoding: .utf8)
+        let config = """
+        {"id":"x","title":"X","windows":[60],"log":{"root":"\(dir.path)","timestamp":"ts"},
+         "usage":{"mode":"cumulative","tokens":{"output":"used.total"}}}
+        """
+
+        let events = try source(config).read(since: epoch).events
+
+        XCTAssertEqual(events.map(\.key), ["rollout-a.jsonl|2026-10-28T10:00:01.000Z", "rollout-a.jsonl|2026-10-28T10:00:02.000Z"])
+        XCTAssertEqual(events.map(\.model), [nil, nil])
+    }
+
     func testConfigReadsCumulativeUsageAndQuotaFromTheLog() throws {
         let dir = try tempDir()
         func line(_ ts: String, input: Int, cached: Int, out: Int, limits: String) -> String {

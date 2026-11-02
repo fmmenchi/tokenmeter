@@ -135,7 +135,7 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
                       (log.where ?? [:]).allSatisfy({ Self.string(Self.value($0.key, in: root)) == $0.value }),
                       let stamp = Self.string(Self.value(log.timestamp, in: root)), let date = LogDate.parse(stamp)
                 else { continue }
-                if let usage = config.usage { record(usage, root, date, into: &state) }
+                if let usage = config.usage { record(usage, root, date, origin: "\(file.lastPathComponent)|\(stamp)", into: &state) }
                 if let quota = config.quota, quota.file == nil {
                     for window in quota.windows where window.each == nil {
                         guard let reported = Self.quota(window, in: root, observedAt: date),
@@ -161,7 +161,8 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
         return (events.sorted { $0.date < $1.date }, quotas, plan)
     }
 
-    private func record(_ usage: ProviderConfig.Usage, _ root: [String: Any], _ date: Date, into state: inout FileState) {
+    private func record(_ usage: ProviderConfig.Usage, _ root: [String: Any], _ date: Date, origin: String,
+                        into state: inout FileState) {
         func count(_ field: ProviderConfig.Field?) -> Int {
             guard let field else { return 0 }
             let value = Self.number(Self.value(field.path, in: root)) ?? 0
@@ -171,17 +172,20 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
         let current = TokenCounts(input: count(tokens.input), output: count(tokens.output),
                                   cacheRead: count(tokens.cacheRead), cacheWrite: count(tokens.cacheWrite))
         let provider = info.provider
+        let model = usage.model.flatMap { Self.string(Self.value($0, in: root)) }
         switch usage.mode {
         case .perEvent:
-            let event = UsageEvent(provider: provider, date: date, tokens: current)
-            // The paths a line has make its key; a line with none is never merged with another.
+            // The paths a line has make its key; a line with none is never merged with another, and its key is where it was
+            // read from, so reading it again is the same event (ADR 0010).
             let keys = (usage.dedupeBy ?? []).compactMap { path in
                 Self.string(Self.value(path, in: root)).map { "\(path)=\($0)" }
             }
+            let key = keys.isEmpty ? origin : keys.joined(separator: "\u{1f}")
+            let event = UsageEvent(provider: provider, date: date, tokens: current, model: model, key: key)
             if keys.isEmpty {
                 state.anonymous.append(event)
             } else {
-                state.byKey[keys.joined(separator: "\u{1f}")] = event
+                state.byKey[key] = event
             }
         case .cumulative:
             let delta = TokenCounts(
@@ -189,7 +193,9 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
                 cacheRead: max(current.cacheRead - state.previous.cacheRead, 0),
                 cacheWrite: max(current.cacheWrite - state.previous.cacheWrite, 0))
             state.previous = current
-            if delta.total > 0 { state.anonymous.append(UsageEvent(provider: provider, date: date, tokens: delta)) }
+            if delta.total > 0 {
+                state.anonymous.append(UsageEvent(provider: provider, date: date, tokens: delta, model: model, key: origin))
+            }
         }
     }
 
