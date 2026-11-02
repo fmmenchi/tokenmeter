@@ -13,7 +13,7 @@ the end of each window, whether you hit the ceiling, and which models took the t
 |        |            |
 | :----- | :--------- |
 | Date   | 2026-11-02 |
-| Status | in design  |
+| Status | in build   |
 
 ## Intent
 
@@ -28,11 +28,11 @@ three models by tokens. A verdict (stay, move down) and a chip in the widget com
 
 ## The nucleus
 
-| Part                | Page                      | Status                 |
-| :------------------ | :------------------------ | :--------------------- |
-| Proposal            | [Proposal](./proposal.md) | in design              |
-| Implementation plan | not written yet           | after the design       |
-| Decisions           | not written yet           | the store, its sources |
+| Part                | Page                                          | Status    |
+| :------------------ | :-------------------------------------------- | :-------- |
+| Proposal            | [Proposal](./proposal.md)                     | in design |
+| Implementation plan | [Plan](./plan.md)                             | approved  |
+| Decisions           | [ADR 0010](../../adr/0010-the-usage-store.md) | accepted  |
 
 ## Related
 

@@ -34,11 +34,12 @@ headline, and a pie of the split between input, output and cache is not drawn.
 - **Only what the data supports.** A number is shown if it was measured or counted. There is no estimate, and no size of
   a plan in tokens: in the Codex logs the tokens counted for a window did not follow its percentage (two checks, from
   0.000 to 0.054 M tokens per point on the 5-hour window), so a ceiling in tokens cannot be derived.
-- **A past that was not measured stays empty**, and the window says "not observed". A reading is recorded **when the
-  AI is used on this Mac and the app is running**. A value recorded as the lowest point of a window is "at least", never
-  "exactly": it can only be too optimistic, so "you hit it" can be missed but never invented.
+- **A past that was not measured stays empty**, and the window says "not observed". Claude's quota is read **while the app
+  runs**, every 15 minutes, because the app asks Claude Code to run `/usage`; ChatGPT's comes from the Codex logs, so only
+  when Codex was used on this Mac. A value recorded as the lowest point of a window is "at least", never "exactly": it can
+  only be too optimistic, so "you hit it" can be missed but never invented.
 - **Tokens are "on this Mac"**, the quota is for the whole account. Use on another computer, on the web or in the
-  phone shows in the quota when it is next read here, and never in the tokens.
+  phone shows in Claude's quota at the next reading, and never in the tokens.
 - **A model is shown by family**: `fable-5` and `fable-5-1` count as one, and `<synthetic>` is dropped. At most three
   for each provider, then "N more…"; under 2% they are grouped as "Other". No pie and no stacked bar: with N models
   they cannot be read.
@@ -49,12 +50,12 @@ headline, and a pie of the split between input, output and cache is not drawn.
 
 Checked on 2026-11-02 against the author's own files, reading only field names, dates and numbers.
 
-| Source                                      | What it holds                                                       | How far back          | Used for                      |
-| :------------------------------------------ | :------------------------------------------------------------------ | :-------------------- | :---------------------------- |
-| Claude logs (`~/.claude/projects`)          | tokens and model for each message; 14 refusals for the weekly limit | 2026-10-04            | tokens, models, hit ceiling   |
-| `~/.claude.json` (`cachedUsageUtilization`) | the last quota percentages, with the time of the reading            | the last reading only | Claude quota, from now on     |
-| Codex logs (`~/.codex/sessions`)            | tokens, the model of the turn, and `rate_limits` with percentage    | 2026-10-26            | ChatGPT quota, tokens, models |
-| Status line file (`~/.tokenmeter`)          | the last reading Claude Code sent                                   | the last reading only | the present quota, as today   |
+| Source                                      | What it holds                                                                                                     | How far back          | Used for                      |
+| :------------------------------------------ | :---------------------------------------------------------------------------------------------------------------- | :-------------------- | :---------------------------- |
+| Claude logs (`~/.claude/projects`)          | tokens and model for each message; 14 refusals for the weekly limit                                               | 2026-10-04            | tokens, models, hit ceiling   |
+| `~/.claude.json` (`cachedUsageUtilization`) | the last quota percentages of the account, with the time; the app asks Claude Code to refresh it every 15 minutes | the last reading only | Claude quota, from now on     |
+| Codex logs (`~/.codex/sessions`)            | tokens, the model of the turn, and `rate_limits` with percentage                                                  | 2026-10-26            | ChatGPT quota, tokens, models |
+| Status line file (`~/.tokenmeter`)          | the last reading Claude Code sent                                                                                 | the last reading only | the present quota, as today   |
 
 Things that were found and shape the design:
 
@@ -62,7 +63,8 @@ Things that were found and shape the design:
   come, the output tokens are 106 M; with one line for each message they are 42 M. The app already removes the
   repeats (`dedupeBy` in the Claude provider); every new count must reuse that rule.
 - **Claude's quota percentage is not in its logs**, except as a refusal when the limit is hit. It is in
-  `~/.claude.json`, which Claude Code rewrites about every 15 minutes, but only the last reading is kept.
+  `~/.claude.json`, which the app already asks Claude Code to refresh every 15 minutes (`ClaudeUsageRefresh`, with Claude
+  Code's own credentials: the app handles none), but only the last reading is kept.
 - **The percentage of Codex never went down inside a window** in 4,904 readings, so it is a measure that can be trusted.
 - **Claude Code prunes its old logs.** What is not read before it is pruned is lost, so the app reads and keeps.
 
@@ -76,11 +78,11 @@ decision and the plan come next, and are not part of this page.
 
 ## Versions
 
-| Version | What it adds                                                                                                              |
-| :------ | :------------------------------------------------------------------------------------------------------------------------ |
-| 1       | The store of facts, the stats view behind the icon: the ceiling hit, the quota left at the end of each window, the models |
-| 2       | The verdict (stay, move down, wait) and the chip in the widget; it needs a few weeks of readings to say anything          |
-| 3       | The long ranges, up to Lifetime, and a second widget with the verdicts only, if they are needed                           |
+| Version | What it adds                                                                                                                                                       |
+| :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1       | The store of facts, and the stats view behind the icon with its range (1 month to Lifetime): the ceiling hit, the quota left at the end of each window, the models |
+| 2       | The verdict (stay, move down, wait) and the chip in the widget; it needs a few weeks of readings to say anything                                                   |
+| 3       | A second widget with the verdicts only, if it is needed                                                                                                            |
 
 ## The variants that were drawn and not chosen
 
@@ -102,8 +104,8 @@ decision and the plan come next, and are not part of this page.
 
 ## Not verified
 
-- That `~/.claude.json` is updated when no Claude Code session is open, and what it holds for a plan that has the
-  5-hour window; the author's plan, Ultra, has none.
+- That the refresh of `~/.claude.json` keeps working over a long run with no session open, and what it holds for a plan
+  that has the 5-hour window; the author's plan, Ultra, has none.
 - A tap on a widget opens the app by a URL that the app has to handle: not checked.
 - SQLite from the system library in Swift 6, with the write-ahead log, inside this project.
 - How the icon that changes (the chart and the gauge) reads to someone who sees it for the first time.
