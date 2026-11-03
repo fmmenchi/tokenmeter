@@ -10,10 +10,10 @@ date: 2026-11-03
 The first time the app opens, a small window walks the person through seven pages: where the app lives, what the bars and the tick say, what the
 buttons and the stats do, and where Settings is.
 
-|        |            |
-| :----- | :--------- |
-| Date   | 2026-11-03 |
-| Status | in build   |
+|        |                         |
+| :----- | :---------------------- |
+| Date   | 2026-11-03              |
+| Status | implemented, 2026-11-03 |
 
 ## Intent
 
@@ -25,10 +25,10 @@ Everything it says comes from what the app really does, and where a sentence is 
 
 ## The nucleus
 
-| Part                | Page                      | Status   |
-| :------------------ | :------------------------ | :------- |
-| Proposal            | [Proposal](./proposal.md) | chosen   |
-| Implementation plan | [Plan](./plan.md)         | accepted |
+| Part                | Page                      | Status |
+| :------------------ | :------------------------ | :----- |
+| Proposal            | [Proposal](./proposal.md) | chosen |
+| Implementation plan | [Plan](./plan.md)         | built  |
 
 No ADR: nothing here moves a boundary.
 
