@@ -51,7 +51,13 @@ spike revises it and names this alternative.
 - If the spike shows the popover cannot hold the panel as it is (the height, the solid skin colour, the corner pieces), this ADR is revised before
   the app changes, and the fall-back is the second option of the tour: the popover on the icon says "click the icon", and the person
   opens the panel.
-- Not verified at the time of writing: all of the spike above.
+- **Spike 2b, run on 2026-11-03** (macOS 27.2, a debug build, the real `MenuContent` and `Meter`): an `NSStatusItem` whose button has a target and an
+  action of ours, and an `NSPopover` with `.transient` behaviour holding the panel. `performClick` from code opened the popover, `performClose`
+  closed it, and a second `performClick` opened it again; `popoverWillShow` fired each time. **Seen:** that it opens, closes and reopens from code.
+- **Not seen, and still to check on a Mac before the app changes:** how the panel looks in the popover (the screenshot taken during the spike
+  did not catch it), its height as the content changes, the skins' solid colour, the corner pieces, `openWindow` for Settings from the hosted view,
+  the refresh on every open through `popoverWillShow`, more than one display, and the behaviour of a `.transient` popover for an app that is
+  not the active one: it closes when focus goes elsewhere, so the tour has to hold it open (`.applicationDefined`) while it runs.
 
 ## Alternatives considered
 
