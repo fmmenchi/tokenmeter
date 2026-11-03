@@ -39,5 +39,21 @@ check "a build lower than the published one: refused" "$(run)" 1
 feed 1
 check "a build that goes up: exit 0" "$(run)" 0
 
+# The zip must be the one of the version, and a feed that cannot be fetched is not a first feed.
+printf 'zip' > "$work/dist/TokenMeter-v0.3.0-dirty.zip"
+check "a zip that is not of this version: refused" "$(cd "$here/.." && OUT_DIR="$work/out" PROJECT_YML="$work/project.yml" SIGN_UPDATE="$work/sign" PREVIOUS_APPCAST="$work/previous.xml" sh scripts/appcast.sh "$work/dist/TokenMeter-v0.3.0-dirty.zip" >/dev/null 2>&1; echo $?)" 1
+mkdir "$work/bin"
+cat > "$work/bin/curl" <<'SH'
+#!/bin/sh
+echo "${SHIM_CODE:-}"; exit "${SHIM_EXIT:-0}"
+SH
+chmod +x "$work/bin/curl"
+fetch() { (cd "$here/.." && PATH="$work/bin:$PATH" SHIM_CODE="$1" SHIM_EXIT="$2" OUT_DIR="$work/out" PROJECT_YML="$work/project.yml" SIGN_UPDATE="$work/sign" \
+  sh scripts/appcast.sh "$work/dist/TokenMeter-v0.3.0.zip" >/dev/null 2>&1; echo $?); }
+check "no release with a feed yet (404): the first feed" "$(fetch 404 0)" 0
+check "the feed is there (200): read" "$(fetch 200 0)" 0
+check "the server fails (500): refused" "$(fetch 500 0)" 1
+check "no network: refused" "$(fetch 000 6)" 1
+
 rm -rf "$work"
 exit $fail

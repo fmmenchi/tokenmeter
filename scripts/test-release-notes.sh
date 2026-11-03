@@ -18,6 +18,7 @@ Released on 2026-01-02.
 - **Bold** and `code` and _it_ with [a page](./stats.md) and [outside](https://example.com/z), and a line that
   goes on in the next one.
 - A <script>tag</script> is text, not markup.
+- A [quote](https://x.example/" onclick="alert(1)) and a [script](javascript:alert(1)) are not links.
 
 ## 0.1.0 {#v0-1-0}
 
@@ -35,6 +36,8 @@ check "a link to a page of the docs becomes an address of the site" "$(grep -c '
 check "an outside link stays" "$(grep -c 'href="https://example.com/z"' "$page")" 1
 check "a line that goes on joins its item" "$(grep -c 'and a line that goes on in the next one' "$page")" 1
 check "markup in the notes is text" "$(grep -c '&lt;script&gt;' "$page")" 1
+check "an address that closes the attribute is not a link" "$(grep -c 'onclick=' "$page")" 0
+check "a javascript address is not a link" "$(grep -c 'href="javascript' "$page")" 0
 check "no real script in the page" "$(grep -c '<script>' "$page")" 0
 check "the text of the date is there" "$(grep -c 'Released on 2026-01-02' "$page")" 1
 check "another version is not in it" "$(grep -c 'The older one' "$page")" 0

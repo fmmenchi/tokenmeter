@@ -11,6 +11,7 @@ field() { sed -n "s/^ *$1: *'\{0,1\}\([^']*\)'\{0,1\} *\$/\1/p" project.yml | he
 [ -n "$(field SU_PUBLIC_ED_KEY)" ] || { echo "SU_PUBLIC_ED_KEY is empty in project.yml: make the signing key first (docs: package and distribute)" >&2; exit 1; }
 [ "$(git describe --tags --exact-match 2>/dev/null)" = "v$(field MARKETING_VERSION)" ] || {
   echo "HEAD must be tagged v$(field MARKETING_VERSION), the MARKETING_VERSION in project.yml" >&2; exit 1; }
+[ -z "$(git status --porcelain)" ] || { echo "The tree has changes the tag does not: commit or discard them, a release is the tagged commit" >&2; exit 1; }
 
 work=.build/release-sign
 rm -rf "$work"
@@ -33,7 +34,8 @@ xcodebuild -exportArchive -archivePath "$work/TokenMeter.xcarchive" \
   -exportOptionsPlist "$work/export.plist" -exportPath "$work/export" -allowProvisioningUpdates
 
 app="$work/export/TokenMeter.app"
-version=$(git describe --tags --always --dirty 2>/dev/null || echo dev)
+# The tag is exact and the tree is clean (checked above), so the name of the zip is the tag.
+version=v$(field MARKETING_VERSION)
 zip="dist/TokenMeter-$version.zip"
 rm -f dist/TokenMeter-*.zip
 ditto -c -k --keepParent "$app" "$zip"
