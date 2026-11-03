@@ -1,83 +1,70 @@
 import Foundation
 
-/// Where the welcome tour is (feature "welcome tour", [ADR 0014](../../../docs/adr/0014-welcome-tour.md)). A pure value: the app draws
-/// what it says and keeps only whether the tour was seen.
+/// Where the welcome wizard is (feature "welcome tour"). A pure value: the app draws the page and keeps only whether the wizard was seen.
 ///
-/// The tour starts by itself once, when it was never seen: on a fresh install and on the first update. It counts as seen when it is
-/// finished, skipped or declined with "Not now", never when it is only started, so one that was interrupted starts again.
+/// The wizard opens by itself once, when it was never seen: on a fresh install and on the first update. It counts as seen when the
+/// person reaches Done, skips it or closes its window, never when the app quits in the middle, so an interrupted one opens again.
 public enum WelcomeState: Equatable, Sendable {
-    /// The places of the tour, in the order the person meets them.
-    public enum Stop: Int, CaseIterable, Sendable {
-        /// The popover under the menu-bar icon.
-        case icon
+    /// The pages, in the order the person meets them.
+    public enum Page: Int, CaseIterable, Sendable {
+        case whereItLives
         case bars
         case tick
         case buttons
         case stats
-        case suggestion
         case settings
-        /// What the app set up on its own, the last screen.
-        case summary
 
-        /// The stops that have a caption "n of 6" (the icon and the summary have none).
-        public var captionNumber: Int? {
-            switch self {
-            case .icon, .summary: nil
-            default: rawValue
-            }
-        }
+        public var isFirst: Bool { self == Page.allCases.first }
+        public var isLast: Bool { self == Page.allCases.last }
     }
 
-    /// The tour is not showing: it was seen, or it is waiting for the panel.
-    case idle
-    case running(Stop)
-
-    /// The state at launch: running at the icon if the tour was never seen, idle otherwise.
-    public static func atLaunch(seen: Bool) -> WelcomeState { seen ? .idle : .running(.icon) }
-
-    public var stop: Stop? {
-        if case .running(let stop) = self { stop } else { nil }
-    }
-
-    /// True while the tour is showing, so the panel is dimmed and a caption is drawn.
-    public var isRunning: Bool { stop != nil }
-
-    /// "Show me" on the popover and "Next" at every stop: the next place, and finished after the summary. Idle stays idle.
-    public func advanced() -> WelcomeState {
-        guard case .running(let stop) = self else { return self }
-        guard let next = Stop(rawValue: stop.rawValue + 1) else { return .idle }
-        return .running(next)
-    }
-
-    /// Whether the tour was just ended and has to be remembered as seen: it ran to its last stop, or it was skipped or declined.
-    public func endedBy(_ action: Action) -> Bool {
-        switch (self, action) {
-        case (.running(.summary), .next): true
-        case (.running, .skip), (.running(.icon), .notNow): true
-        default: false
-        }
-    }
-
+    /// What the person does in the footer, or to the window.
     public enum Action: Equatable, Sendable {
+        case back
+        /// "Next", and "Done" on the last page.
         case next
         case skip
-        /// "Not now" on the popover: ends the tour without showing it.
-        case notNow
+        /// The red button of the window.
+        case close
     }
 
-    /// The state after `action`.
+    /// The wizard is not showing: it was seen, or it was never opened.
+    case idle
+    case showing(Page)
+
+    /// The state at launch: the first page if the wizard was never seen, idle otherwise.
+    public static func atLaunch(seen: Bool) -> WelcomeState { seen ? .idle : .showing(.whereItLives) }
+
+    /// "Show the welcome again" in Settings: the first page, whatever was seen.
+    public static let again = WelcomeState.showing(.whereItLives)
+
+    public var page: Page? {
+        if case .showing(let page) = self { page } else { nil }
+    }
+
+    public var isShowing: Bool { page != nil }
+
+    /// The state after `action`. Back on the first page stays there, and Next on the last page ends it.
     public func applying(_ action: Action) -> WelcomeState {
+        guard case .showing(let page) = self else { return self }
         switch action {
-        case .next: advanced()
-        case .skip, .notNow: .idle
+        case .back:
+            return .showing(Page(rawValue: page.rawValue - 1) ?? page)
+        case .next:
+            return Page(rawValue: page.rawValue + 1).map { .showing($0) } ?? .idle
+        case .skip, .close:
+            return .idle
         }
     }
 
-    /// "Show the welcome again" in Settings: from the popover, whatever was seen.
-    public static let again = WelcomeState.running(.icon)
+    /// Whether `action` ends the wizard in a way that counts as seen: Done, skip or closing the window.
+    public func endedBy(_ action: Action) -> Bool {
+        guard isShowing else { return false }
+        return applying(action) == .idle
+    }
 }
 
-/// Whether the tour was seen. The app keeps it in its defaults.
+/// Whether the wizard was seen. The app keeps it in its defaults.
 public protocol WelcomeSeenStore: Sendable {
     var seen: Bool { get }
     func markSeen()
