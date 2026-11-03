@@ -107,7 +107,10 @@ public struct ProviderConfigFile: Decodable, Sendable {
     /// of the model's name and the rules that turn it into a family (ADR 0010). Each is added once and only when absent, so
     /// what the person wrote stays; the original is kept as `.bak`, as for the Claude integration.
     @discardableResult
-    public static func addUsageFacts(to url: URL = defaultURL) -> MigrationOutcome {
+    ///
+    /// `keepingBackup` is for a run right after another migration of the same file: that one's `.bak` is the file as the person
+    /// wrote it, and this one leaves it alone instead of replacing it with the file half migrated.
+    public static func addUsageFacts(to url: URL = defaultURL, keepingBackup: Bool = false) -> MigrationOutcome {
         guard let data = try? Data(contentsOf: url),
               var object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
               object["version"] as? Int == 1,
@@ -139,9 +142,11 @@ public struct ProviderConfigFile: Decodable, Sendable {
         let backup = url.appendingPathExtension("tokenmeter.bak")
         guard let output = try? JSONSerialization.data(
             withJSONObject: object, options: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]) else { return .untouched }
-        try? FileManager.default.removeItem(at: backup)
-        guard (try? FileManager.default.copyItem(at: url, to: backup)) != nil,
-              (try? (output + Data("\n".utf8)).write(to: url, options: .atomic)) != nil else { return .untouched }
+        if !(keepingBackup && FileManager.default.fileExists(atPath: backup.path)) {
+            try? FileManager.default.removeItem(at: backup)
+            guard (try? FileManager.default.copyItem(at: url, to: backup)) != nil else { return .untouched }
+        }
+        guard (try? (output + Data("\n".utf8)).write(to: url, options: .atomic)) != nil else { return .untouched }
         return .migrated
     }
 
