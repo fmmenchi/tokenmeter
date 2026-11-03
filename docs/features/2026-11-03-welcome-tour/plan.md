@@ -6,7 +6,7 @@ sidebar_position: 3
 
 # Welcome tour, plan
 
-How the [proposal](./proposal.md) is built. Accepted on 2026-11-03: Fabio said to go on. Built as below; the pictures are the docs' screenshots, not a script. There is no ADR: nothing moves
+How the [proposal](./proposal.md) is built. Built on 2026-11-03. Built as below; the pictures are the docs' screenshots, not a script. There is no ADR: nothing moves
 a boundary.
 
 ## Where each thing goes
