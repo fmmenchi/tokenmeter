@@ -56,15 +56,17 @@ extension View {
 private struct EasterEggCorner: ViewModifier {
     @Environment(\.easterEgg) private var egg
 
-    static let size: CGFloat = 34
-    static let overhang: CGFloat = 6
+    static let size: CGFloat = 44
+    /// How far it sticks out past the card to the right, and above it: above enough to stay clear of the first row of figures.
+    static let overhangX: CGFloat = 8
+    static let overhangY: CGFloat = 10
 
     func body(content: Content) -> some View {
         content.overlay(alignment: .topTrailing) {
             if let egg {
                 EasterEggImage(name: egg.corner)
                     .frame(width: Self.size, height: Self.size)
-                    .offset(x: Self.overhang, y: -Self.overhang)
+                    .offset(x: Self.overhangX, y: -Self.overhangY)
                     .allowsHitTesting(false)
             }
         }
