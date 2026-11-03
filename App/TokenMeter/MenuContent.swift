@@ -68,6 +68,9 @@ struct MenuContent: View {
             meter.rollEasterEgg()
         }
         .environment(\.easterEgg, meter.easterEgg)
+        #if DEBUG
+        .environment(\.tickStyle, meter.tickStyle)
+        #endif
         .task { await meter.refresh() }
     }
 

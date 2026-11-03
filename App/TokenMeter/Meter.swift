@@ -34,6 +34,11 @@ final class Meter {
         easterEgg = occasion.map { EasterEgg.random(for: $0) }
     }
 
+    #if DEBUG
+    /// The look of the pace tick the panel is drawn with, chosen from the developer menu of a debug build only.
+    var tickStyle = TickStyle.plain
+    #endif
+
     // MARK: Notices (ADR 0012)
 
     /// The kinds of notice the person turned on. None at first: a notice is something the person asked for.

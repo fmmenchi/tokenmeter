@@ -1,7 +1,7 @@
 import SwiftUI
 import TokenMeterCore
 
-// A menu for the author's own builds, to see the seasonal easter eggs outside their week. It exists only in a debug build, the one
+// A menu for the author's own builds, to see the seasonal easter eggs outside their week and to compare looks of the pace tick. It exists only in a debug build, the one
 // `scripts/preview.sh` makes: the whole file is compiled out of a release, so nobody else can reach it. It is a deliberate exception
 // to the rule of no mock modes, asked for by the author, and it forces nothing but which event the panel is drawn for.
 #if DEBUG
@@ -23,6 +23,15 @@ struct DevMenu: View {
                 choice("Easter", .easter)
             }
             Button("Pick again") { meter.rollEasterEgg() }
+            Section("Pace tick") {
+                ForEach(TickStyle.allCases, id: \.self) { style in
+                    Button {
+                        meter.tickStyle = style
+                    } label: {
+                        if meter.tickStyle == style { Label(style.rawValue.capitalized, systemImage: "checkmark") } else { Text(style.rawValue.capitalized) }
+                    }
+                }
+            }
         } label: {
             Image(systemName: "hammer").frame(width: 28, height: 24)
         }
