@@ -69,6 +69,7 @@ struct SettingsView: View {
                 default: EmptyView()
                 }
             }
+            Button("Show the welcome again") { WelcomeWindow.shared.showAgain() }
         }
     }
 
