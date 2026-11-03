@@ -6,45 +6,43 @@ sidebar_position: 3
 
 # Welcome tour, plan
 
-How the [proposal](./proposal.md) is built, under [ADR 0014](../../adr/0014-welcome-tour.md). Accepted on 2026-11-03: Fabio approved it with the ADR.
+How the [proposal](./proposal.md) is built. Proposed: it waits for Fabio's approval, and nothing is built before. There is no ADR: nothing moves
+a boundary.
 
 ## Where each thing goes
 
-| Layer  | Folder                            | What                                                                                                     |
-| :----- | :-------------------------------- | :------------------------------------------------------------------------------------------------------- |
-| Core   | `Sources/TokenMeterCore/Welcome/` | `WelcomeState`: not started, at a stop, finished, skipped; the transitions; whether a run is a first one |
-| Tests  | `Tests/TokenMeterCoreTests/`      | `WelcomeTests.swift`: the transitions, a fresh install and an update, skipping at any stop               |
-| Shared | `Shared/Tour/`                    | the stops and their texts, the frame each part reports, the veil with a hole and the caption card        |
-| App    | `App/TokenMeter/Welcome/`         | the status item access, the ring and the popover, the end summary, the button in Settings                |
+| Layer  | Folder                            | What                                                                                             |
+| :----- | :-------------------------------- | :----------------------------------------------------------------------------------------------- |
+| Core   | `Sources/TokenMeterCore/Welcome/` | `WelcomeState`: the six pages, Back, Next, Skip, Done, close, and whether it counts as seen      |
+| Tests  | `Tests/TokenMeterCoreTests/`      | `WelcomeTests.swift`: the transitions, a fresh install and an update, skip and close at any page |
+| App    | `App/TokenMeter/Welcome/`         | the window, the pages, the pictures' assets, and the button in Settings                          |
+| Script | `scripts/`                        | draws the pictures from the real views with sample data                                          |
+
+The wizard needs nothing of the `Meter`: it is the part of the app that is isolated, and it is opened by an `NSWindow` hosting a SwiftUI view,
+not by a scene, so it can open by itself at the first launch. The menu-bar item stays as it is.
 
 ## The steps
 
-One commit each, three files at most, the gate green and `xcodebuild` for the app. Step 2 is a spike on a throwaway branch and its result
-is written in the ADR before step 3.
+One commit each, three files at most (the pictures count as one concern), the gate green and `xcodebuild` for the app.
 
-| Step | Commit                                                                                                               | Files                                                                               |
-| :--- | :------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------- |
-| 1    | `feat(core): the state of the welcome tour`                                                                          | `Welcome/WelcomeState.swift`, `WelcomeTests.swift`                                  |
-| 2    | the spike: find the status item, draw a ring, open the panel from code (done: the panel does not open, see ADR 0015) | a throwaway branch; the result is in `docs/adr/0015-status-item-in-appkit.md`       |
-| 2b   | the second spike: `NSStatusItem` with the real panel in an `NSPopover`, opened from code                             | a throwaway branch; the result goes into ADR 0015                                   |
-| 3    | `feat(app): the menu-bar item is an NSStatusItem hosting the panel` (ADR 0015)                                       | `Welcome/StatusItemAccess.swift`, `TokenMeterApp.swift`                             |
-| 4    | `feat(app): the ring and the popover on the icon`                                                                    | `Welcome/IconWelcome.swift`, `Meter.swift`                                          |
-| 5    | `feat(app): the veil with a hole and the caption inside the panel`                                                   | `Shared/Tour/TourOverlay.swift`, `Shared/Tour/TourStops.swift`, `MenuContent.swift` |
-| 6    | `feat(app): the end summary of what the app set up`                                                                  | `Welcome/WelcomeSummary.swift`, `MenuContent.swift`                                 |
-| 7    | `feat(app): the Settings stop and the button to show the welcome again`                                              | `SettingsView.swift`, `Welcome/SettingsTourOverlay.swift`                           |
-| 8    | `docs(use)`: the welcome page and the changelog                                                                      | `use/welcome.md`, `use/changelog.md`                                                |
-| 9    | `docs(develop)`: the core API, the architecture and AGENTS.md                                                        | `develop/core-api.md`, `develop/architecture.md`, `AGENTS.md`                       |
-| 10   | Reconcile, on a `docs/` branch: the status, the row to _Implemented_ and, if asked, Views and Design System          | `index.md`, `features/index.md`                                                     |
+| Step | Commit                                                                                                      | Files                                                                                                                 |
+| :--- | :---------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------- |
+| 1    | `feat(core): the welcome is a wizard of six pages`                                                          | `Welcome/WelcomeState.swift`, `WelcomeTests.swift` (the first version of both is in, built for a tour over the panel) |
+| 2    | `feat(app): the window of the welcome and its six pages`                                                    | `Welcome/WelcomeWindow.swift`, `Welcome/WelcomePages.swift`, `TokenMeterApp.swift`                                    |
+| 3    | `feat(app): the pictures of the welcome`                                                                    | `scripts/welcome-pictures.sh` or a test target, `Assets.xcassets`                                                     |
+| 4    | `feat(app): Show the welcome again in General`                                                              | `SettingsView.swift`                                                                                                  |
+| 5    | `docs(use)`: the welcome page and the changelog                                                             | `use/welcome.md`, `use/changelog.md`                                                                                  |
+| 6    | `docs(develop)`: the core API and AGENTS.md                                                                 | `develop/core-api.md`, `AGENTS.md`                                                                                    |
+| 7    | Reconcile, on a `docs/` branch: the status, the row to _Implemented_ and, if asked, Views and Design System | `index.md`, `features/index.md`                                                                                       |
 
 ## Tests
 
-- A fresh install and the first update both start the tour, and neither starts it again once it was finished or skipped.
-- Skip at any stop ends it, and it is not started again by itself.
-- Closing the panel in the middle leaves the tour where it was, and the next opening goes on from there; it counts as seen only when
-  it ends or is skipped.
-- Each stop is drawn offscreen, in both appearances, with the real views of the panel, and looked at.
+- A fresh install and the first update both open it, and neither opens it again once it was finished, skipped or closed.
+- Back at the first page does nothing; Next at the last page is Done.
+- Quitting in the middle leaves it unseen.
+- Each page is drawn offscreen in both appearances, with the real views, and looked at.
 
 ## Not verified at the time of writing
 
-Reaching the status item and opening the panel from code, the ring on the icon, the popover under it, the tour on a small display, and
-the Settings stop. The first two are what the spike answers.
+That a window opens by itself at the first launch of a menu-bar-only app (step 2 starts with that), how the pictures look on a Retina display and
+in both appearances, the wizard on a small display, and the first-update case with a real update.
