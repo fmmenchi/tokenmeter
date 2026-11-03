@@ -32,12 +32,15 @@ colours of each, and no code or artwork. The notices are kept as the themes wrot
 | Catppuccin | Catppuccin, Mocha and Latte | MIT, Copyright (c) 2021 Catppuccin                                     |
 | Nord       | Nord                        | MIT, Copyright (c) 2016-present Sven Greb                              |
 
-Three things are derived by us and are not the theme's: the light version of Dracula, whose own light theme is not in its free
-repository; the card and the track of One Dark's light version, taken from the One Light background; and nine quota colours that
+Four things are derived by us and are not the theme's: the light version of Dracula, whose own light theme is not in its free
+repository; the card and the track of One Dark's light version, taken from the One Light background; nine quota colours that
 were under 3 : 1 against what the bar is drawn on, each darkened or lightened with its hue kept until it reached 3 : 1: Dracula
 dark's red (`FF5555` to `FF5F5F`), One Dark dark's red (`E05561` to `E46B75`), One Light's blue, orange and red (`4078F2`,
 `C18401`, `E45649` to `3973F2`, `A57101`, `E03F31`), Catppuccin Latte's teal, peach and red (`179299`, `FE640B`, `D20F39` to
-`127278`, `B44201`, `CD0F38`) and Nord Snow Storm's orange (`D08770` to `C56C4F`). The names are the
+`127278`, `B44201`, `CD0F38`) and Nord Snow Storm's orange (`D08770` to `C56C4F`); and five colours of the captions that were
+under 4.5 : 1 on the card, moved the same way until they reached it: Dracula dark (`6272A4` to `8692B9`), Dracula light
+(`6272A4` to `5F6FA2`), One Dark dark (`ABB2BF` at 60% to `91959E`), Catppuccin Latte (`6C6F85` to `696B81`) and Nord dark
+(`D8DEE9` at 60% to `989EA8`). The names are the
 themes' names, used to say where the colours come from; tokenmeter is not made, approved or endorsed by any of them. This is
 what the author did to respect the licences, not legal advice.
 

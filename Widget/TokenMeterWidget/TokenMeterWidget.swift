@@ -39,10 +39,10 @@ struct UsageWidgetView: View {
                     ProviderCard(snapshot: $0, problemCount: snapshot.problemCount(for: $0), showsRunOut: true)
                 }
                 Spacer(minLength: 0)
-                Text(snapshot.generatedAt, style: .relative).font(.caption2).foregroundStyle(.secondary)
+                Text(snapshot.generatedAt, style: .relative).font(.caption2).captionColour()
             }
         } else {
-            Text("Open tokenmeter once to publish usage.").font(.caption).foregroundStyle(.secondary)
+            Text("Open tokenmeter once to publish usage.").font(.caption).captionColour()
         }
     }
 }

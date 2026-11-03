@@ -22,13 +22,13 @@ struct ProblemBanner: View {
                 HStack(spacing: 6) {
                     Image(systemName: "exclamationmark.triangle.fill").font(.system(size: 12)).foregroundStyle(.orange)
                     Text(topicTitle.uppercased()).font(.system(size: 10, weight: .semibold)).tracking(0.5)
-                        .foregroundStyle(.secondary)
+                        .captionColour()
                     Text(problem.message).font(.caption.weight(.semibold))
                 }
                 if case .failed(let reason) = state {
                     Text("Could not \(fix?.label.lowercased() ?? "fix") it: \(reason)").font(.caption2)
                 } else if let detail = problem.detail {
-                    Text(detail).font(.caption2).foregroundStyle(.secondary)
+                    Text(detail).font(.caption2).captionColour()
                 }
                 if explained { explanation }
                 HStack(spacing: 8) {

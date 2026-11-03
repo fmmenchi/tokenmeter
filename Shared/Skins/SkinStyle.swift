@@ -75,3 +75,38 @@ extension View {
     /// Draws this view and everything in it with `skin`: its colours, its bars and its typeface. System changes nothing.
     func skinned(_ skin: Skin) -> some View { modifier(SkinnedModifier(skin: skin)) }
 }
+
+private struct CaptionColour: ViewModifier {
+    @Environment(\.skinStyle) private var skin
+
+    func body(content: Content) -> some View {
+        if let skin {
+            content.foregroundStyle(skin.secondaryText)
+        } else {
+            content.foregroundStyle(.secondary)
+        }
+    }
+}
+
+private struct CardChrome: ViewModifier {
+    @Environment(\.skinStyle) private var skin
+
+    private var radius: CGFloat { skin.map { CGFloat($0.skin.cardRadius) } ?? 10 }
+    private var fill: Color { skin.map { $0.skin.fillsCard ? $0.card : .clear } ?? Color.primary.opacity(0.07) }
+    private var hairline: Color { skin.map { $0.border ?? .clear } ?? Color.primary.opacity(0.1) }
+
+    func body(content: Content) -> some View {
+        content
+            .background(RoundedRectangle(cornerRadius: radius).fill(fill))
+            .overlay(RoundedRectangle(cornerRadius: radius).strokeBorder(hairline))
+    }
+}
+
+extension View {
+    /// The colour of a caption: the skin's secondary text, or the system's secondary where there is no skin (ADR 0013).
+    func captionColour() -> some View { modifier(CaptionColour()) }
+
+    /// A card's fill, hairline and roundness: the skin's, or the soft fill of before where there is none. The provider card and
+    /// the cards of the stats share it.
+    func cardChrome() -> some View { modifier(CardChrome()) }
+}

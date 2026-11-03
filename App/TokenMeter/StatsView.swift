@@ -30,18 +30,18 @@ struct StatsView: View {
             if meter.storeIsOpening {
                 HStack(spacing: 8) {
                     ProgressView().controlSize(.small)
-                    Text("Opening the history.").font(.caption).foregroundStyle(.secondary)
+                    Text("Opening the history.").font(.caption).captionColour()
                 }
             } else if !meter.storeAvailable {
                 Text("The history could not be opened, so there are no stats. The quota in the other view is not affected.")
-                    .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                    .font(.caption).captionColour().fixedSize(horizontal: false, vertical: true)
             } else if meter.isIngesting && meter.stats.isEmpty {
                 // The first pass reads every log the CLIs still keep, which takes a minute or two once: say so instead of
                 // drawing cards that claim nothing is kept.
                 HStack(spacing: 8) {
                     ProgressView().controlSize(.small)
                     Text("Reading what the logs still hold. It takes a minute or two, once.").font(.caption)
-                        .foregroundStyle(.secondary)
+                        .captionColour()
                 }
             } else if let snapshot = meter.snapshot {
                 // One card is open at a time; until the person chooses, the first.
@@ -60,7 +60,7 @@ struct StatsView: View {
                                      onToggle: { meter.toggleStatsDetail(Meter.allProvidersCard, defaultOpen: first) })
                 }
                 Text("Seen on this Mac. The quota is for the whole account; the tokens are only those this Mac counted.")
-                    .font(.caption2).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                    .font(.caption2).captionColour().fixedSize(horizontal: false, vertical: true)
             } else {
                 ProgressView()
             }
@@ -85,12 +85,11 @@ private struct StatsCard: View {
                 HStack(spacing: 6) {
                     Text(snapshot.title).font(.subheadline.weight(.semibold))
                     if let plan = snapshot.plan {
-                        Text(plan).font(.caption.weight(.medium)).padding(.horizontal, 6).padding(.vertical, 1)
-                            .background(Capsule().fill(Color.primary.opacity(0.12)))
+                        PlanChip(plan: plan, font: .caption.weight(.medium))
                     }
                     Spacer()
                     Image(systemName: isExpanded ? "chevron.up" : "chevron.down").font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
+                        .captionColour()
                 }
                 .contentShape(Rectangle())
             }
@@ -107,20 +106,19 @@ private struct StatsCard: View {
                     ModelList(models: stats.models)
                     if let since = stats.since {
                         Text("Kept since \(since, format: .dateTime.month(.abbreviated).day().year())")
-                            .font(.caption2).foregroundStyle(.secondary)
+                            .font(.caption2).captionColour()
                     }
                 } else if let line = modelLine(stats.models) {
-                    Text(line).font(.caption2).foregroundStyle(.secondary).lineLimit(1)
+                    Text(line).font(.caption2).captionColour().lineLimit(1)
                 }
             } else {
-                Text("Nothing is kept for \(snapshot.title) yet.").font(.caption).foregroundStyle(.secondary)
+                Text("Nothing is kept for \(snapshot.title) yet.").font(.caption).captionColour()
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
         .padding(10)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(RoundedRectangle(cornerRadius: 10).fill(Color.primary.opacity(0.07)))
-        .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(Color.primary.opacity(0.1)))
+        .cardChrome()
         // The whole card opens and closes, not only its title row; a button inside it (the models' "more") keeps its own click.
         .contentShape(RoundedRectangle(cornerRadius: 10))
         .onTapGesture(perform: onToggle)
@@ -149,13 +147,13 @@ private struct WindowHistory: View {
 
     @ViewBuilder private var summary: some View {
         if stats.closed == 0 {
-            Text("not observed").font(.caption2).foregroundStyle(.secondary)
+            Text("not observed").font(.caption2).captionColour()
         } else if stats.hits > 0 {
             let last = stats.lastHit.map { " · last \($0.formatted(.dateTime.month(.abbreviated).day()))" } ?? ""
             Text("hit the ceiling \(stats.hits) of \(stats.closed)\(last)").font(.caption2.weight(.semibold))
                 .foregroundStyle(skin?.middle ?? Color.orange)
         } else {
-            Text("never reached the ceiling in \(stats.closed)").font(.caption2).foregroundStyle(.secondary)
+            Text("never reached the ceiling in \(stats.closed)").font(.caption2).captionColour()
         }
     }
 }
@@ -171,7 +169,7 @@ private struct OutcomeRow: View {
     var body: some View {
         HStack(spacing: 8) {
             Text(outcome.resetsAt, format: .dateTime.month(.abbreviated).day())
-                .font(.caption2).foregroundStyle(.secondary).frame(width: 44, alignment: .leading)
+                .font(.caption2).captionColour().frame(width: 44, alignment: .leading)
             QuotaBar(fraction: left / 100, tint: tint, height: 8).opacity(outcome.approximate ? 0.5 : 1)
             Text("\(outcome.approximate ? "~" : "")\(Int(left.rounded()))% left")
                 .font(.caption2.bold().monospacedDigit()).frame(width: 64, alignment: .trailing)
@@ -212,7 +210,7 @@ private struct ModelList: View {
     var body: some View {
         if models.total > 0 {
             VStack(alignment: .leading, spacing: 6) {
-                Text("Tokens by model").font(.caption2.weight(.semibold)).foregroundStyle(.secondary).textCase(.uppercase)
+                Text("Tokens by model").font(.caption2.weight(.semibold)).captionColour().textCase(.uppercase)
                 HStack(spacing: 12) {
                     ring
                     VStack(alignment: .leading, spacing: 4) {
@@ -223,7 +221,7 @@ private struct ModelList: View {
                 if expanded { ForEach(rest, id: \.name) { legend($0, color: .secondary.opacity(0.5)) } }
             }
         } else if models.unknownTokens > 0 {
-            Text("This provider does not say which model the tokens are for.").font(.caption2).foregroundStyle(.secondary)
+            Text("This provider does not say which model the tokens are for.").font(.caption2).captionColour()
         }
     }
 
@@ -248,7 +246,7 @@ private struct ModelList: View {
             RoundedRectangle(cornerRadius: 2).fill(color).frame(width: 9, height: 9)
             Text(share.name).font(.caption2.weight(.medium)).lineLimit(1).truncationMode(.middle)
             Spacer(minLength: 4)
-            Text(share.tokens.compactTokens).font(.caption2).foregroundStyle(.secondary)
+            Text(share.tokens.compactTokens).font(.caption2).captionColour()
             Text(percent(share.fraction)).font(.caption2.bold().monospacedDigit()).frame(width: 32, alignment: .trailing)
         }
         .help("\(share.name): \(share.tokens.compactTokens) tokens, input plus output")
@@ -297,7 +295,7 @@ private struct VerdictBox: View {
                 .background(Capsule().fill(verdict.word == .moveDown ? Color.accentColor.opacity(0.2) : Color.primary.opacity(0.12)))
             VStack(alignment: .leading, spacing: 2) {
                 Text(headline).font(.caption.weight(.semibold)).fixedSize(horizontal: false, vertical: true)
-                Text(detail).font(.caption2).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                Text(detail).font(.caption2).captionColour().fixedSize(horizontal: false, vertical: true)
             }
         }
         .padding(8)
@@ -323,7 +321,7 @@ private struct AllProvidersCard: View {
                     Text("All providers").font(.subheadline.weight(.semibold))
                     Spacer()
                     Image(systemName: isExpanded ? "chevron.up" : "chevron.down").font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
+                        .captionColour()
                 }
                 .contentShape(Rectangle())
             }
@@ -342,13 +340,12 @@ private struct AllProvidersCard: View {
                 }
             } else {
                 Text(shares.map { "\(titles[$0.provider] ?? $0.provider.rawValue) \(percent($0.fraction))" }.joined(separator: " · "))
-                    .font(.caption2).foregroundStyle(.secondary).lineLimit(1)
+                    .font(.caption2).captionColour().lineLimit(1)
             }
         }
         .padding(10)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(RoundedRectangle(cornerRadius: 10).fill(Color.primary.opacity(0.07)))
-        .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(Color.primary.opacity(0.1)))
+        .cardChrome()
         .contentShape(RoundedRectangle(cornerRadius: 10))
         .onTapGesture(perform: onToggle)
     }
@@ -381,7 +378,7 @@ private struct AllProvidersCard: View {
             RoundedRectangle(cornerRadius: 2).fill(color).frame(width: 9, height: 9)
             Text(titles[share.provider] ?? share.provider.rawValue).font(.caption2.weight(.semibold))
             Spacer()
-            Text("\(share.tokens.compactTokens) · \(percent(share.fraction))").font(.caption2).foregroundStyle(.secondary)
+            Text("\(share.tokens.compactTokens) · \(percent(share.fraction))").font(.caption2).captionColour()
         }
         .padding(.top, 3)
     }
@@ -396,7 +393,7 @@ private struct AllProvidersCard: View {
             RoundedRectangle(cornerRadius: 2).fill(color).frame(width: 9, height: 9)
             Text(share.name).font(.caption2.weight(.medium)).lineLimit(1).truncationMode(.middle)
             Spacer(minLength: 4)
-            Text(share.tokens.compactTokens).font(.caption2).foregroundStyle(.secondary)
+            Text(share.tokens.compactTokens).font(.caption2).captionColour()
             Text(percent(share.fraction)).font(.caption2.bold().monospacedDigit()).frame(width: 32, alignment: .trailing)
         }
         .padding(.leading, 12)

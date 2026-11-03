@@ -13,7 +13,7 @@ nothing of what the panel says.
 
 ## What you see
 
-- **A small icon on the bar** where the plain tick would be, on a bar whose quota lasts until the reset (not in the One Dark skin, whose bar is too thin for it): a pumpkin or a wrapped candy
+- **A small icon on the bar** where the plain tick would be, on a bar whose quota lasts until the reset (on the thin bar of the One Dark skin the icon sits across the line and the rows take a little more room that week): a pumpkin or a wrapped candy
   at Halloween, a reindeer or a bell at Christmas, a basket or a rabbit at Easter.
 - **A corner piece on each card**, across its top right corner: a cobweb, a ribbon with a chick, a fir branch.
 - **Where the quota will not last until the reset, the tick stays orange.** It is a warning and a joke never replaces it.

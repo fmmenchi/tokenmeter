@@ -72,6 +72,17 @@ final class SkinsTests: XCTestCase {
         }
     }
 
+    func testTheCaptionsCanBeReadOnTheSurfaceAndAreOpaque() {
+        for skin in Skin.allCases {
+            for appearance in SkinAppearance.allCases {
+                guard let palette = skin.palette(for: appearance) else { continue }
+                let surface = skin.fillsCard ? palette.card : palette.panel
+                XCTAssertEqual(palette.secondaryText >> 24, 0xFF, "\(skin) in \(appearance)")
+                XCTAssertGreaterThanOrEqual(contrast(palette.secondaryText, surface), 4.5, "\(skin) in \(appearance)")
+            }
+        }
+    }
+
     func testEachSkinDrawsItsOwnBar() {
         XCTAssertEqual(Set(Skin.allCases.map(\.shape)).count, Skin.allCases.count)
         XCTAssertEqual(Skin.dracula.typeface, .monospaced)

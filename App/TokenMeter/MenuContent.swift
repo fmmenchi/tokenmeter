@@ -31,7 +31,7 @@ struct MenuContent: View {
                         }
                     }
                 }
-                .font(.caption2).foregroundStyle(.secondary)
+                .font(.caption2).captionColour()
             } else {
                 ProgressView()
             }
