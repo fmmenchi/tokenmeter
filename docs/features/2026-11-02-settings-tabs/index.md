@@ -9,10 +9,10 @@ date: 2026-11-02
 
 The Settings window shows one section at a time, chosen from a row of tabs, instead of one long column.
 
-|        |            |
-| :----- | :--------- |
-| Date   | 2026-11-02 |
-| Status | in build   |
+|        |                         |
+| :----- | :---------------------- |
+| Date   | 2026-11-02              |
+| Status | implemented, 2026-11-02 |
 
 ## Intent
 
