@@ -33,8 +33,8 @@ The label is the feature's title in the user's words, never the name of a concep
    reconciliation (item 9) written as its own row: it is never left implied.
 5. **Wait for Fabio to approve the plan.** The ADR is `accepted` when he confirms. No code before.
 6. **Build it** with the `design-import` skill, one commit per step of the plan, three files at most, the gate green.
-   `pnpm run check` does not build the app or the widget: also run `xcodebuild`. Update the Use and Develop pages with the
-   code, in the same branch.
+   `pnpm run check` builds the app and the widget unsigned, so a view that does not compile fails the gate; it does not run
+   them. Update the Use and Develop pages with the code, in the same branch.
 7. **Review and preview.** Read the diff against the ADR and the plan, then `./scripts/preview.sh` builds the branch and
    opens it without installing it. Report what was not seen as not seen: the widget needs the install, and a tooltip only
    shows on the real app.

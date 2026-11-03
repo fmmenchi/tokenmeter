@@ -10,22 +10,23 @@ Every command, script, file and data shape in one place.
 
 ## Commands
 
-| Command                           | What it does                                                                             |
-| :-------------------------------- | :--------------------------------------------------------------------------------------- |
-| `swift build`                     | Builds `TokenMeterCore` and the probe.                                                   |
-| `swift test`                      | Runs the core tests (XCTest).                                                            |
-| `swift run tokenmeter-probe`      | Prints each provider's windows with tokens and remaining quota.                          |
-| `xcodegen generate`               | Regenerates `TokenMeter.xcodeproj` from `project.yml`.                                   |
-| `pnpm install`                    | Installs the Node tooling (commitlint, husky, Prettier, Docusaurus).                     |
-| `pnpm run check`                  | The gate: Prettier check, `swift test`, the script tests, Docusaurus build.              |
-| `pnpm run docs:start`             | Serves this site locally with hot reload.                                                |
-| `pnpm run docs:build`             | Builds the site; broken links fail the build.                                            |
-| `./scripts/install.sh`            | Builds the app, installs it in `/Applications`, sets up the status line.                 |
-| `./scripts/preview.sh`            | Builds the checked-out branch and opens it, without installing it.                       |
-| `./scripts/install-statusline.sh` | Only the Claude status line: copies the script, sets `statusLine`.                       |
-| `./scripts/sign-release.sh`       | Archives the app and exports it signed with Developer ID, as a zip.                      |
-| `./scripts/notarize.sh`           | Notarizes that zip, staples the ticket, checks it with `spctl`.                          |
-| `pnpm run scripts:test`           | Tests the status-line installer, the appcast and the release notes in throwaway folders. |
+| Command                           | What it does                                                                                              |
+| :-------------------------------- | :-------------------------------------------------------------------------------------------------------- |
+| `swift build`                     | Builds `TokenMeterCore` and the probe.                                                                    |
+| `swift test`                      | Runs the core tests (XCTest).                                                                             |
+| `swift run tokenmeter-probe`      | Prints each provider's windows with tokens and remaining quota.                                           |
+| `xcodegen generate`               | Regenerates `TokenMeter.xcodeproj` from `project.yml`.                                                    |
+| `pnpm install`                    | Installs the Node tooling (commitlint, husky, Prettier, Docusaurus).                                      |
+| `pnpm run check`                  | The gate: Prettier check, `swift test`, the app and the widget built, the script tests, Docusaurus build. |
+| `pnpm run app:build`              | Generates the project and builds the app and the widget with signing off, in `.build/xcode-check`.        |
+| `pnpm run docs:start`             | Serves this site locally with hot reload.                                                                 |
+| `pnpm run docs:build`             | Builds the site; broken links fail the build.                                                             |
+| `./scripts/install.sh`            | Builds the app, installs it in `/Applications`, sets up the status line.                                  |
+| `./scripts/preview.sh`            | Builds the checked-out branch and opens it, without installing it.                                        |
+| `./scripts/install-statusline.sh` | Only the Claude status line: copies the script, sets `statusLine`.                                        |
+| `./scripts/sign-release.sh`       | Archives the app and exports it signed with Developer ID, as a zip.                                       |
+| `./scripts/notarize.sh`           | Notarizes that zip, staples the ticket, checks it with `spctl`.                                           |
+| `pnpm run scripts:test`           | Tests the status-line installer, the appcast and the release notes in throwaway folders.                  |
 
 The probe output looks like:
 

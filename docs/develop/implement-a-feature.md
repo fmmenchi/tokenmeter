@@ -18,8 +18,8 @@ preview, merge, and the reconciliation of the interface. Nothing is built before
 ## Before you start
 
 - A semantic branch, never `main`: `feat/<name>` or `docs/<name>`. The pre-push hook checks it.
-- The gate is `pnpm run check`. It does not build the app or the widget, so changes there also need `xcodebuild`
-  (step 6), and the branch is tried with `./scripts/preview.sh` (step 7).
+- The gate is `pnpm run check`. It builds the app and the widget unsigned, which proves they compile but not that they work, so
+  the branch is also tried with `./scripts/preview.sh` (step 7).
 - The skills are in `.claude/skills/`: `feature` runs the whole flow and stops at each approval, and it calls
   `design-proposal`, `design-import` and `design-export` at their steps.
 
@@ -84,7 +84,7 @@ The ADR becomes `accepted` when you confirm it, and the plan is yours to approve
 One commit per step of the plan, conventional, each leaving the gate green:
 
 ```bash
-pnpm run check                      # prettier, swift test, helper scripts, docs build
+pnpm run check                      # prettier, swift test, app and widget build, helper scripts, docs build
 xcodegen generate -q                # only if project.yml changed
 xcodebuild -project TokenMeter.xcodeproj -scheme TokenMeter -configuration Debug \
   -derivedDataPath .build/xc build  # the app and the widget, which the gate does not build
