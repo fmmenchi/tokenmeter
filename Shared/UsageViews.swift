@@ -74,7 +74,14 @@ struct QuotaBar: View {
     let tint: Color
     var height: CGFloat = 10
     var mark: Pace?
+    /// An estimated figure is drawn at half strength: the bar and its tick, not the icon of an event, which is an image of its own.
+    var faded = false
     @Environment(\.easterEgg) private var easterEgg
+    @Environment(\.colorScheme) private var colorScheme
+
+    /// Solid white or black, not `Color.primary`: over the panel's translucent material that one is composed as vibrancy and came out
+    /// dark grey on the bright green in the dark appearance, where the tick could not be read.
+    private var tickColor: Color { colorScheme == .dark ? .white : .black }
 
     var body: some View {
         GeometryReader { proxy in
@@ -85,6 +92,7 @@ struct QuotaBar: View {
                         .frame(width: max(proxy.size.height, proxy.size.width * min(max(fraction, 0), 1)))
                 }
             }
+            .opacity(faded ? 0.5 : 1)
             .frame(width: proxy.size.width, height: proxy.size.height)
             // The mark is drawn over the bar and takes no part in its size. Inside the same stack it made the stack taller than the
             // bar and the track and the fill, which are flexible, grew with it: a bar with a mark was 14 points thick, one without 10.
@@ -93,11 +101,12 @@ struct QuotaBar: View {
                     EasterEggMark(egg: easterEgg, position: mark.aheadFraction, barWidth: proxy.size.width)
                         .accessibilityLabel("Where a steady use would put the bar")
                 } else if let mark {
-                    Capsule().fill(mark.runsOut ? Color.orange : Color.primary)
+                    Capsule().fill(mark.runsOut ? Color.orange : tickColor)
                         .frame(width: 2, height: proxy.size.height + 4)
                         .background(Capsule().fill(Color(nsColor: .windowBackgroundColor)).padding(-1))
                         .offset(x: proxy.size.width * min(max(mark.aheadFraction, 0), 1) - 1)
                         .accessibilityLabel("Where a steady use would put the bar")
+                        .opacity(faded ? 0.5 : 1)
                 }
             }
         }
@@ -128,8 +137,8 @@ struct WindowRow: View {
                     .foregroundStyle(say == nil ? Color.primary : usage.paceFigureStyle(at: Date()))
                     .id(say ?? "").transition(.opacity)
             }
-            QuotaBar(fraction: usage.remainingFraction, tint: tint, mark: showsPace ? usage.pace(at: Date()) : nil)
-                .opacity(usage.isApproximate ? 0.5 : 1)
+            QuotaBar(fraction: usage.remainingFraction, tint: tint, mark: showsPace ? usage.pace(at: Date()) : nil,
+                     faded: usage.isApproximate)
                 .hovered($hovering, enabled: showsPace)
             // A model's thin bar is 4 points tall in a row as tall as its text, so it has 4 points of air above and below it.
             // The last row gives the air below back, so the gap to the line under it is the one a bar of its own would have.
