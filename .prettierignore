@@ -5,3 +5,4 @@ apps/docusaurus/build
 apps/docusaurus/.docusaurus
 .vscode/
 apps/docusaurus/static/release-notes
+.claude/worktrees
