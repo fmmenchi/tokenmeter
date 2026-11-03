@@ -77,9 +77,9 @@ private struct WelcomePicture: View {
     var body: some View {
         switch page {
         case .whereItLives: MenuBarPicture()
-        case .bars: picture("WelcomePanel", height: 430, shown: 240, from: .top, outline: Outline(x: 0.05, y: 0.095, width: 0.9, height: 0.275))
+        case .bars: picture("WelcomePanel", height: 430, shown: 240, from: .top, outline: Outline(x: 0.03, y: 0.09, width: 0.94, height: 0.285))
         case .tick: picture("WelcomePanel", height: 430, shown: 240, from: .top, outline: Outline(x: 0.40, y: 0.125, width: 0.08, height: 0.065))
-        case .buttons: picture("WelcomePanel", height: 430, shown: 240, from: .bottom, outline: Outline(x: 0.03, y: 0.765, width: 0.9, height: 0.2))
+        case .buttons: picture("WelcomePanel", height: 430, shown: 240, from: .bottom, outline: Outline(x: 0.02, y: 0.76, width: 0.96, height: 0.21))
         case .stats:
             HStack(alignment: .top, spacing: 16) {
                 picture("WelcomeStats", height: 610, shown: 178, from: .top, outline: Outline(x: 0.07, y: 0.125, width: 0.84, height: 0.125))
