@@ -12,7 +12,7 @@ The first time the app opens, it points at its own icon in the menu bar and walk
 |        |            |
 | :----- | :--------- |
 | Date   | 2026-11-03 |
-| Status | in design  |
+| Status | in build   |
 
 ## Intent
 
@@ -28,7 +28,7 @@ Everything it says comes from what the app really does, and where a sentence is 
 | :------------------ | :----------------------------------------- | :------- |
 | Proposal            | [Proposal](./proposal.md)                  | chosen   |
 | Implementation plan | [Plan](./plan.md)                          | proposed |
-| Decisions           | [ADR 0014](../../adr/0014-welcome-tour.md) | proposed |
+| Decisions           | [ADR 0014](../../adr/0014-welcome-tour.md) | accepted |
 
 ## Related
 

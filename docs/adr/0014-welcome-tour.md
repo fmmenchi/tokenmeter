@@ -1,6 +1,6 @@
 # ADR 0014 — Welcome tour: the app reaches its own menu-bar item to point at it, and the tour is drawn inside the panel
 
-Status: proposed (2026-11-03, with the plan of the [welcome tour](../features/2026-11-03-welcome-tour/plan.md))
+Status: accepted (2026-11-03, with the plan of the [welcome tour](../features/2026-11-03-welcome-tour/plan.md); Fabio approved both and the rule that the tour starts once, on a new install and on the first update)
 
 ## Context
 

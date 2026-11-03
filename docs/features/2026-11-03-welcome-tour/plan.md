@@ -6,8 +6,7 @@ sidebar_position: 3
 
 # Welcome tour, plan
 
-How the [proposal](./proposal.md) is built, under [ADR 0014](../../adr/0014-welcome-tour.md). Proposed: it waits for Fabio's approval, and
-nothing is built before.
+How the [proposal](./proposal.md) is built, under [ADR 0014](../../adr/0014-welcome-tour.md). Accepted on 2026-11-03: Fabio approved it with the ADR.
 
 ## Where each thing goes
 
