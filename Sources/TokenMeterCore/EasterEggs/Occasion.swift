@@ -2,8 +2,9 @@ import Foundation
 
 /// The events that have a week of small details in the panel (feature "seasonal easter eggs").
 ///
-/// An event is on for the seven days up to and including the day it falls on. The days are in the person's own calendar and time
-/// zone. Easter is worked out for each year; the other two are fixed.
+/// An event is on for the seven days up to and including the day it falls on. The days are those of the person's own time
+/// zone, counted in the Gregorian calendar whatever calendar the Mac shows: the three events are Gregorian dates, and Easter is
+/// worked out for a Gregorian year. Easter is worked out for each year; the other two are fixed.
 public enum Occasion: String, CaseIterable, Sendable {
     case halloween
     case christmas
@@ -14,6 +15,7 @@ public enum Occasion: String, CaseIterable, Sendable {
 
     /// The event whose week it is on `date`, or nil. The weeks never overlap.
     public static func active(on date: Date, calendar: Calendar = .current) -> Occasion? {
+        let calendar = gregorian(like: calendar)
         let today = calendar.startOfDay(for: date)
         let year = calendar.component(.year, from: today)
         return allCases.first { occasion in
@@ -25,6 +27,7 @@ public enum Occasion: String, CaseIterable, Sendable {
 
     /// The day the event falls on in `year`, at the start of that day.
     public func day(inYear year: Int, calendar: Calendar = .current) -> Date? {
+        let calendar = Self.gregorian(like: calendar)
         let parts: (month: Int, day: Int)
         switch self {
         case .halloween: parts = (10, 31)
@@ -32,6 +35,16 @@ public enum Occasion: String, CaseIterable, Sendable {
         case .easter: parts = Self.easterSunday(year: year)
         }
         return calendar.date(from: DateComponents(year: year, month: parts.month, day: parts.day))
+    }
+
+    /// The Gregorian calendar in the time zone and with the first weekday of `calendar`. A Buddhist, Japanese or Islamic calendar
+    /// numbers its years otherwise, and Easter worked out for that number falls on another day.
+    private static func gregorian(like calendar: Calendar) -> Calendar {
+        guard calendar.identifier != .gregorian else { return calendar }
+        var gregorian = Calendar(identifier: .gregorian)
+        gregorian.timeZone = calendar.timeZone
+        gregorian.locale = calendar.locale
+        return gregorian
     }
 
     /// Easter Sunday of the Gregorian calendar (the Western Church), by the Meeus/Jones/Butcher method.
