@@ -13,8 +13,7 @@ Add another AI tool to the panel by describing its files, without writing Swift 
 Show a provider next to Claude and ChatGPT by adding an entry to one JSON file. That file,
 `~/.tokenmeter/providers.json`, is the **only** list of providers and every entry in it is equal:
 Claude and ChatGPT are two entries the app writes the first time it runs, and you can edit, reorder
-or remove them like any other ([ADR 0003](../adr/0003-providers-in-one-config-file.md),
-[ADR 0003](../adr/0003-providers-in-one-config-file.md)). A tool whose logs need a rule the
+or remove them like any other ([ADR 0003](../adr/0003-providers-in-one-config-file.md)). A tool whose logs need a rule the
 file cannot say is a [source in Swift](../develop/add-a-provider.md) instead.
 
 ## Prerequisites
@@ -127,5 +126,7 @@ as the template for a new provider. They are not special: delete the Claude entr
 the panel. If you ever want the original two back, move the file aside and start the app; it writes
 them again.
 
-The file is yours once written. An app update does not change it, so a future improvement to how
-Claude or ChatGPT are read reaches you only if you take it into your file.
+The file is yours once written. An app update does not change what you wrote or rewrite your entries. A few additions that a
+newer version needs, such as the fields that name the model in the usage, are made once, only where they are missing, and the
+file as it was is kept next to it as `providers.json.tokenmeter.bak`. A future improvement to how Claude or ChatGPT are read
+reaches you only if it is one of those additions or you take it into your file.

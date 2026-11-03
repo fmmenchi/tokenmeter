@@ -36,4 +36,4 @@ long-lived work and is sandboxed, so it cannot read the logs of the CLIs it repo
 - The first scan after launch costs seconds and runs off the main thread. A log rewritten in place at the same size would be
   missed; both CLIs only append.
 - Claude's bars can lag as long as no session runs.
-- Not verified: that the sandboxed widget reads the snapshot on the desktop with a notarized build.
+- Verified on the author's Mac with the Developer ID build of v0.2.0: the sandboxed widget reads the snapshot on the desktop. Not verified: the double click of a notarized build on another Mac.

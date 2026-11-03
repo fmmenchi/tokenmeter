@@ -11,7 +11,7 @@ are **off** until you turn them on.
 
 ## The three notices
 
-Turn each on by itself, in the group **Notifications** of Settings:
+Turn each on by itself, in the tab **Notifications** of Settings:
 
 | Notice                            | It comes when                                                                  |
 | :-------------------------------- | :----------------------------------------------------------------------------- |

@@ -57,8 +57,7 @@ flowchart LR
 | **Shared views**       | `Shared`                       | The bar and rows, compiled into both targets so they look the same.                               |
 | **Status-line script** | `scripts/claude-statusline.sh` | Persists Claude Code's `rate_limits` for the Claude source.                                       |
 
-The split is [ADR 0001](../adr/0001-app-architecture.md) and
-[ADR 0001](../adr/0001-app-architecture.md).
+The split is [ADR 0001](../adr/0001-app-architecture.md).
 
 ### The collection pipeline
 

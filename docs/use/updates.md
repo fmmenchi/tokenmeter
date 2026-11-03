@@ -19,11 +19,11 @@ of the app, so it updates with it.
   **Install**, and the menu-bar icon carries a **dot** (the same dot that a problem puts there).
 - **Install** quits the app, replaces it, opens it again, and the app migrates what it keeps. Your settings and your history stay,
   and the stats are not read again from nothing.
-- **What's new** opens the [changelog](./changelog.md) at that version.
+- **What's new** opens a clean page with the notes of that version, made from the [changelog](./changelog.md), which has the rest.
 
 ## Settings
 
-At the foot of Settings, a group **Updates** shows the installed version and has:
+In the tab **Updates** of Settings, the installed version and:
 
 - a switch **Update automatically**, on by default. Off, the app never contacts GitHub on its own;
 - a line that says when it last looked, and a button **Check now**. If a check fails (offline, for instance) the line says so,
@@ -34,7 +34,7 @@ At the foot of Settings, a group **Updates** shows the installed version and has
 - **The first version with updates is installed by hand**, by dragging it to `/Applications` over the old one. Versions before it
   (v0.1.0 and v0.2.0) do not look for updates. From then on the app updates itself.
 - An update is signed with a key that only the author has, and the app refuses one that does not match.
-- A build you made yourself has no key, so it does not look for updates: Settings says so.
+- A build you made yourself from this repository carries the same public key, so it looks for updates too. A build whose key was removed does not, and Settings says so.
 - The widget on the desktop can take a moment to show the new version after an update.
 - Nothing about this leaves your Mac except that one request for the list.
 

@@ -27,4 +27,4 @@ Building needs Xcode, XcodeGen and a signing team, and someone who only wants th
 - Only the stapled zip from `notarize.sh` opens with a double click on any Mac; `dist/` is git-ignored.
 - Settings kept under the old identifiers start fresh, and the old login item must be removed.
 - Notarization needs the network and takes minutes, which is why it is not part of `install.sh`.
-- Not verified: the App Group on a notarized build, and the widget on the desktop with it; the first notarization is pending.
+- The App Group and the widget on the desktop were verified on the author's Mac with the Developer ID build of v0.2.0 (every version since is notarized). Not verified: the double click of the zip on another Mac.

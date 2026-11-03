@@ -30,10 +30,9 @@ The app writes a new snapshot every 60 seconds and asks WidgetKit to reload. The
 schedules itself every 15 minutes, and at each upcoming reset time, so a bar flips to its reset
 state on time instead of at the next refresh.
 
-:::caution[Not verified]
-The widget is registered with macOS and the app writes the snapshot, but the widget on the desktop
-has not been seen running end to end. If it says "Open tokenmeter once to publish usage", see
-[Troubleshooting](./troubleshooting.md).
+:::caution[Seen on one Mac]
+The widget was seen running on the desktop on the author's Mac with the notarized build; it has not been tried on another Mac.
+If it says "Open tokenmeter once to publish usage", see [Troubleshooting](./troubleshooting.md).
 :::
 
 ## Related

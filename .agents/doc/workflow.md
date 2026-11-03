@@ -12,6 +12,6 @@
 - **Never push.** Fabio pushes. **Merge** a finished branch into `main` with a merge commit: `git checkout main`, then
   `git merge --no-ff <branch>`. Never fast-forward, never rebase onto `main`. A branch holds one feature or one fix, and
   the merge is the last step of its plan.
-- **Gate:** `pnpm run check` (prettier, `swift test`, docs build). CI mirrors it
+- **Gate:** `pnpm run check` (prettier, `swift test`, the script tests, docs build). CI mirrors it
   (`.github/workflows/ci.yml`: Swift on macOS, web on Ubuntu, commitlint on PRs).
 - **Docs** deploy to GitHub Pages from `main` (`docs.yml`).

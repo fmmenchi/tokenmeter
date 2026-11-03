@@ -38,7 +38,8 @@ author's data touched), showed:
   say it. The reading of the logs and the quota stay as they are: no credentials, and Claude's quota still comes from Claude
   Code running its own `/usage`.
 - **It tells, and the user installs** (`SUAutomaticallyUpdate` false): the system's update window asks, and nothing is
-  installed without a yes. For whoever misses the window, the panel shows a notice at its top and the menu-bar icon shows the
+  installed without a yes, unless the person themselves turns on the automatic install that Sparkle's window offers
+  (`SUAllowsAutomaticUpdates` is true). For whoever misses the window, the panel shows a notice at its top and the menu-bar icon shows the
   dot of the [icon-only menu bar](../features/2026-11-02-menu-bar-icon-only/index.md), the same dot as a problem.
 - **The feed is a file attached to each GitHub release**, at the address of the latest release, so a release and its feed cannot
   fall out of step. **To be checked:** that Sparkle follows that redirect.
@@ -48,8 +49,9 @@ author's data touched), showed:
 - **The version is read from `project.yml`.** `MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` feed both Info.plist files. The
   build number is an integer that **goes up by one in every release**; v0.2.0 reported 1, so the first version with an updater
   is build 2. The release script refuses a build number that is not greater than the last one in the feed.
-- **What changed is one click away.** Each item of the feed points to the changelog page of the docs site, with the version as
-  an anchor; **What's new** opens it. The page lists, for each version, what changed in a few lines.
+- **What changed is one click away.** Each item of the feed points to a clean page of the docs site with the notes of that version
+  (`/release-notes/v<version>.html`, made from the changelog by `scripts/release-notes.sh`), which the update window shows and
+  **What's new** opens; that page links to the whole changelog.
 - **An update starts the app again, and the app migrates and does not start again from nothing.** The schema of the store and the
   fields of `providers.json` are migrated at launch, as they already are, and the ingestor reads only what changed since the last
   pass that finished ([ADR 0010](./0010-the-usage-store.md), commit `0ed6380`).
