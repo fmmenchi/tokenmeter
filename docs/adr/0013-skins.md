@@ -8,7 +8,7 @@ the end and to release it)
 A skin changes the colours of the panel, the card and the bar, the quota colours, the shape of the bar and the typeface
 ([proposal](../features/2026-11-02-skins/proposal.md)). Three things are structural: where the definition of a skin lives, how the
 widget, which is another process, learns which skin was chosen, and how the shared views take their look from it without each
-view asking. Today the views use only system colours and their opacities ([ADR 0006](./0006-providers-in-settings.md)), the
+view asking. Today the views use only system colours and their opacities ([ADR 0006](./0006-display-preferences.md)), the
 widget reads the snapshot the app publishes and nothing else
 ([ADR 0001](./0001-app-architecture.md)), and the colour of a bar is decided in one place, `WindowUsage.tint`.
 
