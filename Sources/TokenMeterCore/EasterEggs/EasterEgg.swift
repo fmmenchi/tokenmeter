@@ -32,7 +32,7 @@ extension Occasion {
 
     private var markPieces: [String] {
         switch self {
-        case .halloween: ["pumpkin", "ghost", "bat", "web", "skull", "witch"]
+        case .halloween: ["pumpkin", "ghost", "bat", "candy", "skull", "witch"]
         case .christmas: ["tree", "santa", "reindeer", "snowman", "gift", "bell"]
         case .easter: ["bunny", "chick", "egg", "basket", "carrot", "lamb"]
         }

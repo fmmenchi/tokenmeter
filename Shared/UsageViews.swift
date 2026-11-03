@@ -89,7 +89,7 @@ struct QuotaBar: View {
             // The mark is drawn over the bar and takes no part in its size. Inside the same stack it made the stack taller than the
             // bar and the track and the fill, which are flexible, grew with it: a bar with a mark was 14 points thick, one without 10.
             .overlay(alignment: .leading) {
-                if let mark, let easterEgg, !mark.runsOut, height >= EasterEggMark.size / 2 {
+                if let mark, let easterEgg, !mark.runsOut, height >= 8 {
                     EasterEggMark(egg: easterEgg, position: mark.aheadFraction, barWidth: proxy.size.width)
                         .accessibilityLabel("Where a steady use would put the bar")
                 } else if let mark {
