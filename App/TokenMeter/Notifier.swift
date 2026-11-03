@@ -60,7 +60,7 @@ extension LimitNotice {
     var body: String {
         let left = window.remainingFraction.map { "\(Int(($0 * 100).rounded()))% left" }
         let pace = kind == .willRunOut ? window.runsOutShortText(at: Date()).map { "at this pace \($0)" } : nil
-        let reset = window.resetText.map { "resets \($0)" }
+        let reset = window.resetText(at: Date()).map { "resets \($0)" }
         return [left, pace, reset].compactMap { $0 }.joined(separator: " · ")
     }
 }

@@ -1,47 +1,37 @@
 import SwiftUI
 import TokenMeterCore
 
+/// The moment a view is drawn for. The panel sets none and reads the clock; the widget sets the date of the entry of its timeline,
+/// so an entry the system draws ahead of time reads as it will when it is shown (ADR 0002).
+private struct RenderDateKey: EnvironmentKey {
+    static let defaultValue: Date? = nil
+}
+
+extension EnvironmentValues {
+    var renderDate: Date? {
+        get { self[RenderDateKey.self] }
+        set { self[RenderDateKey.self] = newValue }
+    }
+}
+
 extension WindowUsage {
-    var isStale: Bool {
-        guard source == .reported, let observedAt else { return false }
-        return Date().timeIntervalSince(observedAt) > Self.staleAfter
-    }
-
-    /// True when the figure is old, inferred  rather than a fresh provider reading.
-    var isApproximate: Bool { isStale || source == .reset }
-
-    var remainingText: String {
+    func remainingText(at now: Date) -> String {
         guard let remainingFraction else { return "—" }
-        return "\(isApproximate ? "~" : "")\(Int((remainingFraction * 100).rounded()))%"
-    }
-
-    var observedAgoText: String? {
-        guard let observedAt else { return nil }
-        let minutes = Int(Date().timeIntervalSince(observedAt) / 60)
-        return minutes >= 1440 ? "\(minutes / 1440)d ago" : minutes >= 60 ? "\(minutes / 60)h ago" : "\(max(minutes, 1))m ago"
+        return "\(isApproximate(at: now) ? "~" : "")\(Int((remainingFraction * 100).rounded()))%"
     }
 
     /// Input + output tokens seen in the window. Cache reads are left out: they are ~98% of the
     /// raw total and say nothing about plan use.
     var tokensText: String { "\((tokens.input + tokens.output).compactTokens) tokens" }
 
-    var detailText: String {
+    func detailText(at now: Date) -> String {
         switch source {
-        case .reported where isStale:
-            "\(tokensText) · seen \(observedAgoText ?? "a while ago") · may be lower"
-        case .reported: [tokensText, resetText.map { "resets \($0)" }].compactMap { $0 }.joined(separator: " · ")
+        case .reported where isStale(at: now):
+            "\(tokensText) · seen \(observedAgoText(at: now) ?? "a while ago") · may be lower"
+        case .reported: [tokensText, resetText(at: now).map { "resets \($0)" }].compactMap { $0 }.joined(separator: " · ")
         case .reset: "window reset · not used since"
         case .consumptionOnly: "no quota · \(tokensText)"
         }
-    }
-
-    /// "in 2h 10m" style; nil when the provider gave no reset time.
-    var resetText: String? {
-        guard let resetsAt else { return nil }
-        let minutes = Int(resetsAt.timeIntervalSinceNow / 60)
-        guard minutes > 0 else { return nil }
-        return minutes >= 60 * 24 ? "in \(minutes / 1440)d \(minutes % 1440 / 60)h"
-            : minutes >= 60 ? "in \(minutes / 60)h \(minutes % 60)m" : "in \(minutes)m"
     }
 }
 
@@ -110,6 +100,8 @@ struct WindowRow: View {
     let usage: WindowUsage
     @State private var hovering = false
     @Environment(\.skinStyle) private var skin
+    @Environment(\.renderDate) private var renderDate
+    private var now: Date { renderDate ?? Date() }
     /// The limits of models that are part of this window, drawn right under its bar (ADR 0002).
     var models: [WindowUsage] = []
     /// Draw the mark on the bar and the hover that says when the quota runs out (ADR 0002). The widget does not.
@@ -124,14 +116,14 @@ struct WindowRow: View {
                 Text(usage.window.label).font(.caption.weight(.medium))
                 Spacer()
                 // While the pointer is on the bar the figure says when the quota runs out (ADR 0002); the label does not move.
-                let say = hovering && showsPace ? usage.paceFigureText(at: Date()) : nil
-                Text(say ?? (usage.remainingFraction == nil ? "unknown" : "\(usage.remainingText) left"))
+                let say = hovering && showsPace ? usage.paceFigureText(at: now) : nil
+                Text(say ?? (usage.remainingFraction == nil ? "unknown" : "\(usage.remainingText(at: now)) left"))
                     .font(.caption.bold().monospacedDigit())
-                    .foregroundStyle(say == nil ? Color.primary : usage.paceFigureStyle(at: Date(), warning: skin?.middle ?? .orange))
+                    .foregroundStyle(say == nil ? Color.primary : usage.paceFigureStyle(at: now, warning: skin?.middle ?? .orange))
                     .id(say ?? "").transition(.opacity)
             }
-            QuotaBar(fraction: usage.remainingFraction, tint: tint, mark: showsPace ? usage.pace(at: Date()) : nil,
-                     faded: usage.isApproximate)
+            QuotaBar(fraction: usage.remainingFraction, tint: tint, mark: showsPace ? usage.pace(at: now) : nil,
+                     faded: usage.isApproximate(at: now))
                 .hovered($hovering, enabled: showsPace)
             // A model's thin bar is 4 points tall in a row as tall as its text, so it has 4 points of air above and below it.
             // The last row gives the air below back, so the gap to the line under it is the one a bar of its own would have.
@@ -147,12 +139,12 @@ struct WindowRow: View {
     /// The detail line. Where the quota would run out before the reset and the widget asks, the moment is in it, in short
     /// and in the notice colour: "3.4B tokens · out Thu 6 pm · resets in 3d 14h".
     @ViewBuilder private var detail: some View {
-        if showsRunOut, let phrase = usage.runsOutShortText(at: Date()) {
+        if showsRunOut, let phrase = usage.runsOutShortText(at: now) {
             (Text("\(usage.tokensText) · ") + Text(phrase).fontWeight(.semibold).foregroundColor(skin?.middle ?? .orange)
-                + Text(usage.resetText.map { " · resets \($0)" } ?? ""))
+                + Text(usage.resetText(at: now).map { " · resets \($0)" } ?? ""))
                 .font(.caption2).foregroundStyle(.secondary)
         } else {
-            Text(usage.detailText).font(.caption2).foregroundStyle(.secondary)
+            Text(usage.detailText(at: now)).font(.caption2).foregroundStyle(.secondary)
         }
     }
 }
@@ -184,6 +176,8 @@ private struct Bracket: Shape {
 /// under that window's bar (ADR 0002). The share of the week and the reset are in the help text.
 struct ScopedWindowRow: View {
     let usage: WindowUsage
+    @Environment(\.renderDate) private var renderDate
+    private var now: Date { renderDate ?? Date() }
     /// Draw the mark on the thin bar and say in its figure when it runs out (ADR 0002). The widget does not.
     var showsPace = false
     @State private var hovering = false
@@ -195,21 +189,21 @@ struct ScopedWindowRow: View {
             Text(usage.window.scope ?? "").font(.caption.weight(.medium)).lineLimit(1)
                 .frame(minWidth: 30, alignment: .leading)
             QuotaBar(fraction: usage.remainingFraction, tint: usage.tint(in: skin), height: 4,
-                     mark: showsPace ? usage.pace(at: Date()) : nil)
+                     mark: showsPace ? usage.pace(at: now) : nil)
             // The figure is as wide as what it says, and the bar gives way to it, smoothly (ADR 0002).
-            let say = hovering && showsPace ? usage.paceFigureText(at: Date()) : nil
-            Text(say ?? (usage.remainingFraction == nil ? "unknown" : "\(usage.remainingText) left"))
+            let say = hovering && showsPace ? usage.paceFigureText(at: now) : nil
+            Text(say ?? (usage.remainingFraction == nil ? "unknown" : "\(usage.remainingText(at: now)) left"))
                 .font(.caption.bold().monospacedDigit())
-                .foregroundStyle(say == nil ? Color.primary : usage.paceFigureStyle(at: Date(), warning: skin?.middle ?? .orange))
+                .foregroundStyle(say == nil ? Color.primary : usage.paceFigureStyle(at: now, warning: skin?.middle ?? .orange))
                 .lineLimit(1).fixedSize()
                 .id(say ?? "").transition(.opacity)
                 .frame(minWidth: 54, alignment: .trailing)
         }
-        .opacity(usage.isApproximate ? 0.5 : 1)
+        .opacity(usage.isApproximate(at: now) ? 0.5 : 1)
         .padding(.leading, 6)
         .hovered($hovering, enabled: showsPace)
         .help([ "Part of \(WindowSpec(name: usage.window.name, duration: 0).label)",
-                usage.resetText.map { "resets \($0)" }, usage.isApproximate ? usage.observedAgoText.map { "seen \($0)" } : nil ]
+                usage.resetText(at: now).map { "resets \($0)" }, usage.isApproximate(at: now) ? usage.observedAgoText(at: now).map { "seen \($0)" } : nil ]
             .compactMap { $0 }.joined(separator: " · "))
     }
 }
@@ -233,6 +227,8 @@ private struct PlanChip: View {
 }
 
 struct ProviderBlock: View {
+    @Environment(\.renderDate) private var renderDate
+    private var now: Date { renderDate ?? Date() }
     let snapshot: ProviderSnapshot
     /// How many problems have this provider as their topic; the widget only counts, the panel lists them.
     var problemCount = 0
@@ -246,15 +242,15 @@ struct ProviderBlock: View {
                 if let plan = snapshot.plan { PlanChip(plan: plan) }
                 if problemCount > 0 { NoticeChip(count: problemCount) }
                 // Only where there is a mark to explain: a provider whose windows cannot be estimated has none.
-                if showsPace, snapshot.windows.contains(where: { $0.pace(at: Date()) != nil }) {
+                if showsPace, snapshot.windows.contains(where: { $0.pace(at: now) != nil }) {
                     Spacer(minLength: 0)
                     PaceInfo()
                 }
             }
             ForEach(snapshot.windows.filter { $0.window.scope == nil }, id: \.window.id) { window in
-                WindowRow(usage: window.resolved(at: Date()),
+                WindowRow(usage: window.resolved(at: now),
                           models: snapshot.windows.filter { $0.window.scope != nil && $0.window.name == window.window.name }
-                              .map { $0.resolved(at: Date()) },
+                              .map { $0.resolved(at: now) },
                           showsPace: showsPace, showsRunOut: showsRunOut)
             }
         }
