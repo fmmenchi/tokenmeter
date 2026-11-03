@@ -255,8 +255,8 @@ private struct ModelList: View {
     }
 }
 
-/// The word of a provider's card and what it rests on, in a sentence (ADR 0010).
-private struct VerdictBox: View {
+/// The word of a provider's card and what it rests on, in a sentence (ADR 0010). The welcome shows three of them.
+struct VerdictBox: View {
     let verdict: Verdict
 
     private func label(_ name: String) -> String { name == "5h" ? "5-hour" : name == "7d" ? "weekly" : name }

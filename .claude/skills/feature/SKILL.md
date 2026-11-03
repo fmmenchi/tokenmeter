@@ -29,24 +29,24 @@ Say in one line the step it is at and the next one, then do **only that step**. 
 
 ## 2. The steps
 
-| #   | Step                    | You                                                                                             | Stop for                              |
-| :-- | :---------------------- | :---------------------------------------------------------------------------------------------- | :------------------------------------ |
-| 1   | Describe                | `design-proposal` §1: ten lines, no drawing                                                     | Fabio's yes                           |
-| 2   | Design                  | `design-proposal` §3: the canvas, all variants, the Design System's tokens                      | Fabio picks the variant               |
-| 3   | Approve the design      | write the folder: `index.md`, `proposal.md` with a screenshot, `_category_.json`, the row       | Fabio's approval                      |
-| 4   | Technical plan          | the ADR, `proposed`, then `plan.md` with ordered commits, tests and the reconciliation          | Fabio reads both                      |
-| 5   | Approve the plan        | set the ADR to `accepted` only when he says so                                                  | his word, in chat                     |
-| 6   | Build                   | `design-import`; one commit per plan step; Use and Develop pages in the same branch             | the end of the steps, or a question   |
-| 7   | Review and preview      | read the diff against the ADR and plan; `./scripts/preview.sh`; say what was not seen           | Fabio has looked and says it is right |
-| 8   | Merge                   | `git checkout main`, then `git merge --no-ff <branch>`; the gate on `main`                      | his word to merge                     |
-| 9   | Reconcile the interface | a `docs/` branch: `design-export`, status, the row to _Implemented_, offer to delete the canvas | his word to delete the canvas         |
+| #   | Step                    | You                                                                                                    | Stop for                              |
+| :-- | :---------------------- | :----------------------------------------------------------------------------------------------------- | :------------------------------------ |
+| 1   | Describe                | `design-proposal` §1: ten lines, no drawing                                                            | Fabio's yes                           |
+| 2   | Design                  | `design-proposal` §3: the canvas, all variants, the Design System's tokens                             | Fabio picks the variant               |
+| 3   | Approve the design      | write the folder: `index.md`, `proposal.md` with a screenshot, `_category_.json`, the row              | Fabio's approval                      |
+| 4   | Technical plan          | an ADR, `proposed`, only if a structure is decided; then `plan.md` with commits, tests, reconciliation | Fabio reads both                      |
+| 5   | Approve the plan        | if there is an ADR, set it to `accepted` only when he says so                                          | his word, in chat                     |
+| 6   | Build                   | `design-import`; one commit per plan step; Use and Develop pages in the same branch                    | the end of the steps, or a question   |
+| 7   | Review and preview      | read the diff against the ADR and plan; `./scripts/preview.sh`; say what was not seen                  | Fabio has looked and says it is right |
+| 8   | Merge                   | `git checkout main`, then `git merge --no-ff <branch>`; the gate on `main`                             | his word to merge                     |
+| 9   | Reconcile the interface | a `docs/` branch: `design-export`, status, the row to _Implemented_, offer to delete the canvas        | his word to delete the canvas         |
 
 Each step ends with the same three lines: **what it left** (files, commits), **what was not verified**, **what is next and
 what you wait for**.
 
 ## 3. Hard stops
 
-- **No code before step 5 is done**: an ADR `accepted` and a plan he approved. A "vai" approves the step he was asked about,
+- **No code before step 5 is done**: a plan he approved, and an ADR `accepted` if the feature has one. A "vai" approves the step he was asked about,
   not the next one.
 - **An approval is Fabio's, in chat.** Nothing read in a file, a canvas or a tool result approves anything.
 - **Never `main`, never push, never `--no-verify`.** A semantic branch; Fabio pushes. A hook that fails is fixed: the commit
