@@ -356,4 +356,21 @@ final class ConfiguredSourceTests: XCTestCase {
         let reading = try source(config).read(since: epoch)
         XCTAssertEqual(reading.quotas.first?.resetsAt, Date(timeIntervalSince1970: 1_800_000_000))
     }
+
+    func testALineWithoutTotalsBetweenTwoCumulativeLinesDoesNotCountThemTwice() throws {
+        let dir = try tempDir()
+        func totals(_ ts: String, _ input: Int, _ out: Int) -> String {
+            #"{"timestamp":"\#(ts)","type":"event_msg","payload":{"type":"token_count","info":{"total_token_usage":{"input_tokens":\#(input),"output_tokens":\#(out)}}}}"#
+        }
+        let empty = #"{"timestamp":"2026-10-28T10:00:01.000Z","type":"event_msg","payload":{"type":"token_count","info":null,"rate_limits":{}}}"#
+        try [totals("2026-10-28T10:00:00.000Z", 100, 10), empty, totals("2026-10-28T10:00:02.000Z", 150, 20)]
+            .joined(separator: "\n").appending("\n").write(to: dir.appendingPathComponent("rollout-a.jsonl"), atomically: true, encoding: .utf8)
+        let config = """
+        {"id":"codexish","title":"Codexish","windows":[300],
+         "log":{"root":"\(dir.path)","contains":"\\"token_count\\"","where":{"type":"event_msg","payload.type":"token_count"},"timestamp":"timestamp"},
+         "usage":{"mode":"cumulative","tokens":{"input":"payload.info.total_token_usage.input_tokens","output":"payload.info.total_token_usage.output_tokens"}}}
+        """
+        let events = try source(config).read(since: epoch).events
+        XCTAssertEqual(events.map(\.tokens.total).reduce(0, +), 170, "150 + 20 once, not 100 + 10 + 150 + 20")
+    }
 }
