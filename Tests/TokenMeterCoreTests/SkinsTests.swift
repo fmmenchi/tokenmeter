@@ -46,11 +46,15 @@ final class SkinsTests: XCTestCase {
         }
     }
 
-    func testTheTickCanBeSeenOnTheCard() {
+    func testTheTickCanBeSeenOnWhatTheBarIsDrawnOver() {
+        // The tick is outlined with the surface of the bar: the card, or the panel where the card is only an outline. That outline
+        // is what a reader sees where the tick crosses a bar of nearly its own colour.
         for skin in Skin.allCases {
             for appearance in SkinAppearance.allCases {
                 guard let palette = skin.palette(for: appearance) else { continue }
-                XCTAssertGreaterThanOrEqual(contrast(palette.tick, palette.card), 4.5, "\(skin) in \(appearance)")
+                let surface = skin.fillsCard ? palette.card : palette.panel
+                XCTAssertGreaterThanOrEqual(contrast(palette.tick, surface), 4.5, "\(skin) in \(appearance)")
+                XCTAssertGreaterThanOrEqual(contrast(palette.middle, surface), 2.0, "the warning tick, \(skin) in \(appearance)")
             }
         }
     }

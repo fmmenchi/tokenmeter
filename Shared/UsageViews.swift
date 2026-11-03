@@ -127,7 +127,7 @@ struct WindowRow: View {
                 let say = hovering && showsPace ? usage.paceFigureText(at: Date()) : nil
                 Text(say ?? (usage.remainingFraction == nil ? "unknown" : "\(usage.remainingText) left"))
                     .font(.caption.bold().monospacedDigit())
-                    .foregroundStyle(say == nil ? Color.primary : usage.paceFigureStyle(at: Date()))
+                    .foregroundStyle(say == nil ? Color.primary : usage.paceFigureStyle(at: Date(), warning: skin?.middle ?? .orange))
                     .id(say ?? "").transition(.opacity)
             }
             QuotaBar(fraction: usage.remainingFraction, tint: tint, mark: showsPace ? usage.pace(at: Date()) : nil,
@@ -148,7 +148,7 @@ struct WindowRow: View {
     /// and in the notice colour: "3.4B tokens · out Thu 6 pm · resets in 3d 14h".
     @ViewBuilder private var detail: some View {
         if showsRunOut, let phrase = usage.runsOutShortText(at: Date()) {
-            (Text("\(usage.tokensText) · ") + Text(phrase).fontWeight(.semibold).foregroundColor(.orange)
+            (Text("\(usage.tokensText) · ") + Text(phrase).fontWeight(.semibold).foregroundColor(skin?.middle ?? .orange)
                 + Text(usage.resetText.map { " · resets \($0)" } ?? ""))
                 .font(.caption2).foregroundStyle(.secondary)
         } else {
@@ -200,7 +200,7 @@ struct ScopedWindowRow: View {
             let say = hovering && showsPace ? usage.paceFigureText(at: Date()) : nil
             Text(say ?? (usage.remainingFraction == nil ? "unknown" : "\(usage.remainingText) left"))
                 .font(.caption.bold().monospacedDigit())
-                .foregroundStyle(say == nil ? Color.primary : usage.paceFigureStyle(at: Date()))
+                .foregroundStyle(say == nil ? Color.primary : usage.paceFigureStyle(at: Date(), warning: skin?.middle ?? .orange))
                 .lineLimit(1).fixedSize()
                 .id(say ?? "").transition(.opacity)
                 .frame(minWidth: 54, alignment: .trailing)
