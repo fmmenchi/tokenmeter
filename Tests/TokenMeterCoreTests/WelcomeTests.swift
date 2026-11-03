@@ -15,8 +15,8 @@ final class WelcomeTests: XCTestCase {
         XCTAssertTrue(WelcomeState.atLaunch(seen: fresh.seen).isShowing)
     }
 
-    func testThereAreSixPagesInTheOrderOfTheDesign() {
-        XCTAssertEqual(WelcomeState.Page.allCases, [.whereItLives, .bars, .tick, .buttons, .stats, .settings])
+    func testThereAreSevenPagesInTheOrderOfTheDesign() {
+        XCTAssertEqual(WelcomeState.Page.allCases, [.whereItLives, .bars, .tick, .buttons, .stats, .suggestion, .settings])
     }
 
     func testNextGoesThroughEveryPageAndThenEnds() {

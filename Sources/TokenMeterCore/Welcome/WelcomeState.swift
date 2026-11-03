@@ -12,6 +12,7 @@ public enum WelcomeState: Equatable, Sendable {
         case tick
         case buttons
         case stats
+        case suggestion
         case settings
 
         public var isFirst: Bool { self == Page.allCases.first }
