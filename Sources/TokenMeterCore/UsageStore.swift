@@ -68,29 +68,46 @@ public final class UsageStore: @unchecked Sendable {
 
     public struct Failure: Error, Equatable, CustomStringConvertible {
         public let description: String
+        /// True when SQLite says the file is not a database or is damaged: the only failure that makes a new file the answer.
+        public let isDamage: Bool
 
-        public init(description: String) {
+        public init(description: String, isDamage: Bool = false) {
             self.description = description
+            self.isDamage = isDamage
+        }
+
+        init(description: String, code: Int32) {
+            self.init(description: description, isDamage: code == SQLITE_NOTADB || code == SQLITE_CORRUPT)
         }
     }
 
     public let url: URL
+    private let busyMilliseconds: Int32
     private var db: OpaquePointer?
     private let lock = NSLock()
     private static let transient = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
 
-    /// Opens the file, making it and its folder when they are missing. A file that cannot be read is made again empty:
-    /// the app, the snapshot and the widget do not depend on it. A file written by a newer version is left alone and refused.
-    public init(url: URL) throws {
+    /// Opens the file, making it and its folder when they are missing. A file that is not a database, or is damaged, is set aside
+    /// as `usage.sqlite.damaged` and made again empty: the app, the snapshot and the widget do not depend on it. Any other failure
+    /// (a lock held by another copy of the app, a full disk) leaves the file where it is and is thrown, because the history in it
+    /// is fine. A file written by a newer version is left alone and refused.
+    public convenience init(url: URL) throws {
+        try self.init(url: url, busyMilliseconds: 5000)
+    }
+
+    /// How long a statement waits for a lock another copy of the app holds; a test makes it short.
+    init(url: URL, busyMilliseconds: Int32) throws {
         self.url = url
+        self.busyMilliseconds = busyMilliseconds
         try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
         do {
             try open()
-        } catch let failure as Failure where failure.description.hasPrefix("newer") {
-            throw failure
-        } catch {
+        } catch let failure as Failure where failure.isDamage {
             close()
-            for suffix in ["", "-wal", "-shm"] { try? FileManager.default.removeItem(atPath: url.path + suffix) }
+            let aside = URL(fileURLWithPath: url.path + ".damaged")
+            try? FileManager.default.removeItem(at: aside)
+            try? FileManager.default.moveItem(at: url, to: aside)
+            for suffix in ["-wal", "-shm"] { try? FileManager.default.removeItem(atPath: url.path + suffix) }
             try open()
         }
     }
@@ -103,9 +120,9 @@ public final class UsageStore: @unchecked Sendable {
     }
 
     private func open() throws {
-        guard sqlite3_open_v2(url.path, &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FULLMUTEX, nil) == SQLITE_OK
-        else { throw Failure(description: "open: \(message)") }
-        sqlite3_busy_timeout(db, 5000)
+        let opened = sqlite3_open_v2(url.path, &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FULLMUTEX, nil)
+        guard opened == SQLITE_OK else { throw Failure(description: "open: \(message)", code: opened) }
+        sqlite3_busy_timeout(db, busyMilliseconds)
         try exec("PRAGMA journal_mode=WAL")
         try exec("PRAGMA synchronous=NORMAL")
         // A file that is not a database fails on the first real statement.
@@ -349,20 +366,21 @@ public final class UsageStore: @unchecked Sendable {
 
     private func exec(_ sql: String) throws {
         var error: UnsafeMutablePointer<CChar>?
-        guard sqlite3_exec(db, sql, nil, nil, &error) == SQLITE_OK else {
+        let result = sqlite3_exec(db, sql, nil, nil, &error)
+        guard result == SQLITE_OK else {
             let text = error.map { String(cString: $0) } ?? message
             sqlite3_free(error)
-            throw Failure(description: text)
+            throw Failure(description: text, code: result)
         }
     }
 
     private func scalarInt(_ sql: String) throws -> Int {
         var statement: OpaquePointer?
-        guard sqlite3_prepare_v2(db, sql, -1, &statement, nil) == SQLITE_OK, let statement else {
-            throw Failure(description: "prepare: \(message)")
-        }
+        let prepared = sqlite3_prepare_v2(db, sql, -1, &statement, nil)
+        guard prepared == SQLITE_OK, let statement else { throw Failure(description: "prepare: \(message)", code: prepared) }
         defer { sqlite3_finalize(statement) }
-        guard sqlite3_step(statement) == SQLITE_ROW else { throw Failure(description: "step: \(message)") }
+        let stepped = sqlite3_step(statement)
+        guard stepped == SQLITE_ROW else { throw Failure(description: "step: \(message)", code: stepped) }
         return Int(sqlite3_column_int64(statement, 0))
     }
 

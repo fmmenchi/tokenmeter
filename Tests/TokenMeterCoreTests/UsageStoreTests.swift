@@ -204,6 +204,26 @@ final class UsageStoreTests: XCTestCase {
         XCTAssertEqual(store.messageCount(), 0)
         store.insert([message("a")])
         XCTAssertEqual(store.messageCount(), 1, "and it works")
+        XCTAssertTrue(FileManager.default.fileExists(atPath: url.path + ".damaged"), "what was there is set aside, not thrown away")
+    }
+
+    func testAFileThatIsLockedByAnotherCopyIsNotWipedAndTheStoreIsRefused() throws {
+        let url = try fileURL()
+        do {
+            let first = try UsageStore(url: url)
+            first.insert([message("a")])
+        }
+        // Another process holds the file for longer than the store waits.
+        var other: OpaquePointer?
+        XCTAssertEqual(sqlite3_open(url.path, &other), SQLITE_OK)
+        defer { sqlite3_close(other) }
+        XCTAssertEqual(sqlite3_exec(other, "PRAGMA journal_mode=DELETE; BEGIN EXCLUSIVE;", nil, nil, nil), SQLITE_OK)
+        let size = try FileManager.default.attributesOfItem(atPath: url.path)[.size] as? Int
+        XCTAssertThrowsError(try UsageStore(url: url, busyMilliseconds: 50))
+        XCTAssertEqual(try FileManager.default.attributesOfItem(atPath: url.path)[.size] as? Int, size, "the history is still there")
+        XCTAssertFalse(FileManager.default.fileExists(atPath: url.path + ".damaged"))
+        sqlite3_exec(other, "ROLLBACK;", nil, nil, nil)
+        XCTAssertEqual(try UsageStore(url: url).messageCount(), 1, "and once the lock is gone, it opens with its history")
     }
 
     func testAFileFromANewerVersionIsRefusedAndLeftAlone() throws {
