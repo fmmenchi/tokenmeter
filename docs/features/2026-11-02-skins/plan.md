@@ -24,8 +24,8 @@ One commit each, three files at most, the gate green and `xcodebuild` when the a
 
 | Step | Commit                                                                                                      | Files                                                                     |
 | :--- | :---------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------ |
-| 1    | `feat(core): the skins and their palettes`                                                                  | `Skins/Skin.swift`, `SkinsTests.swift`                                    |
-| 2    | `feat(core): the snapshot carries the skin`                                                                 | `Snapshot.swift`, `SkinsTests.swift`                                      |
+| 1    | `feat(core): the skins and their palettes, and the snapshot carries the skin`                               | `Skins/Skin.swift`, `Snapshot.swift`, `SkinsTests.swift`                  |
+| 2    | merged into step 1: the palettes and the snapshot field are one commit                                      |                                                                           |
 | 3    | `feat(app): a skin as a style in the environment`                                                           | `Shared/Skins/SkinStyle.swift`, `UsageViews.swift`                        |
 | 4    | `feat(app): the bar in five shapes`                                                                         | `Shared/Skins/SkinBar.swift`, `UsageViews.swift`                          |
 | 5    | `feat(app): the card, the pace tick and the type follow the skin`                                           | `ProviderCard.swift`, `PaceTick.swift`                                    |
