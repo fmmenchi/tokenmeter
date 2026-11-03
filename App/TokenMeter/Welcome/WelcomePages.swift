@@ -1,7 +1,7 @@
 import SwiftUI
 import TokenMeterCore
 
-/// The six pages of the welcome wizard: a title, a short text, a picture with the part outlined, and the footer.
+/// The seven pages of the welcome wizard: a title, a short text, a picture with the part outlined, and the footer.
 struct WelcomeView: View {
     let welcome: WelcomeWindow
 
