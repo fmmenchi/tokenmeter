@@ -10,10 +10,10 @@ date: 2026-11-02
 A skin changes how the panel, the widget and the stats look: the colours, the shape of the bars and the typeface. There are five:
 System, the look of today, and four taken from well-known editor themes, Dracula, One Dark, Catppuccin and Nord.
 
-|        |            |
-| :----- | :--------- |
-| Date   | 2026-11-02 |
-| Status | in build   |
+|        |                         |
+| :----- | :---------------------- |
+| Date   | 2026-11-02              |
+| Status | implemented, 2026-11-02 |
 
 ## Intent
 
