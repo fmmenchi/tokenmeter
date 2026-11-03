@@ -130,4 +130,17 @@ final class EasterEggsTests: XCTestCase {
         let same = egg.filter { Occasion.halloween.marks.firstIndex(of: $0.mark) == Occasion.halloween.corners.firstIndex(of: $0.corner) }
         XCTAssertLessThan(same.count, 200, "they are picked apart")
     }
+
+    func testAnotherCalendarOfTheMacDoesNotMoveTheWeeks() {
+        // Easter 2026 is the 5th of April and Halloween the 31st of October, whatever calendar numbers the years.
+        for identifier in [Calendar.Identifier.buddhist, .japanese, .islamicUmmAlQura, .hebrew, .persian] {
+            var other = Calendar(identifier: identifier)
+            other.timeZone = TimeZone(identifier: "UTC")!
+            XCTAssertEqual(Occasion.active(on: date(2026, 4, 5), calendar: other), .easter, "\(identifier)")
+            XCTAssertNil(Occasion.active(on: date(2026, 4, 9), calendar: other), "\(identifier)")
+            XCTAssertEqual(Occasion.active(on: date(2026, 10, 28), calendar: other), .halloween, "\(identifier)")
+            XCTAssertEqual(Occasion.active(on: date(2026, 12, 25), calendar: other), .christmas, "\(identifier)")
+            XCTAssertNil(Occasion.active(on: date(2026, 6, 11), calendar: other), "\(identifier)")
+        }
+    }
 }
