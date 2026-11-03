@@ -8,7 +8,7 @@ A macOS menu-bar app and widget showing how much of your **Claude** and **ChatGP
 
 ## Quick start
 
-You need macOS 14 or later, Xcode, [XcodeGen](https://github.com/yonaskolb/XcodeGen) and an Apple signing team. Set your team once, then install:
+To install the app, download the notarized zip of the [latest release](https://github.com/fmmenchi/tokenmeter/releases/latest) and follow [Install](https://fmmenchi.github.io/tokenmeter/use/install). To build it yourself you need macOS 14 or later, Xcode, [XcodeGen](https://github.com/yonaskolb/XcodeGen) and an Apple signing team. Set your team once, then install:
 
 ```sh
 cp Local.xcconfig.example Local.xcconfig   # put your team ID in it
@@ -22,7 +22,7 @@ request, once a day, is for the list of versions that says whether an update is 
 
 | I want to…                            | Read                                                                                     |
 | :------------------------------------ | :--------------------------------------------------------------------------------------- |
-| install it and keep it running        | [Install and Run](https://fmmenchi.github.io/tokenmeter/develop/build-and-run)           |
+| install it and keep it running        | [Install](https://fmmenchi.github.io/tokenmeter/use/install)                             |
 | see the Claude quota                  | [Enable the Claude Quota](https://fmmenchi.github.io/tokenmeter/use/enable-claude-quota) |
 | understand a bar, a colour or the `~` | [Reading the Bars](https://fmmenchi.github.io/tokenmeter/use/bars)                       |
 | read how my use is going              | [Reading the Stats](https://fmmenchi.github.io/tokenmeter/use/stats)                     |

@@ -38,8 +38,8 @@ app; if both are wrong, it is in the data.
 
 :::caution[App Group]
 The app writes `snapshot.json` into `~/Library/Group Containers/<TeamID>.tokenmeter/`
-([ADR 0001](../adr/0001-app-architecture.md)); that was confirmed. Whether the widget reads it
-on the desktop was not. If the widget stays empty with the app running, look for a line starting
+([ADR 0001](../adr/0001-app-architecture.md)); that was confirmed, and the widget was seen reading it on the desktop
+with the notarized build, on the author's Mac. If the widget stays empty with the app running, look for a line starting
 `Could not write` in Console (subsystem `com.fmmenchi.tokenmeter.app`) first.
 :::
 

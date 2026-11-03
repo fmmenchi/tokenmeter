@@ -25,13 +25,13 @@ It generates the project, builds the Release app, and writes `dist/TokenMeter-<v
 
 ## Step 2: Know what the signature allows
 
-| Signed with                      | Runs on                                    | Widget                                  |
-| :------------------------------- | :----------------------------------------- | :-------------------------------------- |
-| Personal Team (the default here) | The Mac that built it. Others get blocked. | Needs the App Group, not confirmed.     |
-| Developer ID, notarized          | Any Mac, with a double click.              | Not yet confirmed on a notarized build. |
+| Signed with                      | Runs on                                    | Widget                                                      |
+| :------------------------------- | :----------------------------------------- | :---------------------------------------------------------- |
+| Personal Team (the default here) | The Mac that built it. Others get blocked. | Needs the App Group.                                        |
+| Developer ID, notarized          | Any Mac, with a double click.              | Seen working on the author's Mac; not tried on another Mac. |
 
-The zip built here is signed with a development certificate and Gatekeeper rejects it
-(`spctl -a -vv` says `rejected`), so it is not yet something to hand to someone else.
+The zip that `install.sh` and `package.sh` build is signed with a development certificate and Gatekeeper rejects it
+(`spctl -a -vv` says `rejected`), so it is not something to hand to someone else: the release is made in step 3.
 
 ## Step 3: Sign for other Macs and notarize
 
@@ -72,7 +72,8 @@ half, and the private half is never pasted into a chat, a script or the reposito
 ```
 
 Put the public key it printed in `project.yml` as `SU_PUBLIC_ED_KEY` and commit it. Until it is there, `sign-release.sh` and
-`appcast.sh` refuse and a build does not look for updates. If the key is lost, no installed copy can update itself and people
+`appcast.sh` refuse and a build does not look for updates. The key is in the base settings of the app, so every build made from
+this repository, a Debug one included, has it and asks GitHub once a day; only a build whose key is removed does not. If the key is lost, no installed copy can update itself and people
 download the app again, so the copy matters.
 
 **For each release**, after the steps above:

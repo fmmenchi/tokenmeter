@@ -29,15 +29,15 @@ The panel as it looks on a Mac with both CLIs installed: a stale reading is dimm
 
 **To run it:** macOS 14 or later, and Claude Code and/or the Codex CLI, since both providers are read from the files those tools leave on your machine.
 
-**To build it** (the only way today): Xcode, XcodeGen and an Apple signing team, because the widget reads its data through an App Group. A prebuilt download that is signed with a Developer ID and notarized would need none of these three: the scripts exist ([ADR 0008](./adr/0008-signing-and-distribution.md)), a notarized build is not published yet. The zip you can build yourself runs only on the Mac that built it.
+**To install it:** nothing else. The release is a zip signed with a Developer ID and notarized ([Install](./use/install.md), [ADR 0008](./adr/0008-signing-and-distribution.md)). **To build it yourself:** Xcode, XcodeGen and an Apple signing team, because the widget reads its data through an App Group; a build made that way runs only on the Mac that built it.
 
-No credentials and no network: tokenmeter only reads files those tools leave on your machine.
+No credentials: tokenmeter reads files those tools leave on your machine and never asks for a login, a key or a token. Its one request of its own, once a day, is for the list of versions that says whether an update is out ([What it does](./use/what-it-does.md)).
 
 :::caution[Status]
 Early. Verified: the providers read from real logs, the quota for both, the bars, the panel and the
-Settings window opened on screen, the app registered to start at login, and the signed build with
-the paid team. **Not verified**: the widget on the desktop end to end, a real reboot with launch at
-login, and a notarized build. See [Troubleshooting](./use/troubleshooting.md).
+Settings window opened on screen, the app registered to start at login, the notarized build and, with
+it, the widget on the desktop (on the author's Mac). **Not verified**: a real reboot with launch at
+login, and the double click on another Mac. See [Troubleshooting](./use/troubleshooting.md).
 :::
 
 ## 👤 Use it
@@ -71,7 +71,7 @@ For someone who builds, extends or ships it.
 The things tokenmeter does, newest first, each with an overview, its proposal (with its screens) and its implementation plan.
 
 1. [How a feature is written](./features/index.md).
-2. [Alerts with a fix](./features/2026-10-30-alerts-with-a-fix/index.md): the app tells what is wrong and offers a fix (in design).
+2. [The list of features](./features/index.md#implemented), newest first: from the alerts with a fix to the skins and the settings in tabs.
 
 ## 🧭 Decisions
 
