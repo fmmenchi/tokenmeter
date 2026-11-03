@@ -10,22 +10,22 @@ Every command, script, file and data shape in one place.
 
 ## Commands
 
-| Command                           | What it does                                                             |
-| :-------------------------------- | :----------------------------------------------------------------------- |
-| `swift build`                     | Builds `TokenMeterCore` and the probe.                                   |
-| `swift test`                      | Runs the core tests (XCTest).                                            |
-| `swift run tokenmeter-probe`      | Prints each provider's windows with tokens and remaining quota.          |
-| `xcodegen generate`               | Regenerates `TokenMeter.xcodeproj` from `project.yml`.                   |
-| `pnpm install`                    | Installs the Node tooling (commitlint, husky, Prettier, Docusaurus).     |
-| `pnpm run check`                  | The gate: Prettier check, `swift test`, Docusaurus build.                |
-| `pnpm run docs:start`             | Serves this site locally with hot reload.                                |
-| `pnpm run docs:build`             | Builds the site; broken links fail the build.                            |
-| `./scripts/install.sh`            | Builds the app, installs it in `/Applications`, sets up the status line. |
-| `./scripts/preview.sh`            | Builds the checked-out branch and opens it, without installing it.       |
-| `./scripts/install-statusline.sh` | Only the Claude status line: copies the script, sets `statusLine`.       |
-| `./scripts/sign-release.sh`       | Archives the app and exports it signed with Developer ID, as a zip.      |
-| `./scripts/notarize.sh`           | Notarizes that zip, staples the ticket, checks it with `spctl`.          |
-| `pnpm run scripts:test`           | Tests the status-line installer on throwaway home directories.           |
+| Command                           | What it does                                                                             |
+| :-------------------------------- | :--------------------------------------------------------------------------------------- |
+| `swift build`                     | Builds `TokenMeterCore` and the probe.                                                   |
+| `swift test`                      | Runs the core tests (XCTest).                                                            |
+| `swift run tokenmeter-probe`      | Prints each provider's windows with tokens and remaining quota.                          |
+| `xcodegen generate`               | Regenerates `TokenMeter.xcodeproj` from `project.yml`.                                   |
+| `pnpm install`                    | Installs the Node tooling (commitlint, husky, Prettier, Docusaurus).                     |
+| `pnpm run check`                  | The gate: Prettier check, `swift test`, the script tests, Docusaurus build.              |
+| `pnpm run docs:start`             | Serves this site locally with hot reload.                                                |
+| `pnpm run docs:build`             | Builds the site; broken links fail the build.                                            |
+| `./scripts/install.sh`            | Builds the app, installs it in `/Applications`, sets up the status line.                 |
+| `./scripts/preview.sh`            | Builds the checked-out branch and opens it, without installing it.                       |
+| `./scripts/install-statusline.sh` | Only the Claude status line: copies the script, sets `statusLine`.                       |
+| `./scripts/sign-release.sh`       | Archives the app and exports it signed with Developer ID, as a zip.                      |
+| `./scripts/notarize.sh`           | Notarizes that zip, staples the ticket, checks it with `spctl`.                          |
+| `pnpm run scripts:test`           | Tests the status-line installer, the appcast and the release notes in throwaway folders. |
 
 The probe output looks like:
 
@@ -59,27 +59,28 @@ Unlike the panel, the probe prints the raw token total including cache reads.
 
 `snapshot.json` is what the widget renders. Dates are ISO 8601.
 
-| Field                        | Type           | Description                                                                                                 |
-| :--------------------------- | :------------- | :---------------------------------------------------------------------------------------------------------- |
-| `generatedAt`                | date           | When the app built the snapshot.                                                                            |
-| `providers[].provider`       | string         | The provider id, for example `claude` or `chatgpt`.                                                         |
-| `providers[].title`          | string         | Display name. Older snapshots lack it and show the id.                                                      |
-| `providers[].plan`           | string, option | Subscription label such as `Ultra`.                                                                         |
-| `providers[].quotaUpdatedAt` | date, optional | When the provider's quota was last written.                                                                 |
-| `providers[].setupHint`      | string, option | Shown while no quota has been seen.                                                                         |
-| `providers[].windows[]`      | array          | One entry per window the provider declares, `5h` then `7d` today.                                           |
-| `notices[]`                  | string array   | Sentences the widget and panel show in orange; absent in older files ([ADR 0005](../adr/0005-problems.md)). |
+| Field                        | Type           | Description                                                                                                                                               |
+| :--------------------------- | :------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `generatedAt`                | date           | When the app built the snapshot.                                                                                                                          |
+| `providers[].provider`       | string         | The provider id, for example `claude` or `chatgpt`.                                                                                                       |
+| `providers[].title`          | string         | Display name. Older snapshots lack it and show the id.                                                                                                    |
+| `providers[].plan`           | string, option | Subscription label such as `Ultra`.                                                                                                                       |
+| `providers[].quotaUpdatedAt` | date, optional | When the provider's quota was last written.                                                                                                               |
+| `providers[].setupHint`      | string, option | Shown while no quota has been seen.                                                                                                                       |
+| `providers[].windows[]`      | array          | One entry per window the provider declares, `5h` then `7d` today.                                                                                         |
+| `problems[]`                 | array          | What the panel and the widget tell about, visible ones only; absent in older files ([ADR 0005](../adr/0005-problems.md)).                                 |
+| `skin`                       | string         | The look the person chose (`system`, `dracula`, `oneDark`, `catppuccin`, `nord`); absent or unknown reads as `system` ([ADR 0013](../adr/0013-skins.md)). |
 
 Each window:
 
-| Field               | Type                                       | Description                                 |
-| :------------------ | :----------------------------------------- | :------------------------------------------ |
-| `window`            | `{ name, duration }`                       | `5h` or `7d`, duration in seconds.          |
-| `tokens`            | `{ input, output, cacheRead, cacheWrite }` | Tokens seen in the window.                  |
-| `remainingFraction` | number 0 to 1, optional                    | Absent when unknown.                        |
-| `source`            | `reported`, `reset`, `consumptionOnly`     | Where `remainingFraction` comes from.       |
-| `resetsAt`          | date, optional                             | When the provider says the window resets.   |
-| `observedAt`        | date, optional                             | When the provider last reported the figure. |
+| Field               | Type                                       | Description                                                                |
+| :------------------ | :----------------------------------------- | :------------------------------------------------------------------------- |
+| `window`            | `{ name, duration, scope? }`               | `5h` or `7d`, duration in seconds; `scope` names the model a limit is for. |
+| `tokens`            | `{ input, output, cacheRead, cacheWrite }` | Tokens seen in the window.                                                 |
+| `remainingFraction` | number 0 to 1, optional                    | Absent when unknown.                                                       |
+| `source`            | `reported`, `reset`, `consumptionOnly`     | Where `remainingFraction` comes from.                                      |
+| `resetsAt`          | date, optional                             | When the provider says the window resets.                                  |
+| `observedAt`        | date, optional                             | When the provider last reported the figure.                                |
 
 ## The app icon
 

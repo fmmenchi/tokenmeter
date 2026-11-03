@@ -55,7 +55,7 @@ pnpm install        # once; also installs the git hooks
 pnpm run check
 ```
 
-`check` is Prettier, `swift test` and the Docusaurus build. The `pre-push` hook runs it too. A
+`check` is Prettier, `swift test`, the script tests (`scripts:test`) and the Docusaurus build. The `pre-push` hook runs it too. A
 failing gate gets fixed; `--no-verify` is not used.
 
 ## What CI runs
@@ -63,7 +63,7 @@ failing gate gets fixed; `--no-verify` is not used.
 | Job       | Runner | Does                                                                                         |
 | :-------- | :----- | :------------------------------------------------------------------------------------------- |
 | `swift`   | macOS  | `swift build`, `swift test`, then generates the project and builds the app with signing off. |
-| `web`     | Ubuntu | Prettier check and the Docusaurus build.                                                     |
+| `web`     | Ubuntu | Prettier check, the script tests and the Docusaurus build.                                   |
 | `commits` | Ubuntu | commitlint over the pull request's commits.                                                  |
 
 On `main`, `docs.yml` deploys this site to GitHub Pages when `docs/` or `apps/docusaurus/` change.

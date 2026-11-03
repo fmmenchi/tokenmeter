@@ -89,15 +89,13 @@ let one = Collector(sources: [mySource]).snapshot(now: date) // your own list, f
 for a fresh one, now for one that is out of date), `runsOutAt`, when the quota runs out at the pace since the window began
 if that is before the reset (nil for a stale figure), `isStale` and `runsOut`. It is nil when nothing can be estimated.
 `runsOut(at:)` is its `runsOutAt`, `paceFigureText(at:)` is what the figure on the bar's label line says while the pointer is on the bar, and `runsOutShortText(at:)` is
-the phrase for the widget ([ADR 0002](../adr/0002-quota-model-and-data-sources.md),
-[ADR 0002](../adr/0002-quota-model-and-data-sources.md)). The JSON shape is in
+the phrase for the widget ([ADR 0002](../adr/0002-quota-model-and-data-sources.md)). The JSON shape is in
 [Commands and Files](./commands.md#the-snapshot); older snapshots without `title` or `problems` still decode.
 
 ## Problems
 
 What the app tells the person is a `Problem`, not a string
-([ADR 0005](../adr/0005-problems.md),
-[ADR 0005](../adr/0005-problems.md)). Everything is in
+([ADR 0005](../adr/0005-problems.md)). Everything is in
 `Sources/TokenMeterCore/Problems/`.
 
 | Type                  | What it is                                                                                                          |

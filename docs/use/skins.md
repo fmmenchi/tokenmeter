@@ -13,7 +13,7 @@ A skin changes how the panel, the widget and the stats look: the colours, the sh
 ## Choosing one
 
 Open [Settings](./settings.md) and choose in the tab **Skin**, a grid of tiles. Each tile is a small preview of its look and its name; the chosen one has a ring. The panel and the widget change at
-once; the widget follows the next time the app publishes, which is within a minute. Settings itself keeps the system look.
+once and the widget is asked to reload at once; macOS decides when it draws it. Settings itself keeps the system look.
 
 ![The Skin tab of Settings, in the light and the dark appearance](../assets/skins-settings.png)
 
@@ -37,7 +37,7 @@ colour, not the window's translucent material.
 - **The pace tick.** It is light on a dark panel and dark on a light one where the quota lasts, and in the skin's middle colour
   where it will not, so the warning is never lost in a palette.
 - **The model row**, indented under its window, with its hook, its thin line and its figure.
-- **The seasonal easter eggs**, which are drawn over whichever skin is chosen.
+- **The seasonal easter eggs**, which are drawn over every skin but One Dark: its bar is 3 points thick, too thin for the icon, so there the plain tick stays. The corner piece of a card is drawn in every skin.
 
 ## Where the colours come from
 
@@ -48,8 +48,10 @@ their notices are on the [licences page](./licenses.md). Two things are **derive
 ## Not tried yet
 
 The panel with a solid colour over the window's real material, and the widget in each size, were checked by drawing the app's own
-views, not on a Mac. In the light appearance a few quota colours are close to the track (Catppuccin Latte and Nord Snow Storm
-are under 3 : 1 for the middle colour); a bar is also read by its length and its figure.
+views, not on a Mac. Some quota colours are close to what they are drawn next to (the track, or the panel for Nord's outlined
+bar): under 3 : 1 are Dracula dark's red (2.9), One Dark dark's red (2.6), One Light's blue, orange and red (2.9, 2.3, 2.7),
+Catppuccin Latte's teal and orange (2.1, 1.6; its red is just under 3) and Nord Snow Storm's orange (2.3). A bar is also
+read by its length and its figure, but these are the palettes of the themes and they were not changed.
 
 ## Related
 

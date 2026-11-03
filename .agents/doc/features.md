@@ -8,15 +8,15 @@ Read this when asked to design, propose or build something new, or when touching
 
 ## Where things go
 
-| What                                   | Where                                                                                                            |
-| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| The feature's folder                   | `docs/features/<yyyy-mm-dd>-<name>/`                                                                             |
-| Overview (date, status, links, intent) | `index.md` in it                                                                                                 |
-| The chosen design, with screenshots    | `proposal.md` and `proposal-*.png` in it                                                                         |
-| How it is built, with diagrams         | `plan.md` in it                                                                                                  |
-| Sidebar label and order                | `_category_.json` in it: `label` is the feature's **title**, `position` is 99999999 minus the date as `YYYYMMDD` |
-| The list of features                   | `docs/features/index.md`, newest first; a feature is under _In design and build_ until its code is in            |
-| The decisions                          | `docs/adr/NNNN-…`, linked from the overview                                                                      |
+| What                                   | Where                                                                                                                                                                    |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| The feature's folder                   | `docs/features/<yyyy-mm-dd>-<name>/`                                                                                                                                     |
+| Overview (date, status, links, intent) | `index.md` in it                                                                                                                                                         |
+| The chosen design, with screenshots    | `proposal.md` and `proposal-*.png` in it                                                                                                                                 |
+| How it is built, with diagrams         | `plan.md` in it                                                                                                                                                          |
+| Sidebar label and order                | `_category_.json` in it: `label` is the feature's **title**, `position` is 99999999 minus the date as `YYYYMMDD`, less 1 for each feature of the same day built after it |
+| The list of features                   | `docs/features/index.md`, newest first; a feature is under _In design and build_ until its code is in                                                                    |
+| The decisions                          | `docs/adr/NNNN-…`, linked from the overview                                                                                                                              |
 
 The label is the feature's title in the user's words, never the name of a concept in the code.
 

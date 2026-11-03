@@ -21,7 +21,7 @@ bar is the detail.
 | under 15%     | red             |
 | unknown       | grey, empty bar |
 
-The thresholds are in `tint` in `Shared/UsageViews.swift`.
+The thresholds are written where the colour is chosen: `tint` in `Shared/UsageViews.swift`, and the same cut-offs in `Shared/Skins/SkinStyle.swift` for a skin.
 
 ## The four states
 

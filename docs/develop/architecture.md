@@ -33,7 +33,7 @@ How the pieces fit, where each file goes and which rules keep it that way. The r
 
 1. **Sources.** `Providers.standard()` reads `~/.tokenmeter/providers.json` and builds one
    `ConfiguredSource` per entry. If the file is missing the app writes a seed with Claude and ChatGPT
-   ([ADR 0003](../adr/0003-providers-in-one-config-file.md), [0018](../adr/0003-providers-in-one-config-file.md)).
+   ([ADR 0003](../adr/0003-providers-in-one-config-file.md)).
    A broken file is never overwritten: the seed runs for that launch.
 2. **Reading.** A source's `read(since:)` returns a `ProviderReading`: usage events, quotas the
    provider itself reported, a plan name. It scans incrementally and keeps per-file state, so a source
@@ -81,8 +81,7 @@ any age of the snapshot, so a stale file never shows a stale percentage as curre
 
 The widget cannot read your logs, so the host app does the collecting and the widget renders what it
 finds in `snapshot.json`, inside the App Group container
-`<TeamID>.tokenmeter` ([ADR 0001](../adr/0001-app-architecture.md),
-[0023](../adr/0001-app-architecture.md)). The app is unsandboxed because it reads
+`<TeamID>.tokenmeter` ([ADR 0001](../adr/0001-app-architecture.md)). The app is unsandboxed because it reads
 other tools' files; the widget is sandboxed. An App Group needs a signing team, which is why a build
 needs `DEVELOPMENT_TEAM` in `Local.xcconfig`.
 
