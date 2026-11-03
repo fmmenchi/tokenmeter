@@ -40,7 +40,8 @@ limits are not in tokens and totals are dominated by cache reads.
   Ultra plan.
 - **The pace of a window is computed in the core.** At the average since the window began, the quota runs out at
   `start + elapsed / used` if that is before the reset; nothing is estimated unless the figure is reported with a reset time
-  ahead, something was used and at least 10% of the window has passed. The moment is rounded to the hour.
+  ahead, something was used and at least 10% of the window has passed; before that the mark is drawn where the window stands and
+  it lasts. The moment is rounded to the hour.
   `WindowUsage.pace(at:)` returns a `Pace` (`aheadFraction`, `runsOutAt`, `isStale`, `runsOut`): the share of the window still
   ahead, measured at `observedAt` for a fresh figure and now for a stale one, which runs out only when the reading is already
   under it. The text the interface says is built in the core too. The panel draws it and the widget does not (`showsPace`); the
