@@ -25,10 +25,9 @@ whether the menu-bar item stays a `MenuBarExtra`.
   own in the Settings window.
 - **The state of the tour is a pure value in `TokenMeterCore`** (not started, at a stop, finished, skipped), with its transitions tested.
   The defaults hold only that it was seen.
-- **Only a fresh install starts the tour by itself.** An app that already ran has the key
-  `launchAtLoginDecided`, which the app writes the first time it runs ([ADR 0007](./0007-login-item-plan-name-and-settings.md)); the
-  tour looks for that key before anything writes it, so an update from an earlier version shows nothing and the tour is one button
-  away in Settings.
+- **The tour starts by itself once, when it was never seen**: the first time the app opens a version that has it, on a fresh install
+  and on the first update alike. The defaults hold one flag, set when the tour is finished or skipped, never when it is only started,
+  so a tour that was interrupted starts again at the next opening of the panel. After that it is one button away in Settings.
 - **Nothing leaves the Mac** and nothing is asked: the tour uses no network and no credential.
 
 What the stops say, their order and their count are the feature's, in its
@@ -36,6 +35,11 @@ What the stops say, their order and their count are the feature's, in its
 
 ## Consequences
 
+- **A person who already uses the app sees the tour once, after the update**, with the panel open on their own bars. The first-launch
+  wording (the icon is introduced, the bars are said to be empty until the first use) is then not true for them: the wording has to hold
+  for both, or the tour has to look at what the panel holds. That is the feature's to decide, in its proposal.
+- After an update Sparkle relaunches the app, so the popover can come up in the middle of someone's work: it is skippable and it happens
+  once.
 - The tour depends on how macOS builds the status item, which Apple does not document: a new macOS may break the ring and the popover. The
   cost is bounded (the tour does not start) and the check is one file.
 - The tour state is tested in the core, which the gate builds; the overlay and the popover are in the app target, which only `xcodebuild`

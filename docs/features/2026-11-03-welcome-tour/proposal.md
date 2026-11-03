@@ -56,8 +56,14 @@ Skip is in every caption. **Not now** at the start adds nothing to the icon: the
 - **The summary is at the end, not in the middle.** It is a report of what was set up, not a lesson.
 - **No widget step.** How the widget is added on the author's Mac was not verified, so the tour does not say.
 - **Six stops**, with the stats in two (the view and its suggestion).
+- **It starts once, when it was never seen**: on a fresh install and on the first update. It counts as seen when it ends or is skipped, and
+  it is shown again from Settings.
 
 ## Not decided here
+
+- **The wording for someone who already uses the app.** The start and the first stop talk to a new person ("tokenmeter is here", the
+  bars are empty until the first use). After an update the person already knows the icon and may have full bars, so the same words would
+  not be true. Either the tour is written to hold for both, or its first words depend on what the panel holds.
 
 How the app points at its own icon and opens its panel: SwiftUI's menu-bar item does not expose either. That is the
 [ADR](../../adr/0014-welcome-tour.md), with a spike first.

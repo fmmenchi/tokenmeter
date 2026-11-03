@@ -38,9 +38,10 @@ is written in the ADR before step 3.
 
 ## Tests
 
-- A fresh install starts the tour; an app that already ran does not, and the tour is still available from Settings.
+- A fresh install and the first update both start the tour, and neither starts it again once it was finished or skipped.
 - Skip at any stop ends it, and it is not started again by itself.
-- Closing the panel in the middle leaves the tour where it was, and the next opening goes on from there.
+- Closing the panel in the middle leaves the tour where it was, and the next opening goes on from there; it counts as seen only when
+  it ends or is skipped.
 - Each stop is drawn offscreen, in both appearances, with the real views of the panel, and looked at.
 
 ## Not verified at the time of writing
