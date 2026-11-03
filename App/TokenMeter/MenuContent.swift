@@ -53,6 +53,9 @@ struct MenuContent: View {
                     NSApplication.shared.activate(ignoringOtherApps: true)
                     openWindow(id: SettingsWindow.id)
                 }
+                #if DEBUG
+                DevMenu(meter: meter)
+                #endif
                 Spacer()
                 IconButton(systemName: "power", label: "Quit") { NSApplication.shared.terminate(nil) }
             }

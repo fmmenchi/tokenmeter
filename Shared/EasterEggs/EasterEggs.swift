@@ -29,19 +29,21 @@ struct EasterEggImage: View {
     }
 }
 
-/// The icon of the event on a bar, 16 points across, centred on `position` (a fraction of the bar's width). Where the quota will
+/// The icon of the event on a bar, in a box 34 points wide and 24 high, centred on `position` (a fraction of the bar's width). Where the quota will
 /// not last the plain orange tick stays: a warning is never replaced by a joke, so callers use this only where it lasts.
 struct EasterEggMark: View {
     let egg: EasterEgg
     let position: CGFloat
     let barWidth: CGFloat
 
-    static let size: CGFloat = 16
+    /// Every mark has a 34 × 24 point canvas, with its drawing optically balanced inside it and an exact 2× representation.
+    static let width: CGFloat = 34
+    static let height: CGFloat = 24
 
     var body: some View {
         EasterEggImage(name: egg.mark)
-            .frame(width: Self.size, height: Self.size)
-            .offset(x: barWidth * min(max(position, 0), 1) - Self.size / 2)
+            .frame(width: Self.width, height: Self.height)
+            .offset(x: barWidth * min(max(position, 0), 1) - Self.width / 2)
             .allowsHitTesting(false)
     }
 }
@@ -54,15 +56,17 @@ extension View {
 private struct EasterEggCorner: ViewModifier {
     @Environment(\.easterEgg) private var egg
 
-    static let size: CGFloat = 34
-    static let overhang: CGFloat = 6
+    static let size: CGFloat = 44
+    /// How far it sticks out past the card to the right, and above it: above enough to stay clear of the first row of figures.
+    static let overhangX: CGFloat = 8
+    static let overhangY: CGFloat = 10
 
     func body(content: Content) -> some View {
         content.overlay(alignment: .topTrailing) {
             if let egg {
                 EasterEggImage(name: egg.corner)
                     .frame(width: Self.size, height: Self.size)
-                    .offset(x: Self.overhang, y: -Self.overhang)
+                    .offset(x: Self.overhangX, y: -Self.overhangY)
                     .allowsHitTesting(false)
             }
         }

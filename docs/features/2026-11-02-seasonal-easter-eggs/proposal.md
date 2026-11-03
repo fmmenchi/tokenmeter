@@ -51,11 +51,11 @@ An event is a row of data: a name, the days it is on, an icon set and a corner s
 
 ## The pieces
 
-| Event     | Icons for the bars                                       | Corner pieces                                                              |
-| :-------- | :------------------------------------------------------- | :------------------------------------------------------------------------- |
-| Halloween | pumpkin, ghost, bat, web with a spider, skull, witch hat | pumpkin with a vine, ghost, bat wing, cobweb, skull with a bone, hat       |
-| Christmas | tree, Santa, reindeer, snowman, gift, bell               | fir branch with a star, Santa hat and scarf, reindeer, snowman, gift, bell |
-| Easter    | rabbit, chick, egg, basket, carrot, lamb                 | the same six, on a ribbon                                                  |
+| Event     | Icons for the bars                           | Corner pieces                                                              |
+| :-------- | :------------------------------------------- | :------------------------------------------------------------------------- |
+| Halloween | pumpkin, ghost, bat, candy, skull, witch hat | pumpkin with a vine, ghost, bat wing, cobweb, skull with a bone, hat       |
+| Christmas | tree, Santa, reindeer, snowman, gift, bell   | fir branch with a star, Santa hat and scarf, reindeer, snowman, gift, bell |
+| Easter    | rabbit, chick, egg, basket, carrot, lamb     | the same six, on a ribbon                                                  |
 
 ## What was not seen
 

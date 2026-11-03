@@ -13,8 +13,8 @@ nothing of what the panel says.
 
 ## What you see
 
-- **A small icon on the bar** where the plain tick would be, on a bar whose quota lasts until the reset: a pumpkin or a web at
-  Halloween, a reindeer or a bell at Christmas, a basket or a rabbit at Easter.
+- **A small icon on the bar** where the plain tick would be, on a bar whose quota lasts until the reset: a pumpkin or a wrapped candy
+  at Halloween, a reindeer or a bell at Christmas, a basket or a rabbit at Easter.
 - **A corner piece on each card**, across its top right corner: a cobweb, a ribbon with a chick, a fir branch.
 - **Where the quota will not last until the reset, the tick stays orange.** It is a warning and a joke never replaces it.
 
