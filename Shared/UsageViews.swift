@@ -72,44 +72,44 @@ extension Int {
 struct QuotaBar: View {
     let fraction: Double?
     let tint: Color
-    var height: CGFloat = 10
+    /// nil: the thickness of the skin's bar, or 10 points. A model's line passes 4 and is a plain line in every skin.
+    var height: CGFloat?
     var mark: Pace?
     /// An estimated figure is drawn at half strength: the bar and its tick, not the icon of an event, which is an image of its own.
     var faded = false
     @Environment(\.easterEgg) private var easterEgg
+    @Environment(\.skinStyle) private var skin
+
+    private var barHeight: CGFloat { height ?? skin.map { CGFloat($0.skin.barHeight) } ?? 10 }
+    private var shape: BarShape { height == nil ? skin?.skin.shape ?? .pill : .pill }
 
     var body: some View {
         GeometryReader { proxy in
-            ZStack(alignment: .leading) {
-                Capsule().fill(Color.primary.opacity(0.15))
-                if let fraction {
-                    Capsule().fill(tint)
-                        .frame(width: max(proxy.size.height, proxy.size.width * min(max(fraction, 0), 1)))
-                }
-            }
+            SkinBarBody(fraction: fraction, tint: tint, shape: shape, track: skin?.track ?? Color.primary.opacity(0.15))
             .opacity(faded ? 0.5 : 1)
             .frame(width: proxy.size.width, height: proxy.size.height)
             // The mark is drawn over the bar and takes no part in its size. Inside the same stack it made the stack taller than the
             // bar and the track and the fill, which are flexible, grew with it: a bar with a mark was 14 points thick, one without 10.
             .overlay(alignment: .leading) {
-                if let mark, let easterEgg, !mark.runsOut, height >= 8 {
+                if let mark, let easterEgg, !mark.runsOut, barHeight >= 8 {
                     EasterEggMark(egg: easterEgg, position: mark.aheadFraction, barWidth: proxy.size.width)
                         .accessibilityLabel("Where a steady use would put the bar")
                 } else if let mark {
-                    PaceTick(runsOut: mark.runsOut, height: proxy.size.height)
+                    PaceTick(runsOut: mark.runsOut, height: proxy.size.height, reach: shape == .line ? 7 : 4)
                         .offset(x: proxy.size.width * min(max(mark.aheadFraction, 0), 1) - 1)
                         .accessibilityLabel("Where a steady use would put the bar")
                         .opacity(faded ? 0.5 : 1)
                 }
             }
         }
-        .frame(height: height)
+        .frame(height: barHeight)
     }
 }
 
 struct WindowRow: View {
     let usage: WindowUsage
     @State private var hovering = false
+    @Environment(\.skinStyle) private var skin
     /// The limits of models that are part of this window, drawn right under its bar (ADR 0002).
     var models: [WindowUsage] = []
     /// Draw the mark on the bar and the hover that says when the quota runs out (ADR 0002). The widget does not.
@@ -142,7 +142,7 @@ struct WindowRow: View {
         }
     }
 
-    var tint: Color { usage.tint }
+    var tint: Color { usage.tint(in: skin) }
 
     /// The detail line. Where the quota would run out before the reset and the widget asks, the moment is in it, in short
     /// and in the notice colour: "3.4B tokens · out Thu 6 pm · resets in 3d 14h".
@@ -162,6 +162,9 @@ extension WindowUsage {
         guard let remainingFraction else { return .gray }
         return remainingFraction < 0.15 ? .red : remainingFraction < 0.4 ? .orange : .green
     }
+
+    /// The colour of the bar in the skin that is drawing it, or the system's where there is none.
+    func tint(in skin: SkinStyle?) -> Color { skin?.tint(for: remainingFraction) ?? tint }
 }
 
 /// The corner that joins a model's line to the bar of the window it is part of.
@@ -184,13 +187,14 @@ struct ScopedWindowRow: View {
     /// Draw the mark on the thin bar and say in its figure when it runs out (ADR 0002). The widget does not.
     var showsPace = false
     @State private var hovering = false
+    @Environment(\.skinStyle) private var skin
 
     var body: some View {
         HStack(spacing: 6) {
             Bracket().stroke(Color.secondary.opacity(0.6), lineWidth: 1).frame(width: 8, height: 8).offset(y: -3)
             Text(usage.window.scope ?? "").font(.caption.weight(.medium)).lineLimit(1)
                 .frame(minWidth: 30, alignment: .leading)
-            QuotaBar(fraction: usage.remainingFraction, tint: usage.tint, height: 4,
+            QuotaBar(fraction: usage.remainingFraction, tint: usage.tint(in: skin), height: 4,
                      mark: showsPace ? usage.pace(at: Date()) : nil)
             // The figure is as wide as what it says, and the bar gives way to it, smoothly (ADR 0002).
             let say = hovering && showsPace ? usage.paceFigureText(at: Date()) : nil
@@ -210,6 +214,24 @@ struct ScopedWindowRow: View {
     }
 }
 
+/// The plan next to a provider's name: a soft fill, or an outline in the accent colour of a skin.
+private struct PlanChip: View {
+    let plan: String
+    @Environment(\.skinStyle) private var skin
+
+    var body: some View {
+        if let skin {
+            Text(plan).font(.caption2.weight(.medium)).foregroundStyle(skin.accent)
+                .padding(.horizontal, 6).padding(.vertical, 1)
+                .overlay(Capsule().strokeBorder(skin.accent, lineWidth: 1))
+        } else {
+            Text(plan).font(.caption2.weight(.medium))
+                .padding(.horizontal, 6).padding(.vertical, 1)
+                .background(Capsule().fill(Color.primary.opacity(0.12)))
+        }
+    }
+}
+
 struct ProviderBlock: View {
     let snapshot: ProviderSnapshot
     /// How many problems have this provider as their topic; the widget only counts, the panel lists them.
@@ -221,11 +243,7 @@ struct ProviderBlock: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 6) {
                 Text(snapshot.title).font(.subheadline.weight(.semibold))
-                if let plan = snapshot.plan {
-                    Text(plan).font(.caption2.weight(.medium))
-                        .padding(.horizontal, 6).padding(.vertical, 1)
-                        .background(Capsule().fill(Color.primary.opacity(0.12)))
-                }
+                if let plan = snapshot.plan { PlanChip(plan: plan) }
                 if problemCount > 0 { NoticeChip(count: problemCount) }
                 // Only where there is a mark to explain: a provider whose windows cannot be estimated has none.
                 if showsPace, snapshot.windows.contains(where: { $0.pace(at: Date()) != nil }) {

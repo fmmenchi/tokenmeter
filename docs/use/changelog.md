@@ -8,6 +8,13 @@ sidebar_position: 10
 
 What changed in each version, newest first. The update window shows the notes of the version it offers, taken from this page, and links here for the rest.
 
+## Unreleased {#unreleased}
+
+- **Skins**: five looks for the panel, the widget and the stats, chosen in Settings: System, Dracula, One Dark, Catppuccin and
+  Nord. Each has its own colours, its own bars and its own typeface, in the dark and in the light appearance
+  ([Skins](./skins.md)).
+- The **licences** of the themes whose colours the skins use are on the [Licences](./licenses.md) page.
+
 ## 0.5.1 {#v0-5-1}
 
 Released on 2026-11-02.

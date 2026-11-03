@@ -155,6 +155,21 @@ The week of an event and what the panel carries in it, in the folder `Sources/To
 
 The views that draw them are in `Shared/EasterEggs/` and the 36 images in `App/TokenMeter/EasterEggs/Pieces/`.
 
+## Skins
+
+The looks of the panel, the widget and the stats, in the folder `Sources/TokenMeterCore/Skins/` and in `SkinsTests.swift`
+([ADR 0013](../adr/0013-skins.md), [proposal](../features/2026-11-02-skins/proposal.md)).
+
+| Type            | What it is                                                                                                                                                    |
+| :-------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Skin`          | `system`, `dracula`, `oneDark`, `catppuccin`, `nord`. Its `shape`, `typeface`, `barHeight`, `cardRadius` and `fillsCard`; `palette(for:)` is nil for System.  |
+| `SkinPalette`   | The colours of a skin in one appearance, as `0xAARRGGBB`: panel, card, track, text, secondary text, accent, plenty, middle, low, tick and an optional border. |
+| `BarShape`      | `pill`, `blocks`, `line`, `thick`, `outline`.                                                                                                                 |
+| `Snapshot.skin` | The skin the app chose, written when it publishes so the widget draws the same. A snapshot without one, or with an id this version does not know, is System.  |
+
+The views that draw them are in `Shared/Skins/`: `SkinStyle` (the style in the environment and `skinned(_:)`), `SkinBar` (the five
+bars) and `SkinPreview` (the small panel in Settings).
+
 ## Model limits
 
 A model's limit is a window with a scope ([ADR 0002](../adr/0002-quota-model-and-data-sources.md)).

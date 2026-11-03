@@ -69,11 +69,23 @@ struct MenuContent: View {
         }
         .environment(\.easterEgg, meter.easterEgg)
         .task { await meter.refresh() }
+        // The skin's own colour in place of the window's translucent material (ADR 0013); System keeps the material.
+        .background { PanelFill() }
+        .skinned(meter.skin)
     }
 
     private func title(of topic: String) -> String {
         meter.snapshot?.providers.first { $0.provider.rawValue == topic }?.title
             ?? (topic == Problem.general ? "General" : topic)
+    }
+}
+
+/// The colour of the skin behind the panel, nothing for System.
+private struct PanelFill: View {
+    @Environment(\.skinStyle) private var skin
+
+    var body: some View {
+        if let skin { skin.panel }
     }
 }
 

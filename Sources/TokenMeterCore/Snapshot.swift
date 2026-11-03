@@ -101,24 +101,33 @@ public struct Snapshot: Codable, Equatable, Sendable {
     public let providers: [ProviderSnapshot]
     /// What the person should know about, visible ones only; written by the app, not the collector (ADR 0005).
     public let problems: [Problem]
+    /// The look the person chose, written by the app so the widget, which reads only this, draws the same (ADR 0013). A snapshot
+    /// from before the skins, or with a skin this version does not know, is `.system`.
+    public let skin: Skin
 
-    public init(generatedAt: Date, providers: [ProviderSnapshot], problems: [Problem] = []) {
+    public init(generatedAt: Date, providers: [ProviderSnapshot], problems: [Problem] = [], skin: Skin = .system) {
         self.generatedAt = generatedAt
         self.providers = providers
         self.problems = problems
+        self.skin = skin
     }
 
-    private enum CodingKeys: String, CodingKey { case generatedAt, providers, problems }
+    private enum CodingKeys: String, CodingKey { case generatedAt, providers, problems, skin }
 
     public init(from decoder: any Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         self.init(generatedAt: try c.decode(Date.self, forKey: .generatedAt),
                   providers: try c.decode([ProviderSnapshot].self, forKey: .providers),
-                  problems: try c.decodeIfPresent([Problem].self, forKey: .problems) ?? [])
+                  problems: try c.decodeIfPresent([Problem].self, forKey: .problems) ?? [],
+                  skin: (try c.decodeIfPresent(String.self, forKey: .skin)).flatMap(Skin.init(rawValue:)) ?? .system)
     }
 
     public func with(problems: [Problem]) -> Snapshot {
-        Snapshot(generatedAt: generatedAt, providers: providers, problems: problems)
+        Snapshot(generatedAt: generatedAt, providers: providers, problems: problems, skin: skin)
+    }
+
+    public func with(skin: Skin) -> Snapshot {
+        Snapshot(generatedAt: generatedAt, providers: providers, problems: problems, skin: skin)
     }
 }
 
@@ -149,7 +158,7 @@ extension Snapshot {
                                     plan: provider.plan, quotaUpdatedAt: provider.quotaUpdatedAt,
                                     setupHint: provider.setupHint)
         }
-        return Snapshot(generatedAt: generatedAt, providers: shown, problems: problems)
+        return Snapshot(generatedAt: generatedAt, providers: shown, problems: problems, skin: skin)
     }
 }
 

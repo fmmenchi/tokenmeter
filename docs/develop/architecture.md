@@ -57,6 +57,11 @@ How the pieces fit, where each file goes and which rules keep it that way. The r
    opens, and the panel hands them to its views through the environment; `Shared/EasterEggs/` draws them and the widget never
    sets the value. Everything of the feature is in four folders: the core, `Shared/`, the images and the tests.
 
+8. **Dressing.** The skin the person chose is kept by `Meter` in the defaults and written to the snapshot it publishes
+   ([ADR 0013](../adr/0013-skins.md)). The panel and the widget put it in the environment with `skinned(_:)` and take their
+   background colour from it; the shared views (the bar, the card, the tick, the plan chip) read the style from the environment and
+   draw as before where there is none, which is System.
+
 ## The window maths
 
 For each window a provider declares (`5h`, `7d`), the builder sums the tokens whose date falls inside

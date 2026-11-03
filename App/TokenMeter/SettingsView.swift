@@ -62,6 +62,7 @@ struct SettingsView: View {
                             move: { meter.moveProvider($0, onto: $1) }))
                 }
             }
+            SkinGroup(meter: meter)
             NotificationsGroup(meter: meter)
             UpdatesGroup(updater: meter.updater)
         }
