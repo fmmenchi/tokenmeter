@@ -32,7 +32,7 @@ final class SkinsTests: XCTestCase {
         XCTAssertEqual(Skin.oneDark.palette(for: .dark)?.card, 0xFF282C34)
         XCTAssertEqual(Skin.oneDark.palette(for: .dark)?.plenty, 0xFF4AA5F0)
         XCTAssertEqual(Skin.catppuccin.palette(for: .dark)?.card, 0xFF1E1E2E)
-        XCTAssertEqual(Skin.catppuccin.palette(for: .light)?.low, 0xFFD20F39)
+        XCTAssertEqual(Skin.catppuccin.palette(for: .dark)?.low, 0xFFF38BA8)
         XCTAssertEqual(Skin.nord.palette(for: .dark)?.panel, 0xFF2E3440)
         XCTAssertEqual(Skin.nord.palette(for: .light)?.low, 0xFFBF616A)
     }
@@ -55,6 +55,19 @@ final class SkinsTests: XCTestCase {
                 let surface = skin.fillsCard ? palette.card : palette.panel
                 XCTAssertGreaterThanOrEqual(contrast(palette.tick, surface), 4.5, "\(skin) in \(appearance)")
                 XCTAssertGreaterThanOrEqual(contrast(palette.middle, surface), 2.0, "the warning tick, \(skin) in \(appearance)")
+            }
+        }
+    }
+
+    func testTheQuotaColoursCanBeSeenAgainstWhatTheBarIsDrawnOn() {
+        // The fill meets the track, or the panel where the bar is only an outline (Nord): 3 : 1, the contrast for a graphic.
+        for skin in Skin.allCases {
+            for appearance in SkinAppearance.allCases {
+                guard let palette = skin.palette(for: appearance) else { continue }
+                let behind = skin.shape == .outline ? palette.panel : palette.track
+                for (name, colour) in [("plenty", palette.plenty), ("middle", palette.middle), ("low", palette.low)] {
+                    XCTAssertGreaterThanOrEqual(contrast(colour, behind), 3.0, "\(name) of \(skin) in \(appearance)")
+                }
             }
         }
     }
