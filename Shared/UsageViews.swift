@@ -72,27 +72,26 @@ extension Int {
 struct QuotaBar: View {
     let fraction: Double?
     let tint: Color
-    var height: CGFloat = 10
+    /// nil: the thickness of the skin's bar, or 10 points. A model's line passes 4 and is a plain line in every skin.
+    var height: CGFloat?
     var mark: Pace?
     /// An estimated figure is drawn at half strength: the bar and its tick, not the icon of an event, which is an image of its own.
     var faded = false
     @Environment(\.easterEgg) private var easterEgg
+    @Environment(\.skinStyle) private var skin
+
+    private var barHeight: CGFloat { height ?? skin.map { CGFloat($0.skin.barHeight) } ?? 10 }
+    private var shape: BarShape { height == nil ? skin?.skin.shape ?? .pill : .pill }
 
     var body: some View {
         GeometryReader { proxy in
-            ZStack(alignment: .leading) {
-                Capsule().fill(Color.primary.opacity(0.15))
-                if let fraction {
-                    Capsule().fill(tint)
-                        .frame(width: max(proxy.size.height, proxy.size.width * min(max(fraction, 0), 1)))
-                }
-            }
+            SkinBarBody(fraction: fraction, tint: tint, shape: shape, track: skin?.track ?? Color.primary.opacity(0.15))
             .opacity(faded ? 0.5 : 1)
             .frame(width: proxy.size.width, height: proxy.size.height)
             // The mark is drawn over the bar and takes no part in its size. Inside the same stack it made the stack taller than the
             // bar and the track and the fill, which are flexible, grew with it: a bar with a mark was 14 points thick, one without 10.
             .overlay(alignment: .leading) {
-                if let mark, let easterEgg, !mark.runsOut, height >= 8 {
+                if let mark, let easterEgg, !mark.runsOut, barHeight >= 8 {
                     EasterEggMark(egg: easterEgg, position: mark.aheadFraction, barWidth: proxy.size.width)
                         .accessibilityLabel("Where a steady use would put the bar")
                 } else if let mark {
@@ -103,7 +102,7 @@ struct QuotaBar: View {
                 }
             }
         }
-        .frame(height: height)
+        .frame(height: barHeight)
     }
 }
 
