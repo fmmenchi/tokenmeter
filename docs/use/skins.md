@@ -27,7 +27,7 @@ once and the widget is asked to reload at once; macOS decides when it draws it. 
 | Catppuccin | Soft: thick pill bars, very round cards.                            | teal                   |
 | Nord       | Frost: an outlined bar with a blue fill, a card with only a border. | blue                   |
 
-Every skin except System has a dark and a light version and follows the appearance of the Mac. With a skin the panel is a solid
+The cards of the stats and the chip with the plan have the same fill, border and roundness as the cards of the panel, and the captions (the grey lines under a figure) take the skin's own secondary colour. Every skin except System has a dark and a light version and follows the appearance of the Mac. With a skin the panel is a solid
 colour, not the window's translucent material.
 
 ## What a skin never changes
@@ -37,14 +37,15 @@ colour, not the window's translucent material.
 - **The pace tick.** It is light on a dark panel and dark on a light one where the quota lasts, and in the skin's middle colour
   where it will not, so the warning is never lost in a palette.
 - **The model row**, indented under its window, with its hook, its thin line and its figure.
-- **The seasonal easter eggs**, which are drawn over every skin but One Dark: its bar is 3 points thick, too thin for the icon, so there the plain tick stays. The corner piece of a card is drawn in every skin.
+- **The seasonal easter eggs**, which are drawn over every skin. On One Dark, whose bar is 3 points thick, the icon sits across the line and the rows take 6 points more air above and below it during the week of an event.
 
 ## Where the colours come from
 
 The colours of Dracula, One Dark, Catppuccin and Nord are those of the editor themes of the same names, all under the MIT licence;
-their notices are on the [licences page](./licenses.md). Three things are **derived by us**, not the theme's: Dracula's light
-version (its own light theme is not in the free repository), the card and track of One Dark's light version, and nine quota
-colours that were under 3 : 1 against what the bar is drawn on; the licences page lists each of them.
+their notices are on the [licences page](./licenses.md). Four things are **derived by us**, not the theme's: Dracula's light
+version (its own light theme is not in the free repository), the card and track of One Dark's light version, nine quota
+colours that were under 3 : 1 against what the bar is drawn on, and five colours of the captions that were under 4.5 : 1 on
+the card; the licences page lists each of them.
 
 ## Not tried yet
 
