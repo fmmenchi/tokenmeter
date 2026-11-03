@@ -14,7 +14,7 @@ ditto -x -k "$zip" "$tmp"
 xcrun stapler staple "$tmp/TokenMeter.app"
 spctl --assess --type execute --verbose=2 "$tmp/TokenMeter.app"
 rm -f dist/TokenMeter-*.zip
-ditto -c -k --keepParent "$tmp/TokenMeter.app" "$zip"
+ditto -c -k --keepParent --norsrc "$tmp/TokenMeter.app" "$zip"   # no AppleDouble entries: see sign-release.sh
 rm -rf "$tmp"
 
 echo "$zip"
