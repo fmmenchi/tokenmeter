@@ -20,7 +20,8 @@ extension WindowUsage {
     /// A reported figure older than this no longer counts as live (ADR 0002).
     public static let staleAfter: TimeInterval = 10 * 60
 
-    /// Less of the window than this has gone: the pace says too little to be believed (ADR 0002).
+    /// Less of the window than this has gone: the pace says too little to be believed, so the mark is drawn where the window
+    /// stands and says nothing about running out (ADR 0002).
     public static let minimumElapsed = 0.10
 
     /// The pace of the window. Nil when nothing can be estimated: not a reported figure, no reset time, or too little of the
@@ -32,14 +33,19 @@ extension WindowUsage {
         let start = resetsAt.addingTimeInterval(-window.duration)
         if now.timeIntervalSince(observedAt) > Self.staleAfter {
             let elapsedNow = now.timeIntervalSince(start)
-            guard elapsedNow >= window.duration * Self.minimumElapsed, elapsedNow < window.duration else { return nil }
+            guard elapsedNow >= 0, elapsedNow < window.duration else { return nil }
             let ahead = resetsAt.timeIntervalSince(now) / window.duration
-            return Pace(aheadFraction: ahead, runsOutAt: nil, isStale: true, runsOut: remainingFraction < ahead)
+            let believed = elapsedNow >= window.duration * Self.minimumElapsed
+            return Pace(aheadFraction: ahead, runsOutAt: nil, isStale: true, runsOut: believed && remainingFraction < ahead)
         }
         let used = 1 - remainingFraction
         let elapsed = observedAt.timeIntervalSince(start)
-        guard elapsed >= window.duration * Self.minimumElapsed, elapsed < window.duration else { return nil }
+        guard elapsed >= 0, elapsed < window.duration else { return nil }
         let ahead = resetsAt.timeIntervalSince(observedAt) / window.duration
+        // Too little of the window has gone to say whether the quota lasts: the mark is where the window stands, and it lasts.
+        guard elapsed >= window.duration * Self.minimumElapsed else {
+            return Pace(aheadFraction: ahead, runsOutAt: nil, isStale: false, runsOut: false)
+        }
         guard used > 0 else { return Pace(aheadFraction: ahead, runsOutAt: nil, isStale: false, runsOut: false) }
         let runsOut = start.addingTimeInterval(elapsed / used)
         let moment = runsOut < resetsAt ? runsOut : nil
