@@ -7,7 +7,7 @@ date: 2026-11-03
 
 # Welcome tour
 
-The first time the app opens, a small window walks the person through six pages: where the app lives, what the bars and the tick say, what the
+The first time the app opens, a small window walks the person through seven pages: where the app lives, what the bars and the tick say, what the
 buttons and the stats do, and where Settings is.
 
 |        |            |

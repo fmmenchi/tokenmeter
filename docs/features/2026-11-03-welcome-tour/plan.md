@@ -13,7 +13,7 @@ a boundary.
 
 | Layer | Folder                            | What                                                                                             |
 | :---- | :-------------------------------- | :----------------------------------------------------------------------------------------------- |
-| Core  | `Sources/TokenMeterCore/Welcome/` | `WelcomeState`: the six pages, Back, Next, Skip, Done, close, and whether it counts as seen      |
+| Core  | `Sources/TokenMeterCore/Welcome/` | `WelcomeState`: the seven pages, Back, Next, Skip, Done, close, and whether it counts as seen    |
 | Tests | `Tests/TokenMeterCoreTests/`      | `WelcomeTests.swift`: the transitions, a fresh install and an update, skip and close at any page |
 | App   | `App/TokenMeter/Welcome/`         | the window, the pages, the pictures' assets, and the button in Settings                          |
 
@@ -26,9 +26,9 @@ One commit each, three files at most (the pictures count as one concern), the ga
 
 | Step | Commit                                                                                                      | Files                                                                                                                 |
 | :--- | :---------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------- |
-| 1    | `feat(core): the welcome is a wizard of six pages`                                                          | `Welcome/WelcomeState.swift`, `WelcomeTests.swift` (the first version of both is in, built for a tour over the panel) |
+| 1    | `feat(core): the welcome is a wizard of seven pages`                                                        | `Welcome/WelcomeState.swift`, `WelcomeTests.swift` (the first version of both is in, built for a tour over the panel) |
 | 2    | `feat(app): the pictures of the welcome, the panel and the stats`                                           | `Assets.xcassets` (the two screenshots of `docs/assets`, with their sample data)                                      |
-| 3    | `feat(app): the window of the welcome and its six pages`                                                    | `Welcome/WelcomeWindow.swift`, `Welcome/WelcomePages.swift`, `TokenMeterApp.swift`                                    |
+| 3    | `feat(app): the window of the welcome and its seven pages`                                                  | `Welcome/WelcomeWindow.swift`, `Welcome/WelcomePages.swift`, `TokenMeterApp.swift`                                    |
 | 4    | `feat(app): a button in General shows the welcome again`                                                    | `SettingsView.swift`                                                                                                  |
 | 5    | `docs(use)`: the welcome page and the changelog                                                             | `use/welcome.md`, `use/changelog.md`                                                                                  |
 | 6    | `docs(develop)`: the core API and AGENTS.md                                                                 | `develop/core-api.md`, `AGENTS.md`                                                                                    |
