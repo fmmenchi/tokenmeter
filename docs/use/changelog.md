@@ -8,6 +8,12 @@ sidebar_position: 10
 
 What changed in each version, newest first. The update window shows the notes of the version it offers, taken from this page, and links here for the rest.
 
+## Unreleased {#unreleased}
+
+- **The pace tick is easier to read**: the tick that says a quota will last is now solid white in the dark appearance and black in the light one. In the dark appearance it was drawn dark grey over the bright green bar.
+- **The icons of the easter eggs are bigger and clearer** on the bars and on the cards, and sharp on a Retina display. The cobweb on the bars is now a wrapped candy.
+- A bar of an estimated figure fades, and its icon does not.
+
 ## 0.5.0 {#v0-5-0}
 
 Released on 2026-11-02.
