@@ -168,6 +168,21 @@ The looks of the panel, the widget and the stats, in the folder `Sources/TokenMe
 The views that draw them are in `Shared/Skins/`: `SkinStyle` (the style in the environment and `skinned(_:)`), `SkinBar` (the five
 bars) and `SkinPreview` (the small panel in Settings).
 
+## The welcome
+
+The state of the welcome wizard, in `Sources/TokenMeterCore/Welcome/` and in `WelcomeTests.swift`
+([proposal](../features/2026-11-03-welcome-tour/proposal.md), [plan](../features/2026-11-03-welcome-tour/plan.md)).
+
+| Type                  | What it is                                                                                                                                  |
+| :-------------------- | :------------------------------------------------------------------------------------------------------------------------------------------ |
+| `WelcomeState`        | `idle` or `showing(Page)`. `atLaunch(seen:)` opens at the first page when it was never seen; `applying(_:)` is the transition of an action. |
+| `WelcomeState.Page`   | The six pages in order: `whereItLives`, `bars`, `tick`, `buttons`, `stats`, `settings`.                                                     |
+| `WelcomeState.Action` | `back`, `next` (Done on the last page), `skip` and `close`. `endedBy(_:)` says whether an action counts as seen.                            |
+| `WelcomeSeenStore`    | Whether it was seen: `DefaultsWelcomeSeenStore` in the app, `MemoryWelcomeSeenStore` in tests.                                              |
+
+The window and the pages are in `App/TokenMeter/Welcome/`: an `NSWindow` hosting a SwiftUI view, opened by the app delegate, that uses
+nothing of the `Meter`. The pictures are two screenshots of the docs in `Assets.xcassets`; keep them in step with `docs/assets`.
+
 ## Model limits
 
 A model's limit is a window with a scope ([ADR 0002](../adr/0002-quota-model-and-data-sources.md)).
