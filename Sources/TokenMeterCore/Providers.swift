@@ -8,8 +8,8 @@ public enum Providers {
         home: URL = FileManager.default.homeDirectoryForCurrentUser
     ) -> [any ProviderSource] {
         let providers: [ProviderConfig]
-        ProviderConfigFile.addClaudeIntegration(to: config)
-        ProviderConfigFile.addUsageFacts(to: config)
+        let integrated = ProviderConfigFile.addClaudeIntegration(to: config)
+        ProviderConfigFile.addUsageFacts(to: config, keepingBackup: integrated == .migrated)
         if let file = try? ProviderConfigFile.load(from: config) {
             providers = file.providers
         } else {

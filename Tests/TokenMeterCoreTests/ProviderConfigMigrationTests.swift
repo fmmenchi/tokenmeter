@@ -92,6 +92,14 @@ final class ProviderConfigMigrationTests: XCTestCase {
         XCTAssertEqual(try String(contentsOf: url.appendingPathExtension("tokenmeter.bak")), withUsage)
     }
 
+    func testAFileThatNeedsBothMigrationsKeepsAsItsBackupTheFileAsThePersonWroteIt() throws {
+        try write(withUsage)
+        _ = Providers.standard(config: url, home: url.deletingLastPathComponent())
+        XCTAssertEqual(try integration(of: "claude"), "claude-status-line", "the first migration ran")
+        XCTAssertEqual(try usage(of: "claude")?.model, "message.model", "and the second")
+        XCTAssertEqual(try String(contentsOf: url.appendingPathExtension("tokenmeter.bak")), withUsage)
+    }
+
     func testUsageFactsLeaveAnotherFileAlone() throws {
         XCTAssertEqual(ProviderConfigFile.addUsageFacts(to: url), .untouched, "no file")
         try write(#"{"version":2,"providers":[{"id":"claude","usage":{}}]}"#)
