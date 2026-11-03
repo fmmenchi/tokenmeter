@@ -13,6 +13,8 @@ whether the menu-bar item stays a `MenuBarExtra`.
 
 ## Decision
 
+- **Amended on 2026-11-03 by [ADR 0015](./0015-status-item-in-appkit.md):** the spike showed the panel cannot be opened from code with
+  a `MenuBarExtra`, so the menu-bar item becomes an `NSStatusItem` and the next point no longer holds. The rest of this ADR stands.
 - **The menu-bar item stays a `MenuBarExtra`**, and the app reaches its status item by looking for the status-bar window among
   `NSApp.windows` and the button inside it, in one small file of the app target. The ring and the popover are added to that button; the
   panel is opened by performing a click on it. Nothing in the app depends on this except the tour: if the item is not found, there is no ring,
