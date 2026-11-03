@@ -12,6 +12,8 @@ struct SettingsView: View {
     @State private var dropTarget: String?
     /// The provider whose handle was grabbed: it is never a drop target for itself.
     @State private var dragging: String?
+    /// The section shown. The window opens on General.
+    @State private var tab = SettingsTab.general
 
     private var claudeStatusText: String {
         guard meter.autoSetUpClaude else { return "Off: tokenmeter does not touch Claude Code's settings." }
@@ -27,7 +29,30 @@ struct SettingsView: View {
     }
 
     var body: some View {
-        Form {
+        VStack(spacing: 0) {
+            SettingsTabs(selection: $tab)
+            Divider()
+            // A fixed height, so the window does not jump when the tab changes; a section taller than it scrolls.
+            Form { section }
+                .formStyle(.grouped)
+                .frame(height: 410)
+        }
+        .frame(width: 500)
+        .onDisappear { NSApplication.shared.setActivationPolicy(.accessory) }
+    }
+
+    @ViewBuilder private var section: some View {
+        switch tab {
+        case .general: general
+        case .providers: providers
+        case .skin: SkinGroup(meter: meter)
+        case .notifications: NotificationsGroup(meter: meter)
+        case .updates: UpdatesGroup(updater: meter.updater)
+        }
+    }
+
+    @ViewBuilder private var general: some View {
+        Group {
             Toggle("Launch at login", isOn: Binding(
                 get: { meter.launchAtLogin },
                 set: { meter.setLaunchAtLogin($0) }))
@@ -44,6 +69,11 @@ struct SettingsView: View {
                 default: EmptyView()
                 }
             }
+        }
+    }
+
+    @ViewBuilder private var providers: some View {
+        Group {
             Section("Providers") {
                 Text("Drag a provider, or use the arrows, to reorder its card. Turn a provider off to take its card off the panel and the widget. Choose the windows each card shows.")
                     .font(.caption).foregroundStyle(.secondary)
@@ -62,16 +92,7 @@ struct SettingsView: View {
                             move: { meter.moveProvider($0, onto: $1) }))
                 }
             }
-            SkinGroup(meter: meter)
-            NotificationsGroup(meter: meter)
-            UpdatesGroup(updater: meter.updater)
         }
-        .formStyle(.grouped)
-        .scrollDisabled(true)
-        .fixedSize(horizontal: false, vertical: true)
-        .frame(width: 380)
-        .padding()
-        .onDisappear { NSApplication.shared.setActivationPolicy(.accessory) }
     }
 }
 
