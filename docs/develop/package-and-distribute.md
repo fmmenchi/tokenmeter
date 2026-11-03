@@ -52,7 +52,9 @@ Then, for each release:
 ```
 
 `sign-release.sh` alone gives a zip that is signed but that Gatekeeper still calls
-`Unnotarized Developer ID`. Only the zip left by `notarize.sh` opens with a double click anywhere.
+`Unnotarized Developer ID`. Only the zip left by `notarize.sh` opens with a double click anywhere. Both scripts zip with
+`ditto --norsrc`, so the archive has no `._` entries: with them, a third-party unarchiver leaves `._` files in the bundle, the
+seal breaks and Gatekeeper says it cannot verify the app.
 A release workflow in CI is not written until the same credentials exist as repository secrets.
 
 To build, install and set up the status line in one go, use `./scripts/install.sh`
