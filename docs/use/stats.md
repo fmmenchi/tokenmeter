@@ -19,7 +19,7 @@ quota; the icon becomes a gauge, and a click on it takes you back. The panel alw
 
 The control at the top picks how far back the stats look: **1 month**, **3 months**, **1 year** or **Lifetime**, which is
 everything the app has kept. It changes the tokens by model and how many windows are counted; the list of windows below is
-always the latest few (four for a month, six for the longer ranges, eight for the 5 hours).
+always the latest few (four for a month, six for the longer ranges).
 
 ## A card for each provider, closed or open
 
@@ -54,7 +54,8 @@ Each provider that is on has a card, in the order of Settings. For each window t
 | `never reached the ceiling in 4`       | The windows the app saw in the range, none of which went to 100%.                                        |
 | `not observed`                         | The app saw no window of that length end in the range. Nothing is made up for the gap.                   |
 
-A plan without the 5 hours does not list them.
+The **5-hour windows are not listed for now**, and the verdict does not use them: several of them end in one day, and how to show that
+clearly is still to be designed. Only windows of a day or longer, such as the weekly one, are listed.
 
 ## Tokens by model
 
