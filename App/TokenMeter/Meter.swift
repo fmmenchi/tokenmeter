@@ -57,6 +57,8 @@ final class Meter {
     private(set) var isIngesting = false
     /// False when the store could not be opened: the stats view says so, and nothing else depends on it.
     private(set) var storeAvailable = false
+    /// True from launch until the store answers: opening it may migrate it, so it is done off the main actor (ADR 0005).
+    private(set) var storeIsOpening = true
     /// Which view the panel shows. Not kept: the panel opens on the current quota, and the stats are one click away.
     var showsStats = false
     /// The look the person chose in Settings (ADR 0013): kept in the defaults, and written to the snapshot so the widget draws the same.
@@ -80,8 +82,8 @@ final class Meter {
         UserDefaults.standard.set(openStatsCard, forKey: Meter.openStatsCardKey)
     }
     private var lastStatsAt = Date.distantPast
-    private let usageStore: UsageStore?
-    private let ingestor: UsageIngestor?
+    private var usageStore: UsageStore?
+    private var ingestor: UsageIngestor?
     private static let noticeKindsKey = "noticeKinds"
     private static let noticeLedgerKey = "noticeLedger"
     private static let statsRangeKey = "statsRange"
@@ -101,6 +103,15 @@ final class Meter {
     private var lastDetection: Date?
     private var lastUsageRefresh: Date?
     private var isRefreshingUsage = false
+    /// The last outcome of what the app tried, kept so a failure is a problem and not only a line in Console (ADR 0005). Nil is good,
+    /// or not asked yet.
+    private var providersFileError: String?
+    private var snapshotWriteError: String?
+    private var usageRefresh: ClaudeUsageRefresh.Outcome?
+    /// The script the app installs as the Claude status line, read once at launch off the main actor.
+    private var claudeScript: Data?
+    /// Snapshots are written one after the other, in the order they were made, and never on the main actor.
+    @ObservationIgnored private let writer = DispatchQueue(label: "com.fmmenchi.tokenmeter.snapshot-writer", qos: .utility)
     private var base: Snapshot?
     private let dismissals = DefaultsDismissals()
     private let preferences = DefaultsDisplayPreferences()
@@ -111,27 +122,38 @@ final class Meter {
     private static let log = Logger(subsystem: "com.fmmenchi.tokenmeter.app", category: "snapshot")
 
     init() {
-        let folder = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?
-            .appendingPathComponent("TokenMeter", isDirectory: true)
-        do {
-            guard let folder else { throw UsageStore.Failure(description: "no Application Support folder") }
-            let opened = try UsageStore(url: folder.appendingPathComponent("usage.sqlite"))
-            usageStore = opened
-            ingestor = UsageIngestor(store: opened)
-            storeAvailable = true
-        } catch {
-            usageStore = nil
-            ingestor = nil
-            Self.log.error("Could not open the usage store: \(error.localizedDescription, privacy: .public)")
-        }
         LaunchAtLogin.enableOnFirstRun()
         launchAtLogin = LaunchAtLogin.isEnabled
-        setUpClaudeStatusLine()
         Task { await refreshNoticePermission() }
-        Task { await refresh() }
+        Task { await launch() }
         timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
             Task { @MainActor in await self?.refresh() }
         }
+    }
+
+    /// What the app does once at launch, in an order that matters, and off the main actor where it touches the disk (ADR 0005): the
+    /// store is opened (which may migrate it) and the status line script is read together, then the status line is set up, and the
+    /// first reading follows.
+    private func launch() async {
+        let folder = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?
+            .appendingPathComponent("TokenMeter", isDirectory: true)
+        let (script, opened) = await Task.detached(priority: .utility) { () -> (Data?, Result<UsageStore, Error>) in
+            let script = Bundle.main.url(forResource: "claude-statusline", withExtension: "sh").flatMap { try? Data(contentsOf: $0) }
+            guard let folder else { return (script, .failure(UsageStore.Failure(description: "no Application Support folder"))) }
+            return (script, Result { try UsageStore(url: folder.appendingPathComponent("usage.sqlite")) })
+        }.value
+        claudeScript = script
+        switch opened {
+        case .success(let store):
+            usageStore = store
+            ingestor = UsageIngestor(store: store)
+            storeAvailable = true
+        case .failure(let error):
+            Self.log.error("Could not open the usage store: \(error.localizedDescription, privacy: .public)")
+        }
+        storeIsOpening = false
+        await setUpClaudeStatusLine()
+        await refresh()
     }
 
     /// Whether the menu bar item carries its dot: something the panel lists, and that is worth opening it for, a problem or an update
@@ -192,10 +214,14 @@ final class Meter {
         isRefreshingUsage = true
         lastUsageRefresh = Date()
         Task(priority: .utility) {
-            let outcome = await Task.detached(priority: .utility) { ClaudeUsageRefresh.refresh() }.value
+            let outcome = await ClaudeUsageRefresh.refresh()
             isRefreshingUsage = false
+            usageRefresh = outcome
             if outcome == .refreshed { await refresh() }
-            else { Self.log.info("Claude usage not refreshed: \(String(describing: outcome), privacy: .public)") }
+            else {
+                Self.log.info("Claude usage not refreshed: \(String(describing: outcome), privacy: .public)")
+                publish()
+            }
         }
     }
 
@@ -300,19 +326,37 @@ final class Meter {
     /// Puts the visible problems on the latest reading and gives it to the widget.
     private func publish() {
         guard let base else { return }
-        problems = dismissals.visible(detected)
+        // What the app met itself comes first, then what the detector found; a repeated id keeps its first occurrence.
+        let own = AppProblems.check(hasAppGroup: store != nil, providersFileError: providersFileError,
+                                    snapshotWriteError: snapshotWriteError, usageRefresh: autoSetUpClaude ? usageRefresh : nil)
+        problems = dismissals.visible(ProblemDetector.merge(general: own, providers: [detected]))
         cardProviders = makeCardProviders()
         let result = base.applying(preferences).with(problems: problems).with(skin: skin)
         snapshot = result
         deliverNotices(now: Date())
-        if let store {
-            do {
-                try store.write(result)
-                WidgetCenter.shared.reloadAllTimelines()
-            } catch {
-                Self.log.error("Could not write \(store.url.path, privacy: .public): \(error.localizedDescription, privacy: .public)")
-            }
+        write(result)
+    }
+
+    /// Off the main actor and in order. The outcome comes back: a failure is a problem, and the one that follows a good write or the
+    /// other way round publishes again so the panel and the widget say it.
+    private func write(_ result: Snapshot) {
+        guard let store else { return }
+        writer.async { [weak self] in
+            var failure: String?
+            do { try store.write(result) } catch { failure = error.localizedDescription }
+            Task { @MainActor in self?.wrote(failure: failure, path: store.url.path) }
         }
+    }
+
+    private func wrote(failure: String?, path: String) {
+        if let failure {
+            Self.log.error("Could not write \(path, privacy: .public): \(failure, privacy: .public)")
+        } else {
+            WidgetCenter.shared.reloadAllTimelines()
+        }
+        guard failure != snapshotWriteError else { return }
+        snapshotWriteError = failure
+        publish()
     }
 
     /// A switch of Settings. The permission of macOS is asked the first time one is turned on, and a notice still due is told at once.
@@ -344,31 +388,31 @@ final class Meter {
     func setAutoSetUpClaude(_ enabled: Bool) {
         autoSetUpClaude = enabled
         UserDefaults.standard.set(enabled, forKey: Self.autoSetUpKey)
-        setUpClaudeStatusLine()
+        Task { await setUpClaudeStatusLine() }
     }
 
     /// Restore original stays in Settings (ADR 0005); the wrap itself is a fix in the panel.
     func restoreClaudeStatusLine() {
-        do {
-            _ = try ClaudeStatusLine.restore()
-        } catch {
-            Self.log.error("Could not restore the Claude status line: \(error.localizedDescription, privacy: .public)")
+        Task {
+            let failure = await Task.detached(priority: .utility) { () -> String? in
+                do { _ = try ClaudeStatusLine.restore(); return nil } catch { return error.localizedDescription }
+            }.value
+            if let failure { Self.log.error("Could not restore the Claude status line: \(failure, privacy: .public)") }
+            await setUpClaudeStatusLine()
+            detectProblems()
         }
-        setUpClaudeStatusLine()
-        detectProblems()
     }
 
-    private var claudeScript: Data? {
-        Bundle.main.url(forResource: "claude-statusline", withExtension: "sh").flatMap { try? Data(contentsOf: $0) }
-    }
-
-    /// ADR 0004: only while the switch is on, at every launch and when it is turned on.
-    private func setUpClaudeStatusLine() {
-        guard autoSetUpClaude else { claudeStatusLine = nil; return }
+    /// ADR 0004: only while the switch is on, at every launch and when it is turned on. The settings file is read and written off the
+    /// main actor (ADR 0005).
+    private func setUpClaudeStatusLine() async {
+        guard autoSetUpClaude else { claudeStatusLine = nil; usageRefresh = nil; return }
         guard let script = claudeScript else { return }
-        do {
-            claudeStatusLine = try ClaudeStatusLine.setUp(script: script)
-        } catch {
+        let result = await Task.detached(priority: .utility) { Result { try ClaudeStatusLine.setUp(script: script) } }.value
+        switch result {
+        case .success(let outcome):
+            claudeStatusLine = outcome
+        case .failure(let error):
             claudeStatusLine = nil
             Self.log.error("Could not set up the Claude status line: \(error.localizedDescription, privacy: .public)")
         }
@@ -390,18 +434,28 @@ final class Meter {
         let hasAppGroup = store != nil
         let integrations = makeIntegrations()
         Task(priority: .utility) {
-            let (found, configured) = await Task.detached(priority: .utility) {
-                // A file that cannot be used falls back to the seed, as the collector does (ADR 0003).
-                let configured = ((try? ProviderConfigFile.load()) ?? nil)?.providers ?? ProviderConfigFile.seed().providers
+            let (found, configured, fileError) = await Task.detached(priority: .utility) {
+                // A file that cannot be used falls back to the seed, as the collector does (ADR 0003), and says so (ADR 0005).
+                let loaded = Self.loadProviders()
                 let found = ProblemDetector.detect(
-                    general: AppProblems.check(hasAppGroup: hasAppGroup), providers: configured,
+                    general: AppProblems.check(hasAppGroup: hasAppGroup), providers: loaded.providers,
                     integrations: integrations, context: ProblemContext())
-                return (found, configured)
+                return (found, loaded.providers, loaded.error)
             }.value
             detected = found
             providers = configured
+            providersFileError = fileError
             for (id, state) in fixStates where state == .done { fixStates[id] = nil }
             publish()
+        }
+    }
+
+    /// The providers as the collector sees them: the file, or the seed where it is missing or cannot be used, with what is wrong.
+    nonisolated private static func loadProviders() -> (providers: [ProviderConfig], error: String?) {
+        do {
+            return (try ProviderConfigFile.load()?.providers ?? ProviderConfigFile.seed().providers, nil)
+        } catch {
+            return (ProviderConfigFile.seed().providers, error.localizedDescription)
         }
     }
 
@@ -423,7 +477,7 @@ final class Meter {
             switch result {
             case .done:
                 fixStates[problem.id] = .done
-                setUpClaudeStatusLine()
+                await setUpClaudeStatusLine()
             case .failed(let reason):
                 fixStates[problem.id] = .failed(reason)
             }
