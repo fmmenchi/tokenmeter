@@ -321,4 +321,39 @@ final class ConfiguredSourceTests: XCTestCase {
         XCTAssertEqual(label(#"{"a":{"type":"x_new_plan"}}"#), "New Plan")
         XCTAssertNil(label(#"{"a":{}}"#))
     }
+
+    // MARK: A line of a log is not trusted
+
+    func testNumbersBeyondAnyPlanAreClampedAndNeverTrapTheCollector() throws {
+        let dir = try tempDir()
+        let lines = [
+            #"{"type":"assistant","timestamp":"2026-10-28T10:00:00.000Z","message":{"id":"a","usage":{"input_tokens":9223372036854775807,"output_tokens":1}}}"#,
+            #"{"type":"assistant","timestamp":"2026-10-28T10:00:01.000Z","message":{"id":"b","usage":{"input_tokens":-9223372036854775808,"output_tokens":9223372036854775807}}}"#,
+            #"{"type":"assistant","timestamp":"2026-10-28T10:00:02.000Z","message":{"id":"c","usage":{"input_tokens":1e300,"output_tokens":5}}}"#,
+        ].joined(separator: "\n") + "\n"
+        try lines.write(to: dir.appendingPathComponent("s.jsonl"), atomically: true, encoding: .utf8)
+        let config = """
+        {"id":"big","title":"Big","windows":[300],
+         "log":{"root":"\(dir.path)","contains":"\\"usage\\":","where":{"type":"assistant"},"timestamp":"timestamp"},
+         "usage":{"mode":"perEvent","tokens":{"input":"message.usage.input_tokens","output":"message.usage.output_tokens"}}}
+        """
+        let events = try source(config).read(since: epoch).events
+        XCTAssertEqual(events.count, 3)
+        XCTAssertTrue(events.allSatisfy { $0.tokens.total <= 4 * ConfiguredSource.largestCount })
+        XCTAssertEqual(events[0].tokens.input, ConfiguredSource.largestCount)
+        XCTAssertEqual(events[1].tokens.input, 0, "a negative count is nothing")
+    }
+
+    func testAResetInEpochMillisecondsIsReadAsMilliseconds() throws {
+        let dir = try tempDir()
+        let line = #"{"timestamp":"2026-10-28T10:00:00.000Z","type":"event_msg","payload":{"limits":{"used":12,"resets":1800000000000}}}"#
+        try (line + "\n").write(to: dir.appendingPathComponent("r.jsonl"), atomically: true, encoding: .utf8)
+        let config = """
+        {"id":"ms","title":"Ms","windows":[300],
+         "log":{"root":"\(dir.path)","contains":"\\"limits\\"","where":{"type":"event_msg"},"timestamp":"timestamp"},
+         "quota":{"windows":[{"at":"payload.limits","minutes":300,"usedPercent":"used","resetsAt":"resets","resetsAtFormat":"epochMilliseconds"}]}}
+        """
+        let reading = try source(config).read(since: epoch)
+        XCTAssertEqual(reading.quotas.first?.resetsAt, Date(timeIntervalSince1970: 1_800_000_000))
+    }
 }

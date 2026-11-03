@@ -246,7 +246,8 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
         let minutes = window.minutes ?? window.minutesPath.flatMap { number(value($0, in: scope)) }
         let resets = window.resetsAt.flatMap { value($0, in: scope) }.flatMap { raw -> Date? in
             if window.resetsAtFormat == .iso8601 { return string(raw).flatMap(LogDate.parse) }
-            return (raw as? NSNumber).map { Date(timeIntervalSince1970: $0.doubleValue) }
+            let scale = window.resetsAtFormat == .epochMilliseconds ? 1000.0 : 1.0
+            return (raw as? NSNumber).map { Date(timeIntervalSince1970: $0.doubleValue / scale) }
         }
         return ReportedQuota(usedPercent: used, windowMinutes: minutes, resetsAt: resets, observedAt: observedAt)
     }
@@ -260,7 +261,15 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
         return current
     }
 
-    private static func number(_ value: Any?) -> Int? { (value as? NSNumber).map { Int(truncating: $0) } }
+    /// The largest count a log may claim. A line is not trusted: a number beyond this is clamped to it, so that adding and
+    /// subtracting the counts of a line can never overflow (a count of 2^53 tokens is already beyond any plan).
+    static let largestCount = 1 << 53
+
+    private static func number(_ value: Any?) -> Int? {
+        guard let double = (value as? NSNumber)?.doubleValue, !double.isNaN else { return nil }
+        let limit = Double(largestCount)
+        return Int(min(max(double, -limit), limit))
+    }
 
     private static func string(_ value: Any?) -> String? {
         switch value {
