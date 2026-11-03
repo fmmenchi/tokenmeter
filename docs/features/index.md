@@ -30,7 +30,9 @@ are [ADRs](../adr), and its overview links them.
 
 ## In design and build
 
-Nothing at the moment.
+| Feature                                                                                                                                | Date       | Pages                                                                               |
+| :------------------------------------------------------------------------------------------------------------------------------------- | :--------- | :---------------------------------------------------------------------------------- |
+| [Skins](./2026-11-02-skins/index.md): five looks for the panel, the widget and the stats, each with its own colours, bars and typeface | 2026-11-02 | [Overview](./2026-11-02-skins/index.md), [Proposal](./2026-11-02-skins/proposal.md) |
 
 ## The pattern: from idea to implemented
 
