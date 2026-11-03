@@ -27,7 +27,12 @@ struct StatsView: View {
             .labelsHidden()
             .controlSize(.small)
 
-            if !meter.storeAvailable {
+            if meter.storeIsOpening {
+                HStack(spacing: 8) {
+                    ProgressView().controlSize(.small)
+                    Text("Opening the history.").font(.caption).foregroundStyle(.secondary)
+                }
+            } else if !meter.storeAvailable {
                 Text("The history could not be opened, so there are no stats. The quota in the other view is not affected.")
                     .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             } else if meter.isIngesting && meter.stats.isEmpty {

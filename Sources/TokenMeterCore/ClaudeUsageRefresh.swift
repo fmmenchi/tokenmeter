@@ -25,8 +25,25 @@ public enum ClaudeUsageRefresh {
             .first { FileManager.default.isExecutableFile(atPath: $0.path) }
     }
 
-    /// Runs `executable` in `folder` (made if missing) and waits at most `timeout` seconds.
-    public static func run(executable: URL, in folder: URL, timeout: TimeInterval = 45) -> Outcome {
+    /// Resumes a continuation once, whichever of the exit and the timeout comes first.
+    private final class Once: @unchecked Sendable {
+        private let lock = NSLock()
+        private var continuation: CheckedContinuation<Outcome, Never>?
+
+        init(_ continuation: CheckedContinuation<Outcome, Never>) { self.continuation = continuation }
+
+        func finish(_ outcome: Outcome) {
+            lock.lock()
+            let pending = continuation
+            continuation = nil
+            lock.unlock()
+            pending?.resume(returning: outcome)
+        }
+    }
+
+    /// Runs `executable` in `folder` (made if missing) and waits at most `timeout` seconds. The wait holds no thread: the caller
+    /// is suspended until the process ends or the time is up, so a CLI that hangs costs nothing but the process itself.
+    public static func run(executable: URL, in folder: URL, timeout: TimeInterval = 45) async -> Outcome {
         try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         let process = Process()
         process.executableURL = executable
@@ -35,22 +52,30 @@ public enum ClaudeUsageRefresh {
         process.standardInput = FileHandle.nullDevice
         process.standardOutput = FileHandle.nullDevice
         process.standardError = FileHandle.nullDevice
-        let finished = DispatchSemaphore(value: 0)
-        process.terminationHandler = { _ in finished.signal() }
-        do { try process.run() } catch { return .failed(error.localizedDescription) }
-        if finished.wait(timeout: .now() + timeout) == .timedOut {
-            process.terminate()
-            return .timedOut
+        return await withCheckedContinuation { (continuation: CheckedContinuation<Outcome, Never>) in
+            let once = Once(continuation)
+            process.terminationHandler = { finished in
+                once.finish(finished.terminationStatus == 0 ? .refreshed : .failed("exit \(finished.terminationStatus)"))
+            }
+            do { try process.run() } catch {
+                once.finish(.failed(error.localizedDescription))
+                return
+            }
+            DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + timeout) {
+                guard process.isRunning else { return }
+                // The outcome first: ending the process makes the termination handler answer too, and the first answer counts.
+                once.finish(.timedOut)
+                process.terminate()
+            }
         }
-        return process.terminationStatus == 0 ? .refreshed : .failed("exit \(process.terminationStatus)")
     }
 
     /// Finds the CLI and runs it in `~/.tokenmeter/claude/`, away from every project.
     public static func refresh(home: URL = FileManager.default.homeDirectoryForCurrentUser,
                                path: String = ProcessInfo.processInfo.environment["PATH"] ?? "",
                                system: [String] = ["/opt/homebrew/bin", "/usr/local/bin"],
-                               timeout: TimeInterval = 45) -> Outcome {
+                               timeout: TimeInterval = 45) async -> Outcome {
         guard let executable = locate(home: home, path: path, system: system) else { return .notFound }
-        return run(executable: executable, in: home.appendingPathComponent(".tokenmeter/claude"), timeout: timeout)
+        return await run(executable: executable, in: home.appendingPathComponent(".tokenmeter/claude"), timeout: timeout)
     }
 }
