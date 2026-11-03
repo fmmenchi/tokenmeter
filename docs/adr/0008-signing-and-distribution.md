@@ -1,6 +1,7 @@
 # ADR 0008 — Signing and distribution: a Developer ID build, notarized, outside the App Store
 
-Status: accepted (2026-10-28, consolidated 2026-11-02 from the ADRs on distributing a prebuilt app, bundle identifiers and notarization)
+Status: accepted (2026-10-28, consolidated 2026-11-02 from the ADRs on distributing a prebuilt app, bundle identifiers and notarization;
+the zip without AppleDouble entries added 2026-11-03)
 
 ## Context
 
@@ -18,6 +19,10 @@ Building needs Xcode, XcodeGen and a signing team, and someone who only wants th
   the `developer-id` method and writes `dist/TokenMeter-<version>.zip`; `scripts/notarize.sh` submits it with `xcrun notarytool submit
 --wait`, staples the ticket, zips again and runs `spctl --assess`, and stops on a rejection printing Apple's log. The team ID comes
   from `Local.xcconfig`, as for every build. The Hardened Runtime is on for the app and the widget.
+- **The zip carries no AppleDouble entries** (`ditto --norsrc`). Without it `ditto` stores the extended attributes of every file
+  as `._name` entries; Archive Utility turns them back into attributes, but an unarchiver that does not know them (`unzip`, some
+  third-party tools) writes them as files inside the bundle, the seal no longer matches and Gatekeeper reports that it cannot
+  verify the app, although it is notarized. The attributes dropped (`com.apple.provenance`) are not part of the signature.
 - **Credentials are never in the repository or in a script**: `notarize.sh` uses a keychain profile, `tokenmeter-notary`, created once
   with `xcrun notarytool store-credentials`. `scripts/install.sh` keeps using the development build, the fast loop that needs no network.
   A GitHub release workflow is written only once the secrets exist.
@@ -25,6 +30,8 @@ Building needs Xcode, XcodeGen and a signing team, and someone who only wants th
 ## Consequences
 
 - Only the stapled zip from `notarize.sh` opens with a double click on any Mac; `dist/` is git-ignored.
+- The zips of v0.3.0 to v0.7.0 were published with AppleDouble entries and replaced on 2026-11-03 by zips of the same notarized
+  bundles made without them, with their `.sha256` and the signature in their `appcast.xml` regenerated; the code was not re-signed.
 - Settings kept under the old identifiers start fresh, and the old login item must be removed.
 - Notarization needs the network and takes minutes, which is why it is not part of `install.sh`.
 - The App Group and the widget on the desktop were verified on the author's Mac with the Developer ID build of v0.2.0 (every version since is notarized). Not verified: the double click of the zip on another Mac.

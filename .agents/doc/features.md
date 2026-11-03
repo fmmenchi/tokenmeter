@@ -29,9 +29,11 @@ The label is the feature's title in the user's words, never the name of a concep
 3. **Wait for Fabio to approve the design.** Delete the other variants only when he asks, each time; it is permanent. No
    history of proposals is kept. Then write the feature's folder from the chosen design: `index.md` (status: in design) and
    `proposal.md` with a screenshot.
-4. **Write the technical plan.** ADR before the plan, plan before the code: status `proposed`. Every plan ends with the
+4. **Write the technical plan.** An ADR only if the feature decides a structure: it moves a boundary, a data rule or a module,
+   and then it comes before the plan, status `proposed`. A feature that adds a window, pages, images or a flag and moves no
+   boundary has no ADR: the plan says so ("no ADR: nothing structural"). Plan before the code. Every plan ends with the
    reconciliation (item 9) written as its own row: it is never left implied.
-5. **Wait for Fabio to approve the plan.** The ADR is `accepted` when he confirms. No code before.
+5. **Wait for Fabio to approve the plan.** If there is an ADR, it is `accepted` when he confirms. No code before.
 6. **Build it** with the `design-import` skill, one commit per step of the plan, three files at most, the gate green.
    `pnpm run check` builds the app and the widget unsigned, so a view that does not compile fails the gate; it does not run
    them. Update the Use and Develop pages with the code, in the same branch.
@@ -57,7 +59,8 @@ Show only tokenmeter's own windows, with sample data from the docs, never real u
 
 ## Do not
 
-- Write code for a feature before its ADR and its plan exist.
+- Write code for a feature before its plan exists, or before its ADR if it has one.
+- Write an ADR because the flow has a step for it: ask "is this where the code lives and what depends on what?" first.
 - Put a link to a canvas in the docs: canvases are private and temporary. Write the design into `proposal.md`.
 - Name a feature folder after a code concept, or renumber the other features to make room: the `position` rule orders
   them.

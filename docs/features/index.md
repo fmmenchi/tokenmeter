@@ -29,6 +29,7 @@ are [ADRs](../adr), and its overview links them.
 | [Seasonal easter eggs](./2026-11-02-seasonal-easter-eggs/index.md): in the week of Halloween, Christmas and Easter, a small icon on the bars and a corner piece on the cards | 2026-11-02 | [Overview](./2026-11-02-seasonal-easter-eggs/index.md), [Proposal](./2026-11-02-seasonal-easter-eggs/proposal.md), [Implementation plan](./2026-11-02-seasonal-easter-eggs/plan.md) |
 | [Skins](./2026-11-02-skins/index.md): five looks for the panel, the widget and the stats, each with its own colours, bars and typeface                                       | 2026-11-02 | [Overview](./2026-11-02-skins/index.md), [Proposal](./2026-11-02-skins/proposal.md), [Plan](./2026-11-02-skins/plan.md)                                                             |
 | [Settings in tabs](./2026-11-02-settings-tabs/index.md): the Settings window shows one section at a time, chosen from a row of tabs                                          | 2026-11-02 | [Overview](./2026-11-02-settings-tabs/index.md), [Proposal](./2026-11-02-settings-tabs/proposal.md), [Plan](./2026-11-02-settings-tabs/plan.md)                                     |
+| [Welcome tour](./2026-11-03-welcome-tour/index.md): a wizard that says where the app lives and walks the panel in seven pages                                                | 2026-11-03 | [Overview](./2026-11-03-welcome-tour/index.md), [Proposal](./2026-11-03-welcome-tour/proposal.md), [Plan](./2026-11-03-welcome-tour/plan.md)                                        |
 
 ## In design and build
 

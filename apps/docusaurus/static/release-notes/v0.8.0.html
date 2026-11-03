@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>tokenmeter 0.8.0</title>
+<style>
+  /* Colours are given for both appearances: the web view of the update window does not always follow the system on its own. */
+  :root { color-scheme: light dark; --text: #1d1d1f; --back: #ffffff; --link: #0a60d6; --code: rgba(0, 0, 0, 0.07); }
+  @media (prefers-color-scheme: dark) { :root { --text: #f5f5f7; --back: #1e1e1e; --link: #4da3ff; --code: rgba(255, 255, 255, 0.14); } }
+  html { background: var(--back); }
+  body { font: 13px/1.5 -apple-system, "SF Pro", system-ui, sans-serif; margin: 0; padding: 16px 20px 24px; color: var(--text); background: var(--back); }
+  h1 { font-size: 17px; margin: 0 0 8px; }
+  p, li { margin: 0 0 8px; }
+  ul { padding-left: 20px; margin: 0 0 8px; }
+  code { font: 12px ui-monospace, "SF Mono", monospace; padding: 1px 4px; border-radius: 4px; background: var(--code); }
+  a { color: var(--link); }
+  .all { margin-top: 12px; }
+</style>
+</head>
+<body>
+<h1>tokenmeter 0.8.0</h1>
+<p>Released on 2026-11-03.</p>
+<ul><li><strong>The welcome</strong>: the first time the app opens a version that has it, on a fresh install and on the first update alike, a small window of seven pages says where the app lives, how to read the bars, the tick, the buttons, the stats and the suggestion, and where Settings is. It can be seen again with <strong>Show the welcome again</strong> in Settings, General (<a href="https://fmmenchi.github.io/tokenmeter/use/welcome">The welcome</a>).</li><li><strong>The pace mark is there from the first minute of a window.</strong> It used to wait until a tenth of the window had passed, so a weekly bar had none for its first 17 hours. Until that tenth the mark says where the window stands and that the quota lasts; the "runs out before the reset" judgment still waits (<a href="https://fmmenchi.github.io/tokenmeter/use/bars">Reading the Bars</a>).</li><li><strong>The stats list no window shorter than a day, for now.</strong> Several 5-hour windows end in one day and a row has only a date, so they read as duplicates. The verdict is drawn from the weekly windows; how to show the short ones is still to be designed (<a href="https://fmmenchi.github.io/tokenmeter/use/stats">Stats</a>).</li><li><strong>The panel tells the failures of the app</strong>: a broken <code>providers.json</code>, a snapshot the app could not write and a <code>/usage</code> that stays silent are problems the panel lists, and the main actor no longer does disk work (<a href="https://fmmenchi.github.io/tokenmeter/use/troubleshooting">Troubleshooting</a>).</li><li><strong>The skins read better</strong>: nine quota colours reach 3:1 against the bar they are drawn on, the secondary text of five palettes reaches 4.5:1, and the stats, the plan chip and the captions follow the skin. One Dark gets the icon, and the warning figure and the "runs out" phrase take the skin's middle colour.</li><li><strong>Fixes</strong>: the widget draws each entry of its timeline for that entry's own date; a Codex log line without totals no longer resets what the next one is measured against; the numbers of a log line are clamped and a reset in milliseconds is read as such; the weeks of the easter eggs follow the Gregorian calendar whatever the Mac shows; the usage history is set aside only when its file is damaged; a file that needs two migrations keeps the original as its backup.</li><li><strong>The download is a clean zip</strong>: it no longer carries AppleDouble entries, so any unarchiver keeps the signature intact.</li></ul>
+<p class="all"><a href="https://fmmenchi.github.io/tokenmeter/use/changelog">The whole changelog</a></p>
+</body>
+</html>

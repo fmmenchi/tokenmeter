@@ -4,6 +4,7 @@ import TokenMeterCore
 @main
 struct TokenMeterApp: App {
     @State private var meter = Meter()
+    @NSApplicationDelegateAdaptor(TokenMeterDelegate.self) private var delegate
 
     var body: some Scene {
         MenuBarExtra {

@@ -97,7 +97,9 @@ private struct StatsCard: View {
             .help(isExpanded ? "Hide the detail" : "Show the detail")
             .accessibilityLabel("\(snapshot.title): \(isExpanded ? "hide" : "show") the detail")
             if let stats, stats.since != nil || stats.windows.contains(where: { $0.closed > 0 }) {
-                let windows = stats.windows.filter { windowNames.contains($0.name) }
+                // Windows shorter than a day are not listed for now: how to show several of them in one day needs a design
+                // decision, and the verdict is drawn from the windows that are listed.
+                let windows = stats.windows.filter { windowNames.contains($0.name) && $0.windowMinutes >= 1_440 }
                 if isExpanded { VerdictBox(verdict: UsageStats.verdict(windows)) }
                 ForEach(windows, id: \.windowMinutes) {
                     WindowHistory(stats: $0, showsRows: isExpanded)
@@ -253,8 +255,8 @@ private struct ModelList: View {
     }
 }
 
-/// The word of a provider's card and what it rests on, in a sentence (ADR 0010).
-private struct VerdictBox: View {
+/// The word of a provider's card and what it rests on, in a sentence (ADR 0010). The welcome shows three of them.
+struct VerdictBox: View {
     let verdict: Verdict
 
     private func label(_ name: String) -> String { name == "5h" ? "5-hour" : name == "7d" ? "weekly" : name }

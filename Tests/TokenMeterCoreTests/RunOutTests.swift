@@ -36,6 +36,23 @@ final class RunOutTests: XCTestCase {
         XCTAssertNil(window.runsOut(at: start.addingTimeInterval(20 * 60)), "a burst in the first 20 minutes says too little")
     }
 
+    func testTheMarkIsThereFromTheStartAndSaysItLastsUntilThereIsEnoughToJudge() {
+        let now = start.addingTimeInterval(20 * 60)
+        let pace = usage(left: 0.5, observed: 20 * 60).pace(at: now)
+        XCTAssertNotNil(pace, "the share of the window ahead is true from the first minute")
+        XCTAssertEqual(pace?.aheadFraction ?? 0, 1 - 20.0 / 300.0, accuracy: 0.001)
+        XCTAssertEqual(pace?.runsOut, false, "a burst this early is not a reason to say it runs out")
+        XCTAssertNil(pace?.runsOutAt)
+    }
+
+    func testAnOldFigureEarlyInTheWindowAlsoKeepsItsMark() {
+        let now = start.addingTimeInterval(25 * 60)
+        let pace = usage(left: 0.3, observed: 5 * 60).pace(at: now)
+        XCTAssertEqual(pace?.isStale, true)
+        XCTAssertEqual(pace?.runsOut, false)
+        XCTAssertEqual(pace?.aheadFraction ?? 0, 1 - 25.0 / 300.0, accuracy: 0.001)
+    }
+
     func testItSaysNothingWithoutAFreshReportedFigure() {
         let now = start.addingTimeInterval(3 * 3600)
         XCTAssertNil(usage(left: 0.2, observed: 3 * 3600 - 11 * 60).runsOut(at: now), "stale after ten minutes")
@@ -89,7 +106,6 @@ final class RunOutTests: XCTestCase {
         XCTAssertNil(usage(left: 0.2, observed: 3 * 3600, source: .reset).pace(at: now))
         XCTAssertNil(usage(left: 0.2, observed: 3 * 3600, source: .consumptionOnly).pace(at: now))
         XCTAssertNil(usage(left: 0.2, observed: 3 * 3600, resets: false).pace(at: now))
-        XCTAssertNil(usage(left: 0.5, observed: 20 * 60).pace(at: start.addingTimeInterval(20 * 60)), "too early")
     }
 
     // MARK: a figure that is out of date (ADR 0002)
@@ -115,7 +131,6 @@ final class RunOutTests: XCTestCase {
         XCTAssertNil(usage(left: 0.2, observed: 2 * 3600, source: .reset).pace(at: now))
         XCTAssertNil(usage(left: 0.2, observed: 2 * 3600, source: .consumptionOnly).pace(at: now))
         XCTAssertNil(usage(left: 0.2, observed: 2 * 3600, resets: false).pace(at: now))
-        XCTAssertNil(usage(left: 0.2, observed: 5 * 60).pace(at: start.addingTimeInterval(25 * 60)), "too early in the window")
     }
 
     func testTheFigureOfAStaleReadingIsTheDateWithATildeOnlyWhereTheBarIsUnderTheMark() {
@@ -151,7 +166,7 @@ final class RunOutTests: XCTestCase {
         XCTAssertFalse(pace.runsOut)
         XCTAssertNil(usage(left: 1, observed: 3 * 3600).paceFigureText(at: now, calendar: calendar), "no date to give")
         XCTAssertNil(usage(left: 1, observed: 3 * 3600).runsOut(at: now), "it never runs out")
-        XCTAssertNil(usage(left: 1, observed: 20 * 60).pace(at: start.addingTimeInterval(20 * 60)), "still too early")
+        XCTAssertEqual(usage(left: 1, observed: 20 * 60).pace(at: start.addingTimeInterval(20 * 60))?.runsOut, false, "early, it still lasts")
     }
 
     func testTheFigureSaysWhenItRunsOutAndNothingWhereItLasts() {

@@ -57,7 +57,7 @@ end if the window were used steadily from its start to its reset ([ADR 0002](../
   its `x`, with a second click on the `i` or with a click outside it.
 
 **No mark means nothing can be said**, not that the quota lasts. Nothing is estimated for a reset or unknown window, one
-with no reset time, or one with less than a tenth of the window gone. A window where nothing was used has a mark and lasts.
+or one with no reset time. A window where nothing was used has a mark and lasts, and so does one with less than a tenth of its time gone: the mark says where the window stands, and it does not say the quota runs out until there is enough of the window to judge.
 
 - **A reading older than ten minutes keeps its mark, at half strength** and measured now, so it moves left as time passes.
   The bar is the last reading, which can only have gone down since. The mark is orange only when the bar is already before

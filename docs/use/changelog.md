@@ -8,6 +8,18 @@ sidebar_position: 10
 
 What changed in each version, newest first. The update window shows the notes of the version it offers, taken from this page, and links here for the rest.
 
+## 0.8.0 {#v0-8-0}
+
+Released on 2026-11-03.
+
+- **The welcome**: the first time the app opens a version that has it, on a fresh install and on the first update alike, a small window of seven pages says where the app lives, how to read the bars, the tick, the buttons, the stats and the suggestion, and where Settings is. It can be seen again with **Show the welcome again** in Settings, General ([The welcome](./welcome.md)).
+- **The pace mark is there from the first minute of a window.** It used to wait until a tenth of the window had passed, so a weekly bar had none for its first 17 hours. Until that tenth the mark says where the window stands and that the quota lasts; the "runs out before the reset" judgment still waits ([Reading the Bars](./bars.md)).
+- **The stats list no window shorter than a day, for now.** Several 5-hour windows end in one day and a row has only a date, so they read as duplicates. The verdict is drawn from the weekly windows; how to show the short ones is still to be designed ([Stats](./stats.md)).
+- **The panel tells the failures of the app**: a broken `providers.json`, a snapshot the app could not write and a `/usage` that stays silent are problems the panel lists, and the main actor no longer does disk work ([Troubleshooting](./troubleshooting.md)).
+- **The skins read better**: nine quota colours reach 3:1 against the bar they are drawn on, the secondary text of five palettes reaches 4.5:1, and the stats, the plan chip and the captions follow the skin. One Dark gets the icon, and the warning figure and the "runs out" phrase take the skin's middle colour.
+- **Fixes**: the widget draws each entry of its timeline for that entry's own date; a Codex log line without totals no longer resets what the next one is measured against; the numbers of a log line are clamped and a reset in milliseconds is read as such; the weeks of the easter eggs follow the Gregorian calendar whatever the Mac shows; the usage history is set aside only when its file is damaged; a file that needs two migrations keeps the original as its backup.
+- **The download is a clean zip**: it no longer carries AppleDouble entries, so any unarchiver keeps the signature intact.
+
 ## 0.7.0 {#v0-7-0}
 
 Released on 2026-11-02.

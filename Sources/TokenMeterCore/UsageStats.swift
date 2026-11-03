@@ -82,6 +82,11 @@ public struct Verdict: Equatable, Sendable {
 
     public let word: Word
     public let reason: Reason
+
+    public init(word: Word, reason: Reason) {
+        self.word = word
+        self.reason = reason
+    }
 }
 
 /// One provider's share of all the tokens, with its models as shares of the same total.
