@@ -83,15 +83,15 @@ private struct WelcomePicture: View {
         case .bars: picture("WelcomePanel", height: 411, shown: 190, from: .top, outline: Outline(x: 0.03, y: 0.097, width: 0.94, height: 0.231))
         case .tick: picture("WelcomePanel", height: 411, shown: 190, from: .top, outline: Outline(x: 0.40, y: 0.134, width: 0.09, height: 0.067))
         case .buttons: picture("WelcomePanel", height: 411, shown: 160, from: .bottom, outline: Outline(x: 0.02, y: 0.785, width: 0.96, height: 0.19))
-        case .stats: picture("WelcomeStats", height: 670, shown: 410, from: .top, outline: Outline(x: 0.03, y: 0.235, width: 0.94, height: 0.243))
+        case .stats: picture("WelcomeStats", height: 622.5, shown: 400, from: .top, outline: Outline(x: 0.03, y: 0.269, width: 0.94, height: 0.169))
         case .suggestion:
             HStack(alignment: .top, spacing: 16) {
-                picture("WelcomeStats", height: 670, shown: 155, from: .top, outline: Outline(x: 0.04, y: 0.115, width: 0.92, height: 0.105))
+                picture("WelcomeStats", height: 622.5, shown: 175, from: .top, outline: Outline(x: 0.05, y: 0.126, width: 0.9, height: 0.134))
                     .frame(width: 300)
                 VStack(spacing: 8) {
-                    VerdictBox(verdict: Verdict(word: .wait, reason: .fewWindows(window: "7d", seen: 0, needed: 4)))
-                    VerdictBox(verdict: Verdict(word: .stay, reason: .hitCeiling(window: "5h", hits: 2, closed: 5)))
-                    VerdictBox(verdict: Verdict(word: .moveDown, reason: .plentyOfMargin(window: "7d", left: 71)))
+                    VerdictBox(verdict: Verdict(word: .wait, reason: .fewWindows(window: "7d", seen: 2, needed: 4)))
+                    VerdictBox(verdict: Verdict(word: .stay, reason: .hitCeiling(window: "7d", hits: 1, closed: 4)))
+                    VerdictBox(verdict: Verdict(word: .moveDown, reason: .plentyOfMargin(window: "7d", left: 62)))
                 }
             }
             .frame(maxWidth: .infinity)
