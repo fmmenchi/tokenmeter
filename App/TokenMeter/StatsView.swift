@@ -140,12 +140,15 @@ private struct WindowHistory: View {
         }
     }
 
+    @Environment(\.skinStyle) private var skin
+
     @ViewBuilder private var summary: some View {
         if stats.closed == 0 {
             Text("not observed").font(.caption2).foregroundStyle(.secondary)
         } else if stats.hits > 0 {
             let last = stats.lastHit.map { " · last \($0.formatted(.dateTime.month(.abbreviated).day()))" } ?? ""
-            Text("hit the ceiling \(stats.hits) of \(stats.closed)\(last)").font(.caption2.weight(.semibold)).foregroundStyle(.orange)
+            Text("hit the ceiling \(stats.hits) of \(stats.closed)\(last)").font(.caption2.weight(.semibold))
+                .foregroundStyle(skin?.middle ?? Color.orange)
         } else {
             Text("never reached the ceiling in \(stats.closed)").font(.caption2).foregroundStyle(.secondary)
         }
@@ -155,8 +158,10 @@ private struct WindowHistory: View {
 private struct OutcomeRow: View {
     let outcome: WindowOutcome
 
+    @Environment(\.skinStyle) private var skin
+
     private var left: Double { outcome.leftAtMost }
-    private var tint: Color { left >= 40 ? .green : left >= 15 ? .orange : .red }
+    private var tint: Color { skin?.tint(for: left / 100) ?? (left >= 40 ? .green : left >= 15 ? .orange : .red) }
 
     var body: some View {
         HStack(spacing: 8) {
