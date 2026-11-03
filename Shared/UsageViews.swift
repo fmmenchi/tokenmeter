@@ -110,6 +110,7 @@ struct QuotaBar: View {
 struct WindowRow: View {
     let usage: WindowUsage
     @State private var hovering = false
+    @Environment(\.skinStyle) private var skin
     /// The limits of models that are part of this window, drawn right under its bar (ADR 0002).
     var models: [WindowUsage] = []
     /// Draw the mark on the bar and the hover that says when the quota runs out (ADR 0002). The widget does not.
@@ -142,7 +143,7 @@ struct WindowRow: View {
         }
     }
 
-    var tint: Color { usage.tint }
+    var tint: Color { usage.tint(in: skin) }
 
     /// The detail line. Where the quota would run out before the reset and the widget asks, the moment is in it, in short
     /// and in the notice colour: "3.4B tokens · out Thu 6 pm · resets in 3d 14h".
@@ -162,6 +163,9 @@ extension WindowUsage {
         guard let remainingFraction else { return .gray }
         return remainingFraction < 0.15 ? .red : remainingFraction < 0.4 ? .orange : .green
     }
+
+    /// The colour of the bar in the skin that is drawing it, or the system's where there is none.
+    func tint(in skin: SkinStyle?) -> Color { skin?.tint(for: remainingFraction) ?? tint }
 }
 
 /// The corner that joins a model's line to the bar of the window it is part of.
@@ -184,13 +188,14 @@ struct ScopedWindowRow: View {
     /// Draw the mark on the thin bar and say in its figure when it runs out (ADR 0002). The widget does not.
     var showsPace = false
     @State private var hovering = false
+    @Environment(\.skinStyle) private var skin
 
     var body: some View {
         HStack(spacing: 6) {
             Bracket().stroke(Color.secondary.opacity(0.6), lineWidth: 1).frame(width: 8, height: 8).offset(y: -3)
             Text(usage.window.scope ?? "").font(.caption.weight(.medium)).lineLimit(1)
                 .frame(minWidth: 30, alignment: .leading)
-            QuotaBar(fraction: usage.remainingFraction, tint: usage.tint, height: 4,
+            QuotaBar(fraction: usage.remainingFraction, tint: usage.tint(in: skin), height: 4,
                      mark: showsPace ? usage.pace(at: Date()) : nil)
             // The figure is as wide as what it says, and the bar gives way to it, smoothly (ADR 0002).
             let say = hovering && showsPace ? usage.paceFigureText(at: Date()) : nil
