@@ -206,6 +206,10 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
             return max(value - (field.minus.flatMap { Self.number(Self.value($0, in: root)) } ?? 0), 0)
         }
         let tokens = usage.tokens
+        // A line that carries none of the counts (Codex writes `"info": null` in the first `token_count` of a file) says nothing
+        // about the totals. Reading it as zeros would reset what the next real line is measured against and count it twice.
+        let paths = [tokens.input?.path, tokens.output?.path, tokens.cacheRead?.path, tokens.cacheWrite?.path].compactMap { $0 }
+        if usage.mode == .cumulative, !paths.contains(where: { Self.number(Self.value($0, in: root)) != nil }) { return }
         let current = TokenCounts(input: count(tokens.input), output: count(tokens.output),
                                   cacheRead: count(tokens.cacheRead), cacheWrite: count(tokens.cacheWrite))
         let provider = info.provider
