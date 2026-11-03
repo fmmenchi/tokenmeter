@@ -12,10 +12,10 @@ A skin changes how the panel, the widget and the stats look: the colours, the sh
 
 ## Choosing one
 
-Open Settings and choose in the group **Skin**. Each choice has a small preview of its look. The panel and the widget change at
+Open [Settings](./settings.md) and choose in the tab **Skin**, a grid of tiles. Each tile is a small preview of its look and its name; the chosen one has a ring. The panel and the widget change at
 once; the widget follows the next time the app publishes, which is within a minute. Settings itself keeps the system look.
 
-![The Skin group of Settings, in the light and the dark appearance](../assets/skins-settings.png)
+![The Skin tab of Settings, in the light and the dark appearance](../assets/skins-settings.png)
 
 ## The five
 

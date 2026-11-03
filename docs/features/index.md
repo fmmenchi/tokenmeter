@@ -31,7 +31,9 @@ are [ADRs](../adr), and its overview links them.
 
 ## In design and build
 
-Nothing at the moment.
+| Feature                                                                                                                             | Date       | Pages                                                                                               |
+| :---------------------------------------------------------------------------------------------------------------------------------- | :--------- | :-------------------------------------------------------------------------------------------------- |
+| [Settings in tabs](./2026-11-02-settings-tabs/index.md): the Settings window shows one section at a time, chosen from a row of tabs | 2026-11-02 | [Overview](./2026-11-02-settings-tabs/index.md), [Proposal](./2026-11-02-settings-tabs/proposal.md) |
 
 ## The pattern: from idea to implemented
 
