@@ -39,7 +39,8 @@ What a skin looks like, which five exist and what each colour is are the feature
 - The panel and the widget stop using the window's translucent material when a skin other than System is chosen.
 - The widget learns the skin only when the app publishes, so it can be one refresh late after a change.
 - Dark-only themes do not exist here: every skin has both appearances. Where a theme has no official light version the light
-  colours are derived and the licence page says so.
+  colours are derived and the licence page says so. A quota colour that is under 3 : 1 against what its bar is drawn on is
+  derived too (2026-11-03), and a test keeps every palette above that line.
 - The colours come from themes under the MIT licence, and their notices are kept in the repository and in the
   [licences page](../use/licenses.md).
 - Not verified: how the widget draws a solid container background in every family and appearance, and the real panel with a

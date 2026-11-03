@@ -42,16 +42,15 @@ colour, not the window's translucent material.
 ## Where the colours come from
 
 The colours of Dracula, One Dark, Catppuccin and Nord are those of the editor themes of the same names, all under the MIT licence;
-their notices are on the [licences page](./licenses.md). Two things are **derived by us**, not the theme's: Dracula's light version
-(its own light theme is not in the free repository) and the card and track of One Dark's light version.
+their notices are on the [licences page](./licenses.md). Three things are **derived by us**, not the theme's: Dracula's light
+version (its own light theme is not in the free repository), the card and track of One Dark's light version, and nine quota
+colours that were under 3 : 1 against what the bar is drawn on; the licences page lists each of them.
 
 ## Not tried yet
 
 The panel with a solid colour over the window's real material, and the widget in each size, were checked by drawing the app's own
-views, not on a Mac. Some quota colours are close to what they are drawn next to (the track, or the panel for Nord's outlined
-bar): under 3 : 1 are Dracula dark's red (2.9), One Dark dark's red (2.6), One Light's blue, orange and red (2.9, 2.3, 2.7),
-Catppuccin Latte's teal and orange (2.1, 1.6; its red is just under 3) and Nord Snow Storm's orange (2.3). A bar is also
-read by its length and its figure, but these are the palettes of the themes and they were not changed.
+views, not on a Mac. Every quota colour is at least 3 : 1 against the track (against the panel for Nord's outlined bar), which a
+test checks; the track itself is close to the card in every skin, which is how the themes have it.
 
 ## Related
 
