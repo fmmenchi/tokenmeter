@@ -28,7 +28,7 @@ Everything it says comes from what the app really does, and where a sentence is 
 | Part                | Page                      | Status   |
 | :------------------ | :------------------------ | :------- |
 | Proposal            | [Proposal](./proposal.md) | chosen   |
-| Implementation plan | [Plan](./plan.md)         | proposed |
+| Implementation plan | [Plan](./plan.md)         | accepted |
 
 No ADR: nothing here moves a boundary.
 

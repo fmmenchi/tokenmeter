@@ -6,7 +6,7 @@ sidebar_position: 3
 
 # Welcome tour, plan
 
-How the [proposal](./proposal.md) is built. Proposed: it waits for Fabio's approval, and nothing is built before. There is no ADR: nothing moves
+How the [proposal](./proposal.md) is built. Accepted on 2026-11-03: Fabio said to go on. There is no ADR: nothing moves
 a boundary.
 
 ## Where each thing goes
