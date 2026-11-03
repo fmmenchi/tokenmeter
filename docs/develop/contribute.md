@@ -55,7 +55,7 @@ pnpm install        # once; also installs the git hooks
 pnpm run check
 ```
 
-`check` is Prettier, `swift test`, the script tests (`scripts:test`) and the Docusaurus build. The `pre-push` hook runs it too. A
+`check` is Prettier, `swift test`, the build of the app and the widget (`app:build`, signing off), the script tests (`scripts:test`) and the Docusaurus build. The `pre-push` hook runs it too. A
 failing gate gets fixed; `--no-verify` is not used.
 
 ## What CI runs
