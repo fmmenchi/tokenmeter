@@ -32,7 +32,9 @@ are [ADRs](../adr), and its overview links them.
 
 ## In design and build
 
-Nothing at the moment.
+| Feature                                                                                                                  | Date       | Pages                                                                                             |
+| :----------------------------------------------------------------------------------------------------------------------- | :--------- | :------------------------------------------------------------------------------------------------ |
+| [Welcome tour](./2026-11-03-welcome-tour/index.md): the first launch points at the icon and walks the panel in six stops | 2026-11-03 | [Overview](./2026-11-03-welcome-tour/index.md), [Proposal](./2026-11-03-welcome-tour/proposal.md) |
 
 ## The pattern: from idea to implemented
 
