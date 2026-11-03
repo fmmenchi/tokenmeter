@@ -47,12 +47,27 @@ struct UsageWidgetView: View {
     }
 }
 
+/// The widget's background: the skin's panel colour, or the system's where there is no skin (ADR 0013).
+struct WidgetFill: View {
+    let skin: Skin
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        if let palette = skin.palette(for: colorScheme == .dark ? .dark : .light) {
+            Color(argb: palette.panel)
+        } else {
+            Rectangle().fill(.background)
+        }
+    }
+}
+
 @main
 struct TokenMeterWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "TokenMeterWidget", provider: UsageProvider()) { entry in
             UsageWidgetView(entry: entry)
-                .containerBackground(.background, for: .widget)
+                .skinned(entry.snapshot?.skin ?? .system)
+                .containerBackground(for: .widget) { WidgetFill(skin: entry.snapshot?.skin ?? .system) }
         }
         .configurationDisplayName("AI quota")
         .description("Remaining Claude and ChatGPT quota.")

@@ -59,6 +59,15 @@ final class Meter {
     private(set) var storeAvailable = false
     /// Which view the panel shows. Not kept: the panel opens on the current quota, and the stats are one click away.
     var showsStats = false
+    /// The look the person chose in Settings (ADR 0013): kept in the defaults, and written to the snapshot so the widget draws the same.
+    var skin = Skin(rawValue: UserDefaults.standard.string(forKey: Meter.skinKey) ?? "") ?? .system {
+        didSet {
+            guard skin != oldValue else { return }
+            UserDefaults.standard.set(skin.rawValue, forKey: Self.skinKey)
+            publish()
+        }
+    }
+
     var statsRange = StatsRange(rawValue: UserDefaults.standard.string(forKey: Meter.statsRangeKey) ?? "") ?? .quarter {
         didSet { UserDefaults.standard.set(statsRange.rawValue, forKey: Meter.statsRangeKey) }
     }
@@ -76,6 +85,7 @@ final class Meter {
     private static let noticeKindsKey = "noticeKinds"
     private static let noticeLedgerKey = "noticeLedger"
     private static let statsRangeKey = "statsRange"
+    private static let skinKey = "skin"
     private static let openStatsCardKey = "statsOpenCard"
     /// The id of the card for all providers, next to the ids of the providers.
     static let allProvidersCard = "all-providers"
@@ -292,7 +302,7 @@ final class Meter {
         guard let base else { return }
         problems = dismissals.visible(detected)
         cardProviders = makeCardProviders()
-        let result = base.applying(preferences).with(problems: problems)
+        let result = base.applying(preferences).with(problems: problems).with(skin: skin)
         snapshot = result
         deliverNotices(now: Date())
         if let store {
