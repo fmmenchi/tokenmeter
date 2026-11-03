@@ -95,7 +95,7 @@ struct QuotaBar: View {
                     EasterEggMark(egg: easterEgg, position: mark.aheadFraction, barWidth: proxy.size.width)
                         .accessibilityLabel("Where a steady use would put the bar")
                 } else if let mark {
-                    PaceTick(runsOut: mark.runsOut, height: proxy.size.height)
+                    PaceTick(runsOut: mark.runsOut, height: proxy.size.height, reach: shape == .line ? 7 : 4)
                         .offset(x: proxy.size.width * min(max(mark.aheadFraction, 0), 1) - 1)
                         .accessibilityLabel("Where a steady use would put the bar")
                         .opacity(faded ? 0.5 : 1)
@@ -214,6 +214,24 @@ struct ScopedWindowRow: View {
     }
 }
 
+/// The plan next to a provider's name: a soft fill, or an outline in the accent colour of a skin.
+private struct PlanChip: View {
+    let plan: String
+    @Environment(\.skinStyle) private var skin
+
+    var body: some View {
+        if let skin {
+            Text(plan).font(.caption2.weight(.medium)).foregroundStyle(skin.accent)
+                .padding(.horizontal, 6).padding(.vertical, 1)
+                .overlay(Capsule().strokeBorder(skin.accent, lineWidth: 1))
+        } else {
+            Text(plan).font(.caption2.weight(.medium))
+                .padding(.horizontal, 6).padding(.vertical, 1)
+                .background(Capsule().fill(Color.primary.opacity(0.12)))
+        }
+    }
+}
+
 struct ProviderBlock: View {
     let snapshot: ProviderSnapshot
     /// How many problems have this provider as their topic; the widget only counts, the panel lists them.
@@ -225,11 +243,7 @@ struct ProviderBlock: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 6) {
                 Text(snapshot.title).font(.subheadline.weight(.semibold))
-                if let plan = snapshot.plan {
-                    Text(plan).font(.caption2.weight(.medium))
-                        .padding(.horizontal, 6).padding(.vertical, 1)
-                        .background(Capsule().fill(Color.primary.opacity(0.12)))
-                }
+                if let plan = snapshot.plan { PlanChip(plan: plan) }
                 if problemCount > 0 { NoticeChip(count: problemCount) }
                 // Only where there is a mark to explain: a provider whose windows cannot be estimated has none.
                 if showsPace, snapshot.windows.contains(where: { $0.pace(at: Date()) != nil }) {
