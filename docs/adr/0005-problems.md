@@ -27,7 +27,7 @@ had to produce them without becoming a pile of special cases. Providers are equa
   message changes, and **Learn more**, which says what is wrong or what the fix does technically, with a link to a docs page. A fix
   runs in the panel at once and has four states (ready, running, failed, done), kept in `Meter` and not in the model or the snapshot.
 - **Where they show:** the panel shows a banner for each; the widget puts a chip with a count beside the provider's name and
-  counts only that topic, with no action; the menu-bar item puts the total after the percentage.
+  counts only that topic, with no action; the menu-bar icon carries a dot while the panel lists one (since v0.3.0, which removed the percentage and the count from the menu bar).
 - **`Meter` only orchestrates:** at launch and every 10 minutes it runs the detector in the background, applies the dismissals,
   writes the visible problems into the snapshot and checks again after a fix. The widget reads and computes nothing.
 

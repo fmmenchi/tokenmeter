@@ -22,8 +22,9 @@ limits are not in tokens and totals are dominated by cache reads.
   `five_hour` and `seven_day` as `used_percentage` and `resets_at`. It moves only while Claude Code renders. Codex gives both
   of its windows in its logs, and `rate_limits` is `null` for stretches (see known issues).
 - **A reported window whose reset time has passed reads as `reset`** (100%, inferred) when nothing was used since; with use
-  after the reset it stays `consumptionOnly`. `WindowUsage.resolved(at:)` does it at render time, and the widget timeline has
-  an entry at each reset.
+  after the reset it stays `consumptionOnly`. `SnapshotBuilder` makes that choice when it collects, because only it sees the
+  tokens; `WindowUsage.resolved(at:)` knows no tokens and turns a reported window whose reset has passed into `reset` at render
+  time, until the next collection tells which it is. The widget timeline has an entry at each reset.
 - **A reported figure older than 10 minutes is stale**: kept, dimmed, with a `~`, since use since can only have lowered it.
   Every reported quota carries `observedAt` (the file's modification time for Claude, the event's timestamp for Codex), and the
   snapshot is persisted so a restart shows the last values. A `reset` window is shown with `~` too.
