@@ -28,12 +28,11 @@ are [ADRs](../adr), and its overview links them.
 | [Notifications](./2026-11-02-notifications/index.md): a notice when a window is running out, once for each window and reset                                                  | 2026-11-02 | [Overview](./2026-11-02-notifications/index.md), [Proposal](./2026-11-02-notifications/proposal.md)                                                                              |
 | [Seasonal easter eggs](./2026-11-02-seasonal-easter-eggs/index.md): in the week of Halloween, Christmas and Easter, a small icon on the bars and a corner piece on the cards | 2026-11-02 | [Overview](./2026-11-02-seasonal-easter-eggs/index.md), [Proposal](./2026-11-02-seasonal-easter-eggs/proposal.md)                                                                |
 | [Skins](./2026-11-02-skins/index.md): five looks for the panel, the widget and the stats, each with its own colours, bars and typeface                                       | 2026-11-02 | [Overview](./2026-11-02-skins/index.md), [Proposal](./2026-11-02-skins/proposal.md), [Plan](./2026-11-02-skins/plan.md)                                                          |
+| [Settings in tabs](./2026-11-02-settings-tabs/index.md): the Settings window shows one section at a time, chosen from a row of tabs                                          | 2026-11-02 | [Overview](./2026-11-02-settings-tabs/index.md), [Proposal](./2026-11-02-settings-tabs/proposal.md), [Plan](./2026-11-02-settings-tabs/plan.md)                                  |
 
 ## In design and build
 
-| Feature                                                                                                                             | Date       | Pages                                                                                               |
-| :---------------------------------------------------------------------------------------------------------------------------------- | :--------- | :-------------------------------------------------------------------------------------------------- |
-| [Settings in tabs](./2026-11-02-settings-tabs/index.md): the Settings window shows one section at a time, chosen from a row of tabs | 2026-11-02 | [Overview](./2026-11-02-settings-tabs/index.md), [Proposal](./2026-11-02-settings-tabs/proposal.md) |
+Nothing at the moment.
 
 ## The pattern: from idea to implemented
 
