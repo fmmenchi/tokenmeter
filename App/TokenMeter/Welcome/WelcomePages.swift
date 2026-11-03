@@ -17,7 +17,7 @@ struct WelcomeView: View {
                 footer(page)
             }
             .padding(24)
-            .frame(width: 560, height: 480)
+            .frame(width: 680, height: 440)
         }
     }
 
@@ -60,7 +60,7 @@ extension WelcomeState.Page {
         case .buttons:
             "The lines above say how fresh each quota is. Refresh reads everything now and asks Claude Code for your account's usage; on its own tokenmeter reads every minute. The chart switches to the stats, the gear opens Settings, power quits."
         case .stats:
-            "How each window ended and which models used your tokens. The goal: see whether your plan fits the way you use it. The word at the top is the app's suggestion, from percentages only: it never says Move up and never looks at tokens."
+            "How each window ended and which models used your tokens: the goal is to see whether your plan fits the way you use it. The word at the top is the app's suggestion, Wait, Stay or Move down, from the quota percentages only. It never looks at tokens."
         case .settings:
             "General, Providers, Skin, Notifications and Updates. Choose a skin and turn on notifications there. The daily check for updates is in Updates, where you can turn it off. You can see this tour again from General."
         }
@@ -87,7 +87,17 @@ private struct WelcomePicture: View {
         case .bars: picture("WelcomePanel", height: 430, shown: 240, from: .top, outline: Outline(x: 0.05, y: 0.095, width: 0.9, height: 0.275))
         case .tick: picture("WelcomePanel", height: 430, shown: 240, from: .top, outline: Outline(x: 0.40, y: 0.125, width: 0.08, height: 0.065))
         case .buttons: picture("WelcomePanel", height: 430, shown: 240, from: .bottom, outline: Outline(x: 0.03, y: 0.765, width: 0.9, height: 0.2))
-        case .stats: picture("WelcomeStats", height: 610, shown: 240, from: .top, outline: Outline(x: 0.07, y: 0.125, width: 0.84, height: 0.125))
+        case .stats:
+            HStack(alignment: .top, spacing: 16) {
+                picture("WelcomeStats", height: 610, shown: 178, from: .top, outline: Outline(x: 0.07, y: 0.125, width: 0.84, height: 0.125))
+                    .frame(width: 300)
+                VStack(spacing: 8) {
+                    VerdictBox(verdict: Verdict(word: .wait, reason: .fewWindows(window: "5h", seen: 2, needed: 4)))
+                    VerdictBox(verdict: Verdict(word: .stay, reason: .hitCeiling(window: "5h", hits: 1, closed: 4)))
+                    VerdictBox(verdict: Verdict(word: .moveDown, reason: .plentyOfMargin(window: "7d", left: 71)))
+                }
+            }
+            .frame(maxWidth: .infinity)
         case .settings:
             SettingsTabs(selection: .constant(.general))
                 .frame(width: 460)
