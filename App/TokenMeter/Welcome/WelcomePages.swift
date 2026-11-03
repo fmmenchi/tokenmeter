@@ -76,14 +76,7 @@ private struct WelcomePicture: View {
 
     var body: some View {
         switch page {
-        case .whereItLives:
-            HStack {
-                Spacer()
-                Image(nsImage: MenuBarIcon.withDot).renderingMode(.template).resizable().interpolation(.high).scaledToFit().frame(height: 44).foregroundStyle(.primary)
-                Spacer()
-            }
-            .frame(height: 90)
-            .background(RoundedRectangle(cornerRadius: 12).fill(.quaternary))
+        case .whereItLives: MenuBarPicture()
         case .bars: picture("WelcomePanel", height: 430, shown: 240, from: .top, outline: Outline(x: 0.05, y: 0.095, width: 0.9, height: 0.275))
         case .tick: picture("WelcomePanel", height: 430, shown: 240, from: .top, outline: Outline(x: 0.40, y: 0.125, width: 0.08, height: 0.065))
         case .buttons: picture("WelcomePanel", height: 430, shown: 240, from: .bottom, outline: Outline(x: 0.03, y: 0.765, width: 0.9, height: 0.2))
@@ -121,5 +114,39 @@ private struct WelcomePicture: View {
         .clipped()
         .frame(maxWidth: .infinity)
         .accessibilityLabel(Text(page.title))
+    }
+}
+
+/// The menu bar with the app's own icon and its dot, ringed, on a desktop that follows the appearance.
+private struct MenuBarPicture: View {
+    @Environment(\.colorScheme) private var colorScheme
+
+    private var desktop: LinearGradient {
+        let colors: [Color] = colorScheme == .dark
+            ? [Color(red: 0.106, green: 0.133, blue: 0.2), Color(red: 0.169, green: 0.125, blue: 0.212)]
+            : [Color(red: 0.804, green: 0.851, blue: 0.925), Color(red: 0.914, green: 0.851, blue: 0.902)]
+        return LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing)
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 14) {
+                Spacer()
+                RoundedRectangle(cornerRadius: 3).fill(.secondary.opacity(0.4)).frame(width: 12, height: 12)
+                RoundedRectangle(cornerRadius: 2).fill(.secondary.opacity(0.4)).frame(width: 16, height: 10)
+                Image(nsImage: MenuBarIcon.withDot).renderingMode(.template).resizable().scaledToFit()
+                    .frame(height: 16).foregroundStyle(.primary).padding(5)
+                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.accentColor, lineWidth: 2))
+                Text("Mon 9:41").font(.system(size: 12)).foregroundStyle(.secondary)
+            }
+            .padding(.horizontal, 14)
+            .frame(height: 32)
+            .background(.regularMaterial)
+            Spacer(minLength: 0)
+        }
+        .frame(height: 100)
+        .background(desktop)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .accessibilityLabel(Text("The menu bar, with the tokenmeter icon"))
     }
 }
