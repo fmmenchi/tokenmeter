@@ -35,6 +35,9 @@ def inline(text):
         label, target = m.group(1), m.group(2)
         if target.startswith("./") and target.endswith(".md"):
             target = site + "/use/" + target[2:-3]
+        # Only an address of the web, with nothing that could close the attribute: anything else stays as the label's text.
+        if not re.fullmatch(r"https?://[^\s\"'<>]+", target):
+            return label
         return '<a href="' + target + '">' + label + "</a>"
     return re.sub(r"\[([^\]]+)\]\(([^)]+)\)", link, text)
 
