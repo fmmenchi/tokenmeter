@@ -1,6 +1,6 @@
 # ADR 0015 — The menu-bar item is an AppKit `NSStatusItem` that hosts the same SwiftUI panel
 
-Status: proposed (2026-11-03)
+Status: accepted (2026-11-03, Fabio approved it after the spike of step 2)
 
 ## Context
 
