@@ -8,6 +8,14 @@ sidebar_position: 10
 
 What changed in each version, newest first. The update window shows the notes of the version it offers, taken from this page, and links here for the rest.
 
+## 0.7.0 {#v0-7-0}
+
+Released on 2026-11-02.
+
+- **Settings in tabs**: the window shows one section at a time, chosen from a row of tabs (General, Providers, Skin, Notifications,
+  Updates), and no longer one long column ([Settings](./settings.md)).
+- **The skins are a grid of tiles** in the Skin tab, each with its preview and its name.
+
 ## 0.6.0 {#v0-6-0}
 
 Released on 2026-11-02.
