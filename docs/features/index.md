@@ -32,9 +32,9 @@ are [ADRs](../adr), and its overview links them.
 
 ## In design and build
 
-| Feature                                                                                                                     | Date       | Pages                                                                                             |
-| :-------------------------------------------------------------------------------------------------------------------------- | :--------- | :------------------------------------------------------------------------------------------------ |
-| [Welcome tour](./2026-11-03-welcome-tour/index.md): a wizard that says where the app lives and walks the panel in six pages | 2026-11-03 | [Overview](./2026-11-03-welcome-tour/index.md), [Proposal](./2026-11-03-welcome-tour/proposal.md) |
+| Feature                                                                                                                       | Date       | Pages                                                                                             |
+| :---------------------------------------------------------------------------------------------------------------------------- | :--------- | :------------------------------------------------------------------------------------------------ |
+| [Welcome tour](./2026-11-03-welcome-tour/index.md): a wizard that says where the app lives and walks the panel in seven pages | 2026-11-03 | [Overview](./2026-11-03-welcome-tour/index.md), [Proposal](./2026-11-03-welcome-tour/proposal.md) |
 
 ## The pattern: from idea to implemented
 
