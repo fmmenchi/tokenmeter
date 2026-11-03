@@ -81,7 +81,7 @@ struct QuotaBar: View {
             // The mark is drawn over the bar and takes no part in its size. Inside the same stack it made the stack taller than the
             // bar and the track and the fill, which are flexible, grew with it: a bar with a mark was 14 points thick, one without 10.
             .overlay(alignment: .leading) {
-                if let mark, let easterEgg, !mark.runsOut, barHeight >= 8 {
+                if let mark, let easterEgg, !mark.runsOut, height == nil {
                     EasterEggMark(egg: easterEgg, position: mark.aheadFraction, barWidth: proxy.size.width)
                         .accessibilityLabel("Where a steady use would put the bar")
                 } else if let mark {
@@ -101,7 +101,11 @@ struct WindowRow: View {
     @State private var hovering = false
     @Environment(\.skinStyle) private var skin
     @Environment(\.renderDate) private var renderDate
+    @Environment(\.easterEgg) private var easterEgg
     private var now: Date { renderDate ?? Date() }
+    /// The icon of an event is 24 points tall: on a thin bar (3 points in One Dark) it sticks out more than the row leaves, so in the
+    /// week of an event the bar takes 6 points of air above and below it.
+    private var iconRoom: CGFloat { easterEgg != nil && showsPace && (skin?.skin.barHeight ?? 10) < 8 ? 6 : 0 }
     /// The limits of models that are part of this window, drawn right under its bar (ADR 0002).
     var models: [WindowUsage] = []
     /// Draw the mark on the bar and the hover that says when the quota runs out (ADR 0002). The widget does not.
@@ -124,6 +128,7 @@ struct WindowRow: View {
             }
             QuotaBar(fraction: usage.remainingFraction, tint: tint, mark: showsPace ? usage.pace(at: now) : nil,
                      faded: usage.isApproximate(at: now))
+                .padding(.vertical, iconRoom)
                 .hovered($hovering, enabled: showsPace)
             // A model's thin bar is 4 points tall in a row as tall as its text, so it has 4 points of air above and below it.
             // The last row gives the air below back, so the gap to the line under it is the one a bar of its own would have.
@@ -142,9 +147,9 @@ struct WindowRow: View {
         if showsRunOut, let phrase = usage.runsOutShortText(at: now) {
             (Text("\(usage.tokensText) · ") + Text(phrase).fontWeight(.semibold).foregroundColor(skin?.middle ?? .orange)
                 + Text(usage.resetText(at: now).map { " · resets \($0)" } ?? ""))
-                .font(.caption2).foregroundStyle(.secondary)
+                .font(.caption2).captionColour()
         } else {
-            Text(usage.detailText(at: now)).font(.caption2).foregroundStyle(.secondary)
+            Text(usage.detailText(at: now)).font(.caption2).captionColour()
         }
     }
 }
@@ -209,17 +214,19 @@ struct ScopedWindowRow: View {
 }
 
 /// The plan next to a provider's name: a soft fill, or an outline in the accent colour of a skin.
-private struct PlanChip: View {
+struct PlanChip: View {
     let plan: String
+    /// The panel's cards use the small size; the stats use the one next to it.
+    var font: Font = .caption2.weight(.medium)
     @Environment(\.skinStyle) private var skin
 
     var body: some View {
         if let skin {
-            Text(plan).font(.caption2.weight(.medium)).foregroundStyle(skin.accent)
+            Text(plan).font(font).foregroundStyle(skin.accent)
                 .padding(.horizontal, 6).padding(.vertical, 1)
                 .overlay(Capsule().strokeBorder(skin.accent, lineWidth: 1))
         } else {
-            Text(plan).font(.caption2.weight(.medium))
+            Text(plan).font(font)
                 .padding(.horizontal, 6).padding(.vertical, 1)
                 .background(Capsule().fill(Color.primary.opacity(0.12)))
         }
