@@ -8,7 +8,7 @@ sidebar_position: 2.5
 
 A short wizard that says where tokenmeter lives and how to read its panel.
 
-![The six pages of the welcome wizard](../assets/welcome.png)
+![The seven pages of the welcome wizard](../assets/welcome.png)
 
 ## When it opens
 
@@ -26,10 +26,11 @@ To see it again, open Settings from the gear in the panel and press **Show the w
 | The bars                          | The colours, and that they fill as Claude Code and the Codex CLI are used: empty at first.                    |
 | The tick                          | Where the bar would be at a steady use.                                                                       |
 | Refresh, stats, settings and quit | What the four buttons do, and what the two lines of text above them say.                                      |
-| The stats and the suggestion      | How each window ended, the tokens by model, and the app's suggestion, from percentages only.                  |
+| The stats                         | How each window ended, with its date, bar and what was left, and the tokens by model.                         |
+| The suggestion                    | The word at the top of a card, Wait, Stay or Move down, from percentages only.                                |
 | Settings has five tabs            | General, Providers, Skin, Notifications and Updates, and where the daily check for updates can be turned off. |
 
-The pictures are screenshots of the panel with sample data: the figures in them are not yours.
+The pictures of the panel and the stats are the app's own views drawn with invented sample data: the figures in them are not yours.
 
 ## Related
 

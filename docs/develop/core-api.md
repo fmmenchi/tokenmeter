@@ -176,7 +176,7 @@ The state of the welcome wizard, in `Sources/TokenMeterCore/Welcome/` and in `We
 | Type                  | What it is                                                                                                                                  |
 | :-------------------- | :------------------------------------------------------------------------------------------------------------------------------------------ |
 | `WelcomeState`        | `idle` or `showing(Page)`. `atLaunch(seen:)` opens at the first page when it was never seen; `applying(_:)` is the transition of an action. |
-| `WelcomeState.Page`   | The six pages in order: `whereItLives`, `bars`, `tick`, `buttons`, `stats`, `settings`.                                                     |
+| `WelcomeState.Page`   | The seven pages in order: `whereItLives`, `bars`, `tick`, `buttons`, `stats`, `suggestion`, `settings`.                                     |
 | `WelcomeState.Action` | `back`, `next` (Done on the last page), `skip` and `close`. `endedBy(_:)` says whether an action counts as seen.                            |
 | `WelcomeSeenStore`    | Whether it was seen: `DefaultsWelcomeSeenStore` in the app, `MemoryWelcomeSeenStore` in tests.                                              |
 
