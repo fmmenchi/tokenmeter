@@ -38,7 +38,9 @@ app="$work/export/TokenMeter.app"
 version=v$(field MARKETING_VERSION)
 zip="dist/TokenMeter-$version.zip"
 rm -f dist/TokenMeter-*.zip
-ditto -c -k --keepParent "$app" "$zip"
+# --norsrc: no AppleDouble (._*) entries for extended attributes; an unarchiver that does not know them writes them as files
+# inside the bundle and breaks the seal (ADR 0008).
+ditto -c -k --keepParent --norsrc "$app" "$zip"
 
 echo "$zip"
 codesign -dv "$app" 2>&1 | grep -E 'Authority|TeamIdentifier|Runtime|Signature' || true
