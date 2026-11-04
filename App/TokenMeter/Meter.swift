@@ -290,6 +290,21 @@ final class Meter {
         }
     }
 
+    /// A card as the unlocked panel draws it (ADR 0014): the provider's full reading, hidden or not, with what the person chose.
+    struct Arrangeable: Identifiable {
+        let snapshot: ProviderSnapshot
+        let card: CardProvider
+        var id: String { card.id }
+    }
+
+    /// Every card in the person's order, the hidden ones too, from the full reading, so the unlocked panel can show and
+    /// arrange them all (ADR 0006, 0014).
+    var arrangeable: [Arrangeable] {
+        cardProviders.compactMap { card in
+            base?.providers.first { $0.provider.rawValue == card.id }.map { Arrangeable(snapshot: $0, card: card) }
+        }
+    }
+
     /// Moves a provider's card one place up or down.
     func moveProvider(_ id: String, by offset: Int) {
         var ids = cardProviders.map(\.id)
