@@ -54,18 +54,25 @@ public struct ProviderConfigFile: Decodable, Sendable {
     }
 
     /// Adds to the `claude` entry of an existing file what a newer version needs and the file lacks: its `integration`
-    /// (ADR 0003), the window for its per-model limits (ADR 0002) and the rule for its 5 hours (ADR 0002). The only changes the app makes to a file that is
-    /// already there; each is added once and only when absent, and the original is kept as `.bak`.
+    /// (ADR 0003), the window for its per-model limits (ADR 0002) and the rule for its 5 hours (ADR 0002); and to the
+    /// `chatgpt` entry its `integration`, `codex` (ADR 0014). Each is added once and only when absent, and the original is
+    /// kept as `.bak`.
     @discardableResult
     public static func addClaudeIntegration(to url: URL = defaultURL) -> MigrationOutcome {
         guard let data = try? Data(contentsOf: url),
               var object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
               object["version"] as? Int == 1,
-              var providers = object["providers"] as? [[String: Any]],
-              let index = providers.firstIndex(where: { $0["id"] as? String == "claude" })
+              var providers = object["providers"] as? [[String: Any]]
         else { return .untouched }
-        var entry = providers[index]
         var changed = false
+        if let codex = providers.firstIndex(where: { $0["id"] as? String == "chatgpt" }), providers[codex]["integration"] == nil {
+            providers[codex]["integration"] = "codex"
+            changed = true
+        }
+        guard let index = providers.firstIndex(where: { $0["id"] as? String == "claude" }) else {
+            return changed ? write(object, providers: providers, to: url) : .untouched
+        }
+        var entry = providers[index]
         if entry["integration"] == nil {
             entry["integration"] = "claude-status-line"
             changed = true
@@ -93,6 +100,12 @@ public struct ProviderConfigFile: Decodable, Sendable {
         }
         guard changed else { return .untouched }
         providers[index] = entry
+        return write(object, providers: providers, to: url)
+    }
+
+    /// The migrated file, with the original kept as `.bak`.
+    private static func write(_ object: [String: Any], providers: [[String: Any]], to url: URL) -> MigrationOutcome {
+        var object = object
         object["providers"] = providers
         let backup = url.appendingPathExtension("tokenmeter.bak")
         guard let output = try? JSONSerialization.data(
