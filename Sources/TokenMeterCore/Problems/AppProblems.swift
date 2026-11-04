@@ -36,8 +36,29 @@ public enum AppProblems {
             + "Run claude once in a terminal to see whether it is signed in.",
         guide: "use/enable-claude-quota")
 
+    public static let folderNotNamed = ProblemKind(
+        id: "general.folder", topic: Problem.general, summary: "A folder of a tool is not in providers.json",
+        explanation: "A folder at the top of your home holds what Claude Code or the Codex CLI leaves in one, with its own "
+            + "login, and no entry of ~/.tokenmeter/providers.json names it as its home, so it has no card. Add it writes an "
+            + "entry for it; Dismiss hides this until the folder changes; the guide says how to write the entry by hand.",
+        guide: "use/accounts")
+
     /// Every kind of problem the app itself can report.
-    public static let kinds = [noAppGroup, integrationNotFound, providersFileBroken, snapshotNotWritten, usageRefreshFailed]
+    public static let kinds = [noAppGroup, integrationNotFound, providersFileBroken, snapshotNotWritten, usageRefreshFailed,
+                               folderNotNamed]
+
+    /// A folder of a tool that no entry names (ADR 0014): one problem per folder, named by the folder, with who is signed
+    /// in there. The detector decides which folders those are; this only says it.
+    public static func folderNotNamed(_ found: AccountFolders.Found, userHome: URL) -> Problem {
+        let path = found.folder.standardizedFileURL.path
+        let home = userHome.standardizedFileURL.path
+        let shown = path.hasPrefix(home + "/") ? "~" + path.dropFirst(home.count) : path
+        let login = found.email.map { "is signed in as \($0)" } ?? "has no login yet"
+        return folderNotNamed.problem(
+            message: "A \(found.tool.name) folder is not in providers.json",
+            detail: "\(shown) \(login), and no entry names it. Add it writes an entry, and the card appears.",
+            detailID: String(found.folder.lastPathComponent.drop(while: { $0 == "." })))
+    }
 
     /// What the app found about itself. `providersFileError`, `snapshotWriteError` and `usageRefresh` are the last outcomes the
     /// app saw; nil is good or not asked yet. Claude Code not being installed (`.notFound`) is not a problem.
