@@ -163,6 +163,10 @@ public struct ProviderConfigFile: Decodable, Sendable {
             guard !provider.id.isEmpty, seen.insert(provider.id).inserted else {
                 throw Failure(description: "\(origin): provider id \"\(provider.id)\" is empty or repeated")
             }
+            guard provider.id.unicodeScalars.allSatisfy(ProviderConfig.idCharacters.contains) else {
+                throw Failure(description:
+                    "\(origin): provider id \"\(provider.id)\" may use letters, digits, '.', '_' and '-' only: it names files")
+            }
             guard !provider.windows.isEmpty, provider.windows.allSatisfy({ $0 > 0 }) else {
                 throw Failure(description: "\(origin): \"\(provider.id)\" needs windows in minutes")
             }
@@ -172,16 +176,24 @@ public struct ProviderConfigFile: Decodable, Sendable {
 }
 
 public struct ProviderConfig: Decodable, Sendable {
+    /// Names the entry everywhere, and files on disk too (the status line's), so it is letters, digits, `.`, `_` and `-`
+    /// (ADR 0014).
     public let id: String
     public let title: String
     public let windows: [Int]
     public let setupHint: String?
+    /// The folder the tool reads, the one `CLAUDE_CONFIG_DIR` or `CODEX_HOME` would name, with `~` the person's home; nil
+    /// means the tool's default folder. It serves the integration: the other paths of the entry stay as written (ADR 0014).
+    public let home: String?
     /// The id of the integration that reports this provider's problems and fixes them (ADR 0005); nil when it has none.
     public let integration: String?
     public let log: Log?
     public let usage: Usage?
     public let quota: Quota?
     public let plan: Plan?
+
+    /// What an id may be made of: it names files on disk (ADR 0014).
+    static let idCharacters = CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-")
 
     public struct Log: Decodable, Sendable {
         public let root: String

@@ -52,6 +52,31 @@ final class ProviderTests: XCTestCase {
         XCTAssertNil(snapshot.providers[1].quotaUpdatedAt)
     }
 
+    func testAnEntryMayNameTheFolderOfItsTool() throws {
+        let json = """
+        {"version":1,"providers":[
+          {"id":"claude-work","title":"Claude · work","windows":[300],"home":"~/.claude-work"},
+          {"id":"chatgpt","title":"ChatGPT","windows":[300]}]}
+        """
+        let file = try ProviderConfigFile.decode(Data(json.utf8), origin: "test")
+        XCTAssertEqual(file.providers[0].home, "~/.claude-work")
+        XCTAssertNil(file.providers[1].home, "an entry without a home reads the tool's default folder")
+    }
+
+    func testAnIdThatCannotNameAFileIsRefusedByName() {
+        func file(id: String) -> Data {
+            Data(#"{"version":1,"providers":[{"id":"\#(id)","title":"T","windows":[300]}]}"#.utf8)
+        }
+        for good in ["claude", "claude-work", "me.work_1"] {
+            XCTAssertNoThrow(try ProviderConfigFile.decode(file(id: good), origin: "test"), good)
+        }
+        for bad in ["work account", "claude/work", "a:b", "ünicode"] {
+            XCTAssertThrowsError(try ProviderConfigFile.decode(file(id: bad), origin: "test"), bad) { error in
+                XCTAssertTrue("\(error)".contains("\"\(bad)\""), "the message names the id: \(error)")
+            }
+        }
+    }
+
     func testStandardListHoldsClaudeThenChatGPT() throws {
         let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         addTeardownBlock { try? FileManager.default.removeItem(at: dir) }
