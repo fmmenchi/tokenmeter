@@ -26,7 +26,8 @@ extension ProblemDetector {
                     detailID: provider.id))
                 continue
             }
-            found.append(integration.problems(in: context))
+            // Each entry is checked in its own folder, and its problems name it (ADR 0014).
+            found.append(integration.problems(for: provider, in: context))
         }
         return merge(general: general + unknown, providers: found)
     }

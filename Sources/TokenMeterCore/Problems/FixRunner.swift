@@ -13,11 +13,13 @@ public enum FixRunner {
     public static func run(_ problem: Problem, providers: [ProviderConfig], integrations: Integrations,
                            context: ProblemContext) -> FixResult {
         guard let fix = problem.fix else { return .failed("This problem has no fix. Nothing was changed.") }
-        guard let integration = integration(for: problem, providers: providers, integrations: integrations),
+        guard let provider = providers.first(where: { $0.id == problem.topic }),
+              let integration = integration(for: problem, providers: providers, integrations: integrations),
               integration.fixes.contains(where: { $0.id == fix }) else {
             return .failed("Nothing in this version can run that fix. Nothing was changed.")
         }
-        return integration.run(fix: fix, in: context)
+        // The entry the problem is about: the fix runs in its folder (ADR 0014).
+        return integration.run(fix: fix, for: provider, in: context)
     }
 
     private static func integration(for problem: Problem, providers: [ProviderConfig],

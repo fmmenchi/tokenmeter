@@ -57,6 +57,44 @@ final class ClaudeIntegrationTests: XCTestCase {
         XCTAssertEqual(integration.problems(in: context), [])
     }
 
+    // MARK: one entry at a time (ADR 0014)
+
+    private func entry(_ json: String) throws -> ProviderConfig {
+        try ProviderConfigFile.decode(Data(#"{"version":1,"providers":[\#(json)]}"#.utf8), origin: "test").providers[0]
+    }
+
+    func testAnAccountsProblemsNameItAndAreFoundInItsFolder() throws {
+        let work = try entry(#"{"id":"claude-work","title":"Claude · work","windows":[300],"home":"~/.claude-work"}"#)
+        let folder = home.appendingPathComponent(".claude-work")
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        try Data(#"{"statusLine":{"type":"command","command":"/bin/mine"}}"#.utf8)
+            .write(to: folder.appendingPathComponent("settings.json"))
+        try writeSettings(#"{"model":"opus"}"#)
+
+        let problems = integration.problems(for: work, in: context)
+        XCTAssertEqual(problems.map(\.id), ["claude-work.statusline.other"])
+        XCTAssertEqual(problems.first?.topic, "claude-work")
+        XCTAssertEqual(problems.first?.detail, "In ~/.claude-work it was left alone, so the Claude · work bars do not update.")
+        XCTAssertEqual(problems.first?.fix, ClaudeIntegration.wrapStatusLine)
+        let seed = try entry(#"{"id":"claude","title":"Claude","windows":[300]}"#)
+        XCTAssertEqual(integration.problems(for: seed, in: context), [], "the default folder has no other status line")
+
+        XCTAssertEqual(integration.run(fix: ClaudeIntegration.wrapStatusLine, for: work, in: context), .done)
+        XCTAssertEqual(integration.problems(for: work, in: context), [])
+        XCTAssertTrue(FileManager.default.fileExists(atPath: home.appendingPathComponent(".tokenmeter/claude-work/statusline-wrapper.sh").path),
+                      "the wrapper is the account's")
+        XCTAssertEqual(try String(contentsOf: home.appendingPathComponent(".claude/settings.json"), encoding: .utf8),
+                       #"{"model":"opus"}"#, "the default folder was not touched")
+    }
+
+    func testAnEntryWithoutAHomeIsTheDefaultFolder() throws {
+        try writeSettings(#"{"statusLine":{"type":"command","command":"/bin/mine"}}"#)
+        let seed = try entry(#"{"id":"claude","title":"Claude","windows":[300]}"#)
+        let problems = integration.problems(for: seed, in: context)
+        XCTAssertEqual(problems.map(\.id), ["claude.statusline.other"], "the seed entry keeps the ids of before")
+        XCTAssertEqual(problems.first?.detail, "In ~/.claude it was left alone, so the Claude bars do not update.")
+    }
+
     func testProjectsThatOverrideAreOneProblemWithoutAFix() throws {
         try writeSettings(#"{}"#)
         for name in ["app-a", "app-b"] {
