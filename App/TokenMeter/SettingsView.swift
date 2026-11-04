@@ -15,19 +15,6 @@ struct SettingsView: View {
     /// The section shown. The window opens on General.
     @State private var tab = SettingsTab.general
 
-    private var claudeStatusText: String {
-        guard meter.autoSetUpClaude else { return "Off: tokenmeter does not touch Claude Code's settings." }
-        switch meter.claudeStatusLine {
-        case .set: return "Done: Claude's status line now feeds tokenmeter."
-        case .alreadySet: return "Claude's status line already feeds tokenmeter."
-        case .notInstalled: return "Claude Code not found. Checked again at every launch."
-        case .wrapped: return "Your status line is wrapped: it still prints as before, and also feeds tokenmeter."
-        case .otherStatusLine: return "Another status line is in use and was left alone. Wrap it from the panel to feed tokenmeter too."
-        case .unreadableSettings: return "Claude's settings.json could not be read, so it was left alone."
-        case nil: return "Checked at every launch; never replaces a status line you set."
-        }
-    }
-
     var body: some View {
         VStack(spacing: 0) {
             SettingsTabs(selection: $tab)
@@ -58,17 +45,7 @@ struct SettingsView: View {
                 set: { meter.setLaunchAtLogin($0) }))
             Text("tokenmeter registers itself the first time it runs. Turning this off is respected: it will not turn itself back on.")
                 .font(.caption).foregroundStyle(.secondary)
-            Toggle("Set up the Claude quota automatically", isOn: Binding(
-                get: { meter.autoSetUpClaude },
-                set: { meter.setAutoSetUpClaude($0) }))
-            Text(claudeStatusText)
-                .font(.caption).foregroundStyle(.secondary)
-            if meter.autoSetUpClaude {
-                switch meter.claudeStatusLine {
-                case .wrapped: Button("Restore original") { meter.restoreClaudeStatusLine() }
-                default: EmptyView()
-                }
-            }
+            ClaudeSetupGroup(meter: meter)
             Button("Show the welcome again") { WelcomeWindow.shared.showAgain() }
         }
     }

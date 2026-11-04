@@ -13,8 +13,8 @@ final class Meter {
     private(set) var autoSetUpClaude = UserDefaults.standard.object(forKey: Meter.autoSetUpKey) as? Bool ?? true
     /// What the setup of the status line found, by Claude entry (ADR 0014); empty while the switch is off or before launch.
     private(set) var claudeStatusLines: [String: ClaudeStatusLine.Outcome] = [:]
-    /// The outcome for the seed entry, as Settings said it before accounts.
-    var claudeStatusLine: ClaudeStatusLine.Outcome? { claudeStatusLines[AccountTool.claudeCode.seedID] }
+    /// The Claude entries the setup knows, in the file's order, so Settings can say a line for each (ADR 0014).
+    private(set) var claudeAccounts: [ClaudeAccounts.Entry] = []
     /// The problems the person has not hidden (ADR 0005); the panel draws these and the snapshot carries them.
     private(set) var problems: [Problem] = []
     /// Interface state of the fixes being run, by problem id. Not in the model or the snapshot (the plan of the feature).
@@ -400,9 +400,6 @@ final class Meter {
     }
 
     /// Restore original stays in Settings (ADR 0005); the wrap itself is a fix in the panel.
-    /// Puts the status line of the seed entry back, as before accounts.
-    func restoreClaudeStatusLine() { restoreClaudeStatusLine(for: AccountTool.claudeCode.seedID) }
-
     /// Puts the account's own status line back, in its folder (ADR 0014).
     func restoreClaudeStatusLine(for id: String) {
         guard let entry = ClaudeAccounts.entries(in: providers, integrations: makeIntegrations()).first(where: { $0.id == id })
@@ -421,7 +418,7 @@ final class Meter {
     /// ADR 0004: only while the switch is on, at every launch and when it is turned on, for each Claude entry in its own
     /// folder (ADR 0014). The file and the settings are read and written off the main actor (ADR 0005).
     private func setUpClaudeStatusLine() async {
-        guard autoSetUpClaude else { claudeStatusLines = [:]; usageRefresh = nil; return }
+        guard autoSetUpClaude else { claudeStatusLines = [:]; claudeAccounts = []; usageRefresh = nil; return }
         guard let script = claudeScript else { return }
         let integrations = makeIntegrations()
         let (outcomes, failures, configured) = await Task.detached(priority: .utility) {
@@ -439,6 +436,7 @@ final class Meter {
         for failure in failures { Self.log.error("Could not set up the Claude status line: \(failure, privacy: .public)") }
         claudeStatusLines = outcomes
         providers = configured
+        claudeAccounts = ClaudeAccounts.entries(in: configured, integrations: integrations)
         detectProblems()
     }
 
