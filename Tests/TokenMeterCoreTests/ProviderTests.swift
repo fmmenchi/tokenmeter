@@ -77,6 +77,39 @@ final class ProviderTests: XCTestCase {
         }
     }
 
+    func testTheTemplateMovesEveryPathOfTheDefaultFolderToTheAccounts() throws {
+        let entry = ProviderConfigFile.entry(for: .claudeCode, id: "claude-work", title: "Claude · work", home: "~/.claude-work")
+        XCTAssertEqual(entry["id"] as? String, "claude-work")
+        XCTAssertEqual(entry["title"] as? String, "Claude · work")
+        XCTAssertEqual(entry["home"] as? String, "~/.claude-work")
+        XCTAssertEqual((entry["log"] as? [String: Any])?["root"] as? String, "~/.claude-work/projects")
+        let quota = entry["quota"] as? [String: Any]
+        XCTAssertEqual(quota?["file"] as? String, "~/.tokenmeter/claude-work-statusline.json")
+        let windows = quota?["windows"] as? [[String: Any]]
+        XCTAssertEqual((windows?[0]["existsIf"] as? [String: Any])?["file"] as? String, "~/.claude-work/.claude.json")
+        XCTAssertEqual(windows?[2]["file"] as? String, "~/.claude-work/.claude.json")
+        XCTAssertEqual((entry["plan"] as? [String: Any])?["file"] as? String, "~/.claude-work/.claude.json")
+        XCTAssertEqual(entry["integration"] as? String, "claude-status-line")
+        let decoded = try ProviderConfigFile.decode(
+            JSONSerialization.data(withJSONObject: ["version": 1, "providers": [entry]]), origin: "template")
+        XCTAssertEqual(decoded.providers.first?.home, "~/.claude-work", "what the template gives is an entry the file accepts")
+
+        let codex = ProviderConfigFile.entry(for: .codexCLI, id: "codex-personal", title: "mario.rossi@example.com",
+                                             home: "~/.codex-personal")
+        XCTAssertEqual((codex["log"] as? [String: Any])?["root"] as? String, "~/.codex-personal/sessions")
+        XCTAssertEqual(codex["home"] as? String, "~/.codex-personal")
+    }
+
+    func testTheTemplateForTheSeedIdInTheDefaultFolderIsTheSeedEntry() throws {
+        for tool in AccountTool.allCases {
+            let entry = ProviderConfigFile.entry(for: tool, id: tool.seedID, title: "X", home: tool.defaultHome)
+            XCTAssertNil(entry["home"], "\(tool): the seed entry has no home")
+            var seed = DefaultProviders.seedEntry(tool.seedID)
+            seed["title"] = "X"
+            XCTAssertEqual(NSDictionary(dictionary: entry), NSDictionary(dictionary: seed), "\(tool)")
+        }
+    }
+
     func testStandardListHoldsClaudeThenChatGPT() throws {
         let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         addTeardownBlock { try? FileManager.default.removeItem(at: dir) }

@@ -150,6 +150,12 @@ public struct ProviderConfigFile: Decodable, Sendable {
         return .migrated
     }
 
+    /// The entry for an account of `tool`: the seed entry with its paths rewritten for the folder and the id, explicit and
+    /// readable by hand (ADR 0014). For the seed id and the default folder it is the seed entry itself, without `home`.
+    public static func entry(for tool: AccountTool, id: String, title: String, home: String) -> [String: Any] {
+        DefaultProviders.template(for: tool, id: id, title: title, home: home)
+    }
+
     static func decode(_ data: Data, origin: String) throws -> ProviderConfigFile {
         let file: ProviderConfigFile
         do {
@@ -172,6 +178,35 @@ public struct ProviderConfigFile: Decodable, Sendable {
             }
         }
         return file
+    }
+}
+
+/// A tool an account is a folder of (ADR 0014): which seed entry is its template, and which folder it reads by default.
+public enum AccountTool: String, CaseIterable, Sendable {
+    case claudeCode
+    case codexCLI
+
+    /// The id of the seed entry that is this tool's template.
+    public var seedID: String {
+        switch self {
+        case .claudeCode: "claude"
+        case .codexCLI: "chatgpt"
+        }
+    }
+
+    /// The folder the tool reads when nothing points it elsewhere.
+    public var defaultHome: String {
+        switch self {
+        case .claudeCode: "~/.claude"
+        case .codexCLI: "~/.codex"
+        }
+    }
+
+    public var name: String {
+        switch self {
+        case .claudeCode: "Claude Code"
+        case .codexCLI: "Codex CLI"
+        }
     }
 }
 

@@ -1,3 +1,5 @@
+import Foundation
+
 /// The seed of `~/.tokenmeter/providers.json`: what the file holds the first time (ADR 0003).
 /// A string constant rather than a resource: nothing to lose in the widget bundle.
 enum DefaultProviders {
@@ -91,6 +93,51 @@ enum DefaultProviders {
       ]
     }
     """#
+
+    /// The seed entry of `tool` as an account's entry (ADR 0014): `id`, `title` and `home` set, and every path of the
+    /// default folder moved to `home`; Claude's `~/.claude.json` follows the folder too, and its status line file is
+    /// named by the id. The seed id in the default folder is the seed entry itself.
+    static func template(for tool: AccountTool, id: String, title: String, home: String) -> [String: Any] {
+        var entry = seedEntry(tool.seedID)
+        entry["id"] = id
+        entry["title"] = title
+        guard id != tool.seedID || home != tool.defaultHome else { return entry }
+        entry["home"] = home
+        return rewrite(entry, tool: tool, id: id, home: home) as! [String: Any]
+    }
+
+    /// The same, for a folder that is not the default: what `template` would give, so a writer can tell a path the
+    /// template gave from one the person wrote (ADR 0014).
+    static func derivedPath(_ path: String, tool: AccountTool, id: String, home: String) -> String {
+        switch tool {
+        case .claudeCode where path == "~/.tokenmeter/claude-statusline.json":
+            return "~/.tokenmeter/\(id)-statusline.json"
+        case .claudeCode where path == "~/.claude.json":
+            return "\(home)/.claude.json"
+        default:
+            let prefix = tool.defaultHome + "/"
+            return path.hasPrefix(prefix) ? home + "/" + path.dropFirst(prefix.count) : path
+        }
+    }
+
+    private static func rewrite(_ value: Any, tool: AccountTool, id: String, home: String) -> Any {
+        switch value {
+        case let object as [String: Any]:
+            return object.mapValues { rewrite($0, tool: tool, id: id, home: home) }
+        case let list as [Any]:
+            return list.map { rewrite($0, tool: tool, id: id, home: home) }
+        case let path as String:
+            return derivedPath(path, tool: tool, id: id, home: home)
+        default:
+            return value
+        }
+    }
+
+    /// The seed entry with this id, as JSON. A constant checked by the seed's own test.
+    static func seedEntry(_ id: String) -> [String: Any] {
+        let object = try! JSONSerialization.jsonObject(with: Data(json.utf8)) as! [String: Any]
+        return (object["providers"] as! [[String: Any]]).first { $0["id"] as? String == id }!
+    }
 
     /// What the migration adds to a file that exists: the path of the model and the family rules, by provider id (ADR 0010).
     /// The same as the seed holds; a test says so.
