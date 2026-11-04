@@ -160,6 +160,9 @@ no summary page.
   can come back.
 - **One sheet writes the file.** Add an account…, Edit… and the banner's Add it all end in the same sheet, so what is written
   is confirmed once, with the title in front of the person.
+- **A sheet for everything.** Add an account…, Edit… and Remove… each open a sheet attached to Settings, never a window of
+  their own. Two lighter ways were considered and set aside: renaming inline, with a double click on the title, and removing
+  at once with an Undo line under the list; one way for the three actions is easier to learn than three.
 - **The email is a caption, not a title.** The alias stays the person's word; the email says which login a folder holds, in
   Settings and in the banner, and nowhere the panel or the widget shows.
 - **The folder on hover.** A path is for the person who looks for it; the email is what tells accounts apart.
