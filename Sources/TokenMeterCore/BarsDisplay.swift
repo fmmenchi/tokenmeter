@@ -25,6 +25,9 @@ public enum BarsDisplay: String, CaseIterable, Codable, Sendable {
         return self == .left ? left : 100 - left
     }
 
+    /// The figure with its word, as a line of text says it outside the bars: `9% left`, `91% used`.
+    public func figure(remaining: Double) -> String { "\(percent(remaining: remaining))% \(word)" }
+
     /// The sentence of the verdict that says a window went low, in this reading. `left` is the lowest the windows went, in percent.
     public func littleMarginText(window: String, left: Double) -> String {
         let figure = percent(remaining: left / 100)

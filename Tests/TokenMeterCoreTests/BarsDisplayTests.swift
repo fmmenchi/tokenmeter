@@ -68,6 +68,11 @@ final class BarsDisplayTests: XCTestCase {
         XCTAssertTrue(BarsDisplay.used.markGuide.contains("how much you'd have used"))
     }
 
+    func testTheFigureWithItsWordIsWhatANotificationSays() {
+        XCTAssertEqual(BarsDisplay.left.figure(remaining: 0.09), "9% left")
+        XCTAssertEqual(BarsDisplay.used.figure(remaining: 0.09), "91% used")
+    }
+
     func testTheWordIsWhatTheFigureSays() {
         XCTAssertEqual(BarsDisplay.left.word, "left")
         XCTAssertEqual(BarsDisplay.used.word, "used")
