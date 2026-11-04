@@ -25,6 +25,24 @@ public enum BarsDisplay: String, CaseIterable, Codable, Sendable {
         return self == .left ? left : 100 - left
     }
 
+    /// The sentence of the verdict that says a window went low, in this reading. `left` is the lowest the windows went, in percent.
+    public func littleMarginText(window: String, left: Double) -> String {
+        let figure = percent(remaining: left / 100)
+        switch self {
+        case .left: return "The \(window) window went down to \(figure)% left or less."
+        case .used: return "The \(window) window went up to \(figure)% used or more."
+        }
+    }
+
+    /// The sentence of the verdict that says the windows never went low, in this reading.
+    public func plentyOfMarginText(window: String, left: Double) -> String {
+        let figure = percent(remaining: left / 100)
+        switch self {
+        case .left: return "You never went below \(figure)% left in the \(window) windows."
+        case .used: return "You never went above \(figure)% used in the \(window) windows."
+        }
+    }
+
     /// The pace mark as this reading draws it: the bar and the mark are on the same side, so a bar that passes the mark still
     /// means the quota runs out before the reset.
     public func shown(_ pace: Pace) -> Pace {

@@ -46,6 +46,22 @@ final class BarsDisplayTests: XCTestCase {
         XCTAssertEqual(BarsDisplay.used.percent(remaining: 0), 100)
     }
 
+    func testTheVerdictSentencesAreWhatTheyWereInLeft() {
+        XCTAssertEqual(BarsDisplay.left.littleMarginText(window: "Weekly", left: 38.4), "The Weekly window went down to 38% left or less.")
+        XCTAssertEqual(BarsDisplay.left.plentyOfMarginText(window: "Weekly", left: 62), "You never went below 62% left in the Weekly windows.")
+    }
+
+    func testTheVerdictSentencesSayUsedInTheOtherReading() {
+        XCTAssertEqual(BarsDisplay.used.littleMarginText(window: "Weekly", left: 38.4), "The Weekly window went up to 62% used or more.")
+        XCTAssertEqual(BarsDisplay.used.plentyOfMarginText(window: "Weekly", left: 62), "You never went above 38% used in the Weekly windows.")
+    }
+
+    func testTheTwoReadingsOfAVerdictNameTheSameWindow() {
+        // 38.5 rounds to 39 left, so 61 used: the figures add up to 100 here too.
+        XCTAssertTrue(BarsDisplay.left.littleMarginText(window: "w", left: 38.5).contains("39% left"))
+        XCTAssertTrue(BarsDisplay.used.littleMarginText(window: "w", left: 38.5).contains("61% used"))
+    }
+
     func testTheWordIsWhatTheFigureSays() {
         XCTAssertEqual(BarsDisplay.left.word, "left")
         XCTAssertEqual(BarsDisplay.used.word, "used")

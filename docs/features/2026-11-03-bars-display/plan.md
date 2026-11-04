@@ -50,6 +50,11 @@ The changelog is written with the release, not here.
 - `emptyIsEmpty` on `QuotaBar` and `SkinBarBody`: three shapes keep a minimum fill at zero, and the stats, which share the bar, keep it too.
 - The five skins were drawn offscreen from the real shared views with a throwaway harness, in both readings: `~0% used` is empty in all of them.
 
+## Added in 0.9.1: the stats
+
+One commit for the core (`littleMarginText` and `plentyOfMarginText` on `BarsDisplay`, tested, because the sentences were strings inside a view), one for
+`StatsView.swift` (the row of a window and the verdict read the choice from the environment), and the docs. The colour of a row stays on what is left.
+
 ## Not verified at the time of writing
 
 - The five skins' bars with the fill inverted: the blocks of Dracula, the thin line of One Dark, the thick pill of Catppuccin and the
