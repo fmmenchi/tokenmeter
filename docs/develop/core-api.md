@@ -33,13 +33,17 @@ public protocol ProviderSource: Sendable {
 
 ## Building sources
 
-| Symbol                                         | Does                                                                               |
-| :--------------------------------------------- | :--------------------------------------------------------------------------------- |
-| `Providers.standard(config:home:)`             | The list of sources from `providers.json`; seeds it when missing.                  |
-| `ConfiguredSource(_:home:)`                    | A source driven by one `ProviderConfig` ([format](../use/configure-providers.md)). |
-| `ProviderConfigFile.load(from:)`               | Decodes the file; throws `Failure` (printable) when it is broken.                  |
-| `ProviderConfigFile.seed()`, `.writeSeed(to:)` | The built-in Claude and ChatGPT entries.                                           |
-| `PlanName.prettified(_:)`                      | `team_plus` to `Team Plus`.                                                        |
+| Symbol                                                                        | Does                                                                                                                                            |
+| :---------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Providers.standard(config:home:)`                                            | The list of sources from `providers.json`; seeds it when missing.                                                                               |
+| `ConfiguredSource(_:home:)`                                                   | A source driven by one `ProviderConfig` ([format](../use/configure-providers.md)).                                                              |
+| `ProviderConfigFile.load(from:)`                                              | Decodes the file; throws `Failure` (printable) when it is broken.                                                                               |
+| `ProviderConfigFile.seed()`, `.writeSeed(to:)`                                | The built-in Claude and ChatGPT entries.                                                                                                        |
+| `ProviderConfigFile.entry(for:id:title:home:)`                                | The seed entry of a tool as an account's entry, its paths moved to the folder ([ADR 0014](../adr/0014-accounts-and-the-home-of-a-provider.md)). |
+| `ProviderConfigFile.add`, `.replace`, `.remove`, `.edited`, `.id(for:taken:)` | The app writes whole entries, with a `.bak`; `edited` moves only the paths the template gave; an id from a title.                               |
+| `AccountTool`                                                                 | Claude Code or the Codex CLI: its seed entry, its default folder, its name.                                                                     |
+| `ProviderConfig.home`                                                         | Optional: the folder the tool reads for the entry; the integration's, not the readers'.                                                         |
+| `PlanName.prettified(_:)`                                                     | `team_plus` to `Team Plus`.                                                                                                                     |
 
 Pass a throwaway `home:` in tests so nothing reads the real `~`.
 
@@ -98,19 +102,22 @@ What the app tells the person is a `Problem`, not a string
 ([ADR 0005](../adr/0005-problems.md)). Everything is in
 `Sources/TokenMeterCore/Problems/`.
 
-| Type                  | What it is                                                                                                          |
-| :-------------------- | :------------------------------------------------------------------------------------------------------------------ |
-| `Problem`             | `id`, `topic` (a provider id or `general`), `message`, `detail?`, `explanation?`, `fix?`, `guide?`.                 |
-| `ProblemKind`         | One kind of problem: id, topic, summary, explanation, guide and fix. `problem(...)` makes a `Problem` of that kind. |
-| `ProviderIntegration` | One per provider that needs one: its `kinds`, its `fixes`, `problems(in:)` and `run(fix:in:)`.                      |
-| `Integrations`        | The registry by id; `census` lists every kind of the app and of each integration.                                   |
-| `ProblemDetector`     | `detect(...)` gathers the problems of the app and of each configured integration; `merge(...)` orders and dedupes.  |
-| `FixRunner`           | Runs a problem's fix through the integration that declared it; answers `FixResult.done` or `.failed(reason)`.       |
-| `Dismissals`          | What was hidden, by id and message, until the message changes. `DefaultsDismissals` keeps it in the app's defaults. |
+| Type                  | What it is                                                                                                                                                                                        |
+| :-------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Problem`             | `id`, `topic` (a provider id or `general`), `message`, `detail?`, `explanation?`, `fix?`, `guide?`.                                                                                               |
+| `ProblemKind`         | One kind of problem: id, topic, summary, explanation, guide and fix. `problem(...)` makes a `Problem` of that kind.                                                                               |
+| `ProviderIntegration` | One per tool: its `tool`, its `kinds`, its `fixes`, `problems(for:in:)` and `run(fix:for:in:)`, asked about one entry at a time ([ADR 0014](../adr/0014-accounts-and-the-home-of-a-provider.md)). |
+| `AccountFolders`      | A tool's folders: the default, whether a folder is the tool's, who is signed in there, and the scan of the top of the home.                                                                       |
+| `Integrations`        | The registry by id; `census` lists every kind of the app and of each integration.                                                                                                                 |
+| `ProblemDetector`     | `detect(...)` gathers the problems of the app and of each configured integration, and the folders nobody named; `merge(...)` orders and dedupes.                                                  |
+| `FixRunner`           | Runs a problem's fix through the integration that declared it; answers `FixResult.done` or `.failed(reason)`.                                                                                     |
+| `Dismissals`          | What was hidden, by id and message, until the message changes. `DefaultsDismissals` keeps it in the app's defaults.                                                                               |
 
 `providers.json` names a provider's integration in an optional `integration` field; the registry maps it to code, and
 an unknown id is a `general` problem, not a crash. An existing file whose `claude` entry lacks the field gets it once,
-with a backup ([ADR 0003](../adr/0003-providers-in-one-config-file.md)).
+with a backup, and the `chatgpt` entry gets `codex` the same way ([ADR 0003](../adr/0003-providers-in-one-config-file.md),
+[ADR 0014](../adr/0014-accounts-and-the-home-of-a-provider.md)). A problem of an account has the entry's id as its topic and as the
+first segment of its id: `claude-work.statusline.other`.
 
 ## Display preferences
 
@@ -176,26 +183,28 @@ The state of the welcome wizard, in `Sources/TokenMeterCore/Welcome/` and in `We
 | Type                  | What it is                                                                                                                                  |
 | :-------------------- | :------------------------------------------------------------------------------------------------------------------------------------------ |
 | `WelcomeState`        | `idle` or `showing(Page)`. `atLaunch(seen:)` opens at the first page when it was never seen; `applying(_:)` is the transition of an action. |
-| `WelcomeState.Page`   | The seven pages in order: `whereItLives`, `bars`, `tick`, `buttons`, `stats`, `suggestion`, `settings`.                                     |
+| `WelcomeState.Page`   | The eight pages in order: `whereItLives`, `bars`, `tick`, `buttons`, `stats`, `suggestion`, `accounts`, `settings`.                         |
 | `WelcomeState.Action` | `back`, `next` (Done on the last page), `skip` and `close`. `endedBy(_:)` says whether an action counts as seen.                            |
 | `WelcomeSeenStore`    | Whether it was seen: `DefaultsWelcomeSeenStore` in the app, `MemoryWelcomeSeenStore` in tests.                                              |
 
 The window and the pages are in `App/TokenMeter/Welcome/`: an `NSWindow` hosting a SwiftUI view, opened by the app delegate, that uses
-nothing of the `Meter`. The pictures are two screenshots of the docs in `Assets.xcassets`; keep them in step with `docs/assets`.
+nothing of the `Meter`. The pictures are two screenshots of the docs in `Assets.xcassets`; keep them in step with `docs/assets`. The
+accounts page draws two of the app's own cards with sample data instead.
 
 ## Model limits
 
 A model's limit is a window with a scope ([ADR 0002](../adr/0002-quota-model-and-data-sources.md)).
 
-| Type                              | What it is                                                                                                                           |
-| :-------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------- |
-| `WindowSpec.scope`                | A model's name, from the data; `WindowSpec.id` is the name, and the scope after a colon for a scoped window.                         |
-| `ReportedQuota.scope`             | The model a reported limit applies to; the builder makes it a window of its own under the one of the same length.                    |
-| `ClaudeUsageRefresh`              | `locate`, `run` and `refresh`: ask Claude Code to refresh its usage copy by running its own `/usage`.                                |
-| `ProviderReading.absent`          | Lengths in minutes of windows the plan lacks, when fresh data says so ([ADR 0002](../adr/0002-quota-model-and-data-sources.md)).     |
-| `DisplayPreferences.hiddenModels` | The models of a provider the person turned off; a model is on unless it is here.                                                     |
-| `DisplayPreferences.select`       | The windows the person chose: an empty choice is refused, it never hides the provider, and a window just chosen turns its models on. |
-| `ProviderConfig.ExistsIf`         | A list that says whether a window exists: `file`, `each`, `where`, `observedAt` and `maxAgeHours` (6 by default).                    |
+| Type                              | What it is                                                                                                                                                                         |
+| :-------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `WindowSpec.scope`                | A model's name, from the data; `WindowSpec.id` is the name, and the scope after a colon for a scoped window.                                                                       |
+| `ReportedQuota.scope`             | The model a reported limit applies to; the builder makes it a window of its own under the one of the same length.                                                                  |
+| `ClaudeUsageRefresh`              | `locate`, `run` and `refresh`: ask Claude Code to refresh its usage copy by running its own `/usage`, in an account's folder with `CLAUDE_CONFIG_DIR` when given one.              |
+| `ClaudeStatusLine.Account`        | An entry's id and the folder Claude Code reads for it: `setUp`, `otherStatusLine`, `wrap` and `restore` take one ([ADR 0014](../adr/0014-accounts-and-the-home-of-a-provider.md)). |
+| `ProviderReading.absent`          | Lengths in minutes of windows the plan lacks, when fresh data says so ([ADR 0002](../adr/0002-quota-model-and-data-sources.md)).                                                   |
+| `DisplayPreferences.hiddenModels` | The models of a provider the person turned off; a model is on unless it is here.                                                                                                   |
+| `DisplayPreferences.select`       | The windows the person chose: an empty choice is refused, it never hides the provider, and a window just chosen turns its models on.                                               |
+| `ProviderConfig.ExistsIf`         | A list that says whether a window exists: `file`, `each`, `where`, `observedAt` and `maxAgeHours` (6 by default).                                                                  |
 
 A quota window in `providers.json` can read a list: `each` (the path to it), `where` (fields an entry must equal), `scope`
 (the path of the model's name inside an entry), a `file` of its own and `observedAt` (when the file was fetched). No model is
