@@ -51,11 +51,6 @@ public struct ClaudeIntegration: ProviderIntegration {
             id: provider.id, configDir: AccountFolders.folder(of: provider.home, tool: .claudeCode, userHome: context.home))
     }
 
-    /// The seed entry in the default folder, as before accounts.
-    private static func defaultEntry() -> ProviderConfig { ProviderConfigFile.seed().providers.first { $0.id == "claude" }! }
-
-    public func problems(in context: ProblemContext) -> [Problem] { problems(for: Self.defaultEntry(), in: context) }
-
     public func problems(for provider: ProviderConfig, in context: ProblemContext) -> [Problem] {
         guard enabled else { return [] }
         let account = Self.account(for: provider, in: context)
@@ -77,10 +72,6 @@ public struct ClaudeIntegration: ProviderIntegration {
                 detail: "\(provider.title) bars freeze there: \(names)\(more)."))
         }
         return found
-    }
-
-    public func run(fix: String, in context: ProblemContext) -> FixResult {
-        run(fix: fix, for: Self.defaultEntry(), in: context)
     }
 
     public func run(fix: String, for provider: ProviderConfig, in context: ProblemContext) -> FixResult {

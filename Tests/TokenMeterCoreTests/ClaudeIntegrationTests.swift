@@ -124,6 +124,6 @@ final class ClaudeIntegrationTests: XCTestCase {
     }
 
     func testAnUnknownFixFails() {
-        guard case .failed = integration.run(fix: "nope", in: context) else { return XCTFail("expected a failure") }
+        guard case .failed = integration.run(fix: "nope", for: seed, in: context) else { return XCTFail("expected a failure") }
     }
 }

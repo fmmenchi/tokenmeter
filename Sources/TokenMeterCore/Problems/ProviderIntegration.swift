@@ -30,15 +30,8 @@ public protocol ProviderIntegration: Sendable {
     /// The problems of `provider`, an entry that names this integration; their topic is the entry's id.
     func problems(for provider: ProviderConfig, in context: ProblemContext) -> [Problem]
     func run(fix: String, for provider: ProviderConfig, in context: ProblemContext) -> FixResult
-    /// The form before accounts, for the default entry; kept one step, until every caller passes the entry.
-    func problems(in context: ProblemContext) -> [Problem]
-    func run(fix: String, in context: ProblemContext) -> FixResult
 }
 
 public extension ProviderIntegration {
     var tool: AccountTool? { nil }
-    func problems(for provider: ProviderConfig, in context: ProblemContext) -> [Problem] { problems(in: context) }
-    func run(fix: String, for provider: ProviderConfig, in context: ProblemContext) -> FixResult { run(fix: fix, in: context) }
-    func problems(in context: ProblemContext) -> [Problem] { [] }
-    func run(fix: String, in context: ProblemContext) -> FixResult { .failed("This integration takes an entry.") }
 }
