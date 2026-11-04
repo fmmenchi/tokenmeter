@@ -8,7 +8,9 @@ sidebar_position: 10
 
 What changed in each version, newest first. The update window shows the notes of the version it offers, taken from this page, and links here for the rest.
 
-## Unreleased {#unreleased}
+## 0.10.0 {#v0-10-0}
+
+Released on 2026-11-04.
 
 - **Accounts**: a work account and a personal one, each with its own card. An account is a folder Claude Code or the Codex CLI
   reads, named by a `home` in its entry of `providers.json`; the status line is set up and `/usage` asked in each account's own

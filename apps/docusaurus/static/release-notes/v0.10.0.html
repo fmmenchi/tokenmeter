@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>tokenmeter 0.10.0</title>
+<style>
+  /* Colours are given for both appearances: the web view of the update window does not always follow the system on its own. */
+  :root { color-scheme: light dark; --text: #1d1d1f; --back: #ffffff; --link: #0a60d6; --code: rgba(0, 0, 0, 0.07); }
+  @media (prefers-color-scheme: dark) { :root { --text: #f5f5f7; --back: #1e1e1e; --link: #4da3ff; --code: rgba(255, 255, 255, 0.14); } }
+  html { background: var(--back); }
+  body { font: 13px/1.5 -apple-system, "SF Pro", system-ui, sans-serif; margin: 0; padding: 16px 20px 24px; color: var(--text); background: var(--back); }
+  h1 { font-size: 17px; margin: 0 0 8px; }
+  p, li { margin: 0 0 8px; }
+  ul { padding-left: 20px; margin: 0 0 8px; }
+  code { font: 12px ui-monospace, "SF Mono", monospace; padding: 1px 4px; border-radius: 4px; background: var(--code); }
+  a { color: var(--link); }
+  .all { margin-top: 12px; }
+</style>
+</head>
+<body>
+<h1>tokenmeter 0.10.0</h1>
+<p>Released on 2026-11-04.</p>
+<ul><li><strong>Accounts</strong>: a work account and a personal one, each with its own card. An account is a folder Claude Code or the Codex CLI reads, named by a <code>home</code> in its entry of <code>providers.json</code>; the status line is set up and <code>/usage</code> asked in each account's own folder, the problems name the account, and a folder nobody named is found at the top of the home and offered in the panel with <strong>Add it</strong> (<a href="https://fmmenchi.github.io/tokenmeter/use/accounts">Accounts</a>).</li><li><strong>Settings has an Accounts tab</strong> in place of Providers: add, rename or remove an account, each through a sheet, with the email the folder is signed in with under its name (<a href="https://fmmenchi.github.io/tokenmeter/use/settings">Settings</a>).</li><li><strong>The order and the visibility of the cards moved to the panel</strong>, behind a lock: open it and the cards get arrows, an eye each and one on each window, and drag onto one another; a hidden card stays in sight, dimmed, until the lock closes.</li><li><strong>The welcome has eight pages</strong>: the seventh says what an account is (<a href="https://fmmenchi.github.io/tokenmeter/use/welcome">The welcome</a>).</li></ul>
+<p class="all"><a href="https://fmmenchi.github.io/tokenmeter/use/changelog">The whole changelog</a></p>
+</body>
+</html>
