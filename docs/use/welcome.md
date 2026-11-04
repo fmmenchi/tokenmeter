@@ -8,7 +8,7 @@ sidebar_position: 2.5
 
 A short wizard that says where tokenmeter lives and how to read its panel.
 
-![The seven pages of the welcome wizard](../assets/welcome.png)
+![The welcome wizard: the picture shows the seven pages of 0.8.0; the eighth, An account is a folder, came after it](../assets/welcome.png)
 
 ## When it opens
 
@@ -20,17 +20,19 @@ To see it again, open Settings from the gear in the panel and press **Show the w
 
 ## The pages
 
-| Page                              | What it says                                                                                                  |
-| :-------------------------------- | :------------------------------------------------------------------------------------------------------------ |
-| Where it lives                    | The gauge icon in the menu bar, and what the small dot on it means.                                           |
-| The bars                          | The colours, and that they fill as Claude Code and the Codex CLI are used: empty at first.                    |
-| The tick                          | Where the bar would be at a steady use.                                                                       |
-| Refresh, stats, settings and quit | What the four buttons do, and what the two lines of text above them say.                                      |
-| The stats                         | How each window ended, with its date, bar and what was left, and the tokens by model.                         |
-| The suggestion                    | The word at the top of a card, Wait, Stay or Move down, from percentages only.                                |
-| Settings has five tabs            | General, Providers, Skin, Notifications and Updates, and where the daily check for updates can be turned off. |
+| Page                              | What it says                                                                                                                                    |
+| :-------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Where it lives                    | The gauge icon in the menu bar, and what the small dot on it means.                                                                             |
+| The bars                          | The colours, and that they fill as Claude Code and the Codex CLI are used: empty at first.                                                      |
+| The tick                          | Where the bar would be at a steady use.                                                                                                         |
+| Refresh, stats, settings and quit | What the five buttons do, the lock among them, and what the lines of text above them say.                                                       |
+| The stats                         | How each window ended, with its date, bar and what was left, and the tokens by model.                                                           |
+| The suggestion                    | The word at the top of a card, Wait, Stay or Move down, from percentages only.                                                                  |
+| An account is a folder            | A work account and a personal one are two folders, each with a card; the panel says when it finds one nobody named ([accounts](./accounts.md)). |
+| Settings has five tabs            | General, Accounts, Skin, Notifications and Updates, and where the daily check for updates can be turned off.                                    |
 
-The pictures of the panel and the stats are the app's own views drawn with invented sample data: the figures in them are not yours.
+The pictures of the panel, the stats and the two accounts are the app's own views drawn with invented sample data: the figures
+and the names in them are not yours.
 
 ## Related
 
