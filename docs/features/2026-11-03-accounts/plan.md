@@ -10,6 +10,13 @@ How the [proposal](./proposal.md) is built: the `home` of an entry, the writer o
 each account, the folders the app finds, the email, the Accounts tab with its sheets, the lock on the panel and the welcome
 page. The decision is [ADR 0014](../../adr/0014-accounts-and-the-home-of-a-provider.md).
 
+Built on 2026-11-04 as below, with these departures: step 8 took three commits (the entry form of the protocol beside the old
+one, the detector and the fix runner, the old form removed) and step 9 two; step 10 two (the integration and the migration, then
+the seed and the app); steps 14, 15 and 19 two each (the data, then the view); steps 20 and 21 one, because the app does not build
+with the page's case alone; step 18 came after 17, as planned. The welcome's picture of the accounts is the app's own cards drawn
+with sample data, not a screenshot, so `Assets.xcassets` did not change; the docs' `welcome.png` still shows the seven pages of
+0.8.0 and says so.
+
 ## The pieces
 
 ```mermaid
