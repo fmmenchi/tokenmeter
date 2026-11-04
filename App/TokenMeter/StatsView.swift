@@ -164,6 +164,7 @@ private struct OutcomeRow: View {
     let outcome: WindowOutcome
 
     @Environment(\.skinStyle) private var skin
+    @Environment(\.barsDisplay) private var display
 
     private var left: Double { outcome.leftAtMost }
     private var tint: Color { skin?.tint(for: left / 100) ?? (left >= 40 ? .green : left >= 15 ? .orange : .red) }
@@ -172,8 +173,9 @@ private struct OutcomeRow: View {
         HStack(spacing: 8) {
             Text(outcome.resetsAt, format: .dateTime.month(.abbreviated).day())
                 .font(.caption2).captionColour().frame(width: 44, alignment: .leading)
-            QuotaBar(fraction: left / 100, tint: tint, height: 8).opacity(outcome.approximate ? 0.5 : 1)
-            Text("\(outcome.approximate ? "~" : "")\(Int(left.rounded()))% left")
+            QuotaBar(fraction: display.fraction(remaining: left / 100), tint: tint, height: 8, emptyIsEmpty: display == .used)
+                .opacity(outcome.approximate ? 0.5 : 1)
+            Text("\(outcome.approximate ? "~" : "")\(display.percent(remaining: left / 100))% \(display.word)")
                 .font(.caption2.bold().monospacedDigit()).frame(width: 64, alignment: .trailing)
         }
         .help(outcome.approximate
@@ -257,6 +259,7 @@ private struct ModelList: View {
 
 /// The word of a provider's card and what it rests on, in a sentence (ADR 0010). The welcome shows three of them.
 struct VerdictBox: View {
+    @Environment(\.barsDisplay) private var display
     let verdict: Verdict
 
     private func label(_ name: String) -> String { name == "5h" ? "5-hour" : name == "7d" ? "weekly" : name }
@@ -276,8 +279,8 @@ struct VerdictBox: View {
                 ?? "No window has been seen to end, so there is no verdict yet."
         case .hitCeiling(let window, let hits, let closed): "You hit the ceiling in \(hits) of \(closed) of the \(label(window)) windows."
         case .incompleteReadings(let window): "The ceiling was not reached, but some \(label(window)) windows were seen long before their end."
-        case .littleMargin(let window, let left): "The \(label(window)) window went down to \(Int(left.rounded()))% left or less."
-        case .plentyOfMargin(let window, let left): "You never went below \(Int(left.rounded()))% left in the \(label(window)) windows."
+        case .littleMargin(let window, let left): display.littleMarginText(window: label(window), left: left)
+        case .plentyOfMargin(let window, let left): display.plentyOfMarginText(window: label(window), left: left)
         }
     }
 
