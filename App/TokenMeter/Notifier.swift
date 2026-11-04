@@ -36,10 +36,10 @@ final class Notifier: NSObject, UNUserNotificationCenterDelegate {
         return await permission()
     }
 
-    func post(_ notice: LimitNotice) {
+    func post(_ notice: LimitNotice, reading display: BarsDisplay) {
         let content = UNMutableNotificationContent()
         content.title = notice.title
-        content.body = notice.body
+        content.body = notice.body(reading: display)
         center.add(UNNotificationRequest(identifier: notice.id, content: content, trigger: nil))
     }
 
@@ -56,9 +56,10 @@ extension LimitNotice {
         ([providerTitle, window.window.label] + [window.window.scope].compactMap { $0 }).joined(separator: " · ")
     }
 
-    /// One line: what is left and when it resets; the notice that the pace gives says where it runs out.
-    var body: String {
-        let left = window.remainingFraction.map { "\(Int(($0 * 100).rounded()))% left" }
+    /// One line: what is left, or what is used when the bars read that way (ADR 0006), and when it resets; the notice that the pace
+    /// gives says where it runs out. The thresholds that make a notice due stay on what is left.
+    func body(reading display: BarsDisplay) -> String {
+        let left = window.remainingFraction.map { display.figure(remaining: $0) }
         let pace = kind == .willRunOut ? window.runsOutShortText(at: Date()).map { "at this pace \($0)" } : nil
         let reset = window.resetText(at: Date()).map { "resets \($0)" }
         return [left, pace, reset].compactMap { $0 }.joined(separator: " · ")

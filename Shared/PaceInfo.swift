@@ -3,6 +3,7 @@ import SwiftUI
 /// The `i` beside a provider's name: a click opens a popover that explains the mark on the bars (ADR 0002). It closes with
 /// its `x`, with a second click on the `i`, or with a click outside it.
 struct PaceInfo: View {
+    @Environment(\.barsDisplay) private var display
     @State private var shown = false
     @Environment(\.openURL) private var openURL
 
@@ -21,8 +22,7 @@ struct PaceInfo: View {
 
     private var explanation: some View {
         VStack(alignment: .leading, spacing: 3) {
-            Text("The mark is how much you'd have left if you used it steadily until the reset. "
-                 + "A bar shorter than the mark means you are going too fast. Hover the bar to see when.")
+            Text(display.markGuide)
                 .font(.caption).fixedSize(horizontal: false, vertical: true)
             Button("Learn more") { openURL(Self.guide) }.buttonStyle(.plain).font(.caption).foregroundStyle(.tint)
         }

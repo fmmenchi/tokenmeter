@@ -37,7 +37,8 @@ what General holds. The other five pages stay as they are.
 - **The colour keeps following what is left.** A bar at `75% used` is orange, because 25% is left: red under 15% left keeps its meaning in
   both readings, and so does the green of a bar that has plenty.
 - **The mark of the pace mirrors with the bar**, so a bar that passes the mark still means the quota runs out before the reset.
-- **The notifications keep saying what is left.** `Under 10% left` reads the same to everyone.
+- **The line of a notification follows the choice** (0.9.2): `91% used · resets in 2d 6h`. What makes a notice due, and the two lines of Settings that name the thresholds (`Under 10% left.`), stay on what is left: they define a threshold, not a bar.
+- **The mark reads the other way on Used**, and says so: the `i`, the wizard and the docs explain it in the reading chosen (0.9.2).
 - **The stats follow the choice** (added on 2026-11-03, in 0.9.1: a person who reads the bars as used should not meet `left` in the charts): the row of a window that ended, and the two sentences of the verdict that name a percentage.
 - **A window with nothing used is an empty bar**, `~0% used`, not the smallest sliver that a nearly empty `left` bar shows.
 

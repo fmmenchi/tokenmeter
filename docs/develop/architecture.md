@@ -64,7 +64,7 @@ How the pieces fit, where each file goes and which rules keep it that way. The r
 
 9. **Reading.** How the bars read, left or used, is kept by `Meter` in the defaults and written to the snapshot with the skin
    ([ADR 0006](../adr/0006-display-preferences.md)). The panel and the widget put it in the environment once, and `WindowRow` and
-   `ScopedWindowRow` take the figure, the fill and the mark from it; the colour and the notices stay on what is left. The stats read it too, in the row of a window and in the verdict.
+   `ScopedWindowRow` take the figure, the fill and the mark from it; the colour and the thresholds of the notices stay on what is left, and the line of a notification says what the choice says. The stats read it too, in the row of a window and in the verdict.
 
 ## The window maths
 

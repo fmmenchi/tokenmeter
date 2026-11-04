@@ -392,7 +392,7 @@ final class Meter {
         let outcome = LimitNotices.evaluate(snapshot: snapshot, enabled: enabledNotices, ledger: noticeLedger, now: now)
         noticeLedger = outcome.ledger
         if let data = try? JSONEncoder().encode(noticeLedger) { UserDefaults.standard.set(data, forKey: Self.noticeLedgerKey) }
-        for notice in outcome.notices { notifier.post(notice) }
+        for notice in outcome.notices { notifier.post(notice, reading: barsDisplay) }
     }
 
     func setAutoSetUpClaude(_ enabled: Bool) {

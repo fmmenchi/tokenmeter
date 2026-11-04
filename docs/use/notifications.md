@@ -20,7 +20,7 @@ Turn each on by itself, in the tab **Notifications** of Settings:
 | **Will run out before the reset** | At the pace you have used it, the quota will not last until the window resets. |
 
 A notification has the provider and the window as its title and one line under it: `Claude · Weekly`, then
-`9% left · resets in 2d 6h`. For a model's limit the title ends with the model: `Claude · Weekly · Fable`.
+`9% left · resets in 2d 6h`; with [Show on the bars](./bars.md#left-or-used) on Used it is `91% used · resets in 2d 6h`. What makes a notice due is the same in both readings: under 10% and under 30% left. For a model's limit the title ends with the model: `Claude · Weekly · Fable`.
 
 ## What it does and does not do
 

@@ -57,7 +57,7 @@ extension WelcomeState.Page {
         case .bars:
             "Green is plenty left, orange under 40%, red under 15%. The figure says how much is left; if you would rather read how much is used, change it in Settings, in General. tokenmeter reads the files that Claude Code and the Codex CLI leave on this Mac, with no API calls, no login and no key, so the bars update as you use them: at the first launch, until you do, they stay empty."
         case .tick:
-            "Where the bar would be at a steady use. If the bar ends before it, the quota runs out before the reset."
+            "Where the bar would be at a steady use. If the bar ends before it, the quota runs out before the reset. With Show on the bars on Used the bar fills the other way, and the mark with it: then the bar that ends after the mark is the one that runs out."
         case .buttons:
             "The lines above say how fresh each quota is. Refresh reads everything now and asks Claude Code for your account's usage; on its own tokenmeter reads every minute. The chart switches to the stats, the gear opens Settings, power quits."
         case .stats:
