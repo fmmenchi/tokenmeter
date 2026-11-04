@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>tokenmeter 0.9.0</title>
+<style>
+  /* Colours are given for both appearances: the web view of the update window does not always follow the system on its own. */
+  :root { color-scheme: light dark; --text: #1d1d1f; --back: #ffffff; --link: #0a60d6; --code: rgba(0, 0, 0, 0.07); }
+  @media (prefers-color-scheme: dark) { :root { --text: #f5f5f7; --back: #1e1e1e; --link: #4da3ff; --code: rgba(255, 255, 255, 0.14); } }
+  html { background: var(--back); }
+  body { font: 13px/1.5 -apple-system, "SF Pro", system-ui, sans-serif; margin: 0; padding: 16px 20px 24px; color: var(--text); background: var(--back); }
+  h1 { font-size: 17px; margin: 0 0 8px; }
+  p, li { margin: 0 0 8px; }
+  ul { padding-left: 20px; margin: 0 0 8px; }
+  code { font: 12px ui-monospace, "SF Mono", monospace; padding: 1px 4px; border-radius: 4px; background: var(--code); }
+  a { color: var(--link); }
+  .all { margin-top: 12px; }
+</style>
+</head>
+<body>
+<h1>tokenmeter 0.9.0</h1>
+<p>Released on 2026-11-03.</p>
+<ul><li><strong>The bars can read how much is used.</strong> In Settings, General, <strong>Show on the bars</strong> switches between <strong>Left</strong> (<code>25% left</code>, as before and still the default) and <strong>Used</strong> (<code>75% used</code>). It changes the figure, how far the bar is filled and the pace mark, on the panel and the widget alike; the colour of a bar, the notices and the stats keep following what is left, so a bar at <code>75% used</code> is orange. A window with nothing used is an empty bar (Reading the Bars).</li><li><strong>The welcome says so</strong>: its page on the bars says the figure is what is left and where to change it, with the control beside the panel, and its page on Settings names the choice (<a href="https://fmmenchi.github.io/tokenmeter/use/welcome">The welcome</a>).</li></ul>
+<p class="all"><a href="https://fmmenchi.github.io/tokenmeter/use/changelog">The whole changelog</a></p>
+</body>
+</html>
