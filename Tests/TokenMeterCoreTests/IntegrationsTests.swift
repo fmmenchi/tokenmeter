@@ -6,8 +6,8 @@ final class IntegrationsTests: XCTestCase {
         let id: String
         var kinds: [ProblemKind] { [] }
         var fixes: [FixDescriptor] { [] }
-        func problems(in context: ProblemContext) -> [Problem] { [] }
-        func run(fix: String, in context: ProblemContext) -> FixResult { .done }
+        func problems(for provider: ProviderConfig, in context: ProblemContext) -> [Problem] { [] }
+        func run(fix: String, for provider: ProviderConfig, in context: ProblemContext) -> FixResult { .done }
     }
 
     func testAnIntegrationIsFoundByItsId() {
