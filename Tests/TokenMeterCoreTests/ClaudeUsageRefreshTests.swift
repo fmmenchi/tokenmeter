@@ -29,6 +29,21 @@ final class ClaudeUsageRefreshTests: XCTestCase {
         XCTAssertEqual(URL(fileURLWithPath: lines[1]).resolvingSymlinksInPath().path, folder.resolvingSymlinksInPath().path)
     }
 
+    func testAnAccountsRunTellsClaudeCodeWhichFolderToRead() async throws {
+        let dir = try tempDir()
+        let marker = dir.appendingPathComponent("marker")
+        let claude = try script("printf '%s' \"${CLAUDE_CONFIG_DIR-unset}\" > '\(marker.path)'", in: dir)
+        let configDir = dir.appendingPathComponent(".claude-work")
+
+        let plain = await ClaudeUsageRefresh.run(executable: claude, in: dir.appendingPathComponent("run"))
+        XCTAssertEqual(plain, .refreshed)
+        XCTAssertEqual(try String(contentsOf: marker), ProcessInfo.processInfo.environment["CLAUDE_CONFIG_DIR"] ?? "unset",
+                       "without an account the process inherits the environment")
+        let account = await ClaudeUsageRefresh.run(executable: claude, in: dir.appendingPathComponent("run"), configDir: configDir)
+        XCTAssertEqual(account, .refreshed)
+        XCTAssertEqual(try String(contentsOf: marker), configDir.path)
+    }
+
     func testAFailureCarriesTheExitStatus() async throws {
         let claude = try script("exit 3", in: try tempDir())
         let outcome = await ClaudeUsageRefresh.run(executable: claude, in: try tempDir())

@@ -12,10 +12,11 @@ public enum ProblemDetector {
 
 extension ProblemDetector {
     /// The problems of the app and of each configured provider's integration. A provider whose `integration` names
-    /// nothing the app knows is itself a `general` problem, not a crash (ADR 0005).
+    /// nothing the app knows is itself a `general` problem, not a crash (ADR 0005). `folders` are the folders of a tool the
+    /// caller found at the top of the home (`AccountFolders.scan`): one that no entry names is a `general` problem (ADR 0014).
     public static func detect(general: [Problem], providers: [ProviderConfig], integrations: Integrations,
-                              context: ProblemContext) -> [Problem] {
-        var unknown: [Problem] = []
+                              context: ProblemContext, folders: [AccountFolders.Found] = []) -> [Problem] {
+        var unknown = unnamed(folders, providers: providers, integrations: integrations, context: context)
         var found: [[Problem]] = []
         for provider in providers {
             guard let name = provider.integration else { continue }
@@ -26,8 +27,21 @@ extension ProblemDetector {
                     detailID: provider.id))
                 continue
             }
-            found.append(integration.problems(in: context))
+            // Each entry is checked in its own folder, and its problems name it (ADR 0014).
+            found.append(integration.problems(for: provider, in: context))
         }
         return merge(general: general + unknown, providers: found)
+    }
+
+    /// The folders no entry's home names. An entry names the folder its integration's tool reads for it, the default
+    /// folder when it has no `home`; an entry whose integration the app does not know names nothing.
+    static func unnamed(_ folders: [AccountFolders.Found], providers: [ProviderConfig], integrations: Integrations,
+                        context: ProblemContext) -> [Problem] {
+        let named = Set(providers.compactMap { provider -> String? in
+            guard let name = provider.integration, let tool = integrations[name]?.tool else { return nil }
+            return AccountFolders.folder(of: provider.home, tool: tool, userHome: context.home).standardizedFileURL.path
+        })
+        return folders.filter { !named.contains($0.folder.standardizedFileURL.path) }
+            .map { AppProblems.folderNotNamed($0, userHome: context.home) }
     }
 }

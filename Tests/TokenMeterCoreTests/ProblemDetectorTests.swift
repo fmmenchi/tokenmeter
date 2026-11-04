@@ -41,8 +41,8 @@ final class ProblemDetectionTests: XCTestCase {
         let found: [Problem]
         var kinds: [ProblemKind] { [] }
         var fixes: [FixDescriptor] { [] }
-        func problems(in context: ProblemContext) -> [Problem] { found }
-        func run(fix: String, in context: ProblemContext) -> FixResult { .done }
+        func problems(for provider: ProviderConfig, in context: ProblemContext) -> [Problem] { found }
+        func run(fix: String, for provider: ProviderConfig, in context: ProblemContext) -> FixResult { .done }
     }
 
     private func config(_ ids: [(String, String?)]) throws -> [ProviderConfig] {
@@ -59,6 +59,54 @@ final class ProblemDetectionTests: XCTestCase {
         let providers = try config([("a", "a-int"), ("b", nil)])
         XCTAssertEqual(ProblemDetector.detect(general: [], providers: providers, integrations: integrations,
                                               context: ProblemContext()), [a])
+    }
+
+    private struct Tooled: ProviderIntegration {
+        let id: String
+        let tool: AccountTool?
+        var kinds: [ProblemKind] { [] }
+        var fixes: [FixDescriptor] { [] }
+        func problems(for provider: ProviderConfig, in context: ProblemContext) -> [Problem] { [] }
+        func run(fix: String, for provider: ProviderConfig, in context: ProblemContext) -> FixResult { .done }
+    }
+
+    func testAFolderNoEntryNamesIsAGeneralProblemNamedByTheFolder() throws {
+        let home = URL(fileURLWithPath: "/Users/sample", isDirectory: true)
+        let context = ProblemContext(home: home)
+        let integrations = Integrations([Tooled(id: "claude-status-line", tool: .claudeCode), Tooled(id: "codex", tool: .codexCLI)])
+        let json = """
+        {"version":1,"providers":[
+          {"id":"claude","title":"Claude","windows":[300],"integration":"claude-status-line"},
+          {"id":"claude-work","title":"Claude · work","windows":[300],"integration":"claude-status-line","home":"~/.claude-work"},
+          {"id":"chatgpt","title":"ChatGPT","windows":[300],"integration":"codex"}]}
+        """
+        let providers = try ProviderConfigFile.decode(Data(json.utf8), origin: "test").providers
+        let folders = [
+            AccountFolders.Found(tool: .claudeCode, folder: home.appendingPathComponent(".claude"), email: "a@example.com"),
+            AccountFolders.Found(tool: .claudeCode, folder: home.appendingPathComponent(".claude-work"), email: nil),
+            AccountFolders.Found(tool: .codexCLI, folder: home.appendingPathComponent(".codex"), email: nil),
+            AccountFolders.Found(tool: .codexCLI, folder: home.appendingPathComponent(".codex-personal"), email: "mario.rossi@example.com"),
+            AccountFolders.Found(tool: .claudeCode, folder: home.appendingPathComponent(".claude-old"), email: nil),
+        ]
+        let problems = ProblemDetector.detect(general: [], providers: providers, integrations: integrations, context: context,
+                                              folders: folders)
+        XCTAssertEqual(problems.map(\.id), ["general.folder.codex-personal", "general.folder.claude-old"])
+        XCTAssertEqual(problems[0].topic, Problem.general)
+        XCTAssertEqual(problems[0].message, "A Codex CLI folder is not in providers.json")
+        XCTAssertEqual(problems[0].detail, "~/.codex-personal is signed in as mario.rossi@example.com, and no entry names it. "
+                       + "Add it writes an entry, and the card appears.")
+        XCTAssertEqual(problems[1].detail, "~/.claude-old has no login yet, and no entry names it. Add it writes an entry, and the card appears.")
+        XCTAssertNil(problems[0].fix, "the detector offers no fix: Add it is the app's")
+        XCTAssertEqual(problems[0].guide, "use/accounts")
+    }
+
+    func testAFolderOfAToolWhoseIntegrationIsUnknownIsStillReportedAndAnEntryWithAnUnknownOneNamesNothing() throws {
+        let home = URL(fileURLWithPath: "/Users/sample", isDirectory: true)
+        let providers = try config([("claude", "nope")])
+        let folders = [AccountFolders.Found(tool: .claudeCode, folder: home.appendingPathComponent(".claude"), email: nil)]
+        let problems = ProblemDetector.detect(general: [], providers: providers, integrations: Integrations([]),
+                                              context: ProblemContext(home: home), folders: folders)
+        XCTAssertEqual(problems.map(\.id), ["general.folder.claude", "general.integration.claude"])
     }
 
     func testAnUnknownIntegrationIsAGeneralProblem() throws {

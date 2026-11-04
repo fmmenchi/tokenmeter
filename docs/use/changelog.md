@@ -8,6 +8,18 @@ sidebar_position: 10
 
 What changed in each version, newest first. The update window shows the notes of the version it offers, taken from this page, and links here for the rest.
 
+## Unreleased {#unreleased}
+
+- **Accounts**: a work account and a personal one, each with its own card. An account is a folder Claude Code or the Codex CLI
+  reads, named by a `home` in its entry of `providers.json`; the status line is set up and `/usage` asked in each account's own
+  folder, the problems name the account, and a folder nobody named is found at the top of the home and offered in the panel with
+  **Add it** ([Accounts](./accounts.md)).
+- **Settings has an Accounts tab** in place of Providers: add, rename or remove an account, each through a sheet, with the email
+  the folder is signed in with under its name ([Settings](./settings.md)).
+- **The order and the visibility of the cards moved to the panel**, behind a lock: open it and the cards get arrows, an eye each
+  and one on each window, and drag onto one another; a hidden card stays in sight, dimmed, until the lock closes.
+- **The welcome has eight pages**: the seventh says what an account is ([The welcome](./welcome.md)).
+
 ## 0.9.2 {#v0-9-2}
 
 Released on 2026-11-03.

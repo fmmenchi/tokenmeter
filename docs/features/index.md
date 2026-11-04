@@ -34,7 +34,9 @@ are [ADRs](../adr), and its overview links them.
 
 ## In design and build
 
-Nothing at the moment.
+| Feature                                                                                                                                        | Date       | Pages                                                                                     |
+| :--------------------------------------------------------------------------------------------------------------------------------------------- | :--------- | :---------------------------------------------------------------------------------------- |
+| [Accounts](./2026-11-03-accounts/index.md): several accounts of the same tool, one folder and one card each, status line and `/usage` for each | 2026-11-03 | [Overview](./2026-11-03-accounts/index.md), [Proposal](./2026-11-03-accounts/proposal.md) |
 
 ## The pattern: from idea to implemented
 

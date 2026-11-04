@@ -1,11 +1,12 @@
 import Foundation
 
-/// What Claude needs beyond its logs: a status line that leaves the quota on disk (ADR 0002, 0004).
-/// The first integration; it wraps `ClaudeStatusLine` and `ProjectStatusLines`.
+/// What Claude needs beyond its logs: a status line that leaves the quota on disk (ADR 0002, 0004), set up in the
+/// folder of each Claude entry (ADR 0014). The first integration; it wraps `ClaudeStatusLine` and `ProjectStatusLines`.
 public struct ClaudeIntegration: ProviderIntegration {
     public static let wrapStatusLine = "wrapStatusLine"
 
     public let id = "claude-status-line"
+    public let tool: AccountTool? = .claudeCode
     /// The script tokenmeter's status line runs, from the app bundle; nil where there is none (a fix then fails).
     private let script: Data?
 
@@ -21,7 +22,7 @@ public struct ClaudeIntegration: ProviderIntegration {
         [FixDescriptor(
             id: Self.wrapStatusLine, label: "Wrap it", runningLabel: "Wrapping…",
             explanation: """
-            Wrap it changes statusLine in ~/.claude/settings.json to a small script in ~/.tokenmeter/claude/. \
+            Wrap it changes statusLine in the account's settings.json to a small script in ~/.tokenmeter/<account>/. \
             The script gives Claude's data to tokenmeter and still prints your own status line, unchanged. \
             Your setting is saved first, and settings.json.tokenmeter.bak keeps a copy. \
             Restore original in Settings puts it back.
@@ -44,30 +45,40 @@ public struct ClaudeIntegration: ProviderIntegration {
 
     public var kinds: [ProblemKind] { [Self.otherStatusLine, Self.projectOverrides] }
 
-    public func problems(in context: ProblemContext) -> [Problem] {
+    /// The entry as the status line sees it: its id, and the folder Claude Code reads for it (ADR 0014).
+    public static func account(for provider: ProviderConfig, in context: ProblemContext) -> ClaudeStatusLine.Account {
+        ClaudeStatusLine.Account(
+            id: provider.id, configDir: AccountFolders.folder(of: provider.home, tool: .claudeCode, userHome: context.home))
+    }
+
+    public func problems(for provider: ProviderConfig, in context: ProblemContext) -> [Problem] {
         guard enabled else { return [] }
+        let account = Self.account(for: provider, in: context)
+        let folder = provider.home ?? AccountTool.claudeCode.defaultHome
         var found: [Problem] = []
-        if let command = ClaudeStatusLine.otherStatusLine(home: context.home) {
+        if let command = ClaudeStatusLine.otherStatusLine(account: account, home: context.home) {
             found.append(Self.otherStatusLine.problem(
-                detail: "It was left alone, so the Claude bars do not update.", withFix: !command.isEmpty))
+                for: provider.id, detail: "In \(folder) it was left alone, so the \(provider.title) bars do not update.",
+                withFix: !command.isEmpty))
         }
-        let overrides = ProjectStatusLines.overrides(home: context.home, now: context.now)
+        let overrides = ProjectStatusLines.overrides(home: context.home, configDir: account.configDir, now: context.now)
         if !overrides.isEmpty {
             let names = overrides.prefix(3).map(\.project.lastPathComponent).joined(separator: ", ")
             let more = overrides.count > 3 ? " +\(overrides.count - 3)" : ""
             let count = overrides.count
             found.append(Self.projectOverrides.problem(
+                for: provider.id,
                 message: count == 1 ? "1 project sets its own status line" : "\(count) projects set their own status line",
-                detail: "Claude bars freeze there: \(names)\(more)."))
+                detail: "\(provider.title) bars freeze there: \(names)\(more)."))
         }
         return found
     }
 
-    public func run(fix: String, in context: ProblemContext) -> FixResult {
+    public func run(fix: String, for provider: ProviderConfig, in context: ProblemContext) -> FixResult {
         guard fix == Self.wrapStatusLine else { return .failed("Unknown fix \(fix).") }
         guard let script else { return .failed("The status line script is missing from the app. Nothing was changed.") }
         do {
-            switch try ClaudeStatusLine.wrap(script: script, home: context.home) {
+            switch try ClaudeStatusLine.wrap(script: script, account: Self.account(for: provider, in: context), home: context.home) {
             case .wrapped, .alreadyWrapped: return .done
             case .notInstalled: return .failed("Claude Code is not installed. Nothing was changed.")
             case .nothingToWrap: return .failed("There is no other status line to wrap. Nothing was changed.")

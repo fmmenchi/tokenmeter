@@ -7,8 +7,8 @@ final class FixRunnerTests: XCTestCase {
         let result: FixResult
         var kinds: [ProblemKind] { [] }
         var fixes: [FixDescriptor] { [FixDescriptor(id: "go", label: "Go", runningLabel: "Going…", explanation: "e")] }
-        func problems(in context: ProblemContext) -> [Problem] { [] }
-        func run(fix: String, in context: ProblemContext) -> FixResult { result }
+        func problems(for provider: ProviderConfig, in context: ProblemContext) -> [Problem] { [] }
+        func run(fix: String, for provider: ProviderConfig, in context: ProblemContext) -> FixResult { result }
     }
 
     private func providers(integration: String? = "stub") throws -> [ProviderConfig] {
@@ -42,6 +42,22 @@ final class FixRunnerTests: XCTestCase {
         guard case .failed = FixRunner.run(undeclared, providers: try providers(), integrations: Integrations([Stub(result: .done)]),
                                            context: ProblemContext()) else { return XCTFail("expected a failure") }
         XCTAssertNil(FixRunner.descriptor(for: undeclared, providers: try providers(), integrations: Integrations([Stub(result: .done)])))
+    }
+
+    func testTheFixRunsForTheEntryOfTheTopic() throws {
+        struct Recorder: ProviderIntegration {
+            let id = "stub"
+            var kinds: [ProblemKind] { [] }
+            var fixes: [FixDescriptor] { [FixDescriptor(id: "go", label: "Go", runningLabel: "Going…", explanation: "e")] }
+            func problems(for provider: ProviderConfig, in context: ProblemContext) -> [Problem] { [] }
+            func run(fix: String, for provider: ProviderConfig, in context: ProblemContext) -> FixResult {
+                .failed("ran for \(provider.id) in \(provider.home ?? "the default folder")")
+            }
+        }
+        let json = #"{"version":1,"providers":[{"id":"p","title":"P","windows":[60],"integration":"stub","home":"~/.p"}]}"#
+        let providers = try ProviderConfigFile.decode(Data(json.utf8), origin: "test").providers
+        XCTAssertEqual(FixRunner.run(problem, providers: providers, integrations: Integrations([Recorder()]), context: ProblemContext()),
+                       .failed("ran for p in ~/.p"))
     }
 
     func testATopicWithoutAnIntegrationFails() throws {

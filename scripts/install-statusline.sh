@@ -1,15 +1,21 @@
 #!/bin/sh
 # Installs the Claude Code status line for tokenmeter (ADR 0004): copies the script to ~/.tokenmeter and
-# points `statusLine` in ~/.claude/settings.json at it, only when no other status line is set.
-# Without Claude Code (no ~/.claude) there is nothing to set up and nothing is created.
+# points `statusLine` in the account's settings.json at it, only when no other status line is set.
+# Usage: install-statusline.sh [id [folder]]: the entry's id and the folder Claude Code reads for it (ADR 0014);
+# with none, the seed entry `claude` in ~/.claude, whose command has no argument.
+# Without Claude Code (no folder) there is nothing to set up and nothing is created.
 # Exit status: 0 done, already done or nothing to do, 2 another status line is set (left alone), 1 failure.
 set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 dest="$HOME/.tokenmeter/claude-statusline.sh"
-settings="$HOME/.claude/settings.json"
+id="${1:-claude}"
+case "$id" in *[!A-Za-z0-9._-]* | "") echo "an id is letters, digits, '.', '_' and '-' only: $id"; exit 1 ;; esac
+folder="${2:-$HOME/.claude}"
+settings="$folder/settings.json"
+if [ "$id" = claude ]; then command="$dest"; else command="$dest $id"; fi
 
-if [ ! -d "$HOME/.claude" ]; then
-  echo "Claude Code not found (no ~/.claude): status line not set up"
+if [ ! -d "$folder" ]; then
+  echo "Claude Code not found (no $folder): status line not set up"
   exit 0
 fi
 
@@ -18,17 +24,17 @@ cp "$here/claude-statusline.sh" "$dest"
 chmod +x "$dest"
 
 if [ ! -f "$settings" ]; then
-  printf '{\n  "statusLine": {\n    "type": "command",\n    "command": "%s"\n  }\n}\n' "$dest" > "$settings"
+  printf '{\n  "statusLine": {\n    "type": "command",\n    "command": "%s"\n  }\n}\n' "$command" > "$settings"
   echo "created $settings with the status line"
   exit 0
 fi
 
 if ! command -v python3 >/dev/null 2>&1; then
-  echo "python3 not found: set \"statusLine\" to $dest in $settings by hand (docs/use/enable-claude-quota.md)"
+  echo "python3 not found: set \"statusLine\" to $command in $settings by hand (docs/use/enable-claude-quota.md)"
   exit 0
 fi
 
-python3 - "$settings" "$dest" <<'PY'
+python3 - "$settings" "$command" <<'PY'
 import json, shutil, sys
 
 path, command = sys.argv[1:3]

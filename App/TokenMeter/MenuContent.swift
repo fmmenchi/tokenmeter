@@ -4,6 +4,10 @@ import TokenMeterCore
 struct MenuContent: View {
     let meter: Meter
     @Environment(\.openWindow) private var openWindow
+    /// The lock (ADR 0014): open, the cards show their arrows and eyes and drag; it closes with the panel.
+    @State private var isUnlocked = false
+    @State private var dragging: String?
+    @State private var dropTarget: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -14,10 +18,37 @@ struct MenuContent: View {
                 ProblemBanner(
                     problem: problem, topicTitle: title(of: problem.topic), fix: meter.fixDescriptor(for: problem),
                     state: meter.fixStates[problem.id], onFix: { meter.runFix(problem) },
-                    onDismiss: { meter.dismiss(problem) })
+                    onDismiss: { meter.dismiss(problem) },
+                    action: meter.foundFolder(for: problem).map { found in
+                        // Add it: the sheet of Settings › Accounts, on this folder (ADR 0014).
+                        ("Add it", { meter.pendingAccount = found; openSettings() })
+                    })
             }
             if meter.showsStats {
                 StatsView(meter: meter)
+            } else if isUnlocked {
+                let items = meter.arrangeable
+                ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
+                    ArrangeableCard(
+                        item: item, isFirst: index == 0, isLast: index == items.count - 1,
+                        canHide: items.filter(\.card.isShown).count > 1, isDropTarget: dropTarget == item.id,
+                        onMove: { meter.moveProvider(item.id, by: $0) },
+                        onToggleShown: { meter.setProviderShown(!item.card.isShown, for: item.id) },
+                        onToggleWindow: { id in
+                            let on = item.card.shown
+                            meter.setShownWindows(on.contains(id) ? on.subtracting([id]) : on.union([id]), for: item.id)
+                        },
+                        onToggleModel: { meter.setModel($0, shown: $1, for: item.id) })
+                        .onDrag {
+                            dragging = item.id
+                            return NSItemProvider(object: item.id as NSString)
+                        }
+                        .onDrop(of: [.plainText], delegate: CardDropDelegate(
+                            target: item.id, dragging: $dragging, dropTarget: $dropTarget,
+                            move: { meter.moveProvider($0, onto: $1) }))
+                }
+                Text("Drag a card to reorder it. The eye hides it; a hidden card stays here, dimmed, until the lock closes.")
+                    .font(.caption2).captionColour().multilineTextAlignment(.center).frame(maxWidth: .infinity)
             } else if let snapshot = meter.snapshot {
                 ForEach(snapshot.providers, id: \.provider) {
                     ProviderCard(snapshot: $0, problemCount: snapshot.problemCount(for: $0), showsPace: true)
@@ -46,13 +77,15 @@ struct MenuContent: View {
                            label: meter.showsStats ? "Show the current quota" : "Show the stats") {
                     meter.showsStats.toggle()
                 }
-                IconButton(systemName: "gearshape", label: "Settings") {
-                    // An accessory app cannot show a regular window in front: become a regular app
-                    // while Settings is open (SettingsView puts it back on disappear).
-                    NSApplication.shared.setActivationPolicy(.regular)
-                    NSApplication.shared.activate(ignoringOtherApps: true)
-                    openWindow(id: SettingsWindow.id)
+                IconButton(systemName: "gearshape", label: "Settings", action: openSettings)
+                // The lock (ADR 0014): nothing drags and nothing hides while it is closed.
+                IconButton(systemName: isUnlocked ? "lock.open" : "lock",
+                           label: isUnlocked ? "Lock the cards" : "Unlock the cards to reorder or hide them",
+                           isOn: isUnlocked) {
+                    isUnlocked.toggle()
+                    if !isUnlocked { dragging = nil; dropTarget = nil }
                 }
+                .disabled(meter.showsStats)
                 #if DEBUG
                 DevMenu(meter: meter)
                 #endif
@@ -65,14 +98,24 @@ struct MenuContent: View {
         // Every time the panel opens it shows the current quota: the stats are for when they are asked for.
         .onAppear {
             meter.showsStats = false
+            isUnlocked = false
             meter.rollEasterEgg()
         }
+        .onDisappear { isUnlocked = false }
         .environment(\.easterEgg, meter.easterEgg)
         .task { await meter.refresh() }
         // The skin's own colour in place of the window's translucent material (ADR 0013); System keeps the material.
         .background { PanelFill() }
         .skinned(meter.skin)
         .environment(\.barsDisplay, meter.barsDisplay)
+    }
+
+    /// An accessory app cannot show a regular window in front: become a regular app while Settings is open (SettingsView
+    /// puts it back on disappear).
+    private func openSettings() {
+        NSApplication.shared.setActivationPolicy(.regular)
+        NSApplication.shared.activate(ignoringOtherApps: true)
+        openWindow(id: SettingsWindow.id)
     }
 
     private func title(of topic: String) -> String {
@@ -95,6 +138,8 @@ private struct IconButton: View {
     let systemName: String
     let label: String
     var isBusy = false
+    /// True while what the button toggles is on: the lock, open. Drawn in the accent colour on its soft fill.
+    var isOn = false
     let action: () -> Void
     @State private var hovering = false
 
@@ -104,7 +149,9 @@ private struct IconButton: View {
                 if isBusy { ProgressView().controlSize(.small) } else { Image(systemName: systemName) }
             }
             .frame(width: 28, height: 24)
-            .background(RoundedRectangle(cornerRadius: 6).fill(Color.primary.opacity(hovering ? 0.14 : 0.07)))
+            .foregroundStyle(isOn ? Color.accentColor : Color.primary)
+            .background(RoundedRectangle(cornerRadius: 6).fill(
+                isOn ? Color.accentColor.opacity(hovering ? 0.22 : 0.15) : Color.primary.opacity(hovering ? 0.14 : 0.07)))
             .contentShape(RoundedRectangle(cornerRadius: 6))
         }
         .buttonStyle(.plain)

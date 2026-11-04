@@ -11,7 +11,16 @@ final class Meter {
     private(set) var isRefreshing = false
     private(set) var launchAtLogin = false
     private(set) var autoSetUpClaude = UserDefaults.standard.object(forKey: Meter.autoSetUpKey) as? Bool ?? true
-    private(set) var claudeStatusLine: ClaudeStatusLine.Outcome?
+    /// What the setup of the status line found, by Claude entry (ADR 0014); empty while the switch is off or before launch.
+    private(set) var claudeStatusLines: [String: ClaudeStatusLine.Outcome] = [:]
+    /// The Claude entries the setup knows, in the file's order, so Settings can say a line for each (ADR 0014).
+    private(set) var claudeAccounts: [ClaudeAccounts.Entry] = []
+    /// Every entry of the file as the Accounts tab lists it, with who is signed in, read with the problems (ADR 0014).
+    private(set) var accounts: [AccountSummary] = []
+    /// The folders of a tool found at the last detection, so Add it on a banner knows which folder it is about.
+    private var foundFolders: [AccountFolders.Found] = []
+    /// A folder Add it was pressed for: the Accounts tab opens its sheet on it, filled in, and clears this.
+    var pendingAccount: AccountFolders.Found?
     /// The problems the person has not hidden (ADR 0005); the panel draws these and the snapshot carries them.
     private(set) var problems: [Problem] = []
     /// Interface state of the fixes being run, by problem id. Not in the model or the snapshot (the plan of the feature).
@@ -126,7 +135,9 @@ final class Meter {
     private let dismissals = DefaultsDismissals()
     private let preferences = DefaultsDisplayPreferences()
     private static let autoSetUpKey = "autoSetUpClaudeStatusLine"
-    private let collector = Collector()
+    /// Rebuilt when the file changes: after a write of the app, or by hand between two detections (ADR 0014).
+    private var collector = Collector()
+    private var providersFileStamp = Meter.providersFileStamp()
     private let store = SnapshotStore.appGroupStore()
     private var timer: Timer?
     private static let log = Logger(subsystem: "com.fmmenchi.tokenmeter.app", category: "snapshot")
@@ -216,20 +227,25 @@ final class Meter {
     }
 
     /// ADR 0002: Claude Code writes a copy of the usage, including each model's limit, when it runs `/usage`. Ask it to,
-    /// on a slow timer and when the person refreshes, in the background and only while the Claude quota switch is on.
-    /// Claude Code reads its own credentials; tokenmeter handles none.
+    /// on a slow timer and when the person refreshes, in the background and only while the Claude quota switch is on,
+    /// once for each Claude entry in its own folder (ADR 0014). Claude Code reads its own credentials; tokenmeter handles none.
     private func refreshClaudeUsageIfDue(force: Bool) {
         guard autoSetUpClaude, !isRefreshingUsage else { return }
         if !force, let last = lastUsageRefresh, Date().timeIntervalSince(last) < 900 { return }
         isRefreshingUsage = true
         lastUsageRefresh = Date()
+        let accounts = ClaudeAccounts.entries(in: providers, integrations: makeIntegrations()).map(\.account)
         Task(priority: .utility) {
-            let outcome = await ClaudeUsageRefresh.refresh()
+            var outcomes: [ClaudeUsageRefresh.Outcome] = []
+            for account in accounts.isEmpty ? [.default()] : accounts {
+                outcomes.append(await ClaudeUsageRefresh.refresh(account: account))
+            }
             isRefreshingUsage = false
-            usageRefresh = outcome
-            if outcome == .refreshed { await refresh() }
+            // One outcome for the problem the app reports: the first that went wrong, else the first.
+            usageRefresh = outcomes.first { $0 != .refreshed && $0 != .notFound } ?? outcomes.first
+            if outcomes.contains(.refreshed) { await refresh() }
             else {
-                Self.log.info("Claude usage not refreshed: \(String(describing: outcome), privacy: .public)")
+                Self.log.info("Claude usage not refreshed: \(String(describing: outcomes), privacy: .public)")
                 publish()
             }
         }
@@ -285,6 +301,21 @@ final class Meter {
             return CardProvider(
                 id: id, title: provider.title, plan: provider.plan, windows: ownIDs, models: models,
                 shown: shownOwn, shownModels: shownModels, isShown: visible.contains(id))
+        }
+    }
+
+    /// A card as the unlocked panel draws it (ADR 0014): the provider's full reading, hidden or not, with what the person chose.
+    struct Arrangeable: Identifiable {
+        let snapshot: ProviderSnapshot
+        let card: CardProvider
+        var id: String { card.id }
+    }
+
+    /// Every card in the person's order, the hidden ones too, from the full reading, so the unlocked panel can show and
+    /// arrange them all (ADR 0006, 0014).
+    var arrangeable: [Arrangeable] {
+        cardProviders.compactMap { card in
+            base?.providers.first { $0.provider.rawValue == card.id }.map { Arrangeable(snapshot: $0, card: card) }
         }
     }
 
@@ -402,35 +433,48 @@ final class Meter {
     }
 
     /// Restore original stays in Settings (ADR 0005); the wrap itself is a fix in the panel.
-    func restoreClaudeStatusLine() {
+    /// Puts the account's own status line back, in its folder (ADR 0014).
+    func restoreClaudeStatusLine(for id: String) {
+        guard let entry = ClaudeAccounts.entries(in: providers, integrations: makeIntegrations()).first(where: { $0.id == id })
+        else { return }
+        let account = entry.account
         Task {
             let failure = await Task.detached(priority: .utility) { () -> String? in
-                do { _ = try ClaudeStatusLine.restore(); return nil } catch { return error.localizedDescription }
+                do { _ = try ClaudeStatusLine.restore(account: account); return nil } catch { return error.localizedDescription }
             }.value
-            if let failure { Self.log.error("Could not restore the Claude status line: \(failure, privacy: .public)") }
+            if let failure { Self.log.error("Could not restore the Claude status line of \(id, privacy: .public): \(failure, privacy: .public)") }
             await setUpClaudeStatusLine()
             detectProblems()
         }
     }
 
-    /// ADR 0004: only while the switch is on, at every launch and when it is turned on. The settings file is read and written off the
-    /// main actor (ADR 0005).
+    /// ADR 0004: only while the switch is on, at every launch and when it is turned on, for each Claude entry in its own
+    /// folder (ADR 0014). The file and the settings are read and written off the main actor (ADR 0005).
     private func setUpClaudeStatusLine() async {
-        guard autoSetUpClaude else { claudeStatusLine = nil; usageRefresh = nil; return }
+        guard autoSetUpClaude else { claudeStatusLines = [:]; claudeAccounts = []; usageRefresh = nil; return }
         guard let script = claudeScript else { return }
-        let result = await Task.detached(priority: .utility) { Result { try ClaudeStatusLine.setUp(script: script) } }.value
-        switch result {
-        case .success(let outcome):
-            claudeStatusLine = outcome
-        case .failure(let error):
-            claudeStatusLine = nil
-            Self.log.error("Could not set up the Claude status line: \(error.localizedDescription, privacy: .public)")
-        }
+        let integrations = makeIntegrations()
+        let (outcomes, failures, configured) = await Task.detached(priority: .utility) {
+            () -> ([String: ClaudeStatusLine.Outcome], [String], [ProviderConfig]) in
+            let loaded = Self.loadProviders()
+            var outcomes: [String: ClaudeStatusLine.Outcome] = [:]
+            var failures: [String] = []
+            for entry in ClaudeAccounts.entries(in: loaded.providers, integrations: integrations) {
+                do { outcomes[entry.id] = try ClaudeStatusLine.setUp(script: script, account: entry.account) } catch {
+                    failures.append("\(entry.id): \(error.localizedDescription)")
+                }
+            }
+            return (outcomes, failures, loaded.providers)
+        }.value
+        for failure in failures { Self.log.error("Could not set up the Claude status line: \(failure, privacy: .public)") }
+        claudeStatusLines = outcomes
+        providers = configured
+        claudeAccounts = ClaudeAccounts.entries(in: configured, integrations: integrations)
         detectProblems()
     }
 
     private func makeIntegrations() -> Integrations {
-        Integrations([ClaudeIntegration(script: claudeScript, enabled: autoSetUpClaude)])
+        Integrations([ClaudeIntegration(script: claudeScript, enabled: autoSetUpClaude), CodexIntegration()])
     }
 
     /// ADR 0005: in the background at utility priority, at most every 10 minutes between changes.
@@ -443,17 +487,25 @@ final class Meter {
         lastDetection = Date()
         let hasAppGroup = store != nil
         let integrations = makeIntegrations()
+        let stamp = providersFileStamp
         Task(priority: .utility) {
-            let (found, configured, fileError) = await Task.detached(priority: .utility) {
+            // A change by hand wins at the next detection (ADR 0014): the sources are built again from the file.
+            let changed = await Task.detached(priority: .utility) { Self.providersFileStamp() != stamp }.value
+            if changed { await reloadProviders(); return }
+            let (found, configured, fileError, listed, folders) = await Task.detached(priority: .utility) {
                 // A file that cannot be used falls back to the seed, as the collector does (ADR 0003), and says so (ADR 0005).
                 let loaded = Self.loadProviders()
+                // The folders of a tool at the top of the home, for the one nobody named (ADR 0014).
+                let folders = AccountFolders.scan()
                 let found = ProblemDetector.detect(
                     general: AppProblems.check(hasAppGroup: hasAppGroup), providers: loaded.providers,
-                    integrations: integrations, context: ProblemContext())
-                return (found, loaded.providers, loaded.error)
+                    integrations: integrations, context: ProblemContext(), folders: folders)
+                return (found, loaded.providers, loaded.error, AccountSummary.list(loaded.providers, integrations: integrations), folders)
             }.value
             detected = found
             providers = configured
+            accounts = listed
+            foundFolders = folders
             providersFileError = fileError
             for (id, state) in fixStates where state == .done { fixStates[id] = nil }
             publish()
@@ -492,6 +544,101 @@ final class Meter {
                 fixStates[problem.id] = .failed(reason)
             }
         }
+    }
+
+    // MARK: Accounts (ADR 0014)
+
+    /// The folder a problem of the kind "a folder nobody named" is about, for Add it; nil for any other problem.
+    func foundFolder(for problem: Problem) -> AccountFolders.Found? {
+        guard problem.id.hasPrefix(AppProblems.folderNotNamed.id + ".") else { return nil }
+        return foundFolders.first { AppProblems.folderNotNamed($0, userHome: FileManager.default.homeDirectoryForCurrentUser).id == problem.id }
+    }
+
+    /// What the sheet says about a folder the person typed or chose.
+    enum FolderCheck: Equatable {
+        /// Not a folder on disk.
+        case missing
+        /// A folder, but not one the tool left its files in: it may be new, or the wrong one.
+        case notTheTools
+        case found(email: String?)
+    }
+
+    /// Looks at the folder off the main actor: it reads the folder's files.
+    func checkFolder(_ path: String, tool: AccountTool) async -> FolderCheck {
+        let url = AccountFolders.folder(of: Self.tilde(path), tool: tool)
+        return await Task.detached(priority: .userInitiated) {
+            var isDirectory: ObjCBool = false
+            guard FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory), isDirectory.boolValue else {
+                return .missing
+            }
+            guard AccountFolders.isFolder(url, of: tool) else { return .notTheTools }
+            return .found(email: AccountFolders.email(in: url, tool: tool))
+        }.value
+    }
+
+    /// Writes the entry of a new account: the tool's template, with an id made from the title. The error, or nil.
+    func addAccount(tool: AccountTool, folder: String, title: String) async -> String? {
+        let id = ProviderConfigFile.id(for: title, taken: Set(providers.map(\.id)))
+        let entry = ProviderConfigFile.entry(for: tool, id: id, title: title, home: Self.tilde(folder))
+        let error = await Task.detached(priority: .userInitiated) { () -> String? in
+            do { try ProviderConfigFile.add(entry); return nil } catch { return "\(error)" }
+        }.value
+        if error == nil { await reloadProviders() }
+        return error
+    }
+
+    /// Changes an entry's title and folder; its id stays, so its history, its order and its notices do. The error, or nil.
+    func editAccount(_ id: String, title: String, folder: String?) async -> String? {
+        let tool = accounts.first { $0.id == id }?.tool
+        let home = folder.map(Self.tilde)
+        let error = await Task.detached(priority: .userInitiated) { () -> String? in
+            do {
+                guard let data = try? Data(contentsOf: ProviderConfigFile.defaultURL),
+                      let object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
+                      let entry = (object["providers"] as? [[String: Any]])?.first(where: { $0["id"] as? String == id })
+                else { return "providers.json could not be read." }
+                var changed = entry
+                if let tool, let home {
+                    changed = ProviderConfigFile.edited(entry, tool: tool, title: title, home: home)
+                } else {
+                    changed["title"] = title
+                }
+                try ProviderConfigFile.replace(id, with: changed)
+                return nil
+            } catch { return "\(error)" }
+        }.value
+        if error == nil { await reloadProviders() }
+        return error
+    }
+
+    /// Takes the entry out of the file, and nothing else: the preferences, the history and the folder stay. The error, or nil.
+    func removeAccount(_ id: String) async -> String? {
+        let error = await Task.detached(priority: .userInitiated) { () -> String? in
+            do { try ProviderConfigFile.remove(id); return nil } catch { return "\(error)" }
+        }.value
+        if error == nil { await reloadProviders() }
+        return error
+    }
+
+    /// The file was written: the sources are built again from it, the status lines set up, and a reading taken.
+    private func reloadProviders() async {
+        collector = await Task.detached(priority: .userInitiated) { Collector() }.value
+        providersFileStamp = Self.providersFileStamp()
+        await setUpClaudeStatusLine()
+        await refresh()
+    }
+
+    /// `~/…` for a path under the home, so the file reads the same on another Mac; a path elsewhere as it is.
+    nonisolated static func tilde(_ path: String) -> String {
+        let trimmed = path.trimmingCharacters(in: .whitespacesAndNewlines)
+        let home = FileManager.default.homeDirectoryForCurrentUser.path
+        if trimmed == home { return "~" }
+        if trimmed.hasPrefix(home + "/") { return "~" + trimmed.dropFirst(home.count) }
+        return trimmed
+    }
+
+    nonisolated private static func providersFileStamp() -> Date? {
+        (try? FileManager.default.attributesOfItem(atPath: ProviderConfigFile.defaultURL.path))?[.modificationDate] as? Date
     }
 
     func dismiss(_ problem: Problem) {

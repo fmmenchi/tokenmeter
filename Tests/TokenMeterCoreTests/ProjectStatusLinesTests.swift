@@ -32,6 +32,29 @@ final class ProjectStatusLinesTests: XCTestCase {
 
     private func overrides() -> [ProjectStatusLines.Override] { ProjectStatusLines.overrides(home: home) }
 
+    func testAnAccountsOverridesComeFromItsOwnFolder() throws {
+        let fileManager = FileManager.default
+        let project = try makeProject("a", shared: #"{"statusLine":{"type":"command","command":"/bin/mine"}}"#)
+        let configDir = home.appendingPathComponent(".claude-work")
+        let other = home.appendingPathComponent("work/b", isDirectory: true)
+        try fileManager.createDirectory(at: other.appendingPathComponent(".claude"), withIntermediateDirectories: true)
+        try Data(#"{"statusLine":{"type":"command","command":"/bin/theirs"}}"#.utf8)
+            .write(to: other.appendingPathComponent(".claude/settings.json"))
+        let folder = configDir.appendingPathComponent("projects/b")
+        try fileManager.createDirectory(at: folder, withIntermediateDirectories: true)
+        try Data(#"{"type":"user","cwd":"\#(other.path)"}"#.utf8).write(to: folder.appendingPathComponent("a.jsonl"))
+
+        XCTAssertEqual(overrides(), [.init(project: project, command: "/bin/mine")], "the default folder sees its own")
+        XCTAssertEqual(ProjectStatusLines.overrides(home: home, configDir: configDir),
+                       [.init(project: other, command: "/bin/theirs")], "the account's folder sees its own")
+    }
+
+    func testAnAccountsWrapperIsNotAnOverrideEither() throws {
+        let wrapper = home.appendingPathComponent(".tokenmeter/claude-work/statusline-wrapper.sh").path
+        try makeProject("a", shared: #"{"statusLine":{"type":"command","command":"\#(wrapper)"}}"#)
+        XCTAssertEqual(overrides(), [])
+    }
+
     func testAProjectWithItsOwnStatusLineIsReported() throws {
         let project = try makeProject("a", shared: #"{"statusLine":{"type":"command","command":"/bin/mine"}}"#)
         XCTAssertEqual(overrides(), [.init(project: project, command: "/bin/mine")])

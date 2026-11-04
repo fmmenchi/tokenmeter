@@ -26,7 +26,7 @@ final class ProviderConfigMigrationTests: XCTestCase {
         try write(old)
         XCTAssertEqual(ProviderConfigFile.addClaudeIntegration(to: url), .migrated)
         XCTAssertEqual(try integration(of: "claude"), "claude-status-line")
-        XCTAssertNil(try integration(of: "chatgpt"))
+        XCTAssertEqual(try integration(of: "chatgpt"), "codex", "the Codex CLI gets its integration too (ADR 0014)")
         XCTAssertEqual(try String(contentsOf: url.appendingPathExtension("tokenmeter.bak")), old)
         let file = try ProviderConfigFile.load(from: url)
         XCTAssertEqual(file?.providers.map(\.id), ["chatgpt", "claude"], "the order is kept and the file still loads")
@@ -38,6 +38,16 @@ final class ProviderConfigMigrationTests: XCTestCase {
         let after = try Data(contentsOf: url)
         XCTAssertEqual(ProviderConfigFile.addClaudeIntegration(to: url), .untouched)
         XCTAssertEqual(try Data(contentsOf: url), after)
+    }
+
+    func testTheCodexEntryGainsItsIntegrationEvenWithoutAClaudeOne() throws {
+        try write(#"{"version":1,"providers":[{"id":"chatgpt","title":"ChatGPT","windows":[300]}]}"#)
+        XCTAssertEqual(ProviderConfigFile.addClaudeIntegration(to: url), .migrated)
+        XCTAssertEqual(try integration(of: "chatgpt"), "codex")
+        XCTAssertEqual(ProviderConfigFile.addClaudeIntegration(to: url), .untouched)
+        try write(#"{"version":1,"providers":[{"id":"chatgpt","title":"ChatGPT","windows":[300],"integration":"mine"}]}"#)
+        XCTAssertEqual(ProviderConfigFile.addClaudeIntegration(to: url), .untouched)
+        XCTAssertEqual(try integration(of: "chatgpt"), "mine", "a chosen value is never overwritten")
     }
 
     func testAChosenValueIsNeverOverwritten() throws {

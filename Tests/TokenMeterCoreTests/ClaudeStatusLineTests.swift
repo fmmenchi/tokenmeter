@@ -162,6 +162,55 @@ final class ClaudeStatusLineTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: saved.path))
     }
 
+    // MARK: one account at a time (ADR 0014)
+
+    private var work: ClaudeStatusLine.Account {
+        ClaudeStatusLine.Account(id: "claude-work", configDir: home.appendingPathComponent(".claude-work"))
+    }
+
+    private func makeWork(settings json: String? = nil) throws {
+        try FileManager.default.createDirectory(at: work.configDir, withIntermediateDirectories: true)
+        if let json { try Data(json.utf8).write(to: work.configDir.appendingPathComponent("settings.json")) }
+    }
+
+    private func statusLine(of account: ClaudeStatusLine.Account) throws -> [String: Any]? {
+        let data = try Data(contentsOf: account.configDir.appendingPathComponent("settings.json"))
+        return (try JSONSerialization.jsonObject(with: data) as? [String: Any])?["statusLine"] as? [String: Any]
+    }
+
+    func testAnAccountGetsTheStatusLineInItsFolderWithItsIdAsTheArgument() throws {
+        try makeClaude()
+        try makeWork()
+        XCTAssertEqual(try ClaudeStatusLine.setUp(script: script, account: work, home: home), .set)
+        XCTAssertEqual(try statusLine(of: work)?["command"] as? String, "\(command) claude-work")
+        XCTAssertFalse(FileManager.default.fileExists(atPath: settings.path), "the default folder was not touched")
+        XCTAssertEqual(try ClaudeStatusLine.setUp(script: script, home: home), .set)
+        XCTAssertEqual(try statusLine()?["command"] as? String, command, "the seed entry's command has no argument")
+        XCTAssertEqual(try ClaudeStatusLine.setUp(script: script, account: work, home: home), .alreadySet)
+        XCTAssertNil(ClaudeStatusLine.otherStatusLine(account: work, home: home), "its own command is not another's")
+        XCTAssertEqual(try ClaudeStatusLine.setUp(script: script, account: .default(home: home), home: home), .alreadySet)
+    }
+
+    func testAnAccountWithoutItsFolderIsNotInstalled() throws {
+        XCTAssertEqual(try ClaudeStatusLine.setUp(script: script, account: work, home: home), .notInstalled)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: work.configDir.path))
+    }
+
+    func testAnAccountsWrapperAndOriginalAreNamedByItsId() throws {
+        try makeWork(settings: mine)
+        XCTAssertEqual(try ClaudeStatusLine.wrap(script: script, account: work, home: home), .wrapped)
+        let wrapper = home.appendingPathComponent(".tokenmeter/claude-work/statusline-wrapper.sh")
+        XCTAssertEqual(try statusLine(of: work)?["command"] as? String, wrapper.path)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: home.appendingPathComponent(".tokenmeter/claude-work/original-statusline.json").path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: self.wrapper), "the default account's wrapper is another file")
+        let body = try String(contentsOf: wrapper, encoding: .utf8)
+        XCTAssertTrue(body.contains("'\(command)' 'claude-work' >/dev/null"), "the wrapper passes the id to the script: \(body)")
+        XCTAssertEqual(try ClaudeStatusLine.setUp(script: script, account: work, home: home), .wrapped)
+        XCTAssertEqual(try ClaudeStatusLine.restore(account: work, home: home), .restored)
+        XCTAssertEqual(try statusLine(of: work)?["command"] as? String, "sed 's/^/mine:/'")
+        XCTAssertFalse(FileManager.default.fileExists(atPath: wrapper.path))
+    }
+
     func testRestoreNeverOverwritesAStatusLineChangedByHand() throws {
         try makeClaude(settings: mine)
         _ = try ClaudeStatusLine.wrap(script: script, home: home)

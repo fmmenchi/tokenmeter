@@ -2,6 +2,14 @@
 
 Read this **before** debugging something odd. Each entry: symptom, cause, what to do.
 
+## A preview from a worktree says "The widget's data could not be written"
+
+**Symptom:** `./scripts/preview.sh` run in a git worktree opens a build whose panel lists "The widget's data could not be
+written: you don't have permission to save snapshot.json in the folder tokenmeter".
+**Cause:** `Local.xcconfig` is git-ignored, so a worktree has none; without `DEVELOPMENT_TEAM` the App Group of the build is
+`tokenmeter` with no team prefix, and macOS refuses that container (it still creates an empty `~/Library/Group Containers/tokenmeter`).
+**Do:** copy `Local.xcconfig` from the main checkout into the worktree and run the preview again. The feature is not at fault.
+
 ## Codex `rate_limits` is mostly `null`
 
 **Symptom:** the probe shows `reported quota: none`, or a stale percentage (e.g. 99% used).

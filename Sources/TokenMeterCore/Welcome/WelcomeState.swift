@@ -13,6 +13,8 @@ public enum WelcomeState: Equatable, Sendable {
         case buttons
         case stats
         case suggestion
+        /// Several accounts of the same tool, one folder each (ADR 0014).
+        case accounts
         case settings
 
         public var isFirst: Bool { self == Page.allCases.first }

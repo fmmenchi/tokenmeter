@@ -79,4 +79,14 @@ public struct ProblemKind: Equatable, Sendable {
         Problem(id: detailID.map { "\(id).\($0)" } ?? id, topic: topic, message: message ?? summary, detail: detail,
                 explanation: explanation, fix: withFix ? fix : nil, guide: guide)
     }
+
+    /// The same, for the account `topic` names (ADR 0014): the problem's topic is the entry's id, and so is the first
+    /// segment of its id, so `claude.statusline.other` becomes `claude-work.statusline.other` for the entry `claude-work`.
+    public func problem(for topic: Problem.Topic, message: String? = nil, detail: String? = nil, detailID: String? = nil,
+                        withFix: Bool = true) -> Problem {
+        let check = id.split(separator: ".", maxSplits: 1).last.map(String.init) ?? id
+        let base = "\(topic).\(check)"
+        return Problem(id: detailID.map { "\(base).\($0)" } ?? base, topic: topic, message: message ?? summary,
+                       detail: detail, explanation: explanation, fix: withFix ? fix : nil, guide: guide)
+    }
 }

@@ -40,6 +40,20 @@ printf 'not json' > "$h/.claude/settings.json"
 check "invalid settings: exit 1" "$(run "$h")" 1
 check "invalid settings: untouched" "$(cat "$h/.claude/settings.json")" "not json"
 
+# An account (ADR 0014): its own folder, the id as the command's argument, the seed entry untouched.
+h=$(newhome); mkdir -p "$h/.claude" "$h/.claude-work"
+check "account: exit 0" "$(HOME="$h" "$here/install-statusline.sh" claude-work "$h/.claude-work" >"$h/out.txt" 2>&1; echo $?)" 0
+check "account: the command carries the id" "$(cmd "$h/.claude-work/settings.json")" "$h/.tokenmeter/claude-statusline.sh claude-work"
+check "account: the default folder untouched" "$([ -f "$h/.claude/settings.json" ] && echo yes || echo no)" no
+check "account: a bad id is refused" "$(HOME="$h" "$here/install-statusline.sh" 'no spaces' "$h/.claude-work" >/dev/null 2>&1; echo $?)" 1
+
+# The status line script writes one file per account.
+h=$(newhome)
+check "script: the default file" "$(printf '{"a":1}' | HOME="$h" "$here/claude-statusline.sh"; cat "$h/.tokenmeter/claude-statusline.json")" 'tokenmeter{"a":1}'
+check "script: a file per id" "$(printf '{"b":2}' | HOME="$h" "$here/claude-statusline.sh" claude-work >/dev/null; cat "$h/.tokenmeter/claude-work-statusline.json")" '{"b":2}'
+check "script: the default file kept" "$(cat "$h/.tokenmeter/claude-statusline.json")" '{"a":1}'
+check "script: a bad id falls back to claude" "$(printf '{"c":3}' | HOME="$h" "$here/claude-statusline.sh" '../x' >/dev/null; cat "$h/.tokenmeter/claude-statusline.json")" '{"c":3}'
+
 # No python3 on the PATH: the script must still finish and leave settings.json alone.
 h=$(newhome); mkdir -p "$h/.claude" "$h/bin"
 echo '{"model":"sonnet"}' > "$h/.claude/settings.json"

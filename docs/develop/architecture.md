@@ -57,14 +57,20 @@ How the pieces fit, where each file goes and which rules keep it that way. The r
    opens, and the panel hands them to its views through the environment; `Shared/EasterEggs/` draws them and the widget never
    sets the value. Everything of the feature is in four folders: the core, `Shared/`, the images and the tests.
 
-8. **Dressing.** The skin the person chose is kept by `Meter` in the defaults and written to the snapshot it publishes
+8. **Accounting.** An entry with a `home` is an account of Claude Code or the Codex CLI ([ADR 0014](../adr/0014-accounts-and-the-home-of-a-provider.md)).
+   `Meter` sets the status line up and asks `/usage` in each Claude entry's folder, hands the detector the folders
+   `AccountFolders` found at the top of the home, and writes whole entries through `ProviderConfigFile` when the Accounts tab
+   of Settings adds, edits or removes one; after a write, and when the file changed by hand, the sources are built again from
+   it. The order and the visibility of the cards stay in the defaults, written now from the panel's lock.
+
+9. **Dressing.** The skin the person chose is kept by `Meter` in the defaults and written to the snapshot it publishes
    ([ADR 0013](../adr/0013-skins.md)). The panel and the widget put it in the environment with `skinned(_:)` and take their
    background colour from it; the shared views (the bar, the card, the tick, the plan chip) read the style from the environment and
    draw as before where there is none, which is System.
 
-9. **Reading.** How the bars read, left or used, is kept by `Meter` in the defaults and written to the snapshot with the skin
-   ([ADR 0006](../adr/0006-display-preferences.md)). The panel and the widget put it in the environment once, and `WindowRow` and
-   `ScopedWindowRow` take the figure, the fill and the mark from it; the colour and the thresholds of the notices stay on what is left, and the line of a notification says what the choice says. The stats read it too, in the row of a window and in the verdict.
+10. **Reading.** How the bars read, left or used, is kept by `Meter` in the defaults and written to the snapshot with the skin
+    ([ADR 0006](../adr/0006-display-preferences.md)). The panel and the widget put it in the environment once, and `WindowRow` and
+    `ScopedWindowRow` take the figure, the fill and the mark from it; the colour and the thresholds of the notices stay on what is left, and the line of a notification says what the choice says. The stats read it too, in the row of a window and in the verdict.
 
 ## The window maths
 

@@ -54,18 +54,25 @@ public struct ProviderConfigFile: Decodable, Sendable {
     }
 
     /// Adds to the `claude` entry of an existing file what a newer version needs and the file lacks: its `integration`
-    /// (ADR 0003), the window for its per-model limits (ADR 0002) and the rule for its 5 hours (ADR 0002). The only changes the app makes to a file that is
-    /// already there; each is added once and only when absent, and the original is kept as `.bak`.
+    /// (ADR 0003), the window for its per-model limits (ADR 0002) and the rule for its 5 hours (ADR 0002); and to the
+    /// `chatgpt` entry its `integration`, `codex` (ADR 0014). Each is added once and only when absent, and the original is
+    /// kept as `.bak`.
     @discardableResult
     public static func addClaudeIntegration(to url: URL = defaultURL) -> MigrationOutcome {
         guard let data = try? Data(contentsOf: url),
-              var object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
+              let object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
               object["version"] as? Int == 1,
-              var providers = object["providers"] as? [[String: Any]],
-              let index = providers.firstIndex(where: { $0["id"] as? String == "claude" })
+              var providers = object["providers"] as? [[String: Any]]
         else { return .untouched }
-        var entry = providers[index]
         var changed = false
+        if let codex = providers.firstIndex(where: { $0["id"] as? String == "chatgpt" }), providers[codex]["integration"] == nil {
+            providers[codex]["integration"] = "codex"
+            changed = true
+        }
+        guard let index = providers.firstIndex(where: { $0["id"] as? String == "claude" }) else {
+            return changed ? write(object, providers: providers, to: url) : .untouched
+        }
+        var entry = providers[index]
         if entry["integration"] == nil {
             entry["integration"] = "claude-status-line"
             changed = true
@@ -93,6 +100,12 @@ public struct ProviderConfigFile: Decodable, Sendable {
         }
         guard changed else { return .untouched }
         providers[index] = entry
+        return write(object, providers: providers, to: url)
+    }
+
+    /// The migrated file, with the original kept as `.bak`.
+    private static func write(_ object: [String: Any], providers: [[String: Any]], to url: URL) -> MigrationOutcome {
+        var object = object
         object["providers"] = providers
         let backup = url.appendingPathExtension("tokenmeter.bak")
         guard let output = try? JSONSerialization.data(
@@ -150,6 +163,119 @@ public struct ProviderConfigFile: Decodable, Sendable {
         return .migrated
     }
 
+    /// The entry for an account of `tool`: the seed entry with its paths rewritten for the folder and the id, explicit and
+    /// readable by hand (ADR 0014). For the seed id and the default folder it is the seed entry itself, without `home`.
+    public static func entry(for tool: AccountTool, id: String, title: String, home: String) -> [String: Any] {
+        DefaultProviders.template(for: tool, id: id, title: title, home: home)
+    }
+
+    // MARK: The app writes whole entries (ADR 0014)
+
+    /// An id made from a title, for an entry the app adds (ADR 0014): lower case, every run of other characters one `-`,
+    /// nothing else; `account` when nothing is left, and a number when the id is taken.
+    public static func id(for title: String, taken: Set<String>) -> String {
+        var base = ""
+        var gap = false
+        for scalar in title.lowercased().unicodeScalars {
+            if ProviderConfig.idCharacters.contains(scalar), scalar != "-" {
+                if gap, !base.isEmpty { base.append("-") }
+                base.unicodeScalars.append(scalar)
+                gap = false
+            } else {
+                gap = true
+            }
+        }
+        base = base.trimmingCharacters(in: CharacterSet(charactersIn: "._-"))
+        if base.isEmpty { base = "account" }
+        guard taken.contains(base) else { return base }
+        var number = 2
+        while taken.contains("\(base)-\(number)") { number += 1 }
+        return "\(base)-\(number)"
+    }
+
+    /// Adds an entry to the file. The file is read as JSON, changed, kept as `.tokenmeter.bak` and written back atomically;
+    /// nothing is written when the file cannot be used or the result would not load (a repeated id, say): the error says why.
+    public static func add(_ entry: [String: Any], to url: URL = defaultURL) throws {
+        var (object, providers) = try readForWriting(url)
+        providers.append(entry)
+        object["providers"] = providers
+        try writeBack(object, to: url)
+    }
+
+    /// Replaces the entry with `id` by `entry`, in its place; the id must exist.
+    public static func replace(_ id: String, with entry: [String: Any], in url: URL = defaultURL) throws {
+        var (object, providers) = try readForWriting(url)
+        guard let index = providers.firstIndex(where: { $0["id"] as? String == id }) else {
+            throw Failure(description: "\(url.path): no provider \"\(id)\" to replace")
+        }
+        providers[index] = entry
+        object["providers"] = providers
+        try writeBack(object, to: url)
+    }
+
+    /// Removes the entry with `id`, and nothing else: the preferences, the history and the folder are not the file's.
+    public static func remove(_ id: String, from url: URL = defaultURL) throws {
+        var (object, providers) = try readForWriting(url)
+        guard providers.contains(where: { $0["id"] as? String == id }) else {
+            throw Failure(description: "\(url.path): no provider \"\(id)\" to remove")
+        }
+        providers.removeAll { $0["id"] as? String == id }
+        object["providers"] = providers
+        try writeBack(object, to: url)
+    }
+
+    /// `entry` with a new title and folder: a path is rewritten only where it still equals what the template gave for the
+    /// old folder, so a path the person wrote by hand is left alone (ADR 0014). The id does not change.
+    public static func edited(_ entry: [String: Any], tool: AccountTool, title: String, home: String) -> [String: Any] {
+        guard let id = entry["id"] as? String else { return entry }
+        let oldHome = entry["home"] as? String ?? tool.defaultHome
+        var result = entry
+        result["title"] = title
+        guard home != oldHome else { return result }
+        let before = DefaultProviders.template(for: tool, id: id, title: title, home: oldHome)
+        let after = DefaultProviders.template(for: tool, id: id, title: title, home: home)
+        result = moved(result, from: before, to: after) as! [String: Any]
+        if home == tool.defaultHome { result["home"] = nil } else { result["home"] = home }
+        return result
+    }
+
+    private static func moved(_ value: Any, from before: Any?, to after: Any?) -> Any {
+        switch (value, before, after) {
+        case let (object as [String: Any], old as [String: Any], new as [String: Any]):
+            var result = object
+            for (key, item) in object { result[key] = moved(item, from: old[key], to: new[key]) }
+            return result
+        case let (list as [Any], old as [Any], new as [Any]) where old.count == new.count:
+            return list.enumerated().map { index, item in
+                index < old.count ? moved(item, from: old[index], to: new[index]) : item
+            }
+        case let (path as String, old as String, new as String) where path == old:
+            return new
+        default:
+            return value
+        }
+    }
+
+    private static func readForWriting(_ url: URL) throws -> ([String: Any], [[String: Any]]) {
+        guard let data = try? Data(contentsOf: url) else { throw Failure(description: "\(url.path): cannot be read") }
+        guard let object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
+              object["version"] as? Int == 1, let providers = object["providers"] as? [[String: Any]] else {
+            throw Failure(description: "\(url.path): not a providers file the app can write")
+        }
+        return (object, providers)
+    }
+
+    /// Checks that the result loads, keeps the original as `.tokenmeter.bak`, then writes atomically, sorted keys.
+    private static func writeBack(_ object: [String: Any], to url: URL) throws {
+        let output = try JSONSerialization.data(
+            withJSONObject: object, options: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes])
+        _ = try decode(output, origin: url.path)
+        let backup = url.appendingPathExtension("tokenmeter.bak")
+        try? FileManager.default.removeItem(at: backup)
+        try FileManager.default.copyItem(at: url, to: backup)
+        try (output + Data("\n".utf8)).write(to: url, options: .atomic)
+    }
+
     static func decode(_ data: Data, origin: String) throws -> ProviderConfigFile {
         let file: ProviderConfigFile
         do {
@@ -163,6 +289,10 @@ public struct ProviderConfigFile: Decodable, Sendable {
             guard !provider.id.isEmpty, seen.insert(provider.id).inserted else {
                 throw Failure(description: "\(origin): provider id \"\(provider.id)\" is empty or repeated")
             }
+            guard provider.id.unicodeScalars.allSatisfy(ProviderConfig.idCharacters.contains) else {
+                throw Failure(description:
+                    "\(origin): provider id \"\(provider.id)\" may use letters, digits, '.', '_' and '-' only: it names files")
+            }
             guard !provider.windows.isEmpty, provider.windows.allSatisfy({ $0 > 0 }) else {
                 throw Failure(description: "\(origin): \"\(provider.id)\" needs windows in minutes")
             }
@@ -171,17 +301,54 @@ public struct ProviderConfigFile: Decodable, Sendable {
     }
 }
 
+/// A tool an account is a folder of (ADR 0014): which seed entry is its template, and which folder it reads by default.
+public enum AccountTool: String, CaseIterable, Sendable {
+    case claudeCode
+    case codexCLI
+
+    /// The id of the seed entry that is this tool's template.
+    public var seedID: String {
+        switch self {
+        case .claudeCode: "claude"
+        case .codexCLI: "chatgpt"
+        }
+    }
+
+    /// The folder the tool reads when nothing points it elsewhere.
+    public var defaultHome: String {
+        switch self {
+        case .claudeCode: "~/.claude"
+        case .codexCLI: "~/.codex"
+        }
+    }
+
+    public var name: String {
+        switch self {
+        case .claudeCode: "Claude Code"
+        case .codexCLI: "Codex CLI"
+        }
+    }
+}
+
 public struct ProviderConfig: Decodable, Sendable {
+    /// Names the entry everywhere, and files on disk too (the status line's), so it is letters, digits, `.`, `_` and `-`
+    /// (ADR 0014).
     public let id: String
     public let title: String
     public let windows: [Int]
     public let setupHint: String?
+    /// The folder the tool reads, the one `CLAUDE_CONFIG_DIR` or `CODEX_HOME` would name, with `~` the person's home; nil
+    /// means the tool's default folder. It serves the integration: the other paths of the entry stay as written (ADR 0014).
+    public let home: String?
     /// The id of the integration that reports this provider's problems and fixes them (ADR 0005); nil when it has none.
     public let integration: String?
     public let log: Log?
     public let usage: Usage?
     public let quota: Quota?
     public let plan: Plan?
+
+    /// What an id may be made of: it names files on disk (ADR 0014).
+    static let idCharacters = CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-")
 
     public struct Log: Decodable, Sendable {
         public let root: String

@@ -43,12 +43,18 @@ public enum ClaudeUsageRefresh {
 
     /// Runs `executable` in `folder` (made if missing) and waits at most `timeout` seconds. The wait holds no thread: the caller
     /// is suspended until the process ends or the time is up, so a CLI that hangs costs nothing but the process itself.
-    public static func run(executable: URL, in folder: URL, timeout: TimeInterval = 45) async -> Outcome {
+    /// With `configDir`, Claude Code reads that folder: `CLAUDE_CONFIG_DIR` is set for the process (ADR 0014).
+    public static func run(executable: URL, in folder: URL, configDir: URL? = nil, timeout: TimeInterval = 45) async -> Outcome {
         try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         let process = Process()
         process.executableURL = executable
         process.arguments = arguments
         process.currentDirectoryURL = folder
+        if let configDir {
+            var environment = ProcessInfo.processInfo.environment
+            environment["CLAUDE_CONFIG_DIR"] = configDir.path
+            process.environment = environment
+        }
         process.standardInput = FileHandle.nullDevice
         process.standardOutput = FileHandle.nullDevice
         process.standardError = FileHandle.nullDevice
@@ -70,12 +76,16 @@ public enum ClaudeUsageRefresh {
         }
     }
 
-    /// Finds the CLI and runs it in `~/.tokenmeter/claude/`, away from every project.
+    /// Finds the CLI and runs it in `~/.tokenmeter/claude/`, away from every project; for an account, in the account's
+    /// folder (`configDir`), with its own working folder `~/.tokenmeter/<id>/` (ADR 0014).
     public static func refresh(home: URL = FileManager.default.homeDirectoryForCurrentUser,
+                               account: ClaudeStatusLine.Account? = nil,
                                path: String = ProcessInfo.processInfo.environment["PATH"] ?? "",
                                system: [String] = ["/opt/homebrew/bin", "/usr/local/bin"],
                                timeout: TimeInterval = 45) async -> Outcome {
         guard let executable = locate(home: home, path: path, system: system) else { return .notFound }
-        return await run(executable: executable, in: home.appendingPathComponent(".tokenmeter/claude"), timeout: timeout)
+        let id = account?.id ?? AccountTool.claudeCode.seedID
+        return await run(executable: executable, in: home.appendingPathComponent(".tokenmeter/\(id)"),
+                         configDir: account?.configDir, timeout: timeout)
     }
 }
