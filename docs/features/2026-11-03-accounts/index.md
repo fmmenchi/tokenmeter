@@ -33,7 +33,7 @@ accounts, a lock on the panel to arrange their cards, and a word, with a button,
 | :------------------ | :---------------------------------------------------------------------------------------------------- | :------- |
 | Proposal            | [Proposal](./proposal.md)                                                                             | chosen   |
 | Implementation plan | [Plan](./plan.md)                                                                                     | written  |
-| Decisions           | [ADR 0014](../../adr/0014-accounts-and-the-home-of-a-provider.md), an account is an entry with a home | proposed |
+| Decisions           | [ADR 0014](../../adr/0014-accounts-and-the-home-of-a-provider.md), an account is an entry with a home | accepted |
 
 ## Related
 

@@ -1,6 +1,6 @@
 # ADR 0014 — An account is a provider entry with a home: the tool's folder, which the app writes into the file, and whose cards the panel arranges
 
-Status: proposed (2026-11-04, with the [accounts](../features/2026-11-03-accounts/index.md) feature)
+Status: accepted (2026-11-04, with the plan of the [accounts](../features/2026-11-03-accounts/index.md); Fabio said "vai")
 
 ## Context
 
