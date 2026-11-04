@@ -27,6 +27,8 @@ struct AccountSheet: View {
     @State private var title = ""
     /// True once the person typed a title: it is theirs then, and the email no longer replaces it.
     @State private var titleIsTheirs = false
+    /// The last title the sheet filled in itself, so a change to anything else is the person's.
+    @State private var filledTitle = ""
     @State private var check: Meter.FolderCheck?
     @State private var error: String?
     @State private var saving = false
@@ -66,7 +68,7 @@ struct AccountSheet: View {
                 GridRow {
                     Text("Title")
                     TextField("Claude · work", text: $title).textFieldStyle(.roundedBorder)
-                        .onChange(of: title) { _, _ in if !saving { titleIsTheirs = true } }
+                        .onChange(of: title) { _, now in if now != filledTitle { titleIsTheirs = true } }
                 }
             }
             if let error { Text(error).font(.caption).foregroundStyle(.red) }
@@ -113,6 +115,7 @@ struct AccountSheet: View {
         case .existing(let existing):
             tool = existing.tool ?? .claudeCode
             folder = existing.home
+            filledTitle = existing.title
             title = existing.title
             titleIsTheirs = true
         }
@@ -123,9 +126,8 @@ struct AccountSheet: View {
         let result = await meter.checkFolder(folder, tool: tool)
         check = result
         if case .found(let email?) = result, !titleIsTheirs {
-            saving = true
+            filledTitle = email
             title = email
-            saving = false
         }
     }
 
