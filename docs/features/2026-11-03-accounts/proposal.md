@@ -35,11 +35,11 @@ design keeps them apart:
 ## Settings › Accounts
 
 One row per entry: the **title**, which is the account's alias and the name on its card and in its notices ("Claude · work");
-under it the **email** the folder is signed in with; a chip with the tool; the folder on hover. On hover a row shows
-**Edit…** and **Remove…**; under the list, **Add an account…**. The two entries the app writes the first time are rows like the
+under it the **email** the folder is signed in with; a chip with the tool; the folder on hover. Every row ends with **Edit…**
+and **Remove…**, always in sight; Remove is disabled on the last account. Under the list, **Add an account…**. The two entries the app writes the first time are rows like the
 others: they can be renamed, pointed at another folder, and removed.
 
-![Settings, Accounts: three rows, "Claude · work", "Claude · personal" and ChatGPT, each with the email it is signed in with under its name and a chip with the tool; the first row hovered, with Edit and Remove; under the list, Add an account](./proposal-settings-accounts.png)
+![Settings, Accounts: three rows, "Claude · work", "Claude · personal" and ChatGPT, each with the email it is signed in with under its name, a chip with the tool, and Edit and Remove at its end; under the list, Add an account](./proposal-settings-accounts.png)
 
 The email is a fact the app reads, never writes: Claude Code keeps it in the folder's `.claude.json`, the Codex CLI inside the
 identity token of its `auth.json`. It is shown where the person goes on purpose, in Settings and in the banner that says a
