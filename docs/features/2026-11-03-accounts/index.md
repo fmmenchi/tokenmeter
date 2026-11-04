@@ -29,11 +29,11 @@ accounts, a lock on the panel to arrange their cards, and a word, with a button,
 
 ## The nucleus
 
-| Part                | Page                                              | Status |
-| :------------------ | :------------------------------------------------ | :----- |
-| Proposal            | [Proposal](./proposal.md)                         | chosen |
-| Implementation plan | not yet written                                   |        |
-| Decisions           | ADR 0014, the home of a provider, not yet written |        |
+| Part                | Page                                                                                                  | Status   |
+| :------------------ | :---------------------------------------------------------------------------------------------------- | :------- |
+| Proposal            | [Proposal](./proposal.md)                                                                             | chosen   |
+| Implementation plan | [Plan](./plan.md)                                                                                     | written  |
+| Decisions           | [ADR 0014](../../adr/0014-accounts-and-the-home-of-a-provider.md), an account is an entry with a home | proposed |
 
 ## Related
 
