@@ -6,7 +6,7 @@ sidebar_position: 3
 
 # Bars, left or used, plan
 
-How the [proposal](./proposal.md) is built, with one line added to [ADR 0006](../../adr/0006-display-preferences.md): the choice is a preference of the app and reaches the widget in the snapshot, as the skin does ([ADR 0013](../../adr/0013-skins.md)). Proposed on 2026-11-03: nothing is built.
+How the [proposal](./proposal.md) is built, with one line added to [ADR 0006](../../adr/0006-display-preferences.md): the choice is a preference of the app and reaches the widget in the snapshot, as the skin does ([ADR 0013](../../adr/0013-skins.md)). Approved on 2026-11-03.
 
 ## Where each thing goes
 

@@ -28,8 +28,8 @@ the choice.
 | Part                | Page                                                        | Status           |
 | :------------------ | :---------------------------------------------------------- | :--------------- |
 | Proposal            | [Proposal](./proposal.md)                                   | variant A chosen |
-| Implementation plan | [Plan](./plan.md)                                           | proposed         |
-| Decisions           | [ADR 0006](../../adr/0006-display-preferences.md), one line | proposed         |
+| Implementation plan | [Plan](./plan.md)                                           | accepted         |
+| Decisions           | [ADR 0006](../../adr/0006-display-preferences.md), one line | accepted         |
 
 ## Related
 
