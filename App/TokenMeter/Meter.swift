@@ -70,6 +70,15 @@ final class Meter {
         }
     }
 
+    /// How the bars read, chosen in Settings (ADR 0006): kept in the defaults, and written to the snapshot like the skin.
+    var barsDisplay = BarsDisplay(rawValue: UserDefaults.standard.string(forKey: Meter.barsDisplayKey) ?? "") ?? .left {
+        didSet {
+            guard barsDisplay != oldValue else { return }
+            UserDefaults.standard.set(barsDisplay.rawValue, forKey: Self.barsDisplayKey)
+            publish()
+        }
+    }
+
     var statsRange = StatsRange(rawValue: UserDefaults.standard.string(forKey: Meter.statsRangeKey) ?? "") ?? .quarter {
         didSet { UserDefaults.standard.set(statsRange.rawValue, forKey: Meter.statsRangeKey) }
     }
@@ -88,6 +97,7 @@ final class Meter {
     private static let noticeLedgerKey = "noticeLedger"
     private static let statsRangeKey = "statsRange"
     private static let skinKey = "skin"
+    private static let barsDisplayKey = "barsDisplay"
     private static let openStatsCardKey = "statsOpenCard"
     /// The id of the card for all providers, next to the ids of the providers.
     static let allProvidersCard = "all-providers"
@@ -331,7 +341,7 @@ final class Meter {
                                     snapshotWriteError: snapshotWriteError, usageRefresh: autoSetUpClaude ? usageRefresh : nil)
         problems = dismissals.visible(ProblemDetector.merge(general: own, providers: [detected]))
         cardProviders = makeCardProviders()
-        let result = base.applying(preferences).with(problems: problems).with(skin: skin)
+        let result = base.applying(preferences).with(problems: problems).with(skin: skin).with(barsDisplay: barsDisplay)
         snapshot = result
         deliverNotices(now: Date())
         write(result)

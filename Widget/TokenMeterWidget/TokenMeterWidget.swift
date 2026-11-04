@@ -69,6 +69,7 @@ struct TokenMeterWidget: Widget {
                 // Each entry is drawn for its own date: the bar of a window flips to reset at its entry, and the countdowns move.
                 .environment(\.renderDate, entry.date)
                 .skinned(entry.snapshot?.skin ?? .system)
+                .environment(\.barsDisplay, entry.snapshot?.barsDisplay ?? .left)
                 .containerBackground(for: .widget) { WidgetFill(skin: entry.snapshot?.skin ?? .system) }
         }
         .configurationDisplayName("AI quota")
