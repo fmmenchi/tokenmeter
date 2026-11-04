@@ -62,6 +62,12 @@ final class BarsDisplayTests: XCTestCase {
         XCTAssertTrue(BarsDisplay.used.littleMarginText(window: "w", left: 38.5).contains("61% used"))
     }
 
+    func testTheGuideOfTheMarkSaysWhichBarGoesTooFast() {
+        XCTAssertTrue(BarsDisplay.left.markGuide.contains("A bar shorter than the mark means you are going too fast"))
+        XCTAssertTrue(BarsDisplay.used.markGuide.contains("A bar longer than the mark means you are going too fast"))
+        XCTAssertTrue(BarsDisplay.used.markGuide.contains("how much you'd have used"))
+    }
+
     func testTheWordIsWhatTheFigureSays() {
         XCTAssertEqual(BarsDisplay.left.word, "left")
         XCTAssertEqual(BarsDisplay.used.word, "used")

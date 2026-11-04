@@ -43,6 +43,17 @@ public enum BarsDisplay: String, CaseIterable, Codable, Sendable {
         }
     }
 
+    /// What the mark on the bar says, in this reading: the bar and the mark are on the same side, so the rule is the other way round in
+    /// `used` (a bar longer than the mark is the one that goes too fast).
+    public var markGuide: String {
+        switch self {
+        case .left:
+            "The mark is how much you'd have left if you used it steadily until the reset. A bar shorter than the mark means you are going too fast. Hover the bar to see when."
+        case .used:
+            "The mark is how much you'd have used if you used it steadily until the reset. A bar longer than the mark means you are going too fast. Hover the bar to see when."
+        }
+    }
+
     /// The pace mark as this reading draws it: the bar and the mark are on the same side, so a bar that passes the mark still
     /// means the quota runs out before the reset.
     public func shown(_ pace: Pace) -> Pace {
