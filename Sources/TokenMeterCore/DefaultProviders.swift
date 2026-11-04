@@ -62,6 +62,7 @@ enum DefaultProviders {
           "id": "chatgpt",
           "title": "ChatGPT",
           "windows": [300, 10080],
+          "integration": "codex",
           "log": {
             "root": "~/.codex/sessions",
             "contains": "\"token_count\"",

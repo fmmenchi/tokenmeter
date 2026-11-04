@@ -420,7 +420,7 @@ final class Meter {
     }
 
     private func makeIntegrations() -> Integrations {
-        Integrations([ClaudeIntegration(script: claudeScript, enabled: autoSetUpClaude)])
+        Integrations([ClaudeIntegration(script: claudeScript, enabled: autoSetUpClaude), CodexIntegration()])
     }
 
     /// ADR 0005: in the background at utility priority, at most every 10 minutes between changes.
