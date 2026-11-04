@@ -8,6 +8,8 @@ struct SkinBarBody: View {
     let tint: Color
     let shape: BarShape
     let track: Color
+    /// Nothing in the bar draws no fill, instead of the smallest one a shape keeps (ADR 0006).
+    var emptyIsEmpty = false
 
     /// The blocks of a bar of blocks, and the air between two of them.
     private static let blocks = 20
@@ -35,7 +37,7 @@ struct SkinBarBody: View {
             case .outline:
                 ZStack(alignment: .leading) {
                     Capsule().strokeBorder(track, lineWidth: 1)
-                    if fraction != nil {
+                    if fraction != nil, !(emptyIsEmpty && share == 0) {
                         Capsule().fill(LinearGradient(colors: [tint, tint.opacity(0.8)], startPoint: .leading, endPoint: .trailing))
                             .frame(width: max(height - 4, (width - 4) * share), height: height - 4)
                             .padding(2)
@@ -44,7 +46,7 @@ struct SkinBarBody: View {
             case .pill, .thick:
                 ZStack(alignment: .leading) {
                     Capsule().fill(track)
-                    if fraction != nil { Capsule().fill(tint).frame(width: max(height, width * share)) }
+                    if fraction != nil, !(emptyIsEmpty && share == 0) { Capsule().fill(tint).frame(width: max(height, width * share)) }
                 }
             }
         }
