@@ -53,6 +53,11 @@ that there is none), and the title, filled in with the email as soon as the fold
 
 ![The sheet Add an account: Tool, with Codex CLI chosen; Folder, with a sample path and Choose; a line saying what was found and who is signed in; Title, filled in with the sample email; Cancel and Add](./proposal-sheet-account.png)
 
+**Edit…** opens it on the entry: the tool is fixed, the folder and the title can change, and the id does not, so the history,
+the order and the notices of the account stay. **Save** writes the file.
+
+![The sheet Edit Claude · work: the tool fixed on Claude Code, the folder, a line saying what was found and who is signed in, the title; Cancel and Save](./proposal-sheet-edit.png)
+
 **Remove…** asks first, and says what goes and what stays: the card leaves the panel and the widget, the entry leaves the file,
 the history stays in the stats, and the folder and its login are not touched.
 
