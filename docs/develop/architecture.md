@@ -62,6 +62,10 @@ How the pieces fit, where each file goes and which rules keep it that way. The r
    background colour from it; the shared views (the bar, the card, the tick, the plan chip) read the style from the environment and
    draw as before where there is none, which is System.
 
+9. **Reading.** How the bars read, left or used, is kept by `Meter` in the defaults and written to the snapshot with the skin
+   ([ADR 0006](../adr/0006-display-preferences.md)). The panel and the widget put it in the environment once, and `WindowRow` and
+   `ScopedWindowRow` take the figure, the fill and the mark from it; the colour, the notices and the stats stay on what is left.
+
 ## The window maths
 
 For each window a provider declares (`5h`, `7d`), the builder sums the tokens whose date falls inside

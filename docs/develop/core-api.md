@@ -168,6 +168,21 @@ The looks of the panel, the widget and the stats, in the folder `Sources/TokenMe
 The views that draw them are in `Shared/Skins/`: `SkinStyle` (the style in the environment and `skinned(_:)`), `SkinBar` (the five
 bars) and `SkinPreview` (the small panel in Settings).
 
+## How the bars read
+
+Left or used, in `Sources/TokenMeterCore/BarsDisplay.swift` and in `BarsDisplayTests.swift`
+([ADR 0006](../adr/0006-display-preferences.md), [proposal](../features/2026-11-03-bars-display/proposal.md),
+[plan](../features/2026-11-03-bars-display/plan.md)).
+
+| Type                   | What it is                                                                                                                                                                  |
+| :--------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `BarsDisplay`          | `left` (the default) and `used`. `word` is what follows the figure; `fraction(remaining:)` how far a bar is filled; `percent(remaining:)` the figure; `shown(_:)` the mark. |
+| `Snapshot.barsDisplay` | The choice the app made, written when it publishes so the widget draws the same. A snapshot without one, or with a value this version does not know, is `left`.             |
+
+The data is not touched: a window always stores what is left, and the rest follows it. `percent` is what is left rounded as it always was,
+and for `used` a hundred minus that, so the two readings of a window add up to 100. The views read the choice from the environment
+(`Shared/BarsDisplayStyle.swift`), and `QuotaBar` takes `emptyIsEmpty` so a window with nothing used is drawn without the smallest fill.
+
 ## The welcome
 
 The state of the welcome wizard, in `Sources/TokenMeterCore/Welcome/` and in `WelcomeTests.swift`
