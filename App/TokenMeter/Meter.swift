@@ -15,6 +15,8 @@ final class Meter {
     private(set) var claudeStatusLines: [String: ClaudeStatusLine.Outcome] = [:]
     /// The Claude entries the setup knows, in the file's order, so Settings can say a line for each (ADR 0014).
     private(set) var claudeAccounts: [ClaudeAccounts.Entry] = []
+    /// Every entry of the file as the Accounts tab lists it, with who is signed in, read with the problems (ADR 0014).
+    private(set) var accounts: [AccountSummary] = []
     /// The problems the person has not hidden (ADR 0005); the panel draws these and the snapshot carries them.
     private(set) var problems: [Problem] = []
     /// Interface state of the fixes being run, by problem id. Not in the model or the snapshot (the plan of the feature).
@@ -455,17 +457,18 @@ final class Meter {
         let hasAppGroup = store != nil
         let integrations = makeIntegrations()
         Task(priority: .utility) {
-            let (found, configured, fileError) = await Task.detached(priority: .utility) {
+            let (found, configured, fileError, listed) = await Task.detached(priority: .utility) {
                 // A file that cannot be used falls back to the seed, as the collector does (ADR 0003), and says so (ADR 0005).
                 let loaded = Self.loadProviders()
                 // The folders of a tool at the top of the home, for the one nobody named (ADR 0014).
                 let found = ProblemDetector.detect(
                     general: AppProblems.check(hasAppGroup: hasAppGroup), providers: loaded.providers,
                     integrations: integrations, context: ProblemContext(), folders: AccountFolders.scan())
-                return (found, loaded.providers, loaded.error)
+                return (found, loaded.providers, loaded.error, AccountSummary.list(loaded.providers, integrations: integrations))
             }.value
             detected = found
             providers = configured
+            accounts = listed
             providersFileError = fileError
             for (id, state) in fixStates where state == .done { fixStates[id] = nil }
             publish()
