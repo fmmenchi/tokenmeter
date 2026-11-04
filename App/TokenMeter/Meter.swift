@@ -17,6 +17,10 @@ final class Meter {
     private(set) var claudeAccounts: [ClaudeAccounts.Entry] = []
     /// Every entry of the file as the Accounts tab lists it, with who is signed in, read with the problems (ADR 0014).
     private(set) var accounts: [AccountSummary] = []
+    /// The folders of a tool found at the last detection, so Add it on a banner knows which folder it is about.
+    private var foundFolders: [AccountFolders.Found] = []
+    /// A folder Add it was pressed for: the Accounts tab opens its sheet on it, filled in, and clears this.
+    var pendingAccount: AccountFolders.Found?
     /// The problems the person has not hidden (ADR 0005); the panel draws these and the snapshot carries them.
     private(set) var problems: [Problem] = []
     /// Interface state of the fixes being run, by problem id. Not in the model or the snapshot (the plan of the feature).
@@ -478,18 +482,20 @@ final class Meter {
             // A change by hand wins at the next detection (ADR 0014): the sources are built again from the file.
             let changed = await Task.detached(priority: .utility) { Self.providersFileStamp() != stamp }.value
             if changed { await reloadProviders(); return }
-            let (found, configured, fileError, listed) = await Task.detached(priority: .utility) {
+            let (found, configured, fileError, listed, folders) = await Task.detached(priority: .utility) {
                 // A file that cannot be used falls back to the seed, as the collector does (ADR 0003), and says so (ADR 0005).
                 let loaded = Self.loadProviders()
                 // The folders of a tool at the top of the home, for the one nobody named (ADR 0014).
+                let folders = AccountFolders.scan()
                 let found = ProblemDetector.detect(
                     general: AppProblems.check(hasAppGroup: hasAppGroup), providers: loaded.providers,
-                    integrations: integrations, context: ProblemContext(), folders: AccountFolders.scan())
-                return (found, loaded.providers, loaded.error, AccountSummary.list(loaded.providers, integrations: integrations))
+                    integrations: integrations, context: ProblemContext(), folders: folders)
+                return (found, loaded.providers, loaded.error, AccountSummary.list(loaded.providers, integrations: integrations), folders)
             }.value
             detected = found
             providers = configured
             accounts = listed
+            foundFolders = folders
             providersFileError = fileError
             for (id, state) in fixStates where state == .done { fixStates[id] = nil }
             publish()
@@ -531,6 +537,12 @@ final class Meter {
     }
 
     // MARK: Accounts (ADR 0014)
+
+    /// The folder a problem of the kind "a folder nobody named" is about, for Add it; nil for any other problem.
+    func foundFolder(for problem: Problem) -> AccountFolders.Found? {
+        guard problem.id.hasPrefix(AppProblems.folderNotNamed.id + ".") else { return nil }
+        return foundFolders.first { AppProblems.folderNotNamed($0, userHome: FileManager.default.homeDirectoryForCurrentUser).id == problem.id }
+    }
 
     /// What the sheet says about a folder the person typed or chose.
     enum FolderCheck: Equatable {

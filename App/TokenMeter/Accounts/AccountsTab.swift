@@ -19,10 +19,19 @@ struct AccountsTab: View {
                 AccountRow(account: account, canRemove: meter.accounts.count > 1,
                            onEdit: { editing = .existing(account) }, onRemove: { removing = account })
             }
-            Button("Add an account…") { editing = .new }
+            Button("Add an account…") { editing = .new() }
         }
         .sheet(item: $editing) { target in AccountSheet(meter: meter, target: target) }
         .sheet(item: $removing) { account in RemoveAccountSheet(meter: meter, account: account) }
+        // Add it on a banner: the sheet opens on the folder it found, filled in (ADR 0014).
+        .onAppear(perform: openPending)
+        .onChange(of: meter.pendingAccount?.folder) { _, _ in openPending() }
+    }
+
+    private func openPending() {
+        guard let found = meter.pendingAccount else { return }
+        meter.pendingAccount = nil
+        editing = .new(found)
     }
 }
 

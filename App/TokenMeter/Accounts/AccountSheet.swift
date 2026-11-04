@@ -6,14 +6,14 @@ import TokenMeterCore
 /// found there, and the title, filled in with the email as soon as the folder is one of the tool's. Add and Save write
 /// the entry; Edit keeps the tool and the id.
 struct AccountSheet: View {
-    /// Add an account… opens it on a new entry; Edit… on an existing one.
+    /// Add an account… opens it on a new entry, Add it on a banner on the folder it found; Edit… on an existing one.
     enum Target: Identifiable {
-        case new
+        case new(AccountFolders.Found? = nil)
         case existing(AccountSummary)
 
         var id: String {
             switch self {
-            case .new: "new"
+            case .new(let found): "new:\(found?.folder.path ?? "")"
             case .existing(let account): account.id
             }
         }
@@ -104,11 +104,18 @@ struct AccountSheet: View {
     }
 
     private func start() {
-        guard let existing else { return }
-        tool = existing.tool ?? .claudeCode
-        folder = existing.home
-        title = existing.title
-        titleIsTheirs = true
+        switch target {
+        case .new(let found?):
+            tool = found.tool
+            folder = Meter.tilde(found.folder.path)
+        case .new(nil):
+            break
+        case .existing(let existing):
+            tool = existing.tool ?? .claudeCode
+            folder = existing.home
+            title = existing.title
+            titleIsTheirs = true
+        }
     }
 
     private func lookAtFolder() async {
