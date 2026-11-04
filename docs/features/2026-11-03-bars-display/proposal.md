@@ -33,7 +33,7 @@ what General holds. The other five pages stay as they are.
 
 - **One global choice**, not one per provider or per window: the question is how a person reads a bar, and it is the same for all.
 - **A segmented control, not two rows with a sample bar.** The two variants were drawn; the control is the smaller change and the sample
-  bars repeat what the line under the control already says. The other variant is deleted only when Fabio asks.
+  bars repeat what the line under the control already says. The other variant was deleted with the canvas.
 - **The colour keeps following what is left.** A bar at `75% used` is orange, because 25% is left: red under 15% left keeps its meaning in
   both readings, and so does the green of a bar that has plenty.
 - **The mark of the pace mirrors with the bar**, so a bar that passes the mark still means the quota runs out before the reset.
@@ -45,5 +45,5 @@ what General holds. The other five pages stay as they are.
 
 - A choice of two values, kept in the app's defaults and published to the widget in the snapshot.
 - The views read it and draw the figure, the bar and the mark from it.
-- The segmented control, which the Design System does not have yet: it is proposed there as a component after the code is in.
+- The segmented control, now a component of the Design System, with the group that holds it.
 - The two pages of the wizard.

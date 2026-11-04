@@ -9,10 +9,10 @@ date: 2026-11-03
 
 A choice in Settings says whether the bars show how much is left (`25% left`, the default) or how much is used (`75% used`).
 
-|        |                       |
-| :----- | :-------------------- |
-| Date   | 2026-11-03            |
-| Status | in design, 2026-11-03 |
+|        |                         |
+| :----- | :---------------------- |
+| Date   | 2026-11-03              |
+| Status | implemented, 2026-11-03 |
 
 ## Intent
 
@@ -25,11 +25,11 @@ the choice.
 
 ## The nucleus
 
-| Part                | Page                                                        | Status           |
-| :------------------ | :---------------------------------------------------------- | :--------------- |
-| Proposal            | [Proposal](./proposal.md)                                   | variant A chosen |
-| Implementation plan | [Plan](./plan.md)                                           | accepted         |
-| Decisions           | [ADR 0006](../../adr/0006-display-preferences.md), one line | accepted         |
+| Part                | Page                                                        | Status   |
+| :------------------ | :---------------------------------------------------------- | :------- |
+| Proposal            | [Proposal](./proposal.md)                                   | chosen   |
+| Implementation plan | [Plan](./plan.md)                                           | built    |
+| Decisions           | [ADR 0006](../../adr/0006-display-preferences.md), one line | accepted |
 
 ## Related
 
