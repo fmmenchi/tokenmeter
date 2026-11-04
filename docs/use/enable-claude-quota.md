@@ -23,17 +23,24 @@ you already have, writes `settings.json.tokenmeter.bak` before changing the file
 unreadable file alone ([ADR 0004](../adr/0004-the-claude-status-line.md)). The Settings
 window says what it did, and its switch **Set up the Claude quota automatically** turns this off.
 
+**For each account.** An entry with a `home` is set up the same way in its own folder: the command written in that folder's
+`settings.json` carries the entry's id, so the script writes `~/.tokenmeter/<id>-statusline.json` for it, and `/usage` runs
+with `CLAUDE_CONFIG_DIR` set to the folder. The General tab says a line for each account, and a wrapped status line is
+restored by account ([Accounts](./accounts.md), [ADR 0014](../adr/0014-accounts-and-the-home-of-a-provider.md)).
+
 **Doing it yourself.** When building from source, `./scripts/install.sh` runs this step before the app
 opens. To do only this step:
 
 ```bash
 ./scripts/install-statusline.sh
+./scripts/install-statusline.sh claude-work ~/.claude-work   # an account: its id and its folder
 ```
 
 It does what the app does: copies the script, sets only the `statusLine` key, writes the backup first,
 and does nothing if it is already set. If you already have a different status line it leaves it alone
 and exits with status 2. Without Claude Code it creates nothing
-([ADR 0004](../adr/0004-the-claude-status-line.md)).
+([ADR 0004](../adr/0004-the-claude-status-line.md)). With an id and a folder it does the same for an
+account, and the command it writes carries the id.
 
 By hand, the setting is:
 
@@ -50,8 +57,8 @@ To undo it, delete those lines and turn the Settings switch off, or the next lau
 The app leaves it alone and lists it as a problem in the panel. Click **Wrap it** there: your status line keeps
 printing exactly what it printed, and tokenmeter gets the same input beside it
 ([ADR 0004](../adr/0004-the-claude-status-line.md)). The app saves your original setting
-in `~/.tokenmeter/claude/original-statusline.json`, puts a wrapper in `~/.tokenmeter/claude/`, and
-writes `settings.json.tokenmeter.bak` first. **Restore original** in Settings puts it all back. If you later
+in `~/.tokenmeter/claude/original-statusline.json`, puts a wrapper in `~/.tokenmeter/claude/` (for an account,
+in `~/.tokenmeter/<id>/`), and writes `settings.json.tokenmeter.bak` first. **Restore original** in Settings puts it all back. If you later
 change `statusLine` by hand, the app does not overwrite it. It never wraps by itself.
 
 By hand, your command must keep printing its own text and pass the same JSON on stdin to
