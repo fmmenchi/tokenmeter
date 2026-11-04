@@ -6,7 +6,7 @@ sidebar_position: 3
 
 # Bars, left or used, plan
 
-How the [proposal](./proposal.md) is built, under [ADR 0014](../../adr/0014-bars-display.md). Proposed on 2026-11-03: nothing is built.
+How the [proposal](./proposal.md) is built, with one line added to [ADR 0006](../../adr/0006-display-preferences.md): the choice is a preference of the app and reaches the widget in the snapshot, as the skin does ([ADR 0013](../../adr/0013-skins.md)). Proposed on 2026-11-03: nothing is built.
 
 ## Where each thing goes
 
@@ -22,16 +22,16 @@ How the [proposal](./proposal.md) is built, under [ADR 0014](../../adr/0014-bars
 
 One commit each, three files at most, the gate green (`pnpm run check`, which builds the app and the widget unsigned).
 
-| Step | Commit                                                                                                                                  | Files                                                           |
-| :--- | :-------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------- |
-| 1    | `feat(core): the bars can be read as left or as used`                                                                                   | `BarsDisplay.swift`, `Snapshot.swift`, `BarsDisplayTests.swift` |
-| 2    | `feat(shared): the figure, the bar and the mark of a row follow the choice`                                                             | `Shared/UsageViews.swift`, `Shared/BarsDisplayStyle.swift`      |
-| 3    | `feat(app): the choice is kept, published and set at the root of the panel and the widget`                                              | `Meter.swift`, `MenuContent.swift`, `TokenMeterWidget.swift`    |
-| 4    | `feat(app): General says what the bars show, with a control`                                                                            | `BarsDisplayGroup.swift`, `SettingsView.swift`                  |
-| 5    | `feat(app): the wizard says where the figure is chosen`                                                                                 | `Welcome/WelcomePages.swift`, `WelcomeTests.swift`              |
-| 6    | `docs(use)`: bars, settings and the welcome page                                                                                        | `use/bars.md`, `use/settings.md`, `use/welcome.md`              |
-| 7    | `docs(develop)`: the core API and the architecture page                                                                                 | `develop/core-api.md`, `develop/architecture.md`                |
-| 8    | Reconcile, on a `docs/` branch: the status, the row to _Implemented_, ADR 0014 accepted already, and, if asked, Views and Design System | `index.md`, `features/index.md`                                 |
+| Step | Commit                                                                                                      | Files                                                           |
+| :--- | :---------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------- |
+| 1    | `feat(core): the bars can be read as left or as used`                                                       | `BarsDisplay.swift`, `Snapshot.swift`, `BarsDisplayTests.swift` |
+| 2    | `feat(shared): the figure, the bar and the mark of a row follow the choice`                                 | `Shared/UsageViews.swift`, `Shared/BarsDisplayStyle.swift`      |
+| 3    | `feat(app): the choice is kept, published and set at the root of the panel and the widget`                  | `Meter.swift`, `MenuContent.swift`, `TokenMeterWidget.swift`    |
+| 4    | `feat(app): General says what the bars show, with a control`                                                | `BarsDisplayGroup.swift`, `SettingsView.swift`                  |
+| 5    | `feat(app): the wizard says where the figure is chosen`                                                     | `Welcome/WelcomePages.swift`, `WelcomeTests.swift`              |
+| 6    | `docs(use)`: bars, settings and the welcome page                                                            | `use/bars.md`, `use/settings.md`, `use/welcome.md`              |
+| 7    | `docs(develop)`: the core API and the architecture page                                                     | `develop/core-api.md`, `develop/architecture.md`                |
+| 8    | Reconcile, on a `docs/` branch: the status, the row to _Implemented_ and, if asked, Views and Design System | `index.md`, `features/index.md`                                 |
 
 The changelog is written with the release, not here.
 

@@ -25,11 +25,11 @@ the choice.
 
 ## The nucleus
 
-| Part                | Page                                       | Status           |
-| :------------------ | :----------------------------------------- | :--------------- |
-| Proposal            | [Proposal](./proposal.md)                  | variant A chosen |
-| Implementation plan | [Plan](./plan.md)                          | proposed         |
-| Decisions           | [ADR 0014](../../adr/0014-bars-display.md) | proposed         |
+| Part                | Page                                                        | Status           |
+| :------------------ | :---------------------------------------------------------- | :--------------- |
+| Proposal            | [Proposal](./proposal.md)                                   | variant A chosen |
+| Implementation plan | [Plan](./plan.md)                                           | proposed         |
+| Decisions           | [ADR 0006](../../adr/0006-display-preferences.md), one line | proposed         |
 
 ## Related
 
