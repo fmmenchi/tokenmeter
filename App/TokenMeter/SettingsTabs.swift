@@ -1,9 +1,9 @@
 import SwiftUI
 
-/// The sections of Settings, one tab each (feature "settings in tabs").
+/// The sections of Settings, one tab each (feature "settings in tabs"); Accounts took the place of Providers (ADR 0014).
 enum SettingsTab: String, CaseIterable, Identifiable {
     case general
-    case providers
+    case accounts
     case skin
     case notifications
     case updates
@@ -13,7 +13,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .general: "General"
-        case .providers: "Providers"
+        case .accounts: "Accounts"
         case .skin: "Skin"
         case .notifications: "Notifications"
         case .updates: "Updates"
@@ -23,7 +23,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
     var symbol: String {
         switch self {
         case .general: "gearshape"
-        case .providers: "list.bullet"
+        case .accounts: "person.crop.circle"
         case .skin: "paintpalette"
         case .notifications: "bell"
         case .updates: "arrow.down.circle"

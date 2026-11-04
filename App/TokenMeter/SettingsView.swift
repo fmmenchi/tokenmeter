@@ -31,7 +31,7 @@ struct SettingsView: View {
     @ViewBuilder private var section: some View {
         switch tab {
         case .general: general
-        case .providers: providers
+        case .accounts: AccountsTab(meter: meter)
         case .skin: SkinGroup(meter: meter)
         case .notifications: NotificationsGroup(meter: meter)
         case .updates: UpdatesGroup(updater: meter.updater)
