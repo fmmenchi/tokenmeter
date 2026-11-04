@@ -41,8 +41,8 @@ final class ProblemDetectionTests: XCTestCase {
         let found: [Problem]
         var kinds: [ProblemKind] { [] }
         var fixes: [FixDescriptor] { [] }
-        func problems(in context: ProblemContext) -> [Problem] { found }
-        func run(fix: String, in context: ProblemContext) -> FixResult { .done }
+        func problems(for provider: ProviderConfig, in context: ProblemContext) -> [Problem] { found }
+        func run(fix: String, for provider: ProviderConfig, in context: ProblemContext) -> FixResult { .done }
     }
 
     private func config(_ ids: [(String, String?)]) throws -> [ProviderConfig] {
