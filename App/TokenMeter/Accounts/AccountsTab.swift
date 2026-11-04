@@ -6,10 +6,8 @@ import TokenMeterCore
 /// cards are not here: they are set on the panel, behind its lock.
 struct AccountsTab: View {
     let meter: Meter
-    /// The entry Edit… opened; the sheet comes with the next step.
-    @State private var editing: AccountSummary?
-    /// True while Add an account… is open; the sheet comes with the next step.
-    @State private var adding = false
+    /// The sheet that is open: Edit… on a row, or Add an account….
+    @State private var editing: AccountSheet.Target?
     /// The entry Remove… asks about; the sheet comes with a later step.
     @State private var removing: AccountSummary?
 
@@ -19,10 +17,11 @@ struct AccountsTab: View {
                 .font(.caption).foregroundStyle(.secondary)
             ForEach(meter.accounts) { account in
                 AccountRow(account: account, canRemove: meter.accounts.count > 1,
-                           onEdit: { editing = account }, onRemove: { removing = account })
+                           onEdit: { editing = .existing(account) }, onRemove: { removing = account })
             }
-            Button("Add an account…") { adding = true }
+            Button("Add an account…") { editing = .new }
         }
+        .sheet(item: $editing) { target in AccountSheet(meter: meter, target: target) }
     }
 }
 

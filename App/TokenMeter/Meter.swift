@@ -121,7 +121,9 @@ final class Meter {
     private let dismissals = DefaultsDismissals()
     private let preferences = DefaultsDisplayPreferences()
     private static let autoSetUpKey = "autoSetUpClaudeStatusLine"
-    private let collector = Collector()
+    /// Rebuilt when the file changes: after a write of the app, or by hand between two detections (ADR 0014).
+    private var collector = Collector()
+    private var providersFileStamp = Meter.providersFileStamp()
     private let store = SnapshotStore.appGroupStore()
     private var timer: Timer?
     private static let log = Logger(subsystem: "com.fmmenchi.tokenmeter.app", category: "snapshot")
@@ -456,7 +458,11 @@ final class Meter {
         lastDetection = Date()
         let hasAppGroup = store != nil
         let integrations = makeIntegrations()
+        let stamp = providersFileStamp
         Task(priority: .utility) {
+            // A change by hand wins at the next detection (ADR 0014): the sources are built again from the file.
+            let changed = await Task.detached(priority: .utility) { Self.providersFileStamp() != stamp }.value
+            if changed { await reloadProviders(); return }
             let (found, configured, fileError, listed) = await Task.detached(priority: .utility) {
                 // A file that cannot be used falls back to the seed, as the collector does (ADR 0003), and says so (ADR 0005).
                 let loaded = Self.loadProviders()
@@ -507,6 +513,95 @@ final class Meter {
                 fixStates[problem.id] = .failed(reason)
             }
         }
+    }
+
+    // MARK: Accounts (ADR 0014)
+
+    /// What the sheet says about a folder the person typed or chose.
+    enum FolderCheck: Equatable {
+        /// Not a folder on disk.
+        case missing
+        /// A folder, but not one the tool left its files in: it may be new, or the wrong one.
+        case notTheTools
+        case found(email: String?)
+    }
+
+    /// Looks at the folder off the main actor: it reads the folder's files.
+    func checkFolder(_ path: String, tool: AccountTool) async -> FolderCheck {
+        let url = AccountFolders.folder(of: Self.tilde(path), tool: tool)
+        return await Task.detached(priority: .userInitiated) {
+            var isDirectory: ObjCBool = false
+            guard FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory), isDirectory.boolValue else {
+                return .missing
+            }
+            guard AccountFolders.isFolder(url, of: tool) else { return .notTheTools }
+            return .found(email: AccountFolders.email(in: url, tool: tool))
+        }.value
+    }
+
+    /// Writes the entry of a new account: the tool's template, with an id made from the title. The error, or nil.
+    func addAccount(tool: AccountTool, folder: String, title: String) async -> String? {
+        let id = ProviderConfigFile.id(for: title, taken: Set(providers.map(\.id)))
+        let entry = ProviderConfigFile.entry(for: tool, id: id, title: title, home: Self.tilde(folder))
+        let error = await Task.detached(priority: .userInitiated) { () -> String? in
+            do { try ProviderConfigFile.add(entry); return nil } catch { return "\(error)" }
+        }.value
+        if error == nil { await reloadProviders() }
+        return error
+    }
+
+    /// Changes an entry's title and folder; its id stays, so its history, its order and its notices do. The error, or nil.
+    func editAccount(_ id: String, title: String, folder: String?) async -> String? {
+        let tool = accounts.first { $0.id == id }?.tool
+        let home = folder.map(Self.tilde)
+        let error = await Task.detached(priority: .userInitiated) { () -> String? in
+            do {
+                guard let data = try? Data(contentsOf: ProviderConfigFile.defaultURL),
+                      let object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
+                      let entry = (object["providers"] as? [[String: Any]])?.first(where: { $0["id"] as? String == id })
+                else { return "providers.json could not be read." }
+                var changed = entry
+                if let tool, let home {
+                    changed = ProviderConfigFile.edited(entry, tool: tool, title: title, home: home)
+                } else {
+                    changed["title"] = title
+                }
+                try ProviderConfigFile.replace(id, with: changed)
+                return nil
+            } catch { return "\(error)" }
+        }.value
+        if error == nil { await reloadProviders() }
+        return error
+    }
+
+    /// Takes the entry out of the file, and nothing else: the preferences, the history and the folder stay. The error, or nil.
+    func removeAccount(_ id: String) async -> String? {
+        let error = await Task.detached(priority: .userInitiated) { () -> String? in
+            do { try ProviderConfigFile.remove(id); return nil } catch { return "\(error)" }
+        }.value
+        if error == nil { await reloadProviders() }
+        return error
+    }
+
+    /// The file was written: the sources are built again from it, the status lines set up, and a reading taken.
+    private func reloadProviders() async {
+        collector = await Task.detached(priority: .userInitiated) { Collector() }.value
+        providersFileStamp = Self.providersFileStamp()
+        await setUpClaudeStatusLine()
+        await refresh()
+    }
+
+    /// `~/…` for a path under the home, so the file reads the same on another Mac; a path elsewhere as it is.
+    nonisolated static func tilde(_ path: String) -> String {
+        let trimmed = path.trimmingCharacters(in: .whitespacesAndNewlines)
+        let home = FileManager.default.homeDirectoryForCurrentUser.path
+        if trimmed == home { return "~" }
+        if trimmed.hasPrefix(home + "/") { return "~" + trimmed.dropFirst(home.count) }
+        return trimmed
+    }
+
+    nonisolated private static func providersFileStamp() -> Date? {
+        (try? FileManager.default.attributesOfItem(atPath: ProviderConfigFile.defaultURL.path))?[.modificationDate] as? Date
     }
 
     func dismiss(_ problem: Problem) {
