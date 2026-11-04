@@ -8,6 +8,13 @@ sidebar_position: 10
 
 What changed in each version, newest first. The update window shows the notes of the version it offers, taken from this page, and links here for the rest.
 
+## 0.9.0 {#v0-9-0}
+
+Released on 2026-11-03.
+
+- **The bars can read how much is used.** In Settings, General, **Show on the bars** switches between **Left** (`25% left`, as before and still the default) and **Used** (`75% used`). It changes the figure, how far the bar is filled and the pace mark, on the panel and the widget alike; the colour of a bar, the notices and the stats keep following what is left, so a bar at `75% used` is orange. A window with nothing used is an empty bar ([Reading the Bars](./bars.md#left-or-used)).
+- **The welcome says so**: its page on the bars says the figure is what is left and where to change it, with the control beside the panel, and its page on Settings names the choice ([The welcome](./welcome.md)).
+
 ## 0.8.0 {#v0-8-0}
 
 Released on 2026-11-03.
