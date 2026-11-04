@@ -8,6 +8,12 @@ sidebar_position: 10
 
 What changed in each version, newest first. The update window shows the notes of the version it offers, taken from this page, and links here for the rest.
 
+## 0.9.1 {#v0-9-1}
+
+Released on 2026-11-03.
+
+- **The stats follow Show on the bars.** On Used, the row of a window that ended says `35% used` with its bar filled to it, and the verdict says "went up to 62% used or more" and "never went above 38% used" in place of the sentences about what is left. The colour of a row still follows what is left ([Reading the Bars](./bars.md#left-or-used), [Stats](./stats.md)).
+
 ## 0.9.0 {#v0-9-0}
 
 Released on 2026-11-03.

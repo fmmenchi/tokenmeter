@@ -46,13 +46,13 @@ are a choice and not a measurement.
 
 Each provider that is on has a card, in the order of Settings. For each window the plan has:
 
-| What you see                           | Meaning                                                                                                  |
-| :------------------------------------- | :------------------------------------------------------------------------------------------------------- |
-| A date, a bar and `12% left`           | A window that ended on that date, and **at most** that much was left: the highest use the app saw in it. |
-| `~12% left`, the bar at half strength  | The last reading was a good while before the window ended, so it may have ended with less.               |
-| `hit the ceiling 1 of 4 · last Oct 27` | In how many of the windows in the range the ceiling was reached (100%), and when it last was.            |
-| `never reached the ceiling in 4`       | The windows the app saw in the range, none of which went to 100%.                                        |
-| `not observed`                         | The app saw no window of that length end in the range. Nothing is made up for the gap.                   |
+| What you see                           | Meaning                                                                                                                                                                                                     |
+| :------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A date, a bar and `12% left`           | A window that ended on that date, and **at most** that much was left: the highest use the app saw in it. With [Show on the bars](./bars.md#left-or-used) on Used it reads `88% used`, the highest use seen. |
+| `~12% left`, the bar at half strength  | The last reading was a good while before the window ended, so it may have ended with less.                                                                                                                  |
+| `hit the ceiling 1 of 4 · last Oct 27` | In how many of the windows in the range the ceiling was reached (100%), and when it last was.                                                                                                               |
+| `never reached the ceiling in 4`       | The windows the app saw in the range, none of which went to 100%.                                                                                                                                           |
+| `not observed`                         | The app saw no window of that length end in the range. Nothing is made up for the gap.                                                                                                                      |
 
 The **5-hour windows are not listed for now**, and the verdict does not use them: several of them end in one day, and how to show that
 clearly is still to be designed. Only windows of a day or longer, such as the weekly one, are listed.

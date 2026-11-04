@@ -49,7 +49,7 @@ a bar that ends past the mark still means the quota runs out before the reset. T
 size and skin ([ADR 0006](../adr/0006-display-preferences.md)).
 
 Three things do not change. **The colour** still follows what is left: a bar at `75% used` is orange, and one at `95% used` is red, because
-under 40% and under 15% are left. **The notices** and **the stats** keep saying what is left. And **a window with nothing used** is an empty
+under 40% and under 15% are left. **The notices** keep saying what is left. **The stats** follow the choice: a window that ended says `35% used` and its bar is filled to it, and the verdict says "went up to 62% used or more" in place of "went down to 38% left or less". And **a window with nothing used** is an empty
 bar, `~0% used`, where in `left` a bar that is almost out keeps a small sliver so that it is not drawn as if it were empty.
 
 ## Reading the mark
