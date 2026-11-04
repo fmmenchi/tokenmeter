@@ -71,6 +71,19 @@ final class ProviderConfigWriteTests: XCTestCase {
         XCTAssertThrowsError(try ProviderConfigFile.replace("gemini", with: ["id": "gemini"], in: url))
     }
 
+    func testAnIdIsMadeFromTheTitleAndNeverRepeated() {
+        XCTAssertEqual(ProviderConfigFile.id(for: "Claude · work", taken: []), "claude-work")
+        XCTAssertEqual(ProviderConfigFile.id(for: "mario.rossi@example.com", taken: []), "mario.rossi-example.com")
+        XCTAssertEqual(ProviderConfigFile.id(for: "  Codex (personal)  ", taken: []), "codex-personal")
+        XCTAssertEqual(ProviderConfigFile.id(for: "···", taken: []), "account")
+        XCTAssertEqual(ProviderConfigFile.id(for: "Claude", taken: ["claude", "claude-2"]), "claude-3")
+        for title in ["Claude · work", "mario.rossi@example.com", "ünïcode", ""] {
+            let id = ProviderConfigFile.id(for: title, taken: [])
+            XCTAssertTrue(id.unicodeScalars.allSatisfy(ProviderConfig.idCharacters.contains), "\(title) gives \(id)")
+            XCTAssertFalse(id.isEmpty)
+        }
+    }
+
     func testEditedMovesThePathsTheTemplateGaveAndLeavesAHandWrittenOne() {
         var entry = ProviderConfigFile.entry(for: .claudeCode, id: "claude-work", title: "Claude · work", home: "~/.claude-work")
         var plan = entry["plan"] as! [String: Any]

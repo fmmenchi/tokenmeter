@@ -171,6 +171,28 @@ public struct ProviderConfigFile: Decodable, Sendable {
 
     // MARK: The app writes whole entries (ADR 0014)
 
+    /// An id made from a title, for an entry the app adds (ADR 0014): lower case, every run of other characters one `-`,
+    /// nothing else; `account` when nothing is left, and a number when the id is taken.
+    public static func id(for title: String, taken: Set<String>) -> String {
+        var base = ""
+        var gap = false
+        for scalar in title.lowercased().unicodeScalars {
+            if ProviderConfig.idCharacters.contains(scalar), scalar != "-" {
+                if gap, !base.isEmpty { base.append("-") }
+                base.unicodeScalars.append(scalar)
+                gap = false
+            } else {
+                gap = true
+            }
+        }
+        base = base.trimmingCharacters(in: CharacterSet(charactersIn: "._-"))
+        if base.isEmpty { base = "account" }
+        guard taken.contains(base) else { return base }
+        var number = 2
+        while taken.contains("\(base)-\(number)") { number += 1 }
+        return "\(base)-\(number)"
+    }
+
     /// Adds an entry to the file. The file is read as JSON, changed, kept as `.tokenmeter.bak` and written back atomically;
     /// nothing is written when the file cannot be used or the result would not load (a repeated id, say): the error says why.
     public static func add(_ entry: [String: Any], to url: URL = defaultURL) throws {
