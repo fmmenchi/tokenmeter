@@ -156,6 +156,91 @@ public struct ProviderConfigFile: Decodable, Sendable {
         DefaultProviders.template(for: tool, id: id, title: title, home: home)
     }
 
+    // MARK: The app writes whole entries (ADR 0014)
+
+    /// Adds an entry to the file. The file is read as JSON, changed, kept as `.tokenmeter.bak` and written back atomically;
+    /// nothing is written when the file cannot be used or the result would not load (a repeated id, say): the error says why.
+    public static func add(_ entry: [String: Any], to url: URL = defaultURL) throws {
+        var (object, providers) = try readForWriting(url)
+        providers.append(entry)
+        object["providers"] = providers
+        try writeBack(object, to: url)
+    }
+
+    /// Replaces the entry with `id` by `entry`, in its place; the id must exist.
+    public static func replace(_ id: String, with entry: [String: Any], in url: URL = defaultURL) throws {
+        var (object, providers) = try readForWriting(url)
+        guard let index = providers.firstIndex(where: { $0["id"] as? String == id }) else {
+            throw Failure(description: "\(url.path): no provider \"\(id)\" to replace")
+        }
+        providers[index] = entry
+        object["providers"] = providers
+        try writeBack(object, to: url)
+    }
+
+    /// Removes the entry with `id`, and nothing else: the preferences, the history and the folder are not the file's.
+    public static func remove(_ id: String, from url: URL = defaultURL) throws {
+        var (object, providers) = try readForWriting(url)
+        guard providers.contains(where: { $0["id"] as? String == id }) else {
+            throw Failure(description: "\(url.path): no provider \"\(id)\" to remove")
+        }
+        providers.removeAll { $0["id"] as? String == id }
+        object["providers"] = providers
+        try writeBack(object, to: url)
+    }
+
+    /// `entry` with a new title and folder: a path is rewritten only where it still equals what the template gave for the
+    /// old folder, so a path the person wrote by hand is left alone (ADR 0014). The id does not change.
+    public static func edited(_ entry: [String: Any], tool: AccountTool, title: String, home: String) -> [String: Any] {
+        guard let id = entry["id"] as? String else { return entry }
+        let oldHome = entry["home"] as? String ?? tool.defaultHome
+        var result = entry
+        result["title"] = title
+        guard home != oldHome else { return result }
+        let before = DefaultProviders.template(for: tool, id: id, title: title, home: oldHome)
+        let after = DefaultProviders.template(for: tool, id: id, title: title, home: home)
+        result = moved(result, from: before, to: after) as! [String: Any]
+        if home == tool.defaultHome { result["home"] = nil } else { result["home"] = home }
+        return result
+    }
+
+    private static func moved(_ value: Any, from before: Any?, to after: Any?) -> Any {
+        switch (value, before, after) {
+        case let (object as [String: Any], old as [String: Any], new as [String: Any]):
+            var result = object
+            for (key, item) in object { result[key] = moved(item, from: old[key], to: new[key]) }
+            return result
+        case let (list as [Any], old as [Any], new as [Any]) where old.count == new.count:
+            return list.enumerated().map { index, item in
+                index < old.count ? moved(item, from: old[index], to: new[index]) : item
+            }
+        case let (path as String, old as String, new as String) where path == old:
+            return new
+        default:
+            return value
+        }
+    }
+
+    private static func readForWriting(_ url: URL) throws -> ([String: Any], [[String: Any]]) {
+        guard let data = try? Data(contentsOf: url) else { throw Failure(description: "\(url.path): cannot be read") }
+        guard let object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
+              object["version"] as? Int == 1, let providers = object["providers"] as? [[String: Any]] else {
+            throw Failure(description: "\(url.path): not a providers file the app can write")
+        }
+        return (object, providers)
+    }
+
+    /// Checks that the result loads, keeps the original as `.tokenmeter.bak`, then writes atomically, sorted keys.
+    private static func writeBack(_ object: [String: Any], to url: URL) throws {
+        let output = try JSONSerialization.data(
+            withJSONObject: object, options: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes])
+        _ = try decode(output, origin: url.path)
+        let backup = url.appendingPathExtension("tokenmeter.bak")
+        try? FileManager.default.removeItem(at: backup)
+        try FileManager.default.copyItem(at: url, to: backup)
+        try (output + Data("\n".utf8)).write(to: url, options: .atomic)
+    }
+
     static func decode(_ data: Data, origin: String) throws -> ProviderConfigFile {
         let file: ProviderConfigFile
         do {
