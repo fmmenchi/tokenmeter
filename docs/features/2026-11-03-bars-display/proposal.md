@@ -37,8 +37,8 @@ what General holds. The other five pages stay as they are.
 - **The colour keeps following what is left.** A bar at `75% used` is orange, because 25% is left: red under 15% left keeps its meaning in
   both readings, and so does the green of a bar that has plenty.
 - **The mark of the pace mirrors with the bar**, so a bar that passes the mark still means the quota runs out before the reset.
-- **Notifications and the stats keep saying what is left.** `Under 10% left` reads the same to everyone, and the stats are windows that
-  ended, not the bars. A later feature can follow the choice there if it is missed.
+- **The notifications keep saying what is left.** `Under 10% left` reads the same to everyone.
+- **The stats follow the choice** (added on 2026-11-03, in 0.9.1: a person who reads the bars as used should not meet `left` in the charts): the row of a window that ended, and the two sentences of the verdict that name a percentage.
 - **A window with nothing used is an empty bar**, `~0% used`, not the smallest sliver that a nearly empty `left` bar shows.
 
 ## What is new to build

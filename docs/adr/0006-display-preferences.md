@@ -27,7 +27,7 @@ The order of providers decides what the medium widget shows, and nobody could hi
 - **How the bars read is a preference of the app too: left or used** (accepted 2026-11-03, [plan](../features/2026-11-03-bars-display/plan.md)). One global choice, `left` by default,
   kept in the app's defaults and published in the snapshot, as the skin is ([ADR 0013](./0013-skins.md)), so the widget draws the same.
   It changes only the figure, the fill of the bar and the position of the pace mark; the data, the colour of a bar, the thresholds of
-  the notices and the stats keep following what is left ([ADR 0002](./0002-quota-model-and-data-sources.md)).
+  the notices keep following what is left. The stats read it too: a window that ended says `35% used` and its bar fills to it, and the two sentences of the verdict that name a percentage say `used` ([ADR 0002](./0002-quota-model-and-data-sources.md)).
 - **One provider always stays shown**: the last one cannot be hidden, and if every provider were hidden the first in order is shown.
   A provider added later is shown.
 
