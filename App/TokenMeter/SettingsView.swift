@@ -8,7 +8,7 @@ enum SettingsWindow {
 
 struct SettingsView: View {
     let meter: Meter
-    /// The section shown. The window opens on General.
+    /// The section shown. The window opens on General, or on Accounts when Add it on a banner opened it (ADR 0014).
     @State private var tab = SettingsTab.general
 
     var body: some View {
@@ -21,6 +21,8 @@ struct SettingsView: View {
                 .frame(height: 410)
         }
         .frame(width: 500)
+        .onAppear { if meter.pendingAccount != nil { tab = .accounts } }
+        .onChange(of: meter.pendingAccount?.folder) { _, folder in if folder != nil { tab = .accounts } }
         .onDisappear { NSApplication.shared.setActivationPolicy(.accessory) }
     }
 

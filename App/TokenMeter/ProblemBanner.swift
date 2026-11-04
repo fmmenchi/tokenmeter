@@ -9,6 +9,8 @@ struct ProblemBanner: View {
     let state: Meter.FixState?
     let onFix: () -> Void
     let onDismiss: () -> Void
+    /// The app's own action for a problem that has no fix of its integration: Add it, for a folder nobody named (ADR 0014).
+    var action: (label: String, run: () -> Void)?
     @State private var explained = false
 
     private static let guideBase = "https://fmmenchi.github.io/tokenmeter/"
@@ -34,6 +36,8 @@ struct ProblemBanner: View {
                 HStack(spacing: 8) {
                     if let fix {
                         Button(buttonLabel(fix), action: onFix).disabled(state == .running)
+                    } else if let action {
+                        Button(action.label, action: action.run)
                     }
                     Button("Dismiss", action: onDismiss).disabled(state == .running)
                     Spacer()

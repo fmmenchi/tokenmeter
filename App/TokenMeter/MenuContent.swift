@@ -18,7 +18,11 @@ struct MenuContent: View {
                 ProblemBanner(
                     problem: problem, topicTitle: title(of: problem.topic), fix: meter.fixDescriptor(for: problem),
                     state: meter.fixStates[problem.id], onFix: { meter.runFix(problem) },
-                    onDismiss: { meter.dismiss(problem) })
+                    onDismiss: { meter.dismiss(problem) },
+                    action: meter.foundFolder(for: problem).map { found in
+                        // Add it: the sheet of Settings › Accounts, on this folder (ADR 0014).
+                        ("Add it", { meter.pendingAccount = found; openSettings() })
+                    })
             }
             if meter.showsStats {
                 StatsView(meter: meter)
@@ -73,13 +77,7 @@ struct MenuContent: View {
                            label: meter.showsStats ? "Show the current quota" : "Show the stats") {
                     meter.showsStats.toggle()
                 }
-                IconButton(systemName: "gearshape", label: "Settings") {
-                    // An accessory app cannot show a regular window in front: become a regular app
-                    // while Settings is open (SettingsView puts it back on disappear).
-                    NSApplication.shared.setActivationPolicy(.regular)
-                    NSApplication.shared.activate(ignoringOtherApps: true)
-                    openWindow(id: SettingsWindow.id)
-                }
+                IconButton(systemName: "gearshape", label: "Settings", action: openSettings)
                 // The lock (ADR 0014): nothing drags and nothing hides while it is closed.
                 IconButton(systemName: isUnlocked ? "lock.open" : "lock",
                            label: isUnlocked ? "Lock the cards" : "Unlock the cards to reorder or hide them",
@@ -109,6 +107,14 @@ struct MenuContent: View {
         // The skin's own colour in place of the window's translucent material (ADR 0013); System keeps the material.
         .background { PanelFill() }
         .skinned(meter.skin)
+    }
+
+    /// An accessory app cannot show a regular window in front: become a regular app while Settings is open (SettingsView
+    /// puts it back on disappear).
+    private func openSettings() {
+        NSApplication.shared.setActivationPolicy(.regular)
+        NSApplication.shared.activate(ignoringOtherApps: true)
+        openWindow(id: SettingsWindow.id)
     }
 
     private func title(of topic: String) -> String {
