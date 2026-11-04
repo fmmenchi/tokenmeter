@@ -8,6 +8,13 @@ sidebar_position: 10
 
 What changed in each version, newest first. The update window shows the notes of the version it offers, taken from this page, and links here for the rest.
 
+## 0.9.2 {#v0-9-2}
+
+Released on 2026-11-03.
+
+- **The line of a notification follows Show on the bars.** On Used it says `91% used · resets in 2d 6h`. What makes a notice due is the same in both readings, under 10% and under 30% left ([Notifications](./notifications.md)).
+- **The mark on the bar is explained in the reading you chose.** On Used the bar fills the other way and the mark with it, so the rule turns around: a bar longer than the mark is the one that goes too fast. The `i`, the welcome and the docs say so ([Reading the Bars](./bars.md#left-or-used)).
+
 ## 0.9.1 {#v0-9-1}
 
 Released on 2026-11-03.

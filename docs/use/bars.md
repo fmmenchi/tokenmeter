@@ -44,15 +44,16 @@ than claiming to be full ([ADR 0002](../adr/0002-quota-model-and-data-sources.md
 ## Left or used
 
 By default the figure says how much is left (`25% left`) and the bar is filled to it. In Settings, in **General**, **Show on the bars**
-changes it to **Used**: the figure says `75% used`, the bar is filled to 75% and the mark moves with it, on the same side as the bar, so
-a bar that ends past the mark still means the quota runs out before the reset. The choice is one for the panel and the widget, in every
+changes it to **Used**: the figure says `75% used`, the bar is filled to 75% and the mark moves with it and is now how much you would have **used** by now at a steady pace. The rule turns around with it: a bar **longer** than the mark is the one that goes too fast, and the mark is orange then. The `i` beside the provider's name says it in the reading you chose. The choice is one for the panel and the widget, in every
 size and skin ([ADR 0006](../adr/0006-display-preferences.md)).
 
 Three things do not change. **The colour** still follows what is left: a bar at `75% used` is orange, and one at `95% used` is red, because
-under 40% and under 15% are left. **The notices** keep saying what is left. **The stats** follow the choice: a window that ended says `35% used` and its bar is filled to it, and the verdict says "went up to 62% used or more" in place of "went down to 38% left or less". And **a window with nothing used** is an empty
+under 40% and under 15% are left. **The thresholds of the notices** stay on what is left, but **the line of a notification** says `91% used` on Used. **The stats** follow the choice: a window that ended says `35% used` and its bar is filled to it, and the verdict says "went up to 62% used or more" in place of "went down to 38% left or less". And **a window with nothing used** is an empty
 bar, `~0% used`, where in `left` a bar that is almost out keeps a small sliver so that it is not drawn as if it were empty.
 
 ## Reading the mark
+
+This section is written for **Left**. On Used the bar fills the other way and the mark with it: read "ends before the mark" as "is longer than the mark", and the other way round ([Left or used](#left-or-used)).
 
 A bar says how much is left, not whether it lasts until the reset. The **mark** on the bar does: it is where the bar would
 end if the window were used steadily from its start to its reset ([ADR 0002](../adr/0002-quota-model-and-data-sources.md)).
