@@ -8,7 +8,7 @@ struct AccountsTab: View {
     let meter: Meter
     /// The sheet that is open: Edit… on a row, or Add an account….
     @State private var editing: AccountSheet.Target?
-    /// The entry Remove… asks about; the sheet comes with a later step.
+    /// The entry Remove… asks about.
     @State private var removing: AccountSummary?
 
     var body: some View {
@@ -22,6 +22,7 @@ struct AccountsTab: View {
             Button("Add an account…") { editing = .new }
         }
         .sheet(item: $editing) { target in AccountSheet(meter: meter, target: target) }
+        .sheet(item: $removing) { account in RemoveAccountSheet(meter: meter, account: account) }
     }
 }
 
