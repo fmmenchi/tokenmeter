@@ -11,7 +11,10 @@ final class Meter {
     private(set) var isRefreshing = false
     private(set) var launchAtLogin = false
     private(set) var autoSetUpClaude = UserDefaults.standard.object(forKey: Meter.autoSetUpKey) as? Bool ?? true
-    private(set) var claudeStatusLine: ClaudeStatusLine.Outcome?
+    /// What the setup of the status line found, by Claude entry (ADR 0014); empty while the switch is off or before launch.
+    private(set) var claudeStatusLines: [String: ClaudeStatusLine.Outcome] = [:]
+    /// The outcome for the seed entry, as Settings said it before accounts.
+    var claudeStatusLine: ClaudeStatusLine.Outcome? { claudeStatusLines[AccountTool.claudeCode.seedID] }
     /// The problems the person has not hidden (ADR 0005); the panel draws these and the snapshot carries them.
     private(set) var problems: [Problem] = []
     /// Interface state of the fixes being run, by problem id. Not in the model or the snapshot (the plan of the feature).
@@ -206,20 +209,25 @@ final class Meter {
     }
 
     /// ADR 0002: Claude Code writes a copy of the usage, including each model's limit, when it runs `/usage`. Ask it to,
-    /// on a slow timer and when the person refreshes, in the background and only while the Claude quota switch is on.
-    /// Claude Code reads its own credentials; tokenmeter handles none.
+    /// on a slow timer and when the person refreshes, in the background and only while the Claude quota switch is on,
+    /// once for each Claude entry in its own folder (ADR 0014). Claude Code reads its own credentials; tokenmeter handles none.
     private func refreshClaudeUsageIfDue(force: Bool) {
         guard autoSetUpClaude, !isRefreshingUsage else { return }
         if !force, let last = lastUsageRefresh, Date().timeIntervalSince(last) < 900 { return }
         isRefreshingUsage = true
         lastUsageRefresh = Date()
+        let accounts = ClaudeAccounts.entries(in: providers, integrations: makeIntegrations()).map(\.account)
         Task(priority: .utility) {
-            let outcome = await ClaudeUsageRefresh.refresh()
+            var outcomes: [ClaudeUsageRefresh.Outcome] = []
+            for account in accounts.isEmpty ? [.default()] : accounts {
+                outcomes.append(await ClaudeUsageRefresh.refresh(account: account))
+            }
             isRefreshingUsage = false
-            usageRefresh = outcome
-            if outcome == .refreshed { await refresh() }
+            // One outcome for the problem the app reports: the first that went wrong, else the first.
+            usageRefresh = outcomes.first { $0 != .refreshed && $0 != .notFound } ?? outcomes.first
+            if outcomes.contains(.refreshed) { await refresh() }
             else {
-                Self.log.info("Claude usage not refreshed: \(String(describing: outcome), privacy: .public)")
+                Self.log.info("Claude usage not refreshed: \(String(describing: outcomes), privacy: .public)")
                 publish()
             }
         }
@@ -392,30 +400,45 @@ final class Meter {
     }
 
     /// Restore original stays in Settings (ADR 0005); the wrap itself is a fix in the panel.
-    func restoreClaudeStatusLine() {
+    /// Puts the status line of the seed entry back, as before accounts.
+    func restoreClaudeStatusLine() { restoreClaudeStatusLine(for: AccountTool.claudeCode.seedID) }
+
+    /// Puts the account's own status line back, in its folder (ADR 0014).
+    func restoreClaudeStatusLine(for id: String) {
+        guard let entry = ClaudeAccounts.entries(in: providers, integrations: makeIntegrations()).first(where: { $0.id == id })
+        else { return }
+        let account = entry.account
         Task {
             let failure = await Task.detached(priority: .utility) { () -> String? in
-                do { _ = try ClaudeStatusLine.restore(); return nil } catch { return error.localizedDescription }
+                do { _ = try ClaudeStatusLine.restore(account: account); return nil } catch { return error.localizedDescription }
             }.value
-            if let failure { Self.log.error("Could not restore the Claude status line: \(failure, privacy: .public)") }
+            if let failure { Self.log.error("Could not restore the Claude status line of \(id, privacy: .public): \(failure, privacy: .public)") }
             await setUpClaudeStatusLine()
             detectProblems()
         }
     }
 
-    /// ADR 0004: only while the switch is on, at every launch and when it is turned on. The settings file is read and written off the
-    /// main actor (ADR 0005).
+    /// ADR 0004: only while the switch is on, at every launch and when it is turned on, for each Claude entry in its own
+    /// folder (ADR 0014). The file and the settings are read and written off the main actor (ADR 0005).
     private func setUpClaudeStatusLine() async {
-        guard autoSetUpClaude else { claudeStatusLine = nil; usageRefresh = nil; return }
+        guard autoSetUpClaude else { claudeStatusLines = [:]; usageRefresh = nil; return }
         guard let script = claudeScript else { return }
-        let result = await Task.detached(priority: .utility) { Result { try ClaudeStatusLine.setUp(script: script) } }.value
-        switch result {
-        case .success(let outcome):
-            claudeStatusLine = outcome
-        case .failure(let error):
-            claudeStatusLine = nil
-            Self.log.error("Could not set up the Claude status line: \(error.localizedDescription, privacy: .public)")
-        }
+        let integrations = makeIntegrations()
+        let (outcomes, failures, configured) = await Task.detached(priority: .utility) {
+            () -> ([String: ClaudeStatusLine.Outcome], [String], [ProviderConfig]) in
+            let loaded = Self.loadProviders()
+            var outcomes: [String: ClaudeStatusLine.Outcome] = [:]
+            var failures: [String] = []
+            for entry in ClaudeAccounts.entries(in: loaded.providers, integrations: integrations) {
+                do { outcomes[entry.id] = try ClaudeStatusLine.setUp(script: script, account: entry.account) } catch {
+                    failures.append("\(entry.id): \(error.localizedDescription)")
+                }
+            }
+            return (outcomes, failures, loaded.providers)
+        }.value
+        for failure in failures { Self.log.error("Could not set up the Claude status line: \(failure, privacy: .public)") }
+        claudeStatusLines = outcomes
+        providers = configured
         detectProblems()
     }
 
@@ -437,9 +460,10 @@ final class Meter {
             let (found, configured, fileError) = await Task.detached(priority: .utility) {
                 // A file that cannot be used falls back to the seed, as the collector does (ADR 0003), and says so (ADR 0005).
                 let loaded = Self.loadProviders()
+                // The folders of a tool at the top of the home, for the one nobody named (ADR 0014).
                 let found = ProblemDetector.detect(
                     general: AppProblems.check(hasAppGroup: hasAppGroup), providers: loaded.providers,
-                    integrations: integrations, context: ProblemContext())
+                    integrations: integrations, context: ProblemContext(), folders: AccountFolders.scan())
                 return (found, loaded.providers, loaded.error)
             }.value
             detected = found
