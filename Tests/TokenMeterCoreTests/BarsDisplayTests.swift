@@ -32,6 +32,20 @@ final class BarsDisplayTests: XCTestCase {
         XCTAssertEqual(BarsDisplay.used.fraction(remaining: -0.1), 1)
     }
 
+    func testTheFiguresOfOneWindowAddUpToAHundred() {
+        for step in 0...1000 {
+            let remaining = Double(step) / 1000
+            XCTAssertEqual(BarsDisplay.left.percent(remaining: remaining) + BarsDisplay.used.percent(remaining: remaining), 100, "\(remaining)")
+        }
+    }
+
+    func testTheFigureOfLeftIsWhatItAlwaysWas() {
+        XCTAssertEqual(BarsDisplay.left.percent(remaining: 0.125), 13)
+        XCTAssertEqual(BarsDisplay.used.percent(remaining: 0.125), 87)
+        XCTAssertEqual(BarsDisplay.used.percent(remaining: 1), 0)
+        XCTAssertEqual(BarsDisplay.used.percent(remaining: 0), 100)
+    }
+
     func testTheWordIsWhatTheFigureSays() {
         XCTAssertEqual(BarsDisplay.left.word, "left")
         XCTAssertEqual(BarsDisplay.used.word, "used")

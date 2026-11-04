@@ -18,6 +18,13 @@ public enum BarsDisplay: String, CaseIterable, Codable, Sendable {
         }
     }
 
+    /// The figure a window says, in whole percent: what is left rounded as it always was, and used as the hundred that remain, so the
+    /// two readings of one window always add up to 100.
+    public func percent(remaining: Double) -> Int {
+        let left = min(max(Int((remaining * 100).rounded()), 0), 100)
+        return self == .left ? left : 100 - left
+    }
+
     /// The pace mark as this reading draws it: the bar and the mark are on the same side, so a bar that passes the mark still
     /// means the quota runs out before the reset.
     public func shown(_ pace: Pace) -> Pace {
