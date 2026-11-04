@@ -1,7 +1,7 @@
 import SwiftUI
 import TokenMeterCore
 
-/// The seven pages of the welcome wizard: a title, a short text, a picture with the part outlined, and the footer.
+/// The eight pages of the welcome wizard: a title, a short text, a picture with the part outlined, and the footer.
 struct WelcomeView: View {
     let welcome: WelcomeWindow
 
@@ -46,6 +46,7 @@ extension WelcomeState.Page {
         case .buttons: "Refresh, stats, settings and quit"
         case .stats: "The stats"
         case .suggestion: "The suggestion"
+        case .accounts: "An account is a folder"
         case .settings: "Settings has five tabs"
         }
     }
@@ -59,18 +60,21 @@ extension WelcomeState.Page {
         case .tick:
             "Where the bar would be at a steady use. If the bar ends before it, the quota runs out before the reset."
         case .buttons:
-            "The lines above say how fresh each quota is. Refresh reads everything now and asks Claude Code for your account's usage; on its own tokenmeter reads every minute. The chart switches to the stats, the gear opens Settings, power quits."
+            "The lines above say how fresh each quota is. Refresh reads everything now and asks Claude Code for each account's usage; on its own tokenmeter reads every minute. The chart switches to the stats, the gear opens Settings, the lock lets you reorder and hide the cards, power quits."
         case .stats:
             "The chart in the panel switches to the stats. Pick a period at the top: each provider's card shows how its windows ended and which models used your tokens. The goal is to see whether your plan fits the way you use it. The tokens are only those this Mac counted."
         case .suggestion:
             "The word at the top of a provider's card is the app's suggestion: Wait, Stay or Move down. It comes from the quota percentages only and never looks at tokens."
+        case .accounts:
+            "A work account and a personal one? Each is a folder that Claude Code or the Codex CLI reads. Name it in providers.json and it gets a card of its own, with its own bars and history. When a folder nobody named is found, the panel says so, and Add it gives it a card."
         case .settings:
-            "General, Providers, Skin, Notifications and Updates. Choose a skin and turn on notifications there. The daily check for updates is in Updates, where you can turn it off. You can see this tour again from General."
+            "General, Accounts, Skin, Notifications and Updates. Accounts is where an account is added, renamed or removed. Choose a skin and turn on notifications there. The daily check for updates is in Updates, where you can turn it off. You can see this tour again from General."
         }
     }
 }
 
-/// The picture of a page: the real icon, a screenshot of the panel with a part outlined, or the real tabs of Settings.
+/// The picture of a page: the real icon, a screenshot of the panel with a part outlined, the real tabs of Settings, or the
+/// real cards of two accounts drawn with sample data.
 private struct WelcomePicture: View {
     let page: WelcomeState.Page
 
@@ -95,6 +99,7 @@ private struct WelcomePicture: View {
                 }
             }
             .frame(maxWidth: .infinity)
+        case .accounts: AccountsPicture()
         case .settings:
             SettingsTabs(selection: .constant(.general))
                 .frame(width: 460)
@@ -118,6 +123,38 @@ private struct WelcomePicture: View {
         .clipped()
         .frame(maxWidth: .infinity)
         .accessibilityLabel(Text(page.title))
+    }
+}
+
+/// Two Claude cards, a work one and a personal one, the second ringed: the app's own card drawn with invented figures,
+/// as the panel would show two accounts (ADR 0014). Nothing here is read from the Mac.
+private struct AccountsPicture: View {
+    private static let now = Date()
+
+    private static func card(_ id: String, title: String, plan: String, fiveHours: Double, weekly: Double) -> ProviderSnapshot {
+        func window(_ spec: WindowSpec, left: Double, resetsIn: TimeInterval, tokens: Int) -> WindowUsage {
+            WindowUsage(window: spec, tokens: TokenCounts(input: tokens, output: tokens / 4), remainingFraction: left,
+                        source: .reported, resetsAt: now.addingTimeInterval(resetsIn), observedAt: now)
+        }
+        return ProviderSnapshot(
+            provider: Provider(rawValue: id), title: title,
+            windows: [window(.session, left: fiveHours, resetsIn: 3 * 3600 + 20 * 60, tokens: 720_000),
+                      window(.week, left: weekly, resetsIn: 2 * 86_400 + 4 * 3600, tokens: 7_800_000)],
+            plan: plan, quotaUpdatedAt: now)
+    }
+
+    var body: some View {
+        VStack(spacing: 12) {
+            ProviderCard(snapshot: Self.card("claude-work", title: "Claude · work", plan: "Max", fiveHours: 0.62, weekly: 0.38))
+            ProviderCard(snapshot: Self.card("claude-personal", title: "Claude · personal", plan: "Pro", fiveHours: 0.91, weekly: 0.24))
+                .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.accentColor, lineWidth: 3))
+        }
+        .padding(12)
+        .frame(width: 300)
+        .background(RoundedRectangle(cornerRadius: 10).fill(.background))
+        .overlay(RoundedRectangle(cornerRadius: 10).stroke(.quaternary, lineWidth: 1))
+        .frame(maxWidth: .infinity)
+        .accessibilityLabel(Text("Two Claude cards, a work account and a personal one"))
     }
 }
 
