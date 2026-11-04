@@ -53,6 +53,7 @@ struct SettingsView: View {
 
     @ViewBuilder private var general: some View {
         Group {
+            BarsDisplayGroup(meter: meter)
             Toggle("Launch at login", isOn: Binding(
                 get: { meter.launchAtLogin },
                 set: { meter.setLaunchAtLogin($0) }))

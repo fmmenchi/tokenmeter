@@ -55,7 +55,7 @@ extension WelcomeState.Page {
         case .whereItLives:
             "It lives in the menu bar: click the gauge icon to see how much of your Claude and ChatGPT plans is left. A small dot on the icon means something needs a look: a problem the panel lists, or an update to install."
         case .bars:
-            "Green is plenty left, orange under 40%, red under 15%. tokenmeter reads the files that Claude Code and the Codex CLI leave on this Mac, with no API calls, no login and no key, so the bars update as you use them: at the first launch, until you do, they stay empty."
+            "Green is plenty left, orange under 40%, red under 15%. The figure says how much is left; if you would rather read how much is used, change it in Settings, in General. tokenmeter reads the files that Claude Code and the Codex CLI leave on this Mac, with no API calls, no login and no key, so the bars update as you use them: at the first launch, until you do, they stay empty."
         case .tick:
             "Where the bar would be at a steady use. If the bar ends before it, the quota runs out before the reset."
         case .buttons:
@@ -65,7 +65,7 @@ extension WelcomeState.Page {
         case .suggestion:
             "The word at the top of a provider's card is the app's suggestion: Wait, Stay or Move down. It comes from the quota percentages only and never looks at tokens."
         case .settings:
-            "General, Providers, Skin, Notifications and Updates. Choose a skin and turn on notifications there. The daily check for updates is in Updates, where you can turn it off. You can see this tour again from General."
+            "General, Providers, Skin, Notifications and Updates. In General you choose whether the bars show how much is left or how much is used. Choose a skin and turn on notifications there. The daily check for updates is in Updates, where you can turn it off. You can see this tour again from General."
         }
     }
 }
@@ -80,7 +80,13 @@ private struct WelcomePicture: View {
     var body: some View {
         switch page {
         case .whereItLives: MenuBarPicture()
-        case .bars: picture("WelcomePanel", height: 411, shown: 190, from: .top, outline: Outline(x: 0.03, y: 0.097, width: 0.94, height: 0.231))
+        case .bars:
+            HStack(alignment: .top, spacing: 24) {
+                picture("WelcomePanel", height: 411, shown: 190, from: .top, outline: Outline(x: 0.03, y: 0.097, width: 0.94, height: 0.231))
+                    .frame(width: 300)
+                BarsDisplayPicture()
+            }
+            .frame(maxWidth: .infinity)
         case .tick: picture("WelcomePanel", height: 411, shown: 190, from: .top, outline: Outline(x: 0.40, y: 0.134, width: 0.09, height: 0.067))
         case .buttons: picture("WelcomePanel", height: 411, shown: 160, from: .bottom, outline: Outline(x: 0.02, y: 0.785, width: 0.96, height: 0.19))
         case .stats: picture("WelcomeStats", height: 622.5, shown: 400, from: .top, outline: Outline(x: 0.03, y: 0.269, width: 0.94, height: 0.169))
@@ -118,6 +124,29 @@ private struct WelcomePicture: View {
         .clipped()
         .frame(maxWidth: .infinity)
         .accessibilityLabel(Text(page.title))
+    }
+}
+
+/// The real control of Settings, General, outlined, on the page about the bars: it says where the figure is chosen. It shows the
+/// default, left, and changes nothing: the window is a picture of the app, not a second place to set it.
+private struct BarsDisplayPicture: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Settings · General").font(.caption.weight(.semibold)).foregroundStyle(.secondary).textCase(.uppercase)
+            Picker("Show on the bars", selection: .constant(BarsDisplay.left)) {
+                Text("Left").tag(BarsDisplay.left)
+                Text("Used").tag(BarsDisplay.used)
+            }
+            .pickerStyle(.segmented)
+            Text("Left: 65% left. Used: 35% used.").font(.caption).foregroundStyle(.secondary)
+        }
+        .allowsHitTesting(false)
+        .padding(12)
+        .frame(width: 250)
+        .background(RoundedRectangle(cornerRadius: 10).fill(.quaternary))
+        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.accentColor, lineWidth: 3))
+        .padding(.top, 8)
+        .accessibilityElement(children: .combine)
     }
 }
 

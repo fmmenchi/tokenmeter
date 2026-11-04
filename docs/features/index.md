@@ -33,7 +33,9 @@ are [ADRs](../adr), and its overview links them.
 
 ## In design and build
 
-Nothing at the moment.
+| Feature                                                                                                                        | Date       | Pages                                                                                                                                        |
+| :----------------------------------------------------------------------------------------------------------------------------- | :--------- | :------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Bars: left or used](./2026-11-03-bars-display/index.md): a choice in Settings says whether the bars show what is left or used | 2026-11-03 | [Overview](./2026-11-03-bars-display/index.md), [Proposal](./2026-11-03-bars-display/proposal.md), [Plan](./2026-11-03-bars-display/plan.md) |
 
 ## The pattern: from idea to implemented
 

@@ -72,6 +72,7 @@ struct MenuContent: View {
         // The skin's own colour in place of the window's translucent material (ADR 0013); System keeps the material.
         .background { PanelFill() }
         .skinned(meter.skin)
+        .environment(\.barsDisplay, meter.barsDisplay)
     }
 
     private func title(of topic: String) -> String {

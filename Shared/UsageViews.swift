@@ -15,9 +15,10 @@ extension EnvironmentValues {
 }
 
 extension WindowUsage {
-    func remainingText(at now: Date) -> String {
+    /// The figure of a window in the reading the person chose: `25%` of what is left, or `75%` of what is used.
+    func figureText(_ display: BarsDisplay, at now: Date) -> String {
         guard let remainingFraction else { return "—" }
-        return "\(isApproximate(at: now) ? "~" : "")\(Int((remainingFraction * 100).rounded()))%"
+        return "\(isApproximate(at: now) ? "~" : "")\(display.percent(remaining: remainingFraction))%"
     }
 
     /// Input + output tokens seen in the window. Cache reads are left out: they are ~98% of the
@@ -67,6 +68,9 @@ struct QuotaBar: View {
     var mark: Pace?
     /// An estimated figure is drawn at half strength: the bar and its tick, not the icon of an event, which is an image of its own.
     var faded = false
+    /// A bar with nothing in it is drawn empty. Without it a bar keeps the smallest sliver of a fill, so that one that is almost out is
+    /// not drawn as if it were empty (the way `left` reads); `used` draws nothing when nothing is used (ADR 0006).
+    var emptyIsEmpty = false
     @Environment(\.easterEgg) private var easterEgg
     @Environment(\.skinStyle) private var skin
 
@@ -75,7 +79,8 @@ struct QuotaBar: View {
 
     var body: some View {
         GeometryReader { proxy in
-            SkinBarBody(fraction: fraction, tint: tint, shape: shape, track: skin?.track ?? Color.primary.opacity(0.15))
+            SkinBarBody(fraction: fraction, tint: tint, shape: shape, track: skin?.track ?? Color.primary.opacity(0.15),
+                        emptyIsEmpty: emptyIsEmpty)
             .opacity(faded ? 0.5 : 1)
             .frame(width: proxy.size.width, height: proxy.size.height)
             // The mark is drawn over the bar and takes no part in its size. Inside the same stack it made the stack taller than the
@@ -100,6 +105,7 @@ struct WindowRow: View {
     let usage: WindowUsage
     @State private var hovering = false
     @Environment(\.skinStyle) private var skin
+    @Environment(\.barsDisplay) private var display
     @Environment(\.renderDate) private var renderDate
     @Environment(\.easterEgg) private var easterEgg
     private var now: Date { renderDate ?? Date() }
@@ -121,13 +127,14 @@ struct WindowRow: View {
                 Spacer()
                 // While the pointer is on the bar the figure says when the quota runs out (ADR 0002); the label does not move.
                 let say = hovering && showsPace ? usage.paceFigureText(at: now) : nil
-                Text(say ?? (usage.remainingFraction == nil ? "unknown" : "\(usage.remainingText(at: now)) left"))
+                Text(say ?? (usage.remainingFraction == nil ? "unknown" : "\(usage.figureText(display, at: now)) \(display.word)"))
                     .font(.caption.bold().monospacedDigit())
                     .foregroundStyle(say == nil ? Color.primary : usage.paceFigureStyle(at: now, warning: skin?.middle ?? .orange))
                     .id(say ?? "").transition(.opacity)
             }
-            QuotaBar(fraction: usage.remainingFraction, tint: tint, mark: showsPace ? usage.pace(at: now) : nil,
-                     faded: usage.isApproximate(at: now))
+            QuotaBar(fraction: usage.remainingFraction.map { display.fraction(remaining: $0) }, tint: tint,
+                     mark: showsPace ? usage.pace(at: now).map(display.shown) : nil,
+                     faded: usage.isApproximate(at: now), emptyIsEmpty: display == .used)
                 .padding(.vertical, iconRoom)
                 .hovered($hovering, enabled: showsPace)
             // A model's thin bar is 4 points tall in a row as tall as its text, so it has 4 points of air above and below it.
@@ -187,17 +194,18 @@ struct ScopedWindowRow: View {
     var showsPace = false
     @State private var hovering = false
     @Environment(\.skinStyle) private var skin
+    @Environment(\.barsDisplay) private var display
 
     var body: some View {
         HStack(spacing: 6) {
             Bracket().stroke(Color.secondary.opacity(0.6), lineWidth: 1).frame(width: 8, height: 8).offset(y: -3)
             Text(usage.window.scope ?? "").font(.caption.weight(.medium)).lineLimit(1)
                 .frame(minWidth: 30, alignment: .leading)
-            QuotaBar(fraction: usage.remainingFraction, tint: usage.tint(in: skin), height: 4,
-                     mark: showsPace ? usage.pace(at: now) : nil)
+            QuotaBar(fraction: usage.remainingFraction.map { display.fraction(remaining: $0) }, tint: usage.tint(in: skin), height: 4,
+                     mark: showsPace ? usage.pace(at: now).map(display.shown) : nil, emptyIsEmpty: display == .used)
             // The figure is as wide as what it says, and the bar gives way to it, smoothly (ADR 0002).
             let say = hovering && showsPace ? usage.paceFigureText(at: now) : nil
-            Text(say ?? (usage.remainingFraction == nil ? "unknown" : "\(usage.remainingText(at: now)) left"))
+            Text(say ?? (usage.remainingFraction == nil ? "unknown" : "\(usage.figureText(display, at: now)) \(display.word)"))
                 .font(.caption.bold().monospacedDigit())
                 .foregroundStyle(say == nil ? Color.primary : usage.paceFigureStyle(at: now, warning: skin?.middle ?? .orange))
                 .lineLimit(1).fixedSize()

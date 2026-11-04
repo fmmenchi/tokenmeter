@@ -10,7 +10,7 @@ What each bar, colour, symbol and line of text under it means.
 
 Each provider has two bars: **5 hours** and **Weekly**. A bar shows how much of the window is
 **left**, not how much is used. The figure on the right is that percentage, and the line under the
-bar is the detail.
+bar is the detail. The figure can read the other way, how much is **used**: see [Left or used](#left-or-used).
 
 ## Colour
 
@@ -40,6 +40,17 @@ if the data on disk is old ([ADR 0002](../adr/0002-quota-model-and-data-sources.
 there was use after the reset and no new quota was reported, the window stays **Unknown** rather
 than claiming to be full ([ADR 0002](../adr/0002-quota-model-and-data-sources.md)).
 :::
+
+## Left or used
+
+By default the figure says how much is left (`25% left`) and the bar is filled to it. In Settings, in **General**, **Show on the bars**
+changes it to **Used**: the figure says `75% used`, the bar is filled to 75% and the mark moves with it, on the same side as the bar, so
+a bar that ends past the mark still means the quota runs out before the reset. The choice is one for the panel and the widget, in every
+size and skin ([ADR 0006](../adr/0006-display-preferences.md)).
+
+Three things do not change. **The colour** still follows what is left: a bar at `75% used` is orange, and one at `95% used` is red, because
+under 40% and under 15% are left. **The notices** and **the stats** keep saying what is left. And **a window with nothing used** is an empty
+bar, `~0% used`, where in `left` a bar that is almost out keeps a small sliver so that it is not drawn as if it were empty.
 
 ## Reading the mark
 
