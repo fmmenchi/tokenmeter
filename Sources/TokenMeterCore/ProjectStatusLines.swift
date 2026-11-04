@@ -11,12 +11,14 @@ public enum ProjectStatusLines {
 
     static let headBytes = 256 * 1024
 
+    /// `configDir` is the folder Claude Code reads for the account, `~/.claude` when nil (ADR 0014); its `projects/` is
+    /// where the transcripts say which projects were used.
     public static func overrides(
-        home: URL = FileManager.default.homeDirectoryForCurrentUser,
+        home: URL = FileManager.default.homeDirectoryForCurrentUser, configDir: URL? = nil,
         now: Date = Date(), days: Int = 30, limit: Int = 200
     ) -> [Override] {
         let fileManager = FileManager.default
-        let root = home.appendingPathComponent(".claude/projects")
+        let root = (configDir ?? home.appendingPathComponent(".claude")).appendingPathComponent("projects")
         guard let folders = try? fileManager.contentsOfDirectory(at: root, includingPropertiesForKeys: nil) else { return [] }
         let oldest = now.addingTimeInterval(-Double(days) * 86_400)
 
@@ -27,7 +29,7 @@ public enum ProjectStatusLines {
                   seen.insert(project.path).inserted,
                   let line = statusLine(of: project) else { continue }
             if let command = line["command"] as? String,
-               command.contains("claude-statusline.sh") || command.contains("claude/statusline-wrapper.sh") { continue }
+               command.contains("claude-statusline.sh") || command.contains("/statusline-wrapper.sh") { continue }
             found.append(Override(project: project, command: line["command"] as? String ?? ""))
         }
         return found.sorted { $0.project.path < $1.project.path }
