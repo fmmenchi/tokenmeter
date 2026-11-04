@@ -24,7 +24,8 @@ is invisible, and its status line and its `/usage` are never set up.
 
 The app does not learn a new concept: an account is a provider like the others, with its own id and title, which is what
 keeps the history, the preferences and the notices apart with no change to them. What the app adds is the folder an entry
-reads from, the setup of that folder's status line, and a word when it finds a folder nobody named.
+reads from, the setup of that folder's status line, the email the folder is signed in with, and a word, with a button, when it
+finds a folder nobody named.
 
 ## The nucleus
 
@@ -32,10 +33,11 @@ reads from, the setup of that folder's status line, and a word when it finds a f
 | :------------------ | :------------------------------------------------ | :----- |
 | Proposal            | [Proposal](./proposal.md)                         | chosen |
 | Implementation plan | not yet written                                   |        |
-| Decisions           | ADR 0015, the home of a provider, not yet written |        |
+| Decisions           | ADR 0014, the home of a provider, not yet written |        |
 
 ## Related
 
 - [Configure providers](../../use/configure-providers.md): the file an account is an entry of
 - [Enable the Claude quota](../../use/enable-claude-quota.md): the status line that each account gets
 - [Alerts with a fix](../2026-10-30-alerts-with-a-fix/index.md): the problem that says a folder was found
+- [Welcome tour](../2026-11-03-welcome-tour/index.md): the page the accounts add to it
