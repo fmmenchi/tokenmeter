@@ -24,8 +24,8 @@ is invisible, and its status line and its `/usage` are never set up.
 
 The app does not learn a new concept: an account is a provider like the others, with its own id and title, which is what
 keeps the history, the preferences and the notices apart with no change to them. What the app adds is the folder an entry
-reads from, the setup of that folder's status line, the email the folder is signed in with, and a word, with a button, when it
-finds a folder nobody named.
+reads from, the setup of that folder's status line, the email the folder is signed in with, a tab to add, rename and remove
+accounts, a lock on the panel to arrange their cards, and a word, with a button, when it finds a folder nobody named.
 
 ## The nucleus
 
