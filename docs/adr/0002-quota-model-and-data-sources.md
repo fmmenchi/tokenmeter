@@ -33,10 +33,12 @@ limits are not in tokens and totals are dominated by cache reads.
   `observedAt`). Claude keeps a copy of its usage in `~/.claude.json` (`cachedUsageUtilization.utilization.limits`, kinds
   `session`, `weekly_all`, `weekly_scoped`), which tokenmeter reads and refreshes by asking Claude Code to run `/usage`
   (`claude -p "/usage" --no-session-persistence --no-chrome`, in `~/.tokenmeter/claude/`, on demand and on a slow timer): Claude
-  Code reads its own credentials, tokenmeter never does. A row appears only for a scope that has data.
+  Code reads its own credentials, tokenmeter never does. A zero exit without a newer `fetchedAtMs` is a failed refresh;
+  Claude Code 2.1.319 has been observed to exit zero without updating this copy. A row appears only for a scope that has data.
 - **A window exists only if the data lists it.** A provider declares its windows, and a quota window may carry `existsIf`, a
-  list in a file and how old it may be (`maxAgeHours`, 6). The window is absent only when the list is readable, not empty and
-  fresh and does not name it; otherwise it stays, as unknown. No plan is named in the code. Claude's 5 hours is absent on the
+  list in a file. The window is absent when the last known list is readable, not empty and does not name it, even while quota
+  percentages grow stale; a newer list can restore it after a plan change. If the list is missing or empty, it stays unknown.
+  No plan is named in the code. Claude's 5 hours is absent on the
   Ultra plan.
 - **The pace of a window is computed in the core.** At the average since the window began, the quota runs out at
   `start + elapsed / used` if that is before the reset; nothing is estimated unless the figure is reported with a reset time

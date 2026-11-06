@@ -90,4 +90,16 @@ final class ClaudeUsageRefreshTests: XCTestCase {
         let outcome = await ClaudeUsageRefresh.refresh(home: try tempDir(), path: "", system: [])
         XCTAssertEqual(outcome, .notFound)
     }
+
+    func testExitZeroWithoutNewQuotaIsReportedAsFailure() async throws {
+        let home = try tempDir()
+        let bin = home.appendingPathComponent(".local/bin")
+        try FileManager.default.createDirectory(at: bin, withIntermediateDirectories: true)
+        _ = try script("exit 0", in: bin)
+        let cache = home.appendingPathComponent(".claude.json")
+        try Data(#"{"cachedUsageUtilization":{"fetchedAtMs":1000}}"#.utf8).write(to: cache)
+
+        let outcome = await ClaudeUsageRefresh.refresh(home: home, path: "", system: [])
+        XCTAssertEqual(outcome, .failed("/usage exited without updating its quota data"))
+    }
 }

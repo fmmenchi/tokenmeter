@@ -100,18 +100,11 @@ public final class ConfiguredSource: ProviderSource, @unchecked Sendable {
         return reading
     }
 
-    /// True only when the list can be believed and does not name the window: the file is readable, the list is not empty and
-    /// it was written recently enough. Anything else says nothing, so the window stays (ADR 0002).
+    /// A known nonempty list continues to describe which windows exist until a newer list replaces it (ADR 0002).
     private func absent(_ rule: ProviderConfig.ExistsIf) -> Bool {
         let url = expand(rule.file)
         guard let root = Self.object(at: url), let entries = Self.value(rule.each, in: root) as? [[String: Any]],
               !entries.isEmpty else { return false }
-        let modified = (try? FileManager.default.attributesOfItem(atPath: url.path))?[.modificationDate] as? Date
-        let observed = rule.observedAt.flatMap { Self.value($0, in: root) }.flatMap { raw -> Date? in
-            guard let number = (raw as? NSNumber)?.doubleValue else { return nil }
-            return Date(timeIntervalSince1970: rule.observedAtFormat == .epochMilliseconds ? number / 1000 : number)
-        } ?? modified
-        guard let observed, Date().timeIntervalSince(observed) <= (rule.maxAgeHours ?? 6) * 3600 else { return false }
         return !entries.contains { entry in
             (rule.where ?? [:]).allSatisfy { Self.string(Self.value($0.key, in: entry)) == $0.value }
         }

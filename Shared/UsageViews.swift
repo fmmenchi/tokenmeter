@@ -28,7 +28,8 @@ extension WindowUsage {
     func detailText(at now: Date) -> String {
         switch source {
         case .reported where isStale(at: now):
-            "\(tokensText) · seen \(observedAgoText(at: now) ?? "a while ago") · may be lower"
+            [tokensText, resetText(at: now).map { "resets \($0)" }, "quota may be lower"]
+                .compactMap { $0 }.joined(separator: " · ")
         case .reported: [tokensText, resetText(at: now).map { "resets \($0)" }].compactMap { $0 }.joined(separator: " · ")
         case .reset: "window reset · not used since"
         case .consumptionOnly: "no quota · \(tokensText)"
