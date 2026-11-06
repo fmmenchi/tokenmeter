@@ -85,7 +85,21 @@ public enum ClaudeUsageRefresh {
                                timeout: TimeInterval = 45) async -> Outcome {
         guard let executable = locate(home: home, path: path, system: system) else { return .notFound }
         let id = account?.id ?? AccountTool.claudeCode.seedID
-        return await run(executable: executable, in: home.appendingPathComponent(".tokenmeter/\(id)"),
-                         configDir: account?.configDir, timeout: timeout)
+        let cache = account.map { $0.configDir.standardizedFileURL == home.appendingPathComponent(".claude").standardizedFileURL
+            ? home.appendingPathComponent(".claude.json") : $0.configDir.appendingPathComponent(".claude.json") }
+            ?? home.appendingPathComponent(".claude.json")
+        let before = fetchedAt(in: cache)
+        let outcome = await run(executable: executable, in: home.appendingPathComponent(".tokenmeter/\(id)"),
+                                configDir: account?.configDir, timeout: timeout)
+        guard outcome == .refreshed else { return outcome }
+        let after = fetchedAt(in: cache)
+        return after != nil && after != before ? .refreshed : .failed("/usage exited without updating its quota data")
+    }
+
+    private static func fetchedAt(in file: URL) -> Double? {
+        guard let data = try? Data(contentsOf: file),
+              let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let usage = root["cachedUsageUtilization"] as? [String: Any] else { return nil }
+        return (usage["fetchedAtMs"] as? NSNumber)?.doubleValue
     }
 }
