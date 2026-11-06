@@ -101,8 +101,7 @@ final class WindowsByPlanTests: XCTestCase {
         try write("[]", fetched: Date(), to: file)
         XCTAssertEqual(try source(file: file).read(since: epoch).absent, [], "an empty list says nothing")
         try write(#"[{"kind":"weekly_all"}]"#, fetched: Date().addingTimeInterval(-7 * 3600), to: file)
-        XCTAssertEqual(try source(file: file).read(since: epoch).absent, [], "a list older than six hours says nothing")
-        XCTAssertEqual(try source(file: file, maxAge: #","maxAgeHours":24"#).read(since: epoch).absent, [300], "unless the rule allows it")
+        XCTAssertEqual(try source(file: file).read(since: epoch).absent, [300], "the last known plan remains valid while usage is stale")
     }
 
     func testTheBuilderLeavesAnAbsentWindowOut() {
