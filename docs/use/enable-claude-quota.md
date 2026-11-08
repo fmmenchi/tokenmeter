@@ -114,18 +114,18 @@ values stay and the panel shows how old they are; see [Reading the Bars](./bars.
 Some plans have a limit for one model that is part of the weekly limit (the usage page shows it, for example, under
 **This week**). tokenmeter shows it as a thin line under **Weekly**'s bar, joined to it by a bracket, only when your plan has it. The figure comes from the
 usage copy Claude Code keeps in `~/.claude.json`, which Claude Code only refreshes when it runs `/usage`. So tokenmeter asks
-it to: with **Set up the Claude quota automatically** on, the refresh icon of the panel and a timer of 15 minutes run
-`claude -p "/usage"` in the background, in `~/.tokenmeter/claude/`, without a session file. Claude Code reads its own
-credentials; tokenmeter reads none. If `claude` is not in `~/.local/bin`, `/opt/homebrew/bin`, `/usr/local/bin` or your
-`PATH`, the figure stays as old as the copy and reads with `~`. In **Settings, Providers**, a switch under Claude's windows
-turns the line off. See [ADR 0002](../adr/0002-quota-model-and-data-sources.md).
+you to open it: **Open /usage** on Claude's card opens Terminal and shows Claude Code's Usage screen for that account.
+Claude Code may first ask whether you trust the folder. Its own credentials are used; tokenmeter reads none. The card says
+when model limits were last seen, and an old figure reads with `~`. The panel's refresh icon reads files already written by
+Claude Code; it does not open `/usage`. In **Settings, Accounts**, a switch under Claude's windows turns the model line off.
+See [ADR 0015](../adr/0015-claude-model-usage-refresh.md).
 
 ## A plan without the 5-hour limit
 
 Some plans do not have every window (Ultra, formerly Max 20x, has no 5-hour limit). tokenmeter shows only the windows your plan
-has: when the usage copy Claude Code keeps in `~/.claude.json` is recent (at most six hours old), lists your other limits and
-does not list the 5-hour one, the 5 hours row is not drawn and **Settings, Providers** says so. If the copy cannot be read, is
-older or Claude Code is not there, the row stays with "unknown", because nothing says the plan lacks it. See
+has: when the last known list in Claude Code's usage copy is readable, not empty and does not list a session limit, the 5-hour
+row is not drawn and **Settings, Accounts** says so, even while the figures grow stale. If the list is missing or empty, the
+row stays with "unknown", because nothing says the plan lacks it. See
 [ADR 0002](../adr/0002-quota-model-and-data-sources.md).
 
 ## Related

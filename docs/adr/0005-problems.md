@@ -28,16 +28,16 @@ had to produce them without becoming a pile of special cases. Providers are equa
   runs in the panel at once and has four states (ready, running, failed, done), kept in `Meter` and not in the model or the snapshot.
 - **Where they show:** the panel shows a banner for each; the widget puts a chip with a count beside the provider's name and
   counts only that topic, with no action; the menu-bar icon carries a dot while the panel lists one (since v0.3.0, which removed the percentage and the count from the menu bar).
-- **A failure the app meets while it runs is a problem too, never only a log line** (amended 2026-11-03). Three `general` kinds
+- **A failure the app meets while it runs is a problem too, never only a log line** (amended 2026-11-03). Two `general` kinds
   join the census: `general.providersfile` (`providers.json` exists and cannot be used, so the app runs on the built-in list and
-  leaves the file as it is), `general.snapshotwrite` (the snapshot the widget reads could not be written, so the widget shows
-  what it had) and `general.usagerefresh` (Claude Code did not answer `/usage` in time or failed, so the model limits stop
-  moving; Claude Code not being installed is not a problem). They have no fix. `AppProblems.check` takes what each one needs as
-  plain values and does no I/O, as for the App Group; `Meter` keeps the last outcome of each and the problem goes when the
-  outcome is good again.
+  leaves the file as it is) and `general.snapshotwrite` (the snapshot the widget reads could not be written, so the widget shows
+  what it had). They have no fix. `AppProblems.check` takes what each one needs as plain values and does no I/O, as for the App
+  Group; `Meter` keeps the last outcome of each and the problem goes when the outcome is good again. The former
+  `general.usagerefresh` is removed by [ADR 0015](./0015-claude-model-usage-refresh.md): a model limit's observed time says
+  when it is stale, and the person opens Claude's Usage screen to refresh it.
 - **The main actor does no disk I/O** (amended 2026-11-03). Opening the usage store (which may migrate it), setting up the
-  Claude status line and writing the snapshot run off it, in order, and report back; `ClaudeUsageRefresh` waits for its process
-  without holding a thread. What the views read stays on the main actor.
+  Claude status line, preparing the manual Usage command and writing the snapshot run off it, in order, and report back.
+  What the views read stays on the main actor.
 - **`Meter` only orchestrates:** at launch and every 10 minutes it runs the detector in the background, applies the dismissals,
   writes the visible problems into the snapshot and checks again after a fix. The widget reads and computes nothing.
 

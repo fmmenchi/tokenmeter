@@ -68,9 +68,9 @@ As a ring, the **first three models** by tokens, input plus output, with the res
 
 - **No estimate.** There is no size of a plan in tokens, no forecast and no verdict: they would rest on a ratio between tokens
   and the percentage that does not hold, because the percentage is the account's and the tokens are one Mac's.
-- **The tokens are only those this Mac counted.** Use on another computer, on the web or in the phone is not in them. It is in
-  Claude's quota, which the app asks Claude Code for every 15 minutes while it runs and the switch that sets up the
-  Claude quota is on.
+- **The tokens are only those this Mac counted.** Use on another computer, on the web or in the phone is not in them. Claude's
+  quota includes that use; the status line writes its current weekly figure while Claude Code runs. A model's limit is updated
+  when you choose **Open /usage** on its card.
 - **A window the app did not see is not drawn.** The quota of a window can only be written down while it is seen: Claude's
   history starts the day the app first ran this version, and ChatGPT's from what the Codex logs still hold.
 

@@ -40,7 +40,8 @@ changes.
   the person's: it is read again after every write and at every detection, and a change by hand wins.
 - **An integration takes the entry, not the home.** `ProviderIntegration` receives the provider entry it is asked about, with
   its id and its folder (the default when `home` is absent): the Claude status line is set up in that folder's `settings.json`,
-  its wrapper and its saved original are named by the entry's id, `/usage` runs with `CLAUDE_CONFIG_DIR` set to the folder, the
+  its wrapper and its saved original are named by the entry's id, the interactive `/usage` action runs with `CLAUDE_CONFIG_DIR`
+  set to the folder ([ADR 0015](./0015-claude-model-usage-refresh.md)), the
   project overrides are read from that folder's `projects/`, and a problem's topic is the entry's id, so its id and its banner
   name the account. The status line script takes the entry's id as its one argument and writes
   `~/.tokenmeter/<id>-statusline.json`; with no argument it writes `claude-statusline.json`, byte for byte as today, so a
@@ -67,8 +68,9 @@ What the tab, the sheets, the lock and the welcome page look like is the feature
 
 ## Consequences
 
-- A person who already has two folders and wrote two entries by hand gets the status line and `/usage` in both as soon as
-  the entries carry a `home`; the recipe in the Use page says so. Entries without `home` behave as before.
+- A person who already has two folders and wrote two entries by hand gets the status line in both and can open `/usage` for
+  either account from its card when the entries carry a `home` ([ADR 0015](./0015-claude-model-usage-refresh.md)). Entries
+  without `home` behave as before.
 - The file is rewritten by the app on Add, Edit and Remove: its layout changes once (sorted keys), as the migrations did, and
   the `.bak` of the last write is the only copy kept.
 - The Codex CLI's `auth.json` is opened by the app, which it never did; only one claim is read, and a test says that the
