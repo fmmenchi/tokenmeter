@@ -4,7 +4,7 @@ import XCTest
 /// The failures the app meets while it runs are problems, not only lines in a log (ADR 0005).
 final class AppProblemsTests: XCTestCase {
     func testNothingWrongIsNoProblem() {
-        XCTAssertEqual(AppProblems.check(hasAppGroup: true, providersFileError: nil, snapshotWriteError: nil, usageRefresh: .refreshed), [])
+        XCTAssertEqual(AppProblems.check(hasAppGroup: true, providersFileError: nil, snapshotWriteError: nil), [])
         XCTAssertEqual(AppProblems.check(hasAppGroup: true), [])
     }
 
@@ -21,19 +21,13 @@ final class AppProblemsTests: XCTestCase {
                        ["general.snapshotwrite"])
     }
 
-    func testAnUnansweredUsageRefreshIsAProblemButAMissingClaudeIsNot() {
-        XCTAssertEqual(AppProblems.check(hasAppGroup: true, usageRefresh: .timedOut).map(\.id), ["general.usagerefresh"])
-        XCTAssertEqual(AppProblems.check(hasAppGroup: true, usageRefresh: .failed("exit 3")).first?.detail, "Claude Code failed: exit 3.")
-        XCTAssertEqual(AppProblems.check(hasAppGroup: true, usageRefresh: .notFound), [], "no Claude Code, nothing to refresh")
-    }
-
     func testSeveralFailuresKeepTheirOrderAndTheirOwnIds() {
-        let all = AppProblems.check(hasAppGroup: false, providersFileError: "x", snapshotWriteError: "y", usageRefresh: .timedOut)
-        XCTAssertEqual(all.map(\.id), ["general.appgroup", "general.providersfile", "general.snapshotwrite", "general.usagerefresh"])
+        let all = AppProblems.check(hasAppGroup: false, providersFileError: "x", snapshotWriteError: "y")
+        XCTAssertEqual(all.map(\.id), ["general.appgroup", "general.providersfile", "general.snapshotwrite"])
     }
 
     func testEveryKindIsInTheCensusWithItsTextAndAGuide() {
-        for kind in [AppProblems.providersFileBroken, AppProblems.snapshotNotWritten, AppProblems.usageRefreshFailed] {
+        for kind in [AppProblems.providersFileBroken, AppProblems.snapshotNotWritten] {
             XCTAssertTrue(AppProblems.kinds.contains(kind), kind.id)
             XCTAssertNotNil(kind.guide)
             XCTAssertFalse(kind.explanation.isEmpty)

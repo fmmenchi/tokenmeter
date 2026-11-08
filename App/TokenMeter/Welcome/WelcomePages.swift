@@ -60,7 +60,7 @@ extension WelcomeState.Page {
         case .tick:
             "Where the bar would be at a steady use. If the bar ends before it, the quota runs out before the reset. With Show on the bars on Used the bar fills the other way, and the mark with it: then the bar that ends after the mark is the one that runs out."
         case .buttons:
-            "The lines above say how fresh each quota is. Refresh reads everything now and asks Claude Code for each account's usage; on its own tokenmeter reads every minute. The chart switches to the stats, the gear opens Settings, the lock lets you reorder and hide the cards, power quits."
+            "The lines above say how fresh each quota is. Refresh reads the files now; on its own tokenmeter reads every minute. Open /usage on a Claude card opens its model limits in Claude Code. The chart switches to the stats, the gear opens Settings, the lock lets you reorder and hide the cards, power quits."
         case .stats:
             "The chart in the panel switches to the stats. Pick a period at the top: each provider's card shows how its windows ended and which models used your tokens. The goal is to see whether your plan fits the way you use it. The tokens are only those this Mac counted."
         case .suggestion:

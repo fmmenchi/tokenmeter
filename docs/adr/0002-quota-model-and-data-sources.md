@@ -34,10 +34,9 @@ limits are not in tokens and totals are dominated by cache reads.
 - **A limit can be scoped to a model**, for every provider: `WindowSpec.scope` is an opaque label read from the data, never a
   fixed case. `providers.json` can read a list of limits (`each`, `where`, the paths of `usedPercent`, `resetsAt`, `scope`,
   `observedAt`). Claude keeps a copy of its usage in `~/.claude.json` (`cachedUsageUtilization.utilization.limits`, kinds
-  `session`, `weekly_all`, `weekly_scoped`), which tokenmeter reads and refreshes by asking Claude Code to run `/usage`
-  (`claude -p "/usage" --no-session-persistence --no-chrome`, in `~/.tokenmeter/claude/`, on demand and on a slow timer): Claude
-  Code reads its own credentials, tokenmeter never does. A zero exit without a newer `fetchedAtMs` is a failed refresh;
-  Claude Code 2.1.319 has been observed to exit zero without updating this copy. A row appears only for a scope that has data.
+  `session`, `weekly_all`, `weekly_scoped`), which tokenmeter reads. Claude Code writes this copy when its interactive `/usage`
+  screen opens: **Open /usage** on the card asks Claude Code to do so ([ADR 0015](./0015-claude-model-usage-refresh.md)).
+  Claude Code reads its own credentials, tokenmeter never does. A row appears only for a scope that has data.
 - **A window exists only if the data lists it.** A provider declares its windows, and a quota window may carry `existsIf`, a
   list in a file. The window is absent when the last known list is readable, not empty and does not name it, even while quota
   percentages grow stale; a newer list can restore it after a plan change. If the list is missing or empty, it stays unknown.

@@ -40,8 +40,9 @@ next launch.
 
 With **Set up the Claude quota automatically** on, the app sets the status line up in each Claude account's folder, in its
 `settings.json`, with the account's id as the script's argument, so each account writes a file of its own under `~/.tokenmeter/`.
-It asks Claude Code for each account's `/usage` in turn, every 15 minutes and when you refresh. The General tab says what it
-found for each account, and **Restore original** beside an account puts its own status line back
+**Open /usage** on a Claude card opens that account's interactive Usage screen in Terminal when you ask for its model limits.
+The card says when those limits were last seen. The General tab says what the status line setup found for each account, and
+**Restore original** beside an account puts its own status line back
 ([Enable the Claude quota](./enable-claude-quota.md)).
 
 A problem about a status line names the account: "Claude · work · Another status line is in use".

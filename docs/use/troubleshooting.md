@@ -58,7 +58,6 @@ hides a problem until its message changes, and the dot goes with it.
 | Integration not found for a provider                         | General     | `providers.json` names an `integration` this version does not have.                                        | Check the spelling or remove the field. Reading its quota is not affected.                                                                                         |
 | providers.json cannot be used                                | General     | The file exists but this version cannot read it (a typo, an unknown version, a repeated id).               | Fix what the detail says, or move the file aside and start the app for a fresh one. Until then tokenmeter runs on Claude and ChatGPT, and the file is not changed. |
 | The widget's data could not be written                       | General     | The snapshot the widget reads could not be saved: a full disk, or a folder that is not writable.           | Free some space; the problem goes by itself at the next write. The panel is not affected.                                                                          |
-| Claude's model limits are not refreshing                     | General     | Claude Code did not answer `/usage` in time, or failed.                                                    | Run `claude` once in a terminal to see whether it is signed in. The 5-hour and weekly bars are not affected ([guide](./enable-claude-quota.md)).                   |
 
 ## Build
 

@@ -120,13 +120,10 @@ final class Meter {
     private var detected: [Problem] = []
     private var providers: [ProviderConfig] = []
     private var lastDetection: Date?
-    private var lastUsageRefresh: Date?
-    private var isRefreshingUsage = false
     /// The last outcome of what the app tried, kept so a failure is a problem and not only a line in Console (ADR 0005). Nil is good,
     /// or not asked yet.
     private var providersFileError: String?
     private var snapshotWriteError: String?
-    private var usageRefresh: ClaudeUsageRefresh.Outcome?
     /// The script the app installs as the Claude status line, read once at launch off the main actor.
     private var claudeScript: Data?
     /// Snapshots are written one after the other, in the order they were made, and never on the main actor.
@@ -182,7 +179,7 @@ final class Meter {
     /// so the bar shows none.
     var needsAttention: Bool { !problems.isEmpty || updater.hasUpdate }
 
-    func refresh(userInitiated: Bool = false) async {
+    func refresh() async {
         guard !isRefreshing else { return }
         isRefreshing = true
         defer { isRefreshing = false }
@@ -190,7 +187,6 @@ final class Meter {
         detectProblemsIfDue()
         base = await Task.detached { collector.snapshot() }.value
         publish()
-        refreshClaudeUsageIfDue(force: userInitiated)
         ingestInBackground()
     }
 
@@ -224,31 +220,6 @@ final class Meter {
                                  store: store, range: range)
             })
         })
-    }
-
-    /// ADR 0002: Claude Code writes a copy of the usage, including each model's limit, when it runs `/usage`. Ask it to,
-    /// on a slow timer and when the person refreshes, in the background and only while the Claude quota switch is on,
-    /// once for each Claude entry in its own folder (ADR 0014). Claude Code reads its own credentials; tokenmeter handles none.
-    private func refreshClaudeUsageIfDue(force: Bool) {
-        guard autoSetUpClaude, !isRefreshingUsage else { return }
-        if !force, let last = lastUsageRefresh, Date().timeIntervalSince(last) < 900 { return }
-        isRefreshingUsage = true
-        lastUsageRefresh = Date()
-        let accounts = ClaudeAccounts.entries(in: providers, integrations: makeIntegrations()).map(\.account)
-        Task(priority: .utility) {
-            var outcomes: [ClaudeUsageRefresh.Outcome] = []
-            for account in accounts.isEmpty ? [.default()] : accounts {
-                outcomes.append(await ClaudeUsageRefresh.refresh(account: account))
-            }
-            isRefreshingUsage = false
-            // One outcome for the problem the app reports: the first that went wrong, else the first.
-            usageRefresh = outcomes.first { $0 != .refreshed && $0 != .notFound } ?? outcomes.first
-            if outcomes.contains(.refreshed) { await refresh() }
-            else {
-                Self.log.info("Claude usage not refreshed: \(String(describing: outcomes), privacy: .public)")
-                publish()
-            }
-        }
     }
 
     /// A provider as Settings lists it: every window it has, and which of them its card shows (ADR 0006).
@@ -348,6 +319,12 @@ final class Meter {
         cardProviders.filter(\.isShown).contains { $0.id != provider }
     }
 
+    /// The account whose interactive Usage screen can refresh this Claude card's model limits (ADR 0015).
+    func claudeAccount(for provider: Provider) -> ClaudeStatusLine.Account? {
+        ClaudeAccounts.entries(in: providers, integrations: makeIntegrations())
+            .first { $0.id == provider.rawValue }?.account
+    }
+
     /// The person chooses windows. The last one cannot be turned off, and a window never hides the provider (ADR 0006).
     func setShownWindows(_ windows: Set<String>, for provider: String) {
         guard let card = cardProviders.first(where: { $0.id == provider }) else { return }
@@ -369,7 +346,7 @@ final class Meter {
         guard let base else { return }
         // What the app met itself comes first, then what the detector found; a repeated id keeps its first occurrence.
         let own = AppProblems.check(hasAppGroup: store != nil, providersFileError: providersFileError,
-                                    snapshotWriteError: snapshotWriteError, usageRefresh: autoSetUpClaude ? usageRefresh : nil)
+                                    snapshotWriteError: snapshotWriteError)
         problems = dismissals.visible(ProblemDetector.merge(general: own, providers: [detected]))
         cardProviders = makeCardProviders()
         let result = base.applying(preferences).with(problems: problems).with(skin: skin).with(barsDisplay: barsDisplay)
@@ -451,7 +428,7 @@ final class Meter {
     /// ADR 0004: only while the switch is on, at every launch and when it is turned on, for each Claude entry in its own
     /// folder (ADR 0014). The file and the settings are read and written off the main actor (ADR 0005).
     private func setUpClaudeStatusLine() async {
-        guard autoSetUpClaude else { claudeStatusLines = [:]; claudeAccounts = []; usageRefresh = nil; return }
+        guard autoSetUpClaude else { claudeStatusLines = [:]; claudeAccounts = []; return }
         guard let script = claudeScript else { return }
         let integrations = makeIntegrations()
         let (outcomes, failures, configured) = await Task.detached(priority: .utility) {

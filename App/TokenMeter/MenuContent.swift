@@ -8,6 +8,8 @@ struct MenuContent: View {
     @State private var isUnlocked = false
     @State private var dragging: String?
     @State private var dropTarget: String?
+    @State private var usageOpenError = ""
+    @State private var showsUsageOpenError = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -50,8 +52,11 @@ struct MenuContent: View {
                 Text("Drag a card to reorder it. The eye hides it; a hidden card stays here, dimmed, until the lock closes.")
                     .font(.caption2).captionColour().multilineTextAlignment(.center).frame(maxWidth: .infinity)
             } else if let snapshot = meter.snapshot {
-                ForEach(snapshot.providers, id: \.provider) {
-                    ProviderCard(snapshot: $0, problemCount: snapshot.problemCount(for: $0), showsPace: true)
+                ForEach(snapshot.providers, id: \.provider) { provider in
+                    ProviderCard(snapshot: provider, problemCount: snapshot.problemCount(for: provider), showsPace: true,
+                                 modelUsageAction: meter.claudeAccount(for: provider.provider).map { account in
+                                     ("Open /usage", { openClaudeUsage(for: account) })
+                                 })
                 }
                 VStack(alignment: .leading, spacing: 2) {
                     ForEach(snapshot.providers, id: \.provider) { provider in
@@ -69,7 +74,7 @@ struct MenuContent: View {
             Divider()
             HStack(spacing: 6) {
                 IconButton(systemName: "arrow.clockwise", label: "Refresh", isBusy: meter.isRefreshing) {
-                    Task { await meter.refresh(userInitiated: true) }
+                    Task { await meter.refresh() }
                 }
                 .disabled(meter.isRefreshing)
                 // The icon says where it takes you: to the stats from the quota, back to the quota from the stats (ADR 0010).
@@ -108,6 +113,11 @@ struct MenuContent: View {
         .background { PanelFill() }
         .skinned(meter.skin)
         .environment(\.barsDisplay, meter.barsDisplay)
+        .alert("Could not open Claude usage", isPresented: $showsUsageOpenError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(usageOpenError)
+        }
     }
 
     /// An accessory app cannot show a regular window in front: become a regular app while Settings is open (SettingsView
@@ -121,6 +131,24 @@ struct MenuContent: View {
     private func title(of topic: String) -> String {
         meter.snapshot?.providers.first { $0.provider.rawValue == topic }?.title
             ?? (topic == Problem.general ? "General" : topic)
+    }
+
+    private func openClaudeUsage(for account: ClaudeStatusLine.Account) {
+        Task {
+            do {
+                let command = try await Task.detached(priority: .userInitiated) {
+                    try ClaudeUsageCommand.write(for: account)
+                }.value
+                guard NSWorkspace.shared.open(command) else {
+                    usageOpenError = "Terminal could not open the Claude usage command."
+                    showsUsageOpenError = true
+                    return
+                }
+            } catch {
+                usageOpenError = error.localizedDescription
+                showsUsageOpenError = true
+            }
+        }
     }
 }
 

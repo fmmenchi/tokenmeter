@@ -12,9 +12,9 @@ Checked on 2026-11-02 against the author's files, reading only field names, date
 
 - Claude's logs repeat each message: 127,180 lines with tokens for 59,237 messages. The app already removes the repeats
   (`dedupeBy`, [ADR 0003](./0003-providers-in-one-config-file.md)).
-- Claude's quota percentage is not in its logs, except as a refusal when a limit is hit. The app already asks Claude Code to
-  run `/usage` every 15 minutes ([ADR 0002](./0002-quota-model-and-data-sources.md)), which rewrites `~/.claude.json` with the
-  percentages of the whole account and the time of the reading.
+- Claude's quota percentage is not in its logs, except as a refusal when a limit is hit. Claude Code's status line supplies
+  the unscoped quota; its interactive `/usage` screen writes model limits to `~/.claude.json` when the person opens it
+  ([ADR 0015](./0015-claude-model-usage-refresh.md)).
 - Codex's logs carry `rate_limits` with the percentage of each window, and it never went down inside a window in 4,904 readings.
 - Tokens counted from the logs did not follow the percentage of a window (from 0.000 to 0.054 M tokens per point on the
   5-hour window), because the quota is the account's and the logs are one Mac's.
