@@ -8,6 +8,15 @@ sidebar_position: 10
 
 What changed in each version, newest first. The update window shows the notes of the version it offers, taken from this page, and links here for the rest.
 
+## 0.10.1 {#v0-10-1}
+
+Released on 2026-11-08.
+
+- **An exhausted quota stays exhausted until a new reading arrives.** Its last reported percentage and reset time remain visible after the expected reset; the panel and widget say they are waiting for an update instead of showing a renewed quota inferred from the clock.
+- **Stale Claude limits keep their reset time.** The panel and widget mark an old percentage as approximate while retaining the last known reset time.
+- **Ultra no longer shows a 5-hour limit** when Claude's last known list confirms that the plan has no session window, even if the quota figures are stale.
+- **A silent `/usage` refresh is reported as a failure** when Claude Code exits successfully without updating its quota data.
+
 ## 0.10.0 {#v0-10-0}
 
 Released on 2026-11-04.
