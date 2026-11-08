@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>tokenmeter 0.10.1</title>
+<style>
+  /* Colours are given for both appearances: the web view of the update window does not always follow the system on its own. */
+  :root { color-scheme: light dark; --text: #1d1d1f; --back: #ffffff; --link: #0a60d6; --code: rgba(0, 0, 0, 0.07); }
+  @media (prefers-color-scheme: dark) { :root { --text: #f5f5f7; --back: #1e1e1e; --link: #4da3ff; --code: rgba(255, 255, 255, 0.14); } }
+  html { background: var(--back); }
+  body { font: 13px/1.5 -apple-system, "SF Pro", system-ui, sans-serif; margin: 0; padding: 16px 20px 24px; color: var(--text); background: var(--back); }
+  h1 { font-size: 17px; margin: 0 0 8px; }
+  p, li { margin: 0 0 8px; }
+  ul { padding-left: 20px; margin: 0 0 8px; }
+  code { font: 12px ui-monospace, "SF Mono", monospace; padding: 1px 4px; border-radius: 4px; background: var(--code); }
+  a { color: var(--link); }
+  .all { margin-top: 12px; }
+</style>
+</head>
+<body>
+<h1>tokenmeter 0.10.1</h1>
+<p>Released on 2026-11-08.</p>
+<ul><li><strong>An exhausted quota stays exhausted until a new reading arrives.</strong> Its last reported percentage and reset time remain visible after the expected reset; the panel and widget say they are waiting for an update instead of showing a renewed quota inferred from the clock.</li><li><strong>Stale Claude limits keep their reset time.</strong> The panel and widget mark an old percentage as approximate while retaining the last known reset time.</li><li><strong>Ultra no longer shows a 5-hour limit</strong> when Claude's last known list confirms that the plan has no session window, even if the quota figures are stale.</li><li><strong>A silent <code>/usage</code> refresh is reported as a failure</strong> when Claude Code exits successfully without updating its quota data.</li></ul>
+<p class="all"><a href="https://fmmenchi.github.io/tokenmeter/use/changelog">The whole changelog</a></p>
+</body>
+</html>
