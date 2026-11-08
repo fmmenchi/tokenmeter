@@ -8,6 +8,12 @@ sidebar_position: 10
 
 What changed in each version, newest first. The update window shows the notes of the version it offers, taken from this page, and links here for the rest.
 
+## 0.10.2 {#v0-10-2}
+
+Released on 2026-11-08.
+
+- **Claude model limits have an explicit refresh action.** Open `/usage` from the Claude card to launch Claude Code's interactive Usage screen in that account. The card shows when model limits were last read. Refresh still reads the latest saved quota, without reporting a failed background `/usage` request.
+
 ## 0.10.1 {#v0-10-1}
 
 Released on 2026-11-08.
