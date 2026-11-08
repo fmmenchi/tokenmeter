@@ -50,10 +50,12 @@ public struct WindowUsage: Codable, Equatable, Sendable {
         self.observedAt = observedAt
     }
 
-    /// The window as it reads at `now`. A reported figure whose reset time has
-    /// passed is no longer valid, however old the snapshot: it reads as reset (ADR 0002/0008).
+    /// The window as it reads at `now`. A reported figure whose reset time has passed reads as reset,
+    /// except an exhausted reading, which remains the last known quota until a replacement arrives (ADR 0002/0008).
     public func resolved(at now: Date) -> WindowUsage {
         guard source == .reported, let resetsAt, resetsAt <= now else { return self }
+        // An exhausted reading remains the last known quota until the provider reports a replacement.
+        if remainingFraction == 0 { return self }
         return WindowUsage(window: window, tokens: tokens, remainingFraction: 1, source: .reset,
                            resetsAt: nil, observedAt: nil)
     }
@@ -195,9 +197,9 @@ public enum SnapshotBuilder {
             }
             let tokens = counted(since: rolling)
 
-            if let reported = reported.first(where: {
-                guard $0.scope == nil, let minutes = $0.windowMinutes, abs(Double(minutes) * 60 - spec.duration) < 60 else { return false }
-                return $0.resetsAt.map { $0 > now } ?? true
+            if let reported = reported.first(where: { quota in
+                guard quota.scope == nil, let minutes = quota.windowMinutes, abs(Double(minutes) * 60 - spec.duration) < 60 else { return false }
+                return quota.resetsAt.map { $0 > now || quota.usedPercent >= 100 } ?? true
             }) {
                 // A window whose reset time is known counts its tokens in its own period, the one its percentage is about
                 // (ADR 0002), and not in the last `duration`, which differs once the provider moves the boundary.
