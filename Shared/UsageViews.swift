@@ -26,7 +26,19 @@ extension WindowUsage {
     var tokensText: String { "\((tokens.input + tokens.output).compactTokens) tokens" }
 
     func detailText(at now: Date) -> String {
-        switch source {
+        if source == .reported, remainingFraction == 0 {
+            let quota = isStale(at: now) ? "last reported quota exhausted" : "quota exhausted"
+            let reset: String?
+            if let countdown = resetText(at: now) {
+                reset = "resets \(countdown)"
+            } else if let resetsAt, resetsAt <= now {
+                reset = "reset expected \(resetsAt.formatted(date: .abbreviated, time: .shortened)) · awaiting update"
+            } else {
+                reset = nil
+            }
+            return [tokensText, quota, reset].compactMap { $0 }.joined(separator: " · ")
+        }
+        return switch source {
         case .reported where isStale(at: now):
             [tokensText, resetText(at: now).map { "resets \($0)" }, "quota may be lower"]
                 .compactMap { $0 }.joined(separator: " · ")
@@ -152,7 +164,7 @@ struct WindowRow: View {
     /// The detail line. Where the quota would run out before the reset and the widget asks, the moment is in it, in short
     /// and in the notice colour: "3.4B tokens · out Thu 6 pm · resets in 3d 14h".
     @ViewBuilder private var detail: some View {
-        if showsRunOut, let phrase = usage.runsOutShortText(at: now) {
+        if showsRunOut, usage.remainingFraction != 0, let phrase = usage.runsOutShortText(at: now) {
             (Text("\(usage.tokensText) · ") + Text(phrase).fontWeight(.semibold).foregroundColor(skin?.middle ?? .orange)
                 + Text(usage.resetText(at: now).map { " · resets \($0)" } ?? ""))
                 .font(.caption2).captionColour()

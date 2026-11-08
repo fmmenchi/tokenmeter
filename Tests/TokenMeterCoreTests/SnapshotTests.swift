@@ -135,6 +135,31 @@ final class ResolvedTests: XCTestCase {
     func testFutureResetLeavesTheFigureAlone() {
         XCTAssertEqual(usage(resetsIn: 600).resolved(at: now), usage(resetsIn: 600))
     }
+
+    func testPassedResetKeepsAnExhaustedReadingAndItsResetTime() {
+        let exhausted = WindowUsage(window: .session, tokens: TokenCounts(), remainingFraction: 0, source: .reported,
+                                    resetsAt: now.addingTimeInterval(-60), observedAt: now.addingTimeInterval(-3600))
+        XCTAssertEqual(exhausted.resolved(at: now), exhausted)
+        XCTAssertTrue(exhausted.isApproximate(at: now))
+    }
+
+    func testCollectionKeepsExhaustedQuotaUntilAReplacementIsReported() {
+        let past = now.addingTimeInterval(-60)
+        let exhausted = ReportedQuota(usedPercent: 100, windowMinutes: 300, resetsAt: past,
+                                      observedAt: now.addingTimeInterval(-3600))
+        let retained = SnapshotBuilder.providerSnapshot(provider: .claude, events: [], windows: [.session],
+                                                        reported: [exhausted], now: now).windows[0]
+        XCTAssertEqual(retained.source, .reported)
+        XCTAssertEqual(retained.remainingFraction, 0)
+        XCTAssertEqual(retained.resetsAt, past)
+
+        let fresh = ReportedQuota(usedPercent: 10, windowMinutes: 300, resetsAt: now.addingTimeInterval(5 * 3600),
+                                  observedAt: now)
+        let replaced = SnapshotBuilder.providerSnapshot(provider: .claude, events: [], windows: [.session],
+                                                        reported: [fresh], now: now).windows[0]
+        XCTAssertEqual(replaced.remainingFraction, 0.9)
+        XCTAssertEqual(replaced.resetsAt, fresh.resetsAt)
+    }
 }
 
 final class PlanNameTests: XCTestCase {
