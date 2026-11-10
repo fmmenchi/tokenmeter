@@ -58,6 +58,14 @@ The changelog is written with the release, not here.
 - The days of a short window: 14 columns, oldest first, each with its windows oldest first.
 - The wizard's text and the views are in the app, which has no test target: they are read in the code, and built by the gate.
 
+## What was added while building
+
+- **`WindowSlot`**: a slot of the weekly strip carries the date its window ends, for the two labels under the strip, so `slots` returns slots and not outcomes.
+- **The line of Move up** drops the clause of the images, "3 of them in the last 3 days": the verdict has no notion of recency, and the 14 days of the 5-hour strip already say it.
+- **A window that reached the ceiling keeps a sliver** in the weekly strip when a bar of what is left would be empty, so the most important case is never an empty block.
+- **The picture of the stats in the wizard and in the Use page** is drawn from the design with sample data, in light and dark, and not captured from the app: the panel cannot be captured without real usage.
+- **The plan said four weekly windows with two ceilings are not Move up**; the rule is two hits and 15%, so two of four is Move up, and the test says so.
+
 ## Not verified at the time of writing
 
 - That the system's tooltip shows on a block in the `MenuBarExtra` panel.
