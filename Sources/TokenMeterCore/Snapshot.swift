@@ -83,6 +83,19 @@ public struct ProviderSnapshot: Codable, Equatable, Sendable {
         self.setupHint = setupHint
     }
 
+    /// The window as it reads at `now`, in the context of this provider. A limit for one model is part of the window of the same
+    /// length: when that window has moved on to a later reset, by at least half its length, the limit ended with it and reads as
+    /// reset, even when it was exhausted and nothing has replaced it, because the quota that renewed it is a fact the app has and
+    /// the clock is not. Anything else reads as `WindowUsage.resolved(at:)` says.
+    public func resolved(_ window: WindowUsage, at now: Date) -> WindowUsage {
+        guard window.window.scope != nil, window.source == .reported, let resetsAt = window.resetsAt,
+              let parent = windows.first(where: { $0.window.scope == nil && $0.window.name == window.window.name }),
+              parent.source == .reported, let parentResetsAt = parent.resetsAt,
+              parentResetsAt.timeIntervalSince(resetsAt) >= window.window.duration / 2 else { return window.resolved(at: now) }
+        return WindowUsage(window: window.window, tokens: window.tokens, remainingFraction: 1, source: .reset,
+                           resetsAt: nil, observedAt: nil)
+    }
+
     private enum CodingKeys: String, CodingKey {
         case provider, title, windows, plan, quotaUpdatedAt, setupHint
     }

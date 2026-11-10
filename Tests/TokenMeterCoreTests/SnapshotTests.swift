@@ -143,6 +143,48 @@ final class ResolvedTests: XCTestCase {
         XCTAssertTrue(exhausted.isApproximate(at: now))
     }
 
+    // MARK: A limit for one model ends with its window
+
+    private func week(_ fraction: Double, resetsIn seconds: TimeInterval, scope: String? = nil,
+                      source: WindowUsage.Source = .reported) -> WindowUsage {
+        WindowUsage(window: WindowSpec(name: "7d", duration: 7 * 24 * 3600, scope: scope), tokens: TokenCounts(),
+                    remainingFraction: fraction, source: source, resetsAt: now.addingTimeInterval(seconds),
+                    observedAt: now.addingTimeInterval(-3600))
+    }
+
+    func testAnExhaustedModelLimitEndsWhenItsWindowHasMovedOnToALaterReset() {
+        let model = week(0, resetsIn: -3600, scope: "Fable")
+        let provider = ProviderSnapshot(provider: .claude, windows: [week(0.98, resetsIn: 6 * 86_400), model])
+        let resolved = provider.resolved(model, at: now)
+        XCTAssertEqual(resolved.source, .reset)
+        XCTAssertEqual(resolved.remainingFraction, 1)
+        XCTAssertEqual(model.resolved(at: now), model, "on its own an exhausted figure stays until a reading replaces it")
+    }
+
+    func testAModelLimitStaysExhaustedWhileItsWindowHasNotMovedOn() {
+        let model = week(0, resetsIn: -3600, scope: "Fable")
+        let parentResets: [TimeInterval] = [-3_600, -3_600 + 30, -3_600 + 2 * 86_400]
+        for parentResetsIn in parentResets {
+            let provider = ProviderSnapshot(provider: .claude, windows: [week(0.5, resetsIn: parentResetsIn), model])
+            XCTAssertEqual(provider.resolved(model, at: now), model,
+                           "a reset that is the same, a few seconds later or less than half a window later is not a renewal")
+        }
+    }
+
+    func testOnlyAWindowThatWasReportedMovesTheModelLimit() {
+        let model = week(0, resetsIn: -3600, scope: "Fable")
+        let inferred = ProviderSnapshot(provider: .claude, windows: [week(1, resetsIn: 6 * 86_400, source: .reset), model])
+        XCTAssertEqual(inferred.resolved(model, at: now), model)
+        let alone = ProviderSnapshot(provider: .claude, windows: [model])
+        XCTAssertEqual(alone.resolved(model, at: now), model)
+    }
+
+    func testTheMainWindowReadsAsItAlwaysDid() {
+        let main = week(0, resetsIn: -3600)
+        let provider = ProviderSnapshot(provider: .claude, windows: [main, week(0, resetsIn: -7_200, scope: "Fable")])
+        XCTAssertEqual(provider.resolved(main, at: now), main.resolved(at: now))
+    }
+
     func testCollectionKeepsExhaustedQuotaUntilAReplacementIsReported() {
         let past = now.addingTimeInterval(-60)
         let exhausted = ReportedQuota(usedPercent: 100, windowMinutes: 300, resetsAt: past,

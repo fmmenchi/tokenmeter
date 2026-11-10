@@ -37,7 +37,7 @@ struct ArrangeableCard: View {
                     action: onToggleShown)
             }
             ForEach(snapshot.windows.filter { $0.window.scope == nil }, id: \.window.id) { window in
-                let usage = window.resolved(at: now)
+                let usage = snapshot.resolved(window, at: now)
                 let id = window.window.id
                 let shown = card.shown.contains(id)
                 VStack(alignment: .leading, spacing: 5) {
@@ -54,7 +54,7 @@ struct ArrangeableCard: View {
                     QuotaBar(fraction: usage.remainingFraction.map { display.fraction(remaining: $0) },
                              tint: usage.tint(in: skin), faded: usage.isApproximate(at: now), emptyIsEmpty: display == .used)
                     ForEach(card.models.filter { $0.parent == id }) { model in
-                        if let usage = snapshot.windows.first(where: { $0.window.id == model.id })?.resolved(at: now) {
+                        if let usage = snapshot.windows.first(where: { $0.window.id == model.id }).map({ snapshot.resolved($0, at: now) }) {
                             let on = card.shownModels.contains(model.id)
                             HStack(spacing: 6) {
                                 ScopedWindowRow(usage: usage)

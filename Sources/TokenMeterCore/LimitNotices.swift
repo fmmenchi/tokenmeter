@@ -73,7 +73,7 @@ public enum LimitNotices {
         var notices: [LimitNotice] = []
         for provider in snapshot.providers {
             for original in provider.windows {
-                let window = original.resolved(at: now)
+                let window = provider.resolved(original, at: now)
                 guard let resetsAt = window.resetsAt, let due = dueKinds(of: window, at: now) else { continue }
                 let fresh = NoticeKind.allCases.filter { due.contains($0) && enabled.contains($0) }
                     .map { (kind: $0, id: identifier(provider.provider, window, resetsAt, $0)) }
