@@ -10,10 +10,20 @@ tokenmeter reads no data from the network and holds no credentials. Everything c
 the two CLIs leave on your machine. The one request the app makes of its own, once a day, is for the list of versions that says
 whether an update is out ([ADR 0011](../adr/0011-updates.md)); it carries nothing about you.
 
-| Provider | Quota (percent left, reset time)       | Tokens                          |
-| -------- | -------------------------------------- | ------------------------------- |
-| Claude   | `~/.tokenmeter/claude-statusline.json` | `~/.claude/projects/**/*.jsonl` |
-| ChatGPT  | `~/.codex/sessions/**/rollout-*.jsonl` | the same Codex logs             |
+## Source rule
+
+Quota and token readings come only from local files left by Claude Code or the Codex CLI, including the file written by
+Claude Code's status line. tokenmeter does not call either provider's internal or undocumented usage endpoints, use a CLI
+credential to request quota, or use browser sessions to fetch it. It can run Claude Code's `/usage` in the background or open
+its interactive screen; Claude Code may contact its own server and update its local usage copy, which tokenmeter then reads
+([ADR 0015](../adr/0015-claude-model-usage-refresh.md)). The separate update check above is for tokenmeter versions, not
+quota data ([ADR 0001](../adr/0001-app-architecture.md),
+[ADR 0002](../adr/0002-quota-model-and-data-sources.md)).
+
+| Provider | Quota (percent left, reset time)                                    | Tokens                          |
+| -------- | ------------------------------------------------------------------- | ------------------------------- |
+| Claude   | `~/.tokenmeter/claude-statusline.json`, `~/.claude.json` for models | `~/.claude/projects/**/*.jsonl` |
+| ChatGPT  | `~/.codex/sessions/**/rollout-*.jsonl`                              | the same Codex logs             |
 
 ## Claude
 
