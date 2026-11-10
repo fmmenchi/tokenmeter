@@ -114,4 +114,19 @@ final class ClaudeUsageRefreshTests: XCTestCase {
         let outcome = await ClaudeUsageRefresh.refresh(home: home, path: "", system: [])
         XCTAssertEqual(outcome, .refreshed)
     }
+
+    func testTheDefaultAccountsBackgroundRunHasNoConfigFolder() async throws {
+        let home = try tempDir()
+        let bin = home.appendingPathComponent(".local/bin")
+        try FileManager.default.createDirectory(at: bin, withIntermediateDirectories: true)
+        let marker = home.appendingPathComponent("marker")
+        _ = try script("printf '%s' \"${CLAUDE_CONFIG_DIR-unset}\" > '\(marker.path)'", in: bin)
+
+        _ = await ClaudeUsageRefresh.refresh(home: home, account: .default(home: home), path: "", system: [])
+        XCTAssertEqual(try String(contentsOf: marker), ProcessInfo.processInfo.environment["CLAUDE_CONFIG_DIR"] ?? "unset",
+                       "the default account is Claude Code's own default: the app does not name its folder")
+        let work = ClaudeStatusLine.Account(id: "claude-work", configDir: home.appendingPathComponent(".claude-work"))
+        _ = await ClaudeUsageRefresh.refresh(home: home, account: work, path: "", system: [])
+        XCTAssertEqual(try String(contentsOf: marker), work.configDir.path)
+    }
 }

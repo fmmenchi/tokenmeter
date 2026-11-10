@@ -90,7 +90,7 @@ public enum ClaudeUsageRefresh {
             ?? home.appendingPathComponent(".claude.json")
         let before = fetchedAt(in: cache)
         let outcome = await run(executable: executable, in: home.appendingPathComponent(".tokenmeter/\(id)"),
-                                configDir: account?.configDir, timeout: timeout)
+                                configDir: account?.environmentConfigDir(home: home), timeout: timeout)
         guard outcome == .refreshed else { return outcome }
         let after = fetchedAt(in: cache)
         return after != nil && after != before ? .refreshed : .unchanged
