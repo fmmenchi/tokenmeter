@@ -17,7 +17,7 @@ struct WelcomeView: View {
                 footer(page)
             }
             .padding(24)
-            .frame(width: 680, height: page == .stats ? 600 : 500)
+            .frame(width: 680, height: page == .stats ? 600 : page == .suggestion ? 560 : 500)
         }
     }
 
@@ -62,9 +62,9 @@ extension WelcomeState.Page {
         case .buttons:
             "The lines above say how fresh each quota is. Refresh reads the files now; on its own tokenmeter reads every minute. Open /usage on a Claude card opens its model limits in Claude Code. The chart switches to the stats, the gear opens Settings, the lock lets you reorder and hide the cards, power quits."
         case .stats:
-            "The chart in the panel switches to the stats. Pick a period at the top: each provider's card shows how its windows ended and which models used your tokens. The goal is to see whether your plan fits the way you use it. The tokens are only those this Mac counted."
+            "The chart in the panel switches to the stats. Pick a period at the top: each provider's card shows its windows as strips, one block for each window: green when plenty was left, orange when little, red when the ceiling was reached. Point at a block for its figure; a dashed one is a window the app did not see. The goal is to see whether your plan fits the way you use it. The tokens are only those this Mac counted."
         case .suggestion:
-            "The word at the top of a provider's card is the app's suggestion: Wait, Stay or Move down. It comes from the quota percentages only and never looks at tokens."
+            "The word at the top of a provider's card is the app's suggestion: Wait, Stay, Move up or Move down. It comes from the quota percentages only, the 5-hour windows and the weekly ones, and never looks at tokens. Move up says the ceiling is reached often; it does not say which plan to take."
         case .accounts:
             "A work account and a personal one? Each is a folder that Claude Code or the Codex CLI reads. Name it in providers.json and it gets a card of its own, with its own bars and history. When a folder nobody named is found, the panel says so, and Add it gives it a card."
         case .settings:
@@ -93,14 +93,15 @@ private struct WelcomePicture: View {
             .frame(maxWidth: .infinity)
         case .tick: picture("WelcomePanel", height: 411, shown: 190, from: .top, outline: Outline(x: 0.40, y: 0.134, width: 0.09, height: 0.067))
         case .buttons: picture("WelcomePanel", height: 411, shown: 160, from: .bottom, outline: Outline(x: 0.02, y: 0.785, width: 0.96, height: 0.19))
-        case .stats: picture("WelcomeStats", height: 622.5, shown: 400, from: .top, outline: Outline(x: 0.03, y: 0.269, width: 0.94, height: 0.169))
+        case .stats: picture("WelcomeStats", height: 590, shown: 400, from: .top, outline: Outline(x: 0.063, y: 0.286, width: 0.873, height: 0.268))
         case .suggestion:
             HStack(alignment: .top, spacing: 16) {
-                picture("WelcomeStats", height: 622.5, shown: 175, from: .top, outline: Outline(x: 0.05, y: 0.126, width: 0.9, height: 0.134))
+                picture("WelcomeStats", height: 590, shown: 190, from: .top, outline: Outline(x: 0.067, y: 0.132, width: 0.867, height: 0.149))
                     .frame(width: 300)
                 VStack(spacing: 8) {
                     VerdictBox(verdict: Verdict(word: .wait, reason: .fewWindows(window: "7d", seen: 2, needed: 4)))
-                    VerdictBox(verdict: Verdict(word: .stay, reason: .hitCeiling(window: "7d", hits: 1, closed: 4)))
+                    VerdictBox(verdict: Verdict(word: .stay, reason: .hitCeiling(window: "5h", hits: 1, closed: 33)))
+                    VerdictBox(verdict: Verdict(word: .moveUp, reason: .tightPlan(window: "5h", hits: 6, closed: 33)))
                     VerdictBox(verdict: Verdict(word: .moveDown, reason: .plentyOfMargin(window: "7d", left: 62)))
                 }
             }
