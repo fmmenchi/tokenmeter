@@ -79,7 +79,7 @@ As a ring, the **first three models** by tokens, input plus output, with the res
   and the percentage that does not hold, because the percentage is the account's and the tokens are one Mac's.
 - **The tokens are only those this Mac counted.** Use on another computer, on the web or in the phone is not in them. Claude's
   quota includes that use; the status line writes its current weekly figure while Claude Code runs. A model's limit is updated
-  when you choose **Open /usage** on its card.
+  when Claude Code runs `/usage`, which the app asks for in the background every 15 minutes.
 - **A window the app did not see is not drawn.** The quota of a window can only be written down while it is seen: Claude's
   history starts the day the app first ran this version, and ChatGPT's from what the Codex logs still hold.
 
