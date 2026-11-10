@@ -8,6 +8,12 @@ sidebar_position: 10
 
 What changed in each version, newest first. The update window shows the notes of the version it offers, taken from this page, and links here for the rest.
 
+## 0.11.1 {#v0-11-1}
+
+Released on 2026-11-10.
+
+- **The stats say since when the quota is kept.** The tokens come from logs that go back months, but the quota is recorded only from the first time the app read it, so a card could say `Kept since Jul 10` over a weekly strip that began on Nov 2. The line under the card now names both dates, and a dashed block before the quota began says in its tooltip that nobody could have seen that window ([Stats](./stats.md)).
+
 ## 0.11.0 {#v0-11-0}
 
 Released on 2026-11-09.
