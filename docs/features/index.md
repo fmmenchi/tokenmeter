@@ -31,13 +31,13 @@ are [ADRs](../adr), and its overview links them.
 | [Settings in tabs](./2026-11-02-settings-tabs/index.md): the Settings window shows one section at a time, chosen from a row of tabs                                          | 2026-11-02 | [Overview](./2026-11-02-settings-tabs/index.md), [Proposal](./2026-11-02-settings-tabs/proposal.md), [Plan](./2026-11-02-settings-tabs/plan.md)                                     |
 | [Welcome tour](./2026-11-03-welcome-tour/index.md): a wizard that says where the app lives and walks the panel in seven pages                                                | 2026-11-03 | [Overview](./2026-11-03-welcome-tour/index.md), [Proposal](./2026-11-03-welcome-tour/proposal.md), [Plan](./2026-11-03-welcome-tour/plan.md)                                        |
 | [Bars: left or used](./2026-11-03-bars-display/index.md): a choice in Settings says whether the bars show what is left or used                                               | 2026-11-03 | [Overview](./2026-11-03-bars-display/index.md), [Proposal](./2026-11-03-bars-display/proposal.md), [Plan](./2026-11-03-bars-display/plan.md)                                        |
+| [Stats, windows as strips](./2026-11-09-stats-windows/index.md): every window as a strip of blocks, the 5 hours counted in the verdict                                       | 2026-11-09 | [Overview](./2026-11-09-stats-windows/index.md), [Proposal](./2026-11-09-stats-windows/proposal.md), [Plan](./2026-11-09-stats-windows/plan.md)                                     |
 
 ## In design and build
 
-| Feature                                                                                                                                        | Date       | Pages                                                                                               |
-| :--------------------------------------------------------------------------------------------------------------------------------------------- | :--------- | :-------------------------------------------------------------------------------------------------- |
-| [Stats, windows as strips](./2026-11-09-stats-windows/index.md): every window as a strip of blocks, the 5 hours counted in the verdict         | 2026-11-09 | [Overview](./2026-11-09-stats-windows/index.md), [Proposal](./2026-11-09-stats-windows/proposal.md) |
-| [Accounts](./2026-11-03-accounts/index.md): several accounts of the same tool, one folder and one card each, status line and `/usage` for each | 2026-11-03 | [Overview](./2026-11-03-accounts/index.md), [Proposal](./2026-11-03-accounts/proposal.md)           |
+| Feature                                                                                                                                        | Date       | Pages                                                                                     |
+| :--------------------------------------------------------------------------------------------------------------------------------------------- | :--------- | :---------------------------------------------------------------------------------------- |
+| [Accounts](./2026-11-03-accounts/index.md): several accounts of the same tool, one folder and one card each, status line and `/usage` for each | 2026-11-03 | [Overview](./2026-11-03-accounts/index.md), [Proposal](./2026-11-03-accounts/proposal.md) |
 
 ## The pattern: from idea to implemented
 

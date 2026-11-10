@@ -9,10 +9,10 @@ date: 2026-11-09
 
 The stats show every window of a provider, the 5-hour ones included, as a strip of blocks in time order, and the verdict counts them.
 
-|        |            |
-| :----- | :--------- |
-| Date   | 2026-11-09 |
-| Status | in design  |
+|        |                                    |
+| :----- | :--------------------------------- |
+| Date   | 2026-11-09                         |
+| Status | implemented, 2026-11-09, in 0.11.0 |
 
 ## Intent
 
@@ -30,11 +30,11 @@ on the suggestion say the same.
 
 ## The nucleus
 
-| Part                | Page                      | Status                                          |
-| :------------------ | :------------------------ | :---------------------------------------------- |
-| Proposal            | [Proposal](./proposal.md) | chosen                                          |
-| Implementation plan | not written yet           |                                                 |
-| Decisions           | none expected             | nothing structural, to be confirmed in the plan |
+| Part                | Page                      | Status                               |
+| :------------------ | :------------------------ | :----------------------------------- |
+| Proposal            | [Proposal](./proposal.md) | chosen                               |
+| Implementation plan | [Plan](./plan.md)         | built                                |
+| Decisions           | none                      | nothing structural, as the plan says |
 
 ## Related
 
