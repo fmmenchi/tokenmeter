@@ -39,8 +39,9 @@ If you do not use one of the two tools, its entry stays empty; the other keeps w
 **No credits, no quota, no money.**
 
 - It makes **one network request of its own**: once a day it asks GitHub for the list of versions, to say whether an update is
-  out ([Updates](./updates.md)). It sends nothing about you or your use, and you can turn it off. When you choose **Open /usage**
-  on a Claude card, Claude Code opens its own Usage screen with its own credentials; tokenmeter never sees them.
+  out ([Updates](./updates.md)). It sends nothing about you or your use, and you can turn it off. Every 15 minutes, and when you
+  refresh, it also asks Claude Code to run its own `/usage`, so a model's limit is current: Claude Code makes the request with its
+  own credentials, and tokenmeter never sees them.
 - It needs **no login, no API key and no token**, and never asks for one. Where it shows who an account is signed in as, in
   Settings and in a banner, it reads the email the tool left in its folder and keeps nothing else of it ([Accounts](./accounts.md)).
 - It does not send messages to a model, so it does not use up your plan. It only reads files that

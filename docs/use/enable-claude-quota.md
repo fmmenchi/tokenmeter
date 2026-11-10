@@ -113,11 +113,15 @@ values stay and the panel shows how old they are; see [Reading the Bars](./bars.
 
 Some plans have a limit for one model that is part of the weekly limit (the usage page shows it, for example, under
 **This week**). tokenmeter shows it as a thin line under **Weekly**'s bar, joined to it by a bracket, only when your plan has it. The figure comes from the
-usage copy Claude Code keeps in `~/.claude.json`, which Claude Code only refreshes when it runs `/usage`. So tokenmeter asks
-you to open it: **Open /usage** on Claude's card opens Terminal and shows Claude Code's Usage screen for that account.
-Claude Code may first ask whether you trust the folder. Its own credentials are used; tokenmeter reads none. The card says
-when model limits were last seen, and an old figure reads with `~`. The panel's refresh icon reads files already written by
-Claude Code; it does not open `/usage`. In **Settings, Accounts**, a switch under Claude's windows turns the model line off.
+usage copy Claude Code keeps in `~/.claude.json`, which Claude Code only refreshes when it runs `/usage`. So, with **Set up
+the Claude quota automatically** on, tokenmeter asks it to: in the background every 15 minutes and when you click the refresh
+icon, never more than once a minute, in each Claude account's folder, without a session file. Claude Code uses its own
+credentials; tokenmeter reads none. Claude Code does not ask again while its copy is less than a minute old, and keeps the copy
+it has when its server does not answer: then nothing changes and nothing is reported. The card says when model limits were last
+seen, and an old figure reads with `~`. **Open /usage** on Claude's card opens Terminal on Claude Code's Usage screen for that
+account, for when the background run cannot: Claude Code may first ask whether you trust the folder. When the weekly starts
+again the model's line starts again with it, even before a new reading. In **Settings, Accounts**, a switch under Claude's
+windows turns the model line off.
 See [ADR 0015](../adr/0015-claude-model-usage-refresh.md).
 
 ## A plan without the 5-hour limit

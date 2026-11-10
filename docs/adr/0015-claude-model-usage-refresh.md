@@ -1,6 +1,6 @@
 # ADR 0015 — Refresh Claude model limits through its interactive Usage screen
 
-Status: accepted (2026-11-08)
+Status: accepted (2026-11-08), amended 2026-11-10: the background run is back
 
 ## Context
 
@@ -33,3 +33,25 @@ problem in [ADR 0005](./0005-problems.md). Account-specific folders still follow
   trust; tokenmeter does not bypass it.
 - The action depends on Claude Code continuing to accept `/usage` as an initial interactive command. A CLI change can break
   the action and must be checked against a real installed version.
+
+## Amendment, 2026-11-10: the background run is back
+
+With Claude Code 2.1.322 `claude -p "/usage" --no-session-persistence --no-chrome` writes the usage copy again. Measured on the
+author's Mac: one run moved `fetchedAtMs` from the day before to the minute of the run, and a run with `--debug` logged
+`fetchUtilization: GET /api/oauth/usage` and `200` and moved it again. A second run three minutes after the first ended with zero
+and left the copy as it was. Read in Claude Code's own program: it writes the copy only when the one it has is a minute old or
+more (`Be = 60000`), and when its server does not answer it shows a copy up to an hour old and writes nothing (`Gt = 3600000`).
+An unchanged copy after a run is therefore not a failure.
+
+- **Run `/usage` in the background again**, as before 2026-11-08: every 15 minutes and when the person refreshes, never twice
+  in a minute, in each Claude account's folder (ADR 0014), only while the Claude quota switch is on. Claude Code reads its own
+  credentials; tokenmeter handles none and calls no API.
+- **A run says nothing to the person**: refreshed, unchanged, failed, timed out or without `claude`, the card keeps saying when
+  the limits were last seen. The former `general.usagerefresh` problem does not come back.
+- **Open /usage stays**, for a version of Claude Code whose background run writes nothing, and for an account whose folder
+  still asks for trust.
+- **A model limit ends with its window** when the window is reported with a later reset (ADR 0002), so a limit the background
+  run could not refresh does not stay exhausted after the weekly has renewed.
+
+The background run depends on a behaviour Claude Code has already broken once. If it breaks again, nothing is reported and
+the card's last-seen time grows; that, and the button, are the fallback.

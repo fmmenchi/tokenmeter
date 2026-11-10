@@ -74,7 +74,7 @@ struct MenuContent: View {
             Divider()
             HStack(spacing: 6) {
                 IconButton(systemName: "arrow.clockwise", label: "Refresh", isBusy: meter.isRefreshing) {
-                    Task { await meter.refresh() }
+                    Task { await meter.refresh(userInitiated: true) }
                 }
                 .disabled(meter.isRefreshing)
                 // The icon says where it takes you: to the stats from the quota, back to the quota from the stats (ADR 0010).
