@@ -7,7 +7,7 @@ sidebar_position: 3
 # Stats, windows as strips, plan
 
 How the [proposal](./proposal.md) is built. **No ADR: nothing structural.** The verdict stays a pure function of the facts in the core
-([ADR 0010](../../adr/0010-usage-stats.md)), the views stay in the app, and nothing new is stored: the strips are drawn from the
+([ADR 0010](../../adr/0010-the-usage-store.md)), the views stay in the app, and nothing new is stored: the strips are drawn from the
 readings the store already keeps. A word is added to the verdict, and the rule that said it never says Move up goes with it. Approved by
 the author on 2026-11-09.
 
