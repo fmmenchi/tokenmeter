@@ -111,6 +111,9 @@ public struct ProviderStats: Equatable, Sendable {
     public let models: ModelBreakdown
     /// Since when the store has anything for this provider; nil when it has nothing.
     public let since: Date?
+    /// Since when the store has a quota reading of this provider: later than `since` when the logs go back further than the quota
+    /// was ever recorded, as Claude's tokens do. A window before it was never seen, and says so.
+    public var quotaSince: Date? = nil
 }
 
 /// The statistics are pure functions of the facts: the same facts give the same figures (ADR 0010).
@@ -289,6 +292,6 @@ public enum UsageStats {
         }
         return ProviderStats(provider: provider, windows: windowStats,
                              models: breakdown(store.modelTotals(provider: provider, since: start), rules: families),
-                             since: store.oldest(provider: provider))
+                             since: store.oldest(provider: provider), quotaSince: store.oldestReading(provider: provider))
     }
 }
