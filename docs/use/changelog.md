@@ -14,6 +14,8 @@ Released on 2026-11-10.
 
 - **A model's limit renews with its weekly window.** A limit for one model that was exhausted, such as Fable at 100%, stayed at 100% after the weekly had started again, until **Open /usage** was used: nothing had replaced its last reading. The limit is part of the weekly and resets with it, so once the weekly is reported with its new reset the model's line reads as reset too.
 
+- **Model limits refresh on their own again.** Every 15 minutes and when you click refresh, tokenmeter asks Claude Code to run its own `/usage` in the background, as it did before 0.10.2: a newer Claude Code writes the limits again. It is never run twice in a minute, and a run that changes nothing says nothing. **Open /usage** stays, for when the background run cannot.
+
 ## 0.11.1 {#v0-11-1}
 
 Released on 2026-11-10.
