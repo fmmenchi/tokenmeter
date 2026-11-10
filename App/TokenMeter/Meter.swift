@@ -120,6 +120,8 @@ final class Meter {
     private var detected: [Problem] = []
     private var providers: [ProviderConfig] = []
     private var lastDetection: Date?
+    private var lastUsageRefresh: Date?
+    private var isRefreshingUsage = false
     /// The last outcome of what the app tried, kept so a failure is a problem and not only a line in Console (ADR 0005). Nil is good,
     /// or not asked yet.
     private var providersFileError: String?
@@ -179,7 +181,7 @@ final class Meter {
     /// so the bar shows none.
     var needsAttention: Bool { !problems.isEmpty || updater.hasUpdate }
 
-    func refresh() async {
+    func refresh(userInitiated: Bool = false) async {
         guard !isRefreshing else { return }
         isRefreshing = true
         defer { isRefreshing = false }
@@ -187,7 +189,30 @@ final class Meter {
         detectProblemsIfDue()
         base = await Task.detached { collector.snapshot() }.value
         publish()
+        refreshClaudeUsageIfDue(userInitiated: userInitiated)
         ingestInBackground()
+    }
+
+    /// ADR 0015, amended on 2026-11-10: Claude Code writes each model's limit into `~/.claude.json` when it runs `/usage`, so
+    /// ask it to, in the background, every 15 minutes and when the person refreshes, but never twice in a minute, only while the
+    /// Claude quota switch is on, once for each Claude account in its own folder (ADR 0014). Claude Code reads its own
+    /// credentials; tokenmeter handles none. A run that changes nothing, fails or cannot find `claude` says nothing: the card
+    /// keeps saying when the limits were last seen, and **Open /usage** stays there.
+    private func refreshClaudeUsageIfDue(userInitiated: Bool) {
+        guard autoSetUpClaude, !isRefreshingUsage else { return }
+        if let last = lastUsageRefresh, Date().timeIntervalSince(last) < (userInitiated ? 60 : 900) { return }
+        isRefreshingUsage = true
+        lastUsageRefresh = Date()
+        let accounts = ClaudeAccounts.entries(in: providers, integrations: makeIntegrations()).map(\.account)
+        Task(priority: .utility) {
+            var outcomes: [ClaudeUsageRefresh.Outcome] = []
+            for account in accounts.isEmpty ? [.default()] : accounts {
+                outcomes.append(await ClaudeUsageRefresh.refresh(account: account))
+            }
+            isRefreshingUsage = false
+            Self.log.info("Claude usage refresh: \(String(describing: outcomes), privacy: .public)")
+            if outcomes.contains(.refreshed) { await refresh() }
+        }
     }
 
     /// ADR 0010: after the snapshot, off the main thread at utility priority, so the panel never waits for the store. The
