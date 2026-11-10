@@ -34,10 +34,13 @@ public enum ClaudeUsageCommand {
         let folder = home.appendingPathComponent(".tokenmeter/\(account.id)", isDirectory: true)
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         let url = folder.appendingPathComponent("open-usage.command")
+        // The default folder is Claude Code's own default: the variable is cleared, never set to it (`environmentConfigDir`).
+        let configDir = account.environmentConfigDir(home: home).map { "export CLAUDE_CONFIG_DIR=\(quoted($0.path))" }
+            ?? "unset CLAUDE_CONFIG_DIR"
         let contents = """
         #!/bin/sh
         cd \(quoted(folder.path)) || exit 1
-        export CLAUDE_CONFIG_DIR=\(quoted(account.configDir.path))
+        \(configDir)
         export CLAUDE_CODE_SKIP_PROMPT_HISTORY=1
         exec \(quoted(executable.path)) /usage --no-chrome
         """ + "\n"

@@ -51,4 +51,31 @@ final class ClaudeUsageCommandTests: XCTestCase {
         XCTAssertEqual(lines, [home.appendingPathComponent(".tokenmeter/claude-work").path,
                                account.configDir.path, "1", "/usage", "--no-chrome"])
     }
+
+    func testTheDefaultAccountRunsWithoutAConfigFolderSoClaudeCodeReadsItsOwnLogin() throws {
+        let home = try tempDir()
+        let claude = home.appendingPathComponent("bin/claude")
+        try executable("printf '%s\\n' \"${CLAUDE_CONFIG_DIR-unset}\"", at: claude)
+        let command = try ClaudeUsageCommand.write(for: .default(home: home), home: home, executable: claude)
+
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/bin/sh")
+        process.arguments = [command.path]
+        var environment = ProcessInfo.processInfo.environment
+        environment["CLAUDE_CONFIG_DIR"] = home.appendingPathComponent(".claude").path
+        process.environment = environment
+        let output = Pipe()
+        process.standardOutput = output
+        try process.run()
+        process.waitUntilExit()
+        let printed = String(decoding: output.fileHandleForReading.readDataToEndOfFile(), as: UTF8.self)
+        XCTAssertEqual(printed, "unset\n", "set to ~/.claude, Claude Code reads ~/.claude/.claude.json and starts its onboarding")
+    }
+
+    func testOnlyAnotherFolderIsGivenToClaudeCode() throws {
+        let home = try tempDir()
+        XCTAssertNil(ClaudeStatusLine.Account.default(home: home).environmentConfigDir(home: home))
+        let work = ClaudeStatusLine.Account(id: "claude-work", configDir: home.appendingPathComponent(".claude-work"))
+        XCTAssertEqual(work.environmentConfigDir(home: home), home.appendingPathComponent(".claude-work"))
+    }
 }

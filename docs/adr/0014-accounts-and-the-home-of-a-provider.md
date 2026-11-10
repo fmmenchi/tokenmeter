@@ -40,8 +40,10 @@ changes.
   the person's: it is read again after every write and at every detection, and a change by hand wins.
 - **An integration takes the entry, not the home.** `ProviderIntegration` receives the provider entry it is asked about, with
   its id and its folder (the default when `home` is absent): the Claude status line is set up in that folder's `settings.json`,
-  its wrapper and its saved original are named by the entry's id, the interactive `/usage` action runs with `CLAUDE_CONFIG_DIR`
-  set to the folder ([ADR 0015](./0015-claude-model-usage-refresh.md)), the
+  its wrapper and its saved original are named by the entry's id, `/usage`, in the background and from the button, runs with
+  `CLAUDE_CONFIG_DIR` set to the folder, except for the default folder, where the variable is cleared: set to `~/.claude`,
+  Claude Code reads `~/.claude/.claude.json` instead of `~/.claude.json` and starts its onboarding as if it had never been used
+  (found on 2026-11-10; [ADR 0015](./0015-claude-model-usage-refresh.md)), the
   project overrides are read from that folder's `projects/`, and a problem's topic is the entry's id, so its id and its banner
   name the account. The status line script takes the entry's id as its one argument and writes
   `~/.tokenmeter/<id>-statusline.json`; with no argument it writes `claude-statusline.json`, byte for byte as today, so a
