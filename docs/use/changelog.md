@@ -8,6 +8,12 @@ sidebar_position: 10
 
 What changed in each version, newest first. The update window shows the notes of the version it offers, taken from this page, and links here for the rest.
 
+## 0.11.3 {#v0-11-3}
+
+Released on 2026-11-10.
+
+- **Documentation and design copies reconciled.** Accounts is marked implemented; the data-source rule states that tokenmeter reads local files and the Claude status line without calling provider usage endpoints itself. The panel and widget artboards now use the current stale-quota wording. App behavior is unchanged.
+
 ## 0.11.2 {#v0-11-2}
 
 Released on 2026-11-10.
