@@ -268,7 +268,17 @@ struct VerdictBox: View {
         switch verdict.word {
         case .wait: "Wait"
         case .stay: "Stay"
+        case .moveUp: "Move up"
         case .moveDown: "Move down"
+        }
+    }
+
+    /// Move up is amber and Move down the accent, so two different words never look alike; the others are neutral.
+    private var chip: Color {
+        switch verdict.word {
+        case .moveUp: Color.orange.opacity(0.3)
+        case .moveDown: Color.accentColor.opacity(0.2)
+        case .wait, .stay: Color.primary.opacity(0.12)
         }
     }
 
@@ -277,6 +287,7 @@ struct VerdictBox: View {
         case .fewWindows(let window, let seen, let needed):
             window.map { "\(seen) of \(needed) \(label($0)) windows seen, so there is no verdict yet." }
                 ?? "No window has been seen to end, so there is no verdict yet."
+        case .tightPlan(let window, let hits, let closed): "You hit the \(label(window)) ceiling in \(hits) of \(closed) windows."
         case .hitCeiling(let window, let hits, let closed): "You hit the ceiling in \(hits) of \(closed) of the \(label(window)) windows."
         case .incompleteReadings(let window): "The ceiling was not reached, but some \(label(window)) windows were seen long before their end."
         case .littleMargin(let window, let left): display.littleMarginText(window: label(window), left: left)
@@ -287,6 +298,7 @@ struct VerdictBox: View {
     private var detail: String {
         switch verdict.reason {
         case .fewWindows: "A window counts when the app has seen it end."
+        case .tightPlan: "A bigger plan would raise the ceiling. The app does not know by how much."
         case .hitCeiling: "A smaller plan would have stopped you."
         case .incompleteReadings: "The readings are not complete enough to say you could move down."
         case .littleMargin: "Moving down would leave little room."
@@ -297,7 +309,7 @@ struct VerdictBox: View {
     var body: some View {
         HStack(alignment: .top, spacing: 8) {
             Text(word).font(.caption.weight(.semibold)).padding(.horizontal, 8).padding(.vertical, 2)
-                .background(Capsule().fill(verdict.word == .moveDown ? Color.accentColor.opacity(0.2) : Color.primary.opacity(0.12)))
+                .background(Capsule().fill(chip))
             VStack(alignment: .leading, spacing: 2) {
                 Text(headline).font(.caption.weight(.semibold)).fixedSize(horizontal: false, vertical: true)
                 Text(detail).font(.caption2).captionColour().fixedSize(horizontal: false, vertical: true)

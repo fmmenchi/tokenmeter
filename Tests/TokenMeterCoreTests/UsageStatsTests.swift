@@ -70,11 +70,50 @@ final class UsageStatsTests: XCTestCase {
         XCTAssertEqual(outcomes.map(\.approximate), [false, true, true], "more than a tenth of the window before it ended, or never")
     }
 
-    func testTheViewHasRoomForFewerWindowsThanTheRangeHas() {
-        XCTAssertEqual(UsageStats.rows(for: week, range: .month), 4)
-        XCTAssertEqual(UsageStats.rows(for: week, range: .quarter), 6)
-        XCTAssertEqual(UsageStats.rows(for: week, range: .lifetime), 6)
-        XCTAssertEqual(UsageStats.rows(for: 300, range: .month), 8)
+    func testAWindowShorterThanADayLooksAtTheLastFourteenDaysWhateverTheRange() {
+        let readings = (0..<40).map { reading(minutes: 300, resetsDaysAgo: Double($0) * 0.5 + 0.1, percent: 50) }
+        func count(_ range: StatsRange) -> Int {
+            UsageStats.outcomes(readings, windowMinutes: 300, now: now, range: range, calendar: calendar).count
+        }
+        XCTAssertEqual(count(.year), 28, "the windows that ended 0.1 to 13.6 days ago, not the 20 days the store holds")
+        XCTAssertEqual(count(.lifetime), 28)
+        XCTAssertEqual(count(.month), 28)
+    }
+
+    // MARK: Strips
+
+    func testTheSlotsOfAWeeklyStripHaveAPlaceForEveryWindowOfTheRange() {
+        let readings = [3.0, 10, 17.0035, 31].map { reading(resetsDaysAgo: $0, percent: 50) }
+        let outcomes = UsageStats.outcomes(readings, windowMinutes: week, now: now, range: .lifetime, calendar: calendar)
+        let stats = WindowStats(windowMinutes: week, outcomes: outcomes, closed: 4, hits: 0, lastHit: nil, lowestLeft: 50, approximate: 0)
+        let slots = UsageStats.slots(stats, range: .quarter, since: nil, now: now)
+        XCTAssertEqual(slots.count, 13)
+        XCTAssertEqual(slots.indices.filter { slots[$0] != nil }, [8, 10, 11, 12],
+                       "the newest is the latest boundary; 17 days and 5 minutes ago is still the slot of 17 days ago")
+        XCTAssertEqual(UsageStats.slots(stats, range: .month, since: nil, now: now).count, 4)
+        XCTAssertEqual(UsageStats.slots(stats, range: .year, since: nil, now: now).count, 52)
+        XCTAssertEqual(UsageStats.slots(stats, range: .lifetime, since: now.addingTimeInterval(-30 * day), now: now).count, 5,
+                       "as many as fit between the first thing kept and now")
+    }
+
+    func testAStripHasNoSlotsUntilAWindowHasBeenSeenToEnd() {
+        let stats = WindowStats(windowMinutes: week, outcomes: [], closed: 0, hits: 0, lastHit: nil, lowestLeft: nil, approximate: 0)
+        XCTAssertEqual(UsageStats.slots(stats, range: .quarter, since: nil, now: now), [])
+        let short = WindowStats(windowMinutes: 300, outcomes: [WindowOutcome(windowMinutes: 300, resetsAt: now.addingTimeInterval(-3_600),
+                                                                             usedSeen: 10, approximate: false)],
+                                closed: 1, hits: 0, lastHit: nil, lowestLeft: 90, approximate: 0)
+        XCTAssertEqual(UsageStats.slots(short, range: .quarter, since: nil, now: now), [], "a short window is drawn by days")
+    }
+
+    func testTheDaysOfAShortWindowAreFourteenColumnsOldestFirst() {
+        let readings = [reading(minutes: 300, resetsDaysAgo: 0.3, percent: 10), reading(minutes: 300, resetsDaysAgo: 0.1, percent: 20),
+                        reading(minutes: 300, resetsDaysAgo: 1.2, percent: 30)]
+        let outcomes = UsageStats.outcomes(readings, windowMinutes: 300, now: now, range: .month, calendar: calendar)
+        let days = UsageStats.days(outcomes, now: now, calendar: calendar)
+        XCTAssertEqual(days.count, 14)
+        XCTAssertEqual(days[13].map(\.usedSeen), [10, 20], "today, the earlier window first")
+        XCTAssertEqual(days[12].map(\.usedSeen), [30], "yesterday")
+        XCTAssertEqual(days[11], [], "a day with no window is a column with nothing in it")
     }
 
     // MARK: Models
@@ -143,8 +182,8 @@ final class UsageStatsTests: XCTestCase {
         let five = stats.windows[0]
         XCTAssertEqual(five.name, "5h")
         XCTAssertEqual(five.closed, 10)
-        XCTAssertEqual(five.outcomes.count, 8, "the view has room for eight")
-        XCTAssertEqual(five.hits, 3, "hits are counted over every window in the range, not only those shown")
+        XCTAssertEqual(five.outcomes.count, 10, "the strip draws every window of the last fourteen days, not a few rows")
+        XCTAssertEqual(five.hits, 3)
         XCTAssertEqual(five.lastHit, now.addingTimeInterval(-3 * 0.4 * day))
         let weekly = stats.windows[1]
         XCTAssertEqual(weekly.name, "7d")
@@ -178,12 +217,32 @@ final class UsageStatsTests: XCTestCase {
     func testReachingTheCeilingIsStayAndNamesTheWindowThatWentThereMostOften() {
         XCTAssertEqual(UsageStats.verdict([window(closed: 5, hits: 1)]),
                        Verdict(word: .stay, reason: .hitCeiling(window: "7d", hits: 1, closed: 5)))
-        XCTAssertEqual(UsageStats.verdict([window(closed: 4, hits: 1), window(300, closed: 8, hits: 3)]),
-                       Verdict(word: .stay, reason: .hitCeiling(window: "5h", hits: 3, closed: 8)), "3 of 8 is more often than 1 of 4")
+        XCTAssertEqual(UsageStats.verdict([window(closed: 4, hits: 1), window(300, closed: 30, hits: 2)]),
+                       Verdict(word: .stay, reason: .hitCeiling(window: "7d", hits: 1, closed: 4)), "1 of 4 is more often than 2 of 30")
+    }
+
+    func testReachingTheCeilingOftenIsMoveUp() {
+        XCTAssertEqual(UsageStats.verdict([window(300, closed: 33, hits: 6)]),
+                       Verdict(word: .moveUp, reason: .tightPlan(window: "5h", hits: 6, closed: 33)))
+        XCTAssertEqual(UsageStats.verdict([window(closed: 4, hits: 2)]).word, .moveUp, "2 of 4 weekly windows")
+        XCTAssertEqual(UsageStats.verdict([window(closed: 4, hits: 1)]).word, .stay, "once is not often")
+        XCTAssertEqual(UsageStats.verdict([window(300, closed: 20, hits: 2)]).word, .stay, "2 of 20 is 10%")
+        XCTAssertEqual(UsageStats.verdict([window(300, closed: 20, hits: 3)]).word, .moveUp, "3 of 20 is exactly 15%")
+    }
+
+    func testTheWindowThatWentToTheCeilingMostOftenIsTheOneNamedForMoveUp() {
+        XCTAssertEqual(UsageStats.verdict([window(closed: 4, hits: 2), window(300, closed: 12, hits: 8)]),
+                       Verdict(word: .moveUp, reason: .tightPlan(window: "5h", hits: 8, closed: 12)))
+    }
+
+    func testAWindowShorterThanADayNeedsTwelveToCount() {
+        XCTAssertEqual(UsageStats.verdict([window(300, closed: 11, hits: 11)]),
+                       Verdict(word: .wait, reason: .fewWindows(window: "5h", seen: 11, needed: 12)))
+        XCTAssertEqual(UsageStats.verdict([window(300, closed: 12, hits: 12)]).word, .moveUp)
     }
 
     func testAWindowLengthThatHasNotEndedEnoughTimesDoesNotCount() {
-        let verdict = UsageStats.verdict([window(closed: 3, hits: 3), window(300, closed: 6, hits: 0, lowest: 90)])
+        let verdict = UsageStats.verdict([window(closed: 3, hits: 3), window(300, closed: 12, hits: 0, lowest: 90)])
         XCTAssertEqual(verdict, Verdict(word: .moveDown, reason: .plentyOfMargin(window: "5h", left: 90)),
                        "the three weekly windows that reached the ceiling are too few to say anything")
     }
@@ -198,7 +257,7 @@ final class UsageStatsTests: XCTestCase {
     }
 
     func testTheTightestWindowDecides() {
-        let verdict = UsageStats.verdict([window(closed: 4, lowest: 90), window(300, closed: 6, lowest: 70)])
+        let verdict = UsageStats.verdict([window(closed: 4, lowest: 90), window(300, closed: 12, lowest: 70)])
         XCTAssertEqual(verdict, Verdict(word: .moveDown, reason: .plentyOfMargin(window: "5h", left: 70)))
     }
 
