@@ -26,7 +26,10 @@ limits are not in tokens and totals are dominated by cache reads.
   tokens; `WindowUsage.resolved(at:)` knows no tokens and turns a reported window whose reset has passed into `reset` at render
   time, until the next collection tells which it is. An exhausted reported window is the exception: its last 0% and known reset
   time remain visible, marked stale after 10 minutes, even after that time passes, until a new quota reading replaces them. The
-  interface then says that the reset was expected and an update is pending; it does not claim the quota has renewed. The widget
+  interface then says that the reset was expected and an update is pending; it does not claim the quota has renewed. A limit
+  for one model is part of the window of the same length and has the same reset time in Claude Code's own data: when that window
+  has been reported with a later reset, by at least half its length, the limit ended with it and reads as `reset`, exhausted or
+  not, because the renewal is then a fact and not a guess from the clock (`ProviderSnapshot.resolved(_:at:)`). The widget
   timeline has an entry at each reset.
 - **A reported figure older than 10 minutes is stale**: kept, dimmed, with a `~`, since use since can only have lowered it.
   Every reported quota carries `observedAt` (the file's modification time for Claude, the event's timestamp for Codex), and the
