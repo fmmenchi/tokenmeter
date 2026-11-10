@@ -252,6 +252,17 @@ final class UsageStoreTests: XCTestCase {
         XCTAssertNil(store.oldest(provider: chatgpt))
     }
 
+    func testTheQuotaIsKeptFromItsFirstReadingNotFromTheFirstMessage() throws {
+        let store = try UsageStore(url: try fileURL())
+        XCTAssertNil(store.oldestReading(provider: chatgpt))
+        store.insert([message("a", at: 1_000, model: "fable", output: 10)])
+        XCTAssertNil(store.oldestReading(provider: chatgpt), "tokens alone say nothing about the quota")
+        store.upsert([reading(percent: 10, resets: 9_000, first: 5_000, last: 6_000),
+                      reading(percent: 20, resets: 3_000, first: 2_000, last: 2_500), reading(percent: 30, resets: 20_000)])
+        XCTAssertEqual(store.oldestReading(provider: chatgpt), Date(timeIntervalSince1970: 2_000))
+        XCTAssertEqual(store.oldest(provider: claude), Date(timeIntervalSince1970: 1_000))
+    }
+
     func testReadingsFromADateOnAreOldestFirst() throws {
         let store = try UsageStore(url: try fileURL())
         store.upsert([reading(percent: 1, resets: 3 * day), reading(percent: 2, resets: 1 * day), reading(percent: 3, resets: 2 * day)])

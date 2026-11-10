@@ -358,6 +358,18 @@ public final class UsageStore: @unchecked Sendable {
         return seconds.map { Date(timeIntervalSince1970: $0) }
     }
 
+    /// The first moment a quota reading of the provider was seen, nil when there is none. The quota is kept only from the day the
+    /// store began or the app first saw it, which is later than the tokens, whose logs go back further.
+    public func oldestReading(provider: Provider) -> Date? {
+        lock.lock()
+        defer { lock.unlock() }
+        let seconds = rows("SELECT MIN(COALESCE(first_observed, resets_at)) FROM readings WHERE provider = ?",
+                           binds: [provider.rawValue]) {
+            sqlite3_column_type($0, 0) == SQLITE_NULL ? nil : sqlite3_column_double($0, 0)
+        }.first ?? nil
+        return seconds.map { Date(timeIntervalSince1970: $0) }
+    }
+
     private static func date(_ statement: OpaquePointer, _ column: Int32) -> Date? {
         sqlite3_column_type(statement, column) == SQLITE_NULL ? nil : Date(timeIntervalSince1970: sqlite3_column_double(statement, column))
     }
