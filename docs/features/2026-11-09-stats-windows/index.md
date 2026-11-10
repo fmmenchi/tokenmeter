@@ -24,7 +24,7 @@ clearest sign that a plan is tight, and it counts for nothing.
 The weekly windows are listed as rows with a date, and the current rows leave no room for the cases that matter: a week the app did not
 see is simply absent, and a plan whose weekly figure is not known yet gets a verdict that says nothing about what is missing.
 
-This feature draws both lengths as a strip, with time running left to right, counts the 5 hours in the verdict, and says what is
+This feature draws both lengths as a strip, with time running left to right, counts the 5 hours in the verdict, which can now say Move up, and says what is
 missing when the weekly is unknown. The figure of a block is one point away, in the system's tooltip. The wizard's pages on the stats and
 on the suggestion say the same.
 
@@ -32,7 +32,7 @@ on the suggestion say the same.
 
 | Part                | Page                      | Status                                          |
 | :------------------ | :------------------------ | :---------------------------------------------- |
-| Proposal            | [Proposal](./proposal.md) | chosen, with one decision open: Move up         |
+| Proposal            | [Proposal](./proposal.md) | chosen                                          |
 | Implementation plan | not written yet           |                                                 |
 | Decisions           | none expected             | nothing structural, to be confirmed in the plan |
 
