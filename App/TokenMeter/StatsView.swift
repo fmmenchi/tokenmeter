@@ -48,7 +48,7 @@ struct StatsView: View {
                 let first = snapshot.providers.first?.provider.rawValue
                 let open = meter.openStatsCard ?? first
                 ForEach(snapshot.providers, id: \.provider) { provider in
-                    StatsCard(snapshot: provider, stats: meter.stats.first { $0.provider == provider.provider },
+                    StatsCard(snapshot: provider, stats: meter.stats.first { $0.provider == provider.provider }, range: meter.statsRange,
                               isExpanded: open == provider.provider.rawValue,
                               onToggle: { meter.toggleStatsDetail(provider.provider.rawValue, defaultOpen: first) })
                 }
@@ -72,11 +72,17 @@ struct StatsView: View {
 private struct StatsCard: View {
     let snapshot: ProviderSnapshot
     let stats: ProviderStats?
+    let range: StatsRange
     let isExpanded: Bool
     let onToggle: () -> Void
 
     /// The windows the provider has now: a plan without the 5 hours does not list them.
     private var windowNames: Set<String> { Set(snapshot.windows.map(\.window).filter { $0.scope == nil }.map(\.name)) }
+
+    /// The weekly window is there but its figure is not known yet, as Claude's is before a session's first reply.
+    private var weeklyUnknown: Bool {
+        snapshot.windows.contains { $0.window.scope == nil && $0.window.name == WindowSpec.week.name && $0.remainingFraction == nil }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -97,12 +103,13 @@ private struct StatsCard: View {
             .help(isExpanded ? "Hide the detail" : "Show the detail")
             .accessibilityLabel("\(snapshot.title): \(isExpanded ? "hide" : "show") the detail")
             if let stats, stats.since != nil || stats.windows.contains(where: { $0.closed > 0 }) {
-                // Windows shorter than a day are not listed for now: how to show several of them in one day needs a design
-                // decision, and the verdict is drawn from the windows that are listed.
-                let windows = stats.windows.filter { windowNames.contains($0.name) && $0.windowMinutes >= 1_440 }
-                if isExpanded { VerdictBox(verdict: UsageStats.verdict(windows)) }
+                let windows = stats.windows.filter { windowNames.contains($0.name) }
+                if isExpanded {
+                    VerdictBox(verdict: UsageStats.verdict(windows))
+                    if weeklyUnknown { WeeklyUnknownNotice() }
+                }
                 ForEach(windows, id: \.windowMinutes) {
-                    WindowHistory(stats: $0, showsRows: isExpanded)
+                    WindowStrip(stats: $0, range: range, since: stats.since, now: Date(), showsStrip: isExpanded)
                 }
                 if isExpanded {
                     ModelList(models: stats.models)
@@ -124,63 +131,6 @@ private struct StatsCard: View {
         // The whole card opens and closes, not only its title row; a button inside it (the models' "more") keeps its own click.
         .contentShape(RoundedRectangle(cornerRadius: 10))
         .onTapGesture(perform: onToggle)
-    }
-}
-
-/// How the last windows of one length ended, newest first, and whether the ceiling was reached. Closed, it is the one line.
-private struct WindowHistory: View {
-    let stats: WindowStats
-    let showsRows: Bool
-
-    private var label: String { WindowSpec(name: stats.name, duration: 0).label }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(alignment: .firstTextBaseline) {
-                Text(label).font(.caption.weight(.medium))
-                Spacer()
-                summary
-            }
-            if showsRows { ForEach(stats.outcomes, id: \.resetsAt) { OutcomeRow(outcome: $0) } }
-        }
-    }
-
-    @Environment(\.skinStyle) private var skin
-
-    @ViewBuilder private var summary: some View {
-        if stats.closed == 0 {
-            Text("not observed").font(.caption2).captionColour()
-        } else if stats.hits > 0 {
-            let last = stats.lastHit.map { " · last \($0.formatted(.dateTime.month(.abbreviated).day()))" } ?? ""
-            Text("hit the ceiling \(stats.hits) of \(stats.closed)\(last)").font(.caption2.weight(.semibold))
-                .foregroundStyle(skin?.middle ?? Color.orange)
-        } else {
-            Text("never reached the ceiling in \(stats.closed)").font(.caption2).captionColour()
-        }
-    }
-}
-
-private struct OutcomeRow: View {
-    let outcome: WindowOutcome
-
-    @Environment(\.skinStyle) private var skin
-    @Environment(\.barsDisplay) private var display
-
-    private var left: Double { outcome.leftAtMost }
-    private var tint: Color { skin?.tint(for: left / 100) ?? (left >= 40 ? .green : left >= 15 ? .orange : .red) }
-
-    var body: some View {
-        HStack(spacing: 8) {
-            Text(outcome.resetsAt, format: .dateTime.month(.abbreviated).day())
-                .font(.caption2).captionColour().frame(width: 44, alignment: .leading)
-            QuotaBar(fraction: display.fraction(remaining: left / 100), tint: tint, height: 8, emptyIsEmpty: display == .used)
-                .opacity(outcome.approximate ? 0.5 : 1)
-            Text("\(outcome.approximate ? "~" : "")\(display.percent(remaining: left / 100))% \(display.word)")
-                .font(.caption2.bold().monospacedDigit()).frame(width: 64, alignment: .trailing)
-        }
-        .help(outcome.approximate
-              ? "The last reading was a good while before the window ended, so it may have ended with less."
-              : "The highest use seen in this window.")
     }
 }
 
@@ -268,7 +218,17 @@ struct VerdictBox: View {
         switch verdict.word {
         case .wait: "Wait"
         case .stay: "Stay"
+        case .moveUp: "Move up"
         case .moveDown: "Move down"
+        }
+    }
+
+    /// Move up is amber and Move down the accent, so two different words never look alike; the others are neutral.
+    private var chip: Color {
+        switch verdict.word {
+        case .moveUp: Color.orange.opacity(0.3)
+        case .moveDown: Color.accentColor.opacity(0.2)
+        case .wait, .stay: Color.primary.opacity(0.12)
         }
     }
 
@@ -277,6 +237,7 @@ struct VerdictBox: View {
         case .fewWindows(let window, let seen, let needed):
             window.map { "\(seen) of \(needed) \(label($0)) windows seen, so there is no verdict yet." }
                 ?? "No window has been seen to end, so there is no verdict yet."
+        case .tightPlan(let window, let hits, let closed): "You hit the \(label(window)) ceiling in \(hits) of \(closed) windows."
         case .hitCeiling(let window, let hits, let closed): "You hit the ceiling in \(hits) of \(closed) of the \(label(window)) windows."
         case .incompleteReadings(let window): "The ceiling was not reached, but some \(label(window)) windows were seen long before their end."
         case .littleMargin(let window, let left): display.littleMarginText(window: label(window), left: left)
@@ -287,6 +248,7 @@ struct VerdictBox: View {
     private var detail: String {
         switch verdict.reason {
         case .fewWindows: "A window counts when the app has seen it end."
+        case .tightPlan: "A bigger plan would raise the ceiling. The app does not know by how much."
         case .hitCeiling: "A smaller plan would have stopped you."
         case .incompleteReadings: "The readings are not complete enough to say you could move down."
         case .littleMargin: "Moving down would leave little room."
@@ -297,7 +259,7 @@ struct VerdictBox: View {
     var body: some View {
         HStack(alignment: .top, spacing: 8) {
             Text(word).font(.caption.weight(.semibold)).padding(.horizontal, 8).padding(.vertical, 2)
-                .background(Capsule().fill(verdict.word == .moveDown ? Color.accentColor.opacity(0.2) : Color.primary.opacity(0.12)))
+                .background(Capsule().fill(chip))
             VStack(alignment: .leading, spacing: 2) {
                 Text(headline).font(.caption.weight(.semibold)).fixedSize(horizontal: false, vertical: true)
                 Text(detail).font(.caption2).captionColour().fixedSize(horizontal: false, vertical: true)

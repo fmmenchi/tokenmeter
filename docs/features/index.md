@@ -34,9 +34,10 @@ are [ADRs](../adr), and its overview links them.
 
 ## In design and build
 
-| Feature                                                                                                                                        | Date       | Pages                                                                                     |
-| :--------------------------------------------------------------------------------------------------------------------------------------------- | :--------- | :---------------------------------------------------------------------------------------- |
-| [Accounts](./2026-11-03-accounts/index.md): several accounts of the same tool, one folder and one card each, status line and `/usage` for each | 2026-11-03 | [Overview](./2026-11-03-accounts/index.md), [Proposal](./2026-11-03-accounts/proposal.md) |
+| Feature                                                                                                                                        | Date       | Pages                                                                                               |
+| :--------------------------------------------------------------------------------------------------------------------------------------------- | :--------- | :-------------------------------------------------------------------------------------------------- |
+| [Stats, windows as strips](./2026-11-09-stats-windows/index.md): every window as a strip of blocks, the 5 hours counted in the verdict         | 2026-11-09 | [Overview](./2026-11-09-stats-windows/index.md), [Proposal](./2026-11-09-stats-windows/proposal.md) |
+| [Accounts](./2026-11-03-accounts/index.md): several accounts of the same tool, one folder and one card each, status line and `/usage` for each | 2026-11-03 | [Overview](./2026-11-03-accounts/index.md), [Proposal](./2026-11-03-accounts/proposal.md)           |
 
 ## The pattern: from idea to implemented
 

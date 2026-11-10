@@ -30,6 +30,12 @@ public struct WindowOutcome: Equatable, Sendable {
     public var hit: Bool { usedSeen >= 100 }
 }
 
+/// One block of the strip of a window of a day or longer: when its window ends, and how it ended when the app saw it end.
+public struct WindowSlot: Equatable, Sendable {
+    public let endsAt: Date
+    public let outcome: WindowOutcome?
+}
+
 public struct WindowStats: Equatable, Sendable {
     public let windowMinutes: Int
     /// The windows that closed, newest first, at most as many as the view has room for.
@@ -65,14 +71,16 @@ public struct ModelBreakdown: Equatable, Sendable {
     public let unknownTokens: Int
 }
 
-/// The word on a provider's card, from percentages only: it never looks at tokens and never says "move up", because the size of
-/// the other plans is not known (ADR 0010).
+/// The word on a provider's card, from percentages only: it never looks at tokens. Move up says the ceiling is reached often; it
+/// never says which plan to take, because the size of the other plans is not known (ADR 0010).
 public struct Verdict: Equatable, Sendable {
-    public enum Word: Equatable, Sendable { case wait, stay, moveDown }
+    public enum Word: Equatable, Sendable { case wait, stay, moveUp, moveDown }
 
     public enum Reason: Equatable, Sendable {
         /// Fewer windows than needed have ended in the range, in the window that has the most.
         case fewWindows(window: String?, seen: Int, needed: Int)
+        /// The ceiling was reached often enough that the plan is tight, in the window that went there most often.
+        case tightPlan(window: String, hits: Int, closed: Int)
         case hitCeiling(window: String, hits: Int, closed: Int)
         /// No ceiling reached, but a reading was seen long before the end of its window: it may have ended with less.
         case incompleteReadings(window: String)
@@ -107,30 +115,48 @@ public struct ProviderStats: Equatable, Sendable {
 
 /// The statistics are pure functions of the facts: the same facts give the same figures (ADR 0010).
 public enum UsageStats {
-    /// How many closed windows a view shows: 4 for a month, 6 for the longer ranges, and 8 for a window shorter than a day.
-    public static func rows(for windowMinutes: Int, range: StatsRange) -> Int {
-        if windowMinutes < 1_440 { return 8 }
-        return range == .month ? 4 : 6
-    }
+    /// A window shorter than this, in minutes, is looked at over the last `shortWindowDays` whatever the range, and needs more of
+    /// them for a verdict: several end in one day.
+    public static let shortWindow = 1_440
+    /// How many days back a window shorter than a day looks.
+    public static let shortWindowDays = 14
 
     /// A reading seen more than a tenth of the window before it ended may have ended higher.
     static let approximateAfter = 0.1
 
-    /// Windows of one length that must have ended in the range before a verdict is given.
+    /// Windows of one length of a day or longer that must have ended in the range before a verdict is given.
     public static let windowsNeeded = 4
+    /// The same for a window shorter than a day.
+    public static let shortWindowsNeeded = 12
     /// The margin, in percent left, below which no window went for a card to say it could move down.
     public static let marginForMoveDown = 60.0
+    /// The ceiling must have been reached at least this many times, and in at least `moveUpShare` of the windows, for Move up.
+    public static let moveUpHits = 2
+    public static let moveUpShare = 0.15
 
-    /// The verdict of a provider's card. Wait while no window length has ended `windowsNeeded` times in the range. Stay when
-    /// the ceiling was reached in any of the windows that count. Move down only when none was reached, every reading was seen near
-    /// the end of its window and the lowest margin was `marginForMoveDown` or more. Anything else is Stay, with what is missing.
+    /// How many windows of this length must have ended before a verdict counts them.
+    public static func windowsNeeded(for windowMinutes: Int) -> Int {
+        windowMinutes < shortWindow ? shortWindowsNeeded : windowsNeeded
+    }
+
+    /// The verdict of a provider's card. Wait while no window length has ended enough times. Move up when the ceiling was reached
+    /// at least `moveUpHits` times and in `moveUpShare` of the windows of a length that counts. Stay when it was reached at all.
+    /// Move down only when none was reached, every reading was seen near the end of its window and the lowest margin was
+    /// `marginForMoveDown` or more. Anything else is Stay, with what is missing.
     public static func verdict(_ windows: [WindowStats]) -> Verdict {
-        let counting = windows.filter { $0.closed >= windowsNeeded }
+        let counting = windows.filter { $0.closed >= windowsNeeded(for: $0.windowMinutes) }
         guard !counting.isEmpty else {
-            let most = windows.max { $0.closed < $1.closed }
-            return Verdict(word: .wait, reason: .fewWindows(window: most?.name, seen: most?.closed ?? 0, needed: windowsNeeded))
+            let most = windows.max {
+                Double($0.closed) / Double(windowsNeeded(for: $0.windowMinutes)) < Double($1.closed) / Double(windowsNeeded(for: $1.windowMinutes))
+            }
+            return Verdict(word: .wait, reason: .fewWindows(window: most?.name, seen: most?.closed ?? 0,
+                                                           needed: most.map { windowsNeeded(for: $0.windowMinutes) } ?? windowsNeeded))
         }
-        if let worst = counting.filter({ $0.hits > 0 }).max(by: { Double($0.hits) / Double($0.closed) < Double($1.hits) / Double($1.closed) }) {
+        let byShare: (WindowStats, WindowStats) -> Bool = { Double($0.hits) / Double($0.closed) < Double($1.hits) / Double($1.closed) }
+        if let tight = counting.filter({ $0.hits >= moveUpHits && Double($0.hits) / Double($0.closed) >= moveUpShare }).max(by: byShare) {
+            return Verdict(word: .moveUp, reason: .tightPlan(window: tight.name, hits: tight.hits, closed: tight.closed))
+        }
+        if let worst = counting.filter({ $0.hits > 0 }).max(by: byShare) {
             return Verdict(word: .stay, reason: .hitCeiling(window: worst.name, hits: worst.hits, closed: worst.closed))
         }
         if let partial = counting.first(where: { $0.approximate > 0 }) {
@@ -160,7 +186,11 @@ public enum UsageStats {
     /// The windows of one length, of the provider as a whole, that closed before `now` and inside the range, newest first.
     public static func outcomes(_ readings: [UsageStore.Reading], windowMinutes: Int, now: Date, range: StatsRange,
                                 calendar: Calendar = .current) -> [WindowOutcome] {
-        let start = range.since(now, calendar: calendar)
+        var start = range.since(now, calendar: calendar)
+        if windowMinutes < shortWindow, let recent = calendar.date(byAdding: .day, value: -shortWindowDays, to: now),
+           start == nil || recent > start! {
+            start = recent
+        }
         return readings
             .filter { $0.windowMinutes == windowMinutes && $0.scope == nil && $0.resetsAt <= now && (start == nil || $0.resetsAt >= start!) }
             .sorted { $0.resetsAt > $1.resetsAt }
@@ -170,6 +200,43 @@ public enum UsageStats {
                 return WindowOutcome(windowMinutes: windowMinutes, resetsAt: reading.resetsAt, usedSeen: reading.usedPercent,
                                      approximate: approximate)
             }
+    }
+
+    /// The blocks of the strip of a window of a day or longer, oldest first: one for each window of the range, the outcome where the
+    /// app saw it end and nil where it did not. The newest slot is the latest boundary of the window before `now`; a window that
+    /// ended a few minutes off its boundary is still the slot's. Empty when nothing was seen to end, because with no outcome there
+    /// is no boundary to count from.
+    public static func slots(_ stats: WindowStats, range: StatsRange, since: Date?, now: Date) -> [WindowSlot] {
+        guard stats.windowMinutes >= shortWindow, let newest = stats.outcomes.first else { return [] }
+        let length = TimeInterval(stats.windowMinutes) * 60
+        let anchor = newest.resetsAt.addingTimeInterval((now.timeIntervalSince(newest.resetsAt) / length).rounded(.down) * length)
+        let count: Int
+        switch range {
+        case .month: count = 4
+        case .quarter: count = 13
+        case .year: count = 52
+        case .lifetime:
+            let kept = since.map { Int((now.timeIntervalSince($0) / length).rounded(.up)) } ?? stats.outcomes.count
+            count = min(104, max(kept, stats.outcomes.count, 1))
+        }
+        var seen = [WindowOutcome?](repeating: nil, count: count)
+        for outcome in stats.outcomes {
+            let back = Int(((anchor.timeIntervalSince(outcome.resetsAt)) / length).rounded())
+            let index = count - 1 - back
+            if seen.indices.contains(index), seen[index] == nil { seen[index] = outcome }
+        }
+        return seen.enumerated().map { WindowSlot(endsAt: anchor.addingTimeInterval(-Double(count - 1 - $0.offset) * length), outcome: $0.element) }
+    }
+
+    /// The columns of the strip of a window shorter than a day: the last `count` days, oldest first, each with the windows that
+    /// ended in it, oldest first.
+    public static func days(_ outcomes: [WindowOutcome], now: Date, count: Int = shortWindowDays,
+                            calendar: Calendar = .current) -> [[WindowOutcome]] {
+        let today = calendar.startOfDay(for: now)
+        return (0..<count).map { offset in
+            guard let day = calendar.date(byAdding: .day, value: -(count - 1 - offset), to: today) else { return [] }
+            return outcomes.filter { calendar.isDate($0.resetsAt, inSameDayAs: day) }.sorted { $0.resetsAt < $1.resetsAt }
+        }
     }
 
     /// The family a model's name is shown as: the first rule whose fragment the name contains, without case; a name no rule
@@ -216,7 +283,7 @@ public enum UsageStats {
         let windowStats = windows.map { minutes -> WindowStats in
             let all = outcomes(readings, windowMinutes: minutes, now: now, range: range, calendar: calendar)
             let hits = all.filter(\.hit)
-            return WindowStats(windowMinutes: minutes, outcomes: Array(all.prefix(rows(for: minutes, range: range))),
+            return WindowStats(windowMinutes: minutes, outcomes: all,
                                closed: all.count, hits: hits.count, lastHit: hits.map(\.resetsAt).max(),
                                lowestLeft: all.map(\.leftAtMost).min(), approximate: all.filter(\.approximate).count)
         }

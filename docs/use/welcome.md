@@ -26,8 +26,8 @@ To see it again, open Settings from the gear in the panel and press **Show the w
 | The bars                          | The colours, that the figure is what is left and where to read what is used instead, and that they fill as Claude Code and the Codex CLI are used: empty at first. |
 | The tick                          | Where the bar would be at a steady use.                                                                                                                            |
 | Refresh, stats, settings and quit | What the five buttons do, the lock among them, and what the lines of text above them say.                                                                          |
-| The stats                         | How each window ended, with its date, bar and what was left, and the tokens by model.                                                                              |
-| The suggestion                    | The word at the top of a card, Wait, Stay or Move down, from percentages only.                                                                                     |
+| The stats                         | The windows as strips of blocks, what the colours mean and that a point shows the figure, and the tokens by model.                                                 |
+| The suggestion                    | The word at the top of a card, Wait, Stay, Move up or Move down, from percentages only, the 5 hours included.                                                      |
 | An account is a folder            | A work account and a personal one are two folders, each with a card; the panel says when it finds one nobody named ([accounts](./accounts.md)).                    |
 | Settings has five tabs            | General, Accounts, Skin, Notifications and Updates, that General chooses left or used, and where the daily check for updates can be turned off.                    |
 
