@@ -56,17 +56,18 @@ ingestor.ingest()                                       // safe from any queue; 
 let stats = UsageStats.stats(for: .claude, windows: [300, 10080], families: rules, store: store, range: .quarter)
 ```
 
-| Symbol                                                    | Does                                                                                                                   |
-| :-------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------- |
-| `UsageStore(url:)`                                        | The SQLite file of facts ([ADR 0010](../adr/0010-the-usage-store.md)); throws only when a newer version wrote it.      |
-| `insert(_:)`, `upsert(_:)`                                | Messages are ignored when their key is there; a reading keeps the highest percentage and the first and last time seen. |
-| `modelTotals`, `readings`, `oldest`                       | What the statistics read.                                                                                              |
-| `UsageIngestor(sources:store:overlap:)`                   | Puts what the sources see into the store; `ingest(now:)` returns how many messages and readings were seen.             |
-| `UsageStats.stats(for:windows:families:store:range:now:)` | A provider's card: the windows that closed, whether the ceiling was hit, and the models by family.                     |
-| `UsageStats.outcomes`, `breakdown`, `family`              | The same pieces, pure, for tests and other views. A window shorter than a day looks at the last 14 days.               |
-| `UsageStats.slots`, `days`                                | The blocks of a strip: one slot for each window of the range, empty where it was not seen; the last days in columns.   |
-| `UsageStats.verdict`                                      | `wait`, `stay`, `moveUp` or `moveDown`, with its reason; the 5-hour windows count once 12 have ended.                  |
-| `StatsRange`                                              | `.month`, `.quarter`, `.year`, `.lifetime`, and where each starts.                                                     |
+| Symbol                                                    | Does                                                                                                                                  |
+| :-------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------ |
+| `UsageStore(url:)`                                        | The SQLite file of facts ([ADR 0010](../adr/0010-the-usage-store.md)); throws only when a newer version wrote it.                     |
+| `insert(_:)`, `upsert(_:)`                                | Messages are ignored when their key is there; a reading keeps the highest percentage and the first and last time seen.                |
+| `modelTotals`, `readings`, `oldest`                       | What the statistics read.                                                                                                             |
+| `UsageIngestor(sources:store:overlap:)`                   | Puts what the sources see into the store; `ingest(now:)` returns how many messages and readings were seen.                            |
+| `UsageStats.stats(for:windows:families:store:range:now:)` | A provider's card: the windows that closed, whether the ceiling was hit, and the models by family.                                    |
+| `UsageStats.outcomes`, `breakdown`, `family`              | The same pieces, pure, for tests and other views. A window shorter than a day looks at the last 14 days.                              |
+| `UsageStore.oldestReading`, `ProviderStats.quotaSince`    | Since when the quota of a provider is kept: its first reading, later than `since`, the oldest message, when the logs go back further. |
+| `UsageStats.slots`, `days`                                | The blocks of a strip: one slot for each window of the range, empty where it was not seen; the last days in columns.                  |
+| `UsageStats.verdict`                                      | `wait`, `stay`, `moveUp` or `moveDown`, with its reason; the 5-hour windows count once 12 have ended.                                 |
+| `StatsRange`                                              | `.month`, `.quarter`, `.year`, `.lifetime`, and where each starts.                                                                    |
 
 The statistics are pure functions of the facts: the same facts give the same figures. A window with no reading is absent, never
 estimated.

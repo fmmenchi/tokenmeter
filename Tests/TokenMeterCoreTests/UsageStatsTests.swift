@@ -193,6 +193,7 @@ final class UsageStatsTests: XCTestCase {
         XCTAssertEqual(weekly.outcomes.map(\.usedSeen), [70, 20])
         XCTAssertEqual(stats.models.shown.map(\.name), ["Fable"], "the Opus message is older than the month")
         XCTAssertEqual(stats.since, now.addingTimeInterval(-60 * day))
+        XCTAssertEqual(stats.quotaSince, now.addingTimeInterval(-27 * day), "the quota is kept from its first reading, not from the oldest message")
     }
 
     func testAProviderWithNothingKeptSaysSo() throws {

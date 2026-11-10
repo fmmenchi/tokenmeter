@@ -109,13 +109,13 @@ private struct StatsCard: View {
                     if weeklyUnknown { WeeklyUnknownNotice() }
                 }
                 ForEach(windows, id: \.windowMinutes) {
-                    WindowStrip(stats: $0, range: range, since: stats.since, now: Date(), showsStrip: isExpanded)
+                    WindowStrip(stats: $0, range: range, since: stats.quotaSince ?? stats.since, quotaSince: stats.quotaSince,
+                                now: Date(), showsStrip: isExpanded)
                 }
                 if isExpanded {
                     ModelList(models: stats.models)
-                    if let since = stats.since {
-                        Text("Kept since \(since, format: .dateTime.month(.abbreviated).day().year())")
-                            .font(.caption2).captionColour()
+                    if let line = keptLine(stats) {
+                        Text(line).font(.caption2).captionColour().fixedSize(horizontal: false, vertical: true)
                     }
                 } else if let line = modelLine(stats.models) {
                     Text(line).font(.caption2).captionColour().lineLimit(1)
@@ -135,6 +135,19 @@ private struct StatsCard: View {
 }
 
 extension StatsCard {
+    /// What the card keeps, and since when. The tokens come from logs that go back further than the quota was ever recorded, so when
+    /// the two differ by more than a day the line says both, and a dashed block before the quota began is not read as a gap.
+    fileprivate func keptLine(_ stats: ProviderStats) -> String? {
+        let day = Date.FormatStyle().month(.abbreviated).day().year()
+        switch (stats.quotaSince, stats.since) {
+        case let (quota?, tokens?) where quota.timeIntervalSince(tokens) > 86_400:
+            return "The quota is kept since \(quota.formatted(day)), the tokens since \(tokens.formatted(day))"
+        case let (_, tokens?): return "Kept since \(tokens.formatted(day))"
+        case let (quota?, nil): return "The quota is kept since \(quota.formatted(day))"
+        default: return nil
+        }
+    }
+
     /// The closed card's line for the models: the first three and what is behind them, "Opus 77% · Sonnet 14% · Fable 9% · 2 more".
     fileprivate func modelLine(_ models: ModelBreakdown) -> String? {
         guard models.total > 0 else { return nil }

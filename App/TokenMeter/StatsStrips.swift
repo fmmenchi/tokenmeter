@@ -9,6 +9,8 @@ struct WindowStrip: View {
     let stats: WindowStats
     let range: StatsRange
     let since: Date?
+    /// Since when the quota of this provider is kept: a block that ends before it is a window nobody could have seen.
+    let quotaSince: Date?
     let now: Date
     let showsStrip: Bool
 
@@ -128,7 +130,9 @@ struct WindowStrip: View {
             .help(tip(outcome))
             .accessibilityElement().accessibilityLabel(tip(outcome))
         } else {
-            let text = "\(slot.endsAt.formatted(dayFormat)) · the app did not see this window"
+            let text = quotaSince.map { slot.endsAt < $0 } == true
+                ? "\(slot.endsAt.formatted(dayFormat)) · before the quota was kept, since \(quotaSince!.formatted(dayFormat))"
+                : "\(slot.endsAt.formatted(dayFormat)) · the app did not see this window"
             RoundedRectangle(cornerRadius: 3)
                 .strokeBorder(Color.secondary.opacity(0.6), style: StrokeStyle(lineWidth: 1, dash: [2, 2]))
                 .help(text)
