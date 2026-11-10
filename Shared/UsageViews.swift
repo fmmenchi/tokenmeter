@@ -276,9 +276,9 @@ struct ProviderBlock: View {
                 }
             }
             ForEach(snapshot.windows.filter { $0.window.scope == nil }, id: \.window.id) { window in
-                WindowRow(usage: window.resolved(at: now),
+                WindowRow(usage: snapshot.resolved(window, at: now),
                           models: snapshot.windows.filter { $0.window.scope != nil && $0.window.name == window.window.name }
-                              .map { $0.resolved(at: now) },
+                              .map { snapshot.resolved($0, at: now) },
                           showsPace: showsPace, showsRunOut: showsRunOut)
             }
         }
