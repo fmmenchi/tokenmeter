@@ -8,6 +8,12 @@ sidebar_position: 10
 
 What changed in each version, newest first. The update window shows the notes of the version it offers, taken from this page, and links here for the rest.
 
+## 0.11.2 {#v0-11-2}
+
+Released on 2026-11-10.
+
+- **A model's limit renews with its weekly window.** A limit for one model that was exhausted, such as Fable at 100%, stayed at 100% after the weekly had started again, until **Open /usage** was used: nothing had replaced its last reading. The limit is part of the weekly and resets with it, so once the weekly is reported with its new reset the model's line reads as reset too.
+
 ## 0.11.1 {#v0-11-1}
 
 Released on 2026-11-10.
