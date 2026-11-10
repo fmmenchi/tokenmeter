@@ -30,6 +30,12 @@ public struct WindowOutcome: Equatable, Sendable {
     public var hit: Bool { usedSeen >= 100 }
 }
 
+/// One block of the strip of a window of a day or longer: when its window ends, and how it ended when the app saw it end.
+public struct WindowSlot: Equatable, Sendable {
+    public let endsAt: Date
+    public let outcome: WindowOutcome?
+}
+
 public struct WindowStats: Equatable, Sendable {
     public let windowMinutes: Int
     /// The windows that closed, newest first, at most as many as the view has room for.
@@ -200,7 +206,7 @@ public enum UsageStats {
     /// app saw it end and nil where it did not. The newest slot is the latest boundary of the window before `now`; a window that
     /// ended a few minutes off its boundary is still the slot's. Empty when nothing was seen to end, because with no outcome there
     /// is no boundary to count from.
-    public static func slots(_ stats: WindowStats, range: StatsRange, since: Date?, now: Date) -> [WindowOutcome?] {
+    public static func slots(_ stats: WindowStats, range: StatsRange, since: Date?, now: Date) -> [WindowSlot] {
         guard stats.windowMinutes >= shortWindow, let newest = stats.outcomes.first else { return [] }
         let length = TimeInterval(stats.windowMinutes) * 60
         let anchor = newest.resetsAt.addingTimeInterval((now.timeIntervalSince(newest.resetsAt) / length).rounded(.down) * length)
@@ -213,13 +219,13 @@ public enum UsageStats {
             let kept = since.map { Int((now.timeIntervalSince($0) / length).rounded(.up)) } ?? stats.outcomes.count
             count = min(104, max(kept, stats.outcomes.count, 1))
         }
-        var slots = [WindowOutcome?](repeating: nil, count: count)
+        var seen = [WindowOutcome?](repeating: nil, count: count)
         for outcome in stats.outcomes {
             let back = Int(((anchor.timeIntervalSince(outcome.resetsAt)) / length).rounded())
             let index = count - 1 - back
-            if slots.indices.contains(index), slots[index] == nil { slots[index] = outcome }
+            if seen.indices.contains(index), seen[index] == nil { seen[index] = outcome }
         }
-        return slots
+        return seen.enumerated().map { WindowSlot(endsAt: anchor.addingTimeInterval(-Double(count - 1 - $0.offset) * length), outcome: $0.element) }
     }
 
     /// The columns of the strip of a window shorter than a day: the last `count` days, oldest first, each with the windows that

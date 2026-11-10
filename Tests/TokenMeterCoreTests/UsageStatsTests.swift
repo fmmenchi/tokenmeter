@@ -88,8 +88,10 @@ final class UsageStatsTests: XCTestCase {
         let stats = WindowStats(windowMinutes: week, outcomes: outcomes, closed: 4, hits: 0, lastHit: nil, lowestLeft: 50, approximate: 0)
         let slots = UsageStats.slots(stats, range: .quarter, since: nil, now: now)
         XCTAssertEqual(slots.count, 13)
-        XCTAssertEqual(slots.indices.filter { slots[$0] != nil }, [8, 10, 11, 12],
+        XCTAssertEqual(slots.indices.filter { slots[$0].outcome != nil }, [8, 10, 11, 12],
                        "the newest is the latest boundary; 17 days and 5 minutes ago is still the slot of 17 days ago")
+        XCTAssertEqual(slots[12].endsAt, now.addingTimeInterval(-3 * day), "a slot knows when its window ends")
+        XCTAssertEqual(slots[11].endsAt, now.addingTimeInterval(-10 * day))
         XCTAssertEqual(UsageStats.slots(stats, range: .month, since: nil, now: now).count, 4)
         XCTAssertEqual(UsageStats.slots(stats, range: .year, since: nil, now: now).count, 52)
         XCTAssertEqual(UsageStats.slots(stats, range: .lifetime, since: now.addingTimeInterval(-30 * day), now: now).count, 5,
