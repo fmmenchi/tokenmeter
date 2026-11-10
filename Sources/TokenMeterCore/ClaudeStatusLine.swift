@@ -18,6 +18,14 @@ public enum ClaudeStatusLine {
         public static func `default`(home: URL = FileManager.default.homeDirectoryForCurrentUser) -> Account {
             Account(id: AccountTool.claudeCode.seedID, configDir: home.appendingPathComponent(".claude"))
         }
+
+        /// What `CLAUDE_CONFIG_DIR` must say when Claude Code runs for this account: nothing for the default folder, `~/.claude`,
+        /// the folder otherwise (ADR 0014). Claude Code reads `~/.claude.json`, where its login and onboarding are, only when the
+        /// variable is not set; set to `~/.claude` it reads `~/.claude/.claude.json`, another file, and starts its onboarding
+        /// as if it had never been used (seen on 2026-11-10 with Claude Code 2.1.322).
+        public func environmentConfigDir(home: URL = FileManager.default.homeDirectoryForCurrentUser) -> URL? {
+            configDir.standardizedFileURL == home.appendingPathComponent(".claude").standardizedFileURL ? nil : configDir
+        }
     }
 
     public enum Outcome: Equatable, Sendable {
