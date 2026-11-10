@@ -11,16 +11,16 @@ Several accounts of the same tool, a work one and a personal one, each with its 
 folder of Claude Code or of the Codex CLI, and a provider entry names it; everything the app already does for a provider, the
 quota, the plan, the history, the notices and the status line, it does for that folder.
 
-|        |            |
-| :----- | :--------- |
-| Date   | 2026-11-03 |
-| Status | in design  |
+|        |                         |
+| :----- | :---------------------- |
+| Date   | 2026-11-03              |
+| Status | implemented, 2026-11-04 |
 
 ## Intent
 
 Claude Code and the Codex CLI keep one login per configuration folder (`CLAUDE_CONFIG_DIR`, `CODEX_HOME`), and people with a
-work and a personal account already use two folders. Today tokenmeter reads one home for every provider, so the second account
-is invisible, and its status line and its `/usage` are never set up.
+work and a personal account already use two folders. Before 0.10.0, tokenmeter read one home for every provider, so a second
+account was invisible and its status line was not set up.
 
 The app does not learn a new concept: an account is a provider like the others, with its own id and title, which is what
 keeps the history, the preferences and the notices apart with no change to them. What the app adds is the folder an entry
@@ -32,7 +32,7 @@ accounts, a lock on the panel to arrange their cards, and a word, with a button,
 | Part                | Page                                                                                                  | Status   |
 | :------------------ | :---------------------------------------------------------------------------------------------------- | :------- |
 | Proposal            | [Proposal](./proposal.md)                                                                             | chosen   |
-| Implementation plan | [Plan](./plan.md)                                                                                     | written  |
+| Implementation plan | [Plan](./plan.md)                                                                                     | accepted |
 | Decisions           | [ADR 0014](../../adr/0014-accounts-and-the-home-of-a-provider.md), an account is an entry with a home | accepted |
 
 ## Related
