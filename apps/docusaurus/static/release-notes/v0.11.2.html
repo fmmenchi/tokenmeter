@@ -23,6 +23,7 @@
 <p>Released on 2026-11-10.</p>
 <ul><li><strong>A model's limit renews with its weekly window.</strong> A limit for one model that was exhausted, such as Fable at 100%, stayed at 100% after the weekly had started again, until <strong>Open /usage</strong> was used: nothing had replaced its last reading. The limit is part of the weekly and resets with it, so once the weekly is reported with its new reset the model's line reads as reset too.</li></ul>
 <ul><li><strong>Model limits refresh on their own again.</strong> Every 15 minutes and when you click refresh, tokenmeter asks Claude Code to run its own <code>/usage</code> in the background, as it did before 0.10.2: a newer Claude Code writes the limits again. It is never run twice in a minute, and a run that changes nothing says nothing. <strong>Open /usage</strong> stays, for when the background run cannot.</li></ul>
+<ul><li><strong>Open /usage no longer starts Claude Code's first-run setup.</strong> For the default account it named Claude Code's own folder, which made Claude Code read another file, with no login and no settings, and ask to set itself up again. The default account now runs Claude Code exactly as a terminal would, in the background and from the button.</li></ul>
 <p class="all"><a href="https://fmmenchi.github.io/tokenmeter/use/changelog">The whole changelog</a></p>
 </body>
 </html>

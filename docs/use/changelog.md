@@ -16,6 +16,8 @@ Released on 2026-11-10.
 
 - **Model limits refresh on their own again.** Every 15 minutes and when you click refresh, tokenmeter asks Claude Code to run its own `/usage` in the background, as it did before 0.10.2: a newer Claude Code writes the limits again. It is never run twice in a minute, and a run that changes nothing says nothing. **Open /usage** stays, for when the background run cannot.
 
+- **Open /usage no longer starts Claude Code's first-run setup.** For the default account it named Claude Code's own folder, which made Claude Code read another file, with no login and no settings, and ask to set itself up again. The default account now runs Claude Code exactly as a terminal would, in the background and from the button.
+
 ## 0.11.1 {#v0-11-1}
 
 Released on 2026-11-10.
