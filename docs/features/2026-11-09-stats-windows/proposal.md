@@ -14,7 +14,7 @@ stays. **Every number in the images is a sample**, from a Max plan that has both
 | Surface               | What it shows                                                                                                                                                                             |
 | :-------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Stats card, open      | Two strips in place of the rows: the **5 hours** over the last 14 days, one block per window, stacked by day; the **weekly** over the range, one block per week. Time runs left to right. |
-| A block               | Green when plenty was left, orange under 30% left, red when the ceiling was reached. A weekly block is filled as a bar is. The figure is in the system's tooltip.                         |
+| A block               | The colour a bar of what was left would have: green when plenty was left, orange under 40%, red under 15%. A weekly block is filled as a bar is. The figure is in the system's tooltip.   |
 | A week not seen       | A dashed block, never a block drawn as if nothing had been used.                                                                                                                          |
 | The summary line      | `hit the ceiling 6 of 33 · last Nov 7` above the 5-hour strip, `never reached the ceiling in 4` above the weekly one.                                                                     |
 | The verdict           | Counts the 5-hour windows as well as the weekly ones, and gains a word: Move up.                                                                                                          |
@@ -48,7 +48,7 @@ the four verdict boxes. The text of both pages is a draft.
   line under the strip, the figure under the lowest block, the tooltip, the strip with the rows on request, only the fill of small bars,
   and the digits under the blocks. The tooltip was chosen: it takes no space and no state, and it is the weakest one at being found.
 - **The tooltip follows Show on the bars**, as the rows do today: `18% left` or `82% used`. The colour of a block follows what is left,
-  as the bars do.
+  as the bars do: the threshold of 30% in the images was a draft, the app uses the bars' own.
 - **The 5-hour strip is the last 14 days**, whatever the range. The weekly strip is the range, 13 blocks for 3 months.
 - **A window the app did not see is dashed.** It was seen only from the day the app first ran this version.
 - **The rows of today go**, the 5-hour ones that were never shown and the weekly ones that were. What they said is in the tooltip.
