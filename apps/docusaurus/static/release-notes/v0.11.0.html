@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>tokenmeter 0.11.0</title>
+<style>
+  /* Colours are given for both appearances: the web view of the update window does not always follow the system on its own. */
+  :root { color-scheme: light dark; --text: #1d1d1f; --back: #ffffff; --link: #0a60d6; --code: rgba(0, 0, 0, 0.07); }
+  @media (prefers-color-scheme: dark) { :root { --text: #f5f5f7; --back: #1e1e1e; --link: #4da3ff; --code: rgba(255, 255, 255, 0.14); } }
+  html { background: var(--back); }
+  body { font: 13px/1.5 -apple-system, "SF Pro", system-ui, sans-serif; margin: 0; padding: 16px 20px 24px; color: var(--text); background: var(--back); }
+  h1 { font-size: 17px; margin: 0 0 8px; }
+  p, li { margin: 0 0 8px; }
+  ul { padding-left: 20px; margin: 0 0 8px; }
+  code { font: 12px ui-monospace, "SF Mono", monospace; padding: 1px 4px; border-radius: 4px; background: var(--code); }
+  a { color: var(--link); }
+  .all { margin-top: 12px; }
+</style>
+</head>
+<body>
+<h1>tokenmeter 0.11.0</h1>
+<p>Released on 2026-11-09.</p>
+<ul><li><strong>The stats draw every window as a strip of blocks</strong>, with time running from left to right: the 5 hours over the last 14 days, a column for each day with a block for each window, and the weekly as one block for each week of the range, filled as a bar is. A dashed block is a window the app did not see. Point at a block for its date and its figure, in the reading chosen with <strong>Show on the bars</strong> (<a href="https://fmmenchi.github.io/tokenmeter/use/stats">Stats</a>).</li><li><strong>The 5-hour windows count in the verdict.</strong> A window shorter than a day looks at the last 14 days and needs 12 of them before it counts.</li><li><strong>The verdict can say Move up</strong>: the ceiling was reached at least twice and in at least 15% of the windows. It says the plan is tight; it does not say which plan to take.</li><li><strong>A notice says when the weekly limit is not known yet</strong>, and that the verdict is then drawn from the 5 hours alone.</li><li><strong>The welcome's pages on the stats and on the suggestion</strong> describe the strips and the four words (<a href="https://fmmenchi.github.io/tokenmeter/use/welcome">The welcome</a>).</li></ul>
+<p class="all"><a href="https://fmmenchi.github.io/tokenmeter/use/changelog">The whole changelog</a></p>
+</body>
+</html>

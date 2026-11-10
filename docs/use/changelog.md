@@ -8,6 +8,16 @@ sidebar_position: 10
 
 What changed in each version, newest first. The update window shows the notes of the version it offers, taken from this page, and links here for the rest.
 
+## 0.11.0 {#v0-11-0}
+
+Released on 2026-11-09.
+
+- **The stats draw every window as a strip of blocks**, with time running from left to right: the 5 hours over the last 14 days, a column for each day with a block for each window, and the weekly as one block for each week of the range, filled as a bar is. A dashed block is a window the app did not see. Point at a block for its date and its figure, in the reading chosen with **Show on the bars** ([Stats](./stats.md)).
+- **The 5-hour windows count in the verdict.** A window shorter than a day looks at the last 14 days and needs 12 of them before it counts.
+- **The verdict can say Move up**: the ceiling was reached at least twice and in at least 15% of the windows. It says the plan is tight; it does not say which plan to take.
+- **A notice says when the weekly limit is not known yet**, and that the verdict is then drawn from the 5 hours alone.
+- **The welcome's pages on the stats and on the suggestion** describe the strips and the four words ([The welcome](./welcome.md)).
+
 ## 0.10.2 {#v0-10-2}
 
 Released on 2026-11-08.
