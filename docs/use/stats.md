@@ -32,7 +32,8 @@ card of its own, and counts as one of them: open, the models under their provide
 ### The verdict
 
 A word at the top of an open card, from percentages only. It counts the 5-hour windows as well as the weekly ones: a window length
-counts once it has ended **4 times** in the range, or **12 times** for a window shorter than a day.
+counts once it has ended **4 times** in the range, or **12 times** for a window shorter than a day. A window **reached the ceiling**
+when the app saw it at **95% used** or more: a reading is a sample, and at 95% the plan is already rationed.
 
 | Word          | When                                                                                                                                                                  |
 | :------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -42,7 +43,7 @@ counts once it has ended **4 times** in the range, or **12 times** for a window 
 | **Move down** | The ceiling was never reached, every reading was seen near the end of its window and the lowest margin was 60% left or more.                                          |
 
 Move up says the ceiling is reached often. It does not say which plan to take, because the size of the other plans is not known, and
-it never looks at tokens. The counts, the 15% and the 60% are a choice and not a measurement.
+it never looks at tokens. The counts, the 95%, the 15% and the 60% are a choice and not a measurement.
 
 When the weekly limit is not known yet, as Claude's is before the first reply of a session, a notice under the verdict says so: the
 verdict is drawn from the 5 hours alone and may change when the weekly figure arrives.
@@ -59,8 +60,8 @@ running from left to right:
 | The colour of a block                                                | The colour a bar of what was left would have: green when there was plenty, orange under 40% and red under 15%. A window that reached the ceiling keeps a sliver when the bar would be empty.              |
 | A block at half strength                                             | The last reading was a good while before the window ended, so it may have ended with less.                                                                                                                |
 | The tooltip of a block                                               | Point at a block for its date and **at most** what was left, the highest use the app saw in it: `Nov 5, 3:00 PM · 0% left`. With [Show on the bars](./bars.md#left-or-used) on Used it reads `100% used`. |
-| `hit the ceiling 1 of 4 · last Oct 27`                               | In how many of the windows in the strip the ceiling was reached (100%), and when it last was.                                                                                                             |
-| `never reached the ceiling in 4`                                     | The windows the app saw, none of which went to 100%.                                                                                                                                                      |
+| `reached 95% 1 of 4 · last Oct 27`                                   | In how many of the windows in the strip the ceiling was reached (95% used or more), and when it last was.                                                                                                 |
+| `never reached 95% in 4`                                             | The windows the app saw, none of which went to 95%.                                                                                                                                                       |
 | `The quota is kept since Nov 2, 2026, the tokens since Jul 10, 2026` | The tokens come from logs that go back months; the quota only from the first time the app read it. A dashed block before that date says so in its tooltip: nobody could have seen that window.            |
 | `not observed`                                                       | The app saw no window of that length end. Nothing is made up for the gap.                                                                                                                                 |
 
