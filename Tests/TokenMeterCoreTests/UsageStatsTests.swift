@@ -54,10 +54,11 @@ final class UsageStatsTests: XCTestCase {
         XCTAssertEqual(count(.lifetime), 14)
     }
 
-    func testTheCeilingIsHitAtAHundredAndNotBefore() {
-        let readings = [reading(resetsDaysAgo: 1, percent: 100), reading(resetsDaysAgo: 8, percent: 97)]
+    func testTheCeilingIsHitAtNinetyFiveAndNotBefore() {
+        let readings = [reading(resetsDaysAgo: 1, percent: 100), reading(resetsDaysAgo: 8, percent: 99),
+                        reading(resetsDaysAgo: 15, percent: 95), reading(resetsDaysAgo: 22, percent: 94.9)]
         let outcomes = UsageStats.outcomes(readings, windowMinutes: week, now: now, range: .lifetime, calendar: calendar)
-        XCTAssertEqual(outcomes.map(\.hit), [true, false])
+        XCTAssertEqual(outcomes.map(\.hit), [true, true, true, false], "a week left at 99% was rationed, not free")
     }
 
     func testAReadingSeenLongBeforeTheEndMayHaveEndedHigher() {

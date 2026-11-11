@@ -26,8 +26,9 @@ public struct WindowOutcome: Equatable, Sendable {
 
     /// At most this much was left at the end.
     public var leftAtMost: Double { max(0, 100 - usedSeen) }
-    /// The ceiling was reached. Missing it is possible; inventing it is not.
-    public var hit: Bool { usedSeen >= 100 }
+    /// The ceiling was reached, or near enough: at `UsageStats.ceilingUsed` the plan is already rationed, and a reading is a
+    /// sample, so the window most likely went higher. Missing it is possible; inventing it is not.
+    public var hit: Bool { usedSeen >= UsageStats.ceilingUsed }
 }
 
 /// One block of the strip of a window of a day or longer: when its window ends, and how it ended when the app saw it end.
@@ -133,6 +134,8 @@ public enum UsageStats {
     public static let shortWindowsNeeded = 12
     /// The margin, in percent left, below which no window went for a card to say it could move down.
     public static let marginForMoveDown = 60.0
+    /// The percentage used from which a window counts as having reached the ceiling. A choice, not a measurement.
+    public static let ceilingUsed = 95.0
     /// The ceiling must have been reached at least this many times, and in at least `moveUpShare` of the windows, for Move up.
     public static let moveUpHits = 2
     public static let moveUpShare = 0.15
