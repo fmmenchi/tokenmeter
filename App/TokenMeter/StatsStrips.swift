@@ -3,8 +3,10 @@ import TokenMeterCore
 
 /// A window as a strip of blocks, time running left to right (the stats). Closed, a card shows only the line above it; open, the
 /// strip: one block for each window that ended, stacked by day for a window shorter than a day and one for each week of the range
-/// for a longer one. The figure of a block is in its tooltip, in the reading chosen for the bars, and every block has a label for
-/// VoiceOver. A block of a window the app did not see is dashed: nothing is made up for the gap.
+/// for a longer one. The figure of a block is in the reading chosen for the bars: written under each weekly block while there is
+/// room (up to 13), otherwise in a label of the app's own that shows as soon as the pointer is on the block, because the system's
+/// tooltip comes too late. Every block has a label for VoiceOver. A block of a window the app did not see is dashed: nothing is made
+/// up for the gap.
 struct WindowStrip: View {
     let stats: WindowStats
     let range: StatsRange
@@ -16,6 +18,19 @@ struct WindowStrip: View {
 
     @Environment(\.skinStyle) private var skin
     @Environment(\.barsDisplay) private var display
+    /// The block under the pointer, with its text and where it is across the strip (0 to 1).
+    @State private var hovered: Hovered?
+
+    private struct Hovered: Equatable {
+        let id: String
+        let text: String
+        let position: Double
+    }
+
+    /// Up to this many weekly blocks, each has its figure written under it; past it, the label on pointing.
+    static let figuresUpTo = 13
+    /// Up to this many, the written figure keeps its percent sign; past it, the number alone fits a block.
+    static let percentSignUpTo = 4
 
     private var label: String { WindowSpec(name: stats.name, duration: 0).label }
     private var ceiling: String { "\(Int(UsageStats.ceilingUsed))%" }
@@ -50,7 +65,7 @@ struct WindowStrip: View {
             let days = UsageStats.days(stats.outcomes, now: now)
             if days.contains(where: { !$0.isEmpty }) {
                 VStack(alignment: .leading, spacing: 2) {
-                    dayColumns(days)
+                    dayColumns(days).overlay { hoverLabel }
                     ends(Calendar.current.date(byAdding: .day, value: -(days.count - 1), to: now) ?? now, now)
                 }
                 .accessibilityElement(children: .contain)
@@ -58,12 +73,16 @@ struct WindowStrip: View {
         } else {
             let slots = UsageStats.slots(stats, range: range, since: since, now: now)
             if let first = slots.first, let last = slots.last {
+                let written = slots.count <= Self.figuresUpTo
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 2) {
-                        ForEach(Array(slots.enumerated()), id: \.offset) { _, slot in
-                            block(slot).frame(maxWidth: .infinity).frame(height: 28)
+                        ForEach(Array(slots.enumerated()), id: \.offset) { index, slot in
+                            block(slot, position: (Double(index) + 0.5) / Double(slots.count), hovers: !written)
+                                .frame(maxWidth: .infinity).frame(height: 28)
                         }
                     }
+                    .overlay { hoverLabel }
+                    if written { figures(slots) }
                     ends(first.endsAt, last.endsAt)
                 }
                 .accessibilityElement(children: .contain)
@@ -93,9 +112,59 @@ struct WindowStrip: View {
         return outcome.approximate ? "\(when) · ~\(figure), seen long before its end" : "\(when) · \(figure)"
     }
 
+    /// The figure of each weekly block, under it: the number in the reading chosen, `–` for a week the app did not see.
+    private func figures(_ slots: [WindowSlot]) -> some View {
+        HStack(spacing: 2) {
+            ForEach(Array(slots.enumerated()), id: \.offset) { _, slot in
+                Group {
+                    if let outcome = slot.outcome {
+                        let percent = display.percent(remaining: outcome.leftAtMost / 100)
+                        let sign = slots.count <= Self.percentSignUpTo ? "%" : ""
+                        Text("\(outcome.approximate ? "~" : "")\(percent)\(sign)").font(.caption2.weight(.bold)).monospacedDigit()
+                    } else {
+                        Text("–").font(.caption2).captionColour()
+                    }
+                }
+                .lineLimit(1)
+                .frame(maxWidth: .infinity)
+            }
+        }
+        .accessibilityHidden(true)
+    }
+
+    /// The label of the block under the pointer, over the strip and kept inside its width.
+    @ViewBuilder private var hoverLabel: some View {
+        if let hovered {
+            GeometryReader { proxy in
+                let width = proxy.size.width
+                let position = hovered.position
+                StripLabel(text: hovered.text)
+                    .fixedSize()
+                    .alignmentGuide(.leading) { size in
+                        -min(max(position * width - size.width / 2, 0), max(width - size.width, 0))
+                    }
+                    .alignmentGuide(.top) { size in size.height + 4 }
+                    .frame(width: width, height: proxy.size.height, alignment: .topLeading)
+            }
+            .allowsHitTesting(false)
+        }
+    }
+
+    /// Shows the label while the pointer is on the block, and rings it.
+    private func pointing<Shape: InsettableShape>(_ id: String, _ text: String, at position: Double, in shape: Shape,
+                                                  enabled: Bool = true) -> some ViewModifier {
+        PointingModifier(isOn: hovered?.id == id, shape: shape, enabled: enabled) { inside in
+            if inside {
+                hovered = Hovered(id: id, text: text, position: position)
+            } else if hovered?.id == id {
+                hovered = nil
+            }
+        }
+    }
+
     private func dayColumns(_ days: [[WindowOutcome]]) -> some View {
         HStack(alignment: .bottom, spacing: 2) {
-            ForEach(Array(days.enumerated()), id: \.offset) { _, day in
+            ForEach(Array(days.enumerated()), id: \.offset) { index, day in
                 VStack(spacing: 2) {
                     if day.isEmpty {
                         Capsule().fill(Color.secondary.opacity(0.25)).frame(height: 2)
@@ -104,7 +173,8 @@ struct WindowStrip: View {
                         ForEach(day.reversed(), id: \.resetsAt) { outcome in
                             RoundedRectangle(cornerRadius: 2).fill(tint(outcome)).opacity(outcome.approximate ? 0.55 : 1)
                                 .frame(height: 8)
-                                .help(tip(outcome))
+                                .modifier(pointing("5h-\(outcome.resetsAt.timeIntervalSince1970)", tip(outcome),
+                                                   at: (Double(index) + 0.5) / Double(days.count), in: RoundedRectangle(cornerRadius: 2)))
                                 .accessibilityElement().accessibilityLabel(tip(outcome))
                         }
                     }
@@ -115,7 +185,7 @@ struct WindowStrip: View {
         .frame(height: 48, alignment: .bottom)
     }
 
-    @ViewBuilder private func block(_ slot: WindowSlot) -> some View {
+    @ViewBuilder private func block(_ slot: WindowSlot, position: Double, hovers: Bool) -> some View {
         if let outcome = slot.outcome {
             // Filled as a bar is, in the reading chosen; a window that reached the ceiling keeps a sliver when a bar of what is
             // left would be empty, so the most important case is never an empty block.
@@ -128,7 +198,8 @@ struct WindowStrip: View {
                 }
             }
             .clipShape(RoundedRectangle(cornerRadius: 3))
-            .help(tip(outcome))
+            .modifier(pointing("w-\(slot.endsAt.timeIntervalSince1970)", tip(outcome), at: position,
+                               in: RoundedRectangle(cornerRadius: 3), enabled: hovers))
             .accessibilityElement().accessibilityLabel(tip(outcome))
         } else {
             let text = quotaSince.map { slot.endsAt < $0 } == true
@@ -136,9 +207,46 @@ struct WindowStrip: View {
                 : "\(slot.endsAt.formatted(dayFormat)) · the app did not see this window"
             RoundedRectangle(cornerRadius: 3)
                 .strokeBorder(Color.secondary.opacity(0.6), style: StrokeStyle(lineWidth: 1, dash: [2, 2]))
-                .help(text)
+                .modifier(pointing("w-\(slot.endsAt.timeIntervalSince1970)", text, at: position,
+                                   in: RoundedRectangle(cornerRadius: 3), enabled: hovers))
                 .accessibilityElement().accessibilityLabel(text)
         }
+    }
+}
+
+/// Rings a block while the pointer is on it and reports when it enters and leaves. Off, it does nothing: the block's figure is
+/// written under it.
+private struct PointingModifier<Ring: InsettableShape>: ViewModifier {
+    let isOn: Bool
+    let shape: Ring
+    let enabled: Bool
+    let onHover: (Bool) -> Void
+
+    func body(content: Content) -> some View {
+        if enabled {
+            content
+                .overlay(shape.strokeBorder(Color.primary, lineWidth: 1.5).opacity(isOn ? 1 : 0))
+                .onHover(perform: onHover)
+        } else {
+            content
+        }
+    }
+}
+
+/// The figure of the block under the pointer, drawn by the app so it shows at once: the system's tooltip waits a second or more.
+private struct StripLabel: View {
+    let text: String
+    @Environment(\.skinStyle) private var skin
+
+    var body: some View {
+        Text(text)
+            .font(.caption2.weight(.semibold))
+            .foregroundStyle(skin?.text ?? Color.primary)
+            .padding(.horizontal, 7)
+            .padding(.vertical, 3)
+            .background(RoundedRectangle(cornerRadius: 6).fill(skin?.panel ?? Color(nsColor: .windowBackgroundColor)))
+            .overlay(RoundedRectangle(cornerRadius: 6).stroke(skin?.border ?? Color.primary.opacity(0.1), lineWidth: 1))
+            .shadow(color: .black.opacity(0.25), radius: 4, y: 2)
     }
 }
 
