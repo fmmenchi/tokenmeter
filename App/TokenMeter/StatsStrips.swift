@@ -25,6 +25,8 @@ struct WindowStrip: View {
         let id: String
         let text: String
         let position: Double
+        /// How far the top of the block is from the bottom of the strip, in points: the label sits just above it.
+        let rise: Double?
     }
 
     /// Up to this many weekly blocks, each has its figure written under it; past it, the label on pointing.
@@ -138,12 +140,15 @@ struct WindowStrip: View {
             GeometryReader { proxy in
                 let width = proxy.size.width
                 let position = hovered.position
+                let height = proxy.size.height
+                let rise = hovered.rise ?? height
+                // As wide as its text, at most the strip: a long text wraps instead of leaving the panel.
                 StripLabel(text: hovered.text)
-                    .fixedSize()
+                    .fixedSize(horizontal: false, vertical: true)
                     .alignmentGuide(.leading) { size in
                         -min(max(position * width - size.width / 2, 0), max(width - size.width, 0))
                     }
-                    .alignmentGuide(.top) { size in size.height + 4 }
+                    .alignmentGuide(.top) { size in size.height + 4 + rise - height }
                     .frame(width: width, height: proxy.size.height, alignment: .topLeading)
             }
             .allowsHitTesting(false)
@@ -151,11 +156,11 @@ struct WindowStrip: View {
     }
 
     /// Shows the label while the pointer is on the block, and rings it.
-    private func pointing<Shape: InsettableShape>(_ id: String, _ text: String, at position: Double, in shape: Shape,
-                                                  enabled: Bool = true) -> some ViewModifier {
+    private func pointing<Shape: InsettableShape>(_ id: String, _ text: String, at position: Double, rise: Double? = nil,
+                                                  in shape: Shape, enabled: Bool = true) -> some ViewModifier {
         PointingModifier(isOn: hovered?.id == id, shape: shape, enabled: enabled) { inside in
             if inside {
-                hovered = Hovered(id: id, text: text, position: position)
+                hovered = Hovered(id: id, text: text, position: position, rise: rise)
             } else if hovered?.id == id {
                 hovered = nil
             }
@@ -170,11 +175,14 @@ struct WindowStrip: View {
                         Capsule().fill(Color.secondary.opacity(0.25)).frame(height: 2)
                     } else {
                         // Newest on top, so the oldest window of the day is the one at the bottom.
-                        ForEach(day.reversed(), id: \.resetsAt) { outcome in
+                        ForEach(Array(day.reversed().enumerated()), id: \.element.resetsAt) { row, outcome in
+                            // Blocks are 8 tall with 2 between them; the first of the day is at the bottom.
+                            let level = day.count - 1 - row
                             RoundedRectangle(cornerRadius: 2).fill(tint(outcome)).opacity(outcome.approximate ? 0.55 : 1)
                                 .frame(height: 8)
                                 .modifier(pointing("5h-\(outcome.resetsAt.timeIntervalSince1970)", tip(outcome),
-                                                   at: (Double(index) + 0.5) / Double(days.count), in: RoundedRectangle(cornerRadius: 2)))
+                                                   at: (Double(index) + 0.5) / Double(days.count), rise: Double(level * 10 + 8),
+                                                   in: RoundedRectangle(cornerRadius: 2)))
                                 .accessibilityElement().accessibilityLabel(tip(outcome))
                         }
                     }
