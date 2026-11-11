@@ -245,14 +245,16 @@ struct VerdictBox: View {
         }
     }
 
+    private var ceiling: String { "\(Int(UsageStats.ceilingUsed))%" }
+
     private var headline: String {
         switch verdict.reason {
         case .fewWindows(let window, let seen, let needed):
             window.map { "\(seen) of \(needed) \(label($0)) windows seen, so there is no verdict yet." }
                 ?? "No window has been seen to end, so there is no verdict yet."
-        case .tightPlan(let window, let hits, let closed): "You hit the \(label(window)) ceiling in \(hits) of \(closed) windows."
-        case .hitCeiling(let window, let hits, let closed): "You hit the ceiling in \(hits) of \(closed) of the \(label(window)) windows."
-        case .incompleteReadings(let window): "The ceiling was not reached, but some \(label(window)) windows were seen long before their end."
+        case .tightPlan(let window, let hits, let closed): "You reached \(ceiling) of the \(label(window)) quota in \(hits) of \(closed) windows."
+        case .hitCeiling(let window, let hits, let closed): "You reached \(ceiling) in \(hits) of \(closed) of the \(label(window)) windows."
+        case .incompleteReadings(let window): "No window reached \(ceiling), but some \(label(window)) windows were seen long before their end."
         case .littleMargin(let window, let left): display.littleMarginText(window: label(window), left: left)
         case .plentyOfMargin(let window, let left): display.plentyOfMarginText(window: label(window), left: left)
         }
