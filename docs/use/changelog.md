@@ -8,6 +8,14 @@ sidebar_position: 10
 
 What changed in each version, newest first. The update window shows the notes of the version it offers, taken from this page, and links here for the rest.
 
+## 0.12.0 {#v0-12-0}
+
+Released on 2026-11-11.
+
+- **A window counts as the ceiling from 95% used.** At 95% the plan is already rationed, and a reading is a sample, so the window most likely went higher. A week seen at 99% no longer reads as never at the ceiling, and **Move up** can be said without a window at exactly 100%. The stats now say `reached 95%` in place of `hit the ceiling` ([Stats](./stats.md)).
+- **The weekly strip writes its figures under the blocks**: with `%` up to 4 weeks, the number alone up to 13, `~` for a week read early and `–` for one the app did not see.
+- **A block shows its date and figure at once.** Pointing at a block of a strip opens a label of the app's own just above it, in place of the system's tooltip, which came late; a window read early ends in `(approx)`.
+
 ## 0.11.3 {#v0-11-3}
 
 Released on 2026-11-10.
