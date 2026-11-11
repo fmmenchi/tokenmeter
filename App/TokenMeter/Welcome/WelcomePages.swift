@@ -64,7 +64,7 @@ extension WelcomeState.Page {
         case .stats:
             "The chart in the panel switches to the stats. Pick a period at the top: each provider's card shows its windows as strips, one block for each window: green when plenty was left, orange when little, red when the ceiling was reached. Point at a block for its figure; a dashed one is a window the app did not see. The goal is to see whether your plan fits the way you use it. The tokens are only those this Mac counted."
         case .suggestion:
-            "The word at the top of a provider's card is the app's suggestion: Wait, Stay, Move up or Move down. It comes from the quota percentages only, the 5-hour windows and the weekly ones, and never looks at tokens. Move up says the ceiling is reached often; it does not say which plan to take."
+            "The word at the top of a provider's card is the app's suggestion: Wait, Stay, Move up or Move down. It comes from the quota percentages only, the 5-hour windows and the weekly ones, and never looks at tokens. Move up says 95% is reached often; it does not say which plan to take."
         case .accounts:
             "A work account and a personal one? Each is a folder that Claude Code or the Codex CLI reads. Name it in providers.json and it gets a card of its own, with its own bars and history. When a folder nobody named is found, the panel says so, and Add it gives it a card."
         case .settings:

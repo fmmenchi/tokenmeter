@@ -18,6 +18,7 @@ struct WindowStrip: View {
     @Environment(\.barsDisplay) private var display
 
     private var label: String { WindowSpec(name: stats.name, duration: 0).label }
+    private var ceiling: String { "\(Int(UsageStats.ceilingUsed))%" }
     private var isShort: Bool { stats.windowMinutes < UsageStats.shortWindow }
     private let dayFormat = Date.FormatStyle().month(.abbreviated).day()
 
@@ -37,10 +38,10 @@ struct WindowStrip: View {
             Text("not observed").font(.caption2).captionColour()
         } else if stats.hits > 0 {
             let last = stats.lastHit.map { " · last \($0.formatted(dayFormat))" } ?? ""
-            Text("hit the ceiling \(stats.hits) of \(stats.closed)\(last)").font(.caption2.weight(.semibold))
+            Text("reached \(ceiling) \(stats.hits) of \(stats.closed)\(last)").font(.caption2.weight(.semibold))
                 .foregroundStyle(skin?.middle ?? Color.orange)
         } else {
-            Text("never reached the ceiling in \(stats.closed)").font(.caption2).captionColour()
+            Text("never reached \(ceiling) in \(stats.closed)").font(.caption2).captionColour()
         }
     }
 
