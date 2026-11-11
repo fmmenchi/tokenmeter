@@ -111,7 +111,7 @@ struct WindowStrip: View {
         let when = isShort ? outcome.resetsAt.formatted(.dateTime.month(.abbreviated).day().hour().minute())
             : outcome.resetsAt.formatted(dayFormat)
         let figure = display.figure(remaining: outcome.leftAtMost / 100)
-        return outcome.approximate ? "\(when) · ~\(figure), seen long before its end" : "\(when) · \(figure)"
+        return outcome.approximate ? "\(when) · \(figure) (approx)" : "\(when) · \(figure)"
     }
 
     /// The figure of each weekly block, under it: the number in the reading chosen, `–` for a week the app did not see.
