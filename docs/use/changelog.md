@@ -8,6 +8,12 @@ sidebar_position: 10
 
 What changed in each version, newest first. The update window shows the notes of the version it offers, taken from this page, and links here for the rest.
 
+## 0.13.0 {#v0-13-0}
+
+Released on 2026-11-11.
+
+- **The weekly strip lines up under the 5 hours.** It is as tall as the 5-hour strip and never has fewer than 14 blocks, one under each day: 14 for a month or 3 months, 52 for a year, as many as fit for everything ([Stats](./stats.md)). Up to 14 blocks, each has its figure under it, the number alone; the count above the strip still follows the range.
+
 ## 0.12.0 {#v0-12-0}
 
 Released on 2026-11-11.
