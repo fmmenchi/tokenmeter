@@ -4,7 +4,7 @@ import TokenMeterCore
 /// A window as a strip of blocks, time running left to right (the stats). Closed, a card shows only the line above it; open, the
 /// strip: one block for each window that ended, stacked by day for a window shorter than a day and one for each week of the range
 /// for a longer one. The figure of a block is in the reading chosen for the bars: written under each weekly block while there is
-/// room (up to 13), otherwise in a label of the app's own that shows as soon as the pointer is on the block, because the system's
+/// room (up to 14, one under each day of the 5 hours), otherwise in a label of the app's own that shows as soon as the pointer is on the block, because the system's
 /// tooltip comes too late. Every block has a label for VoiceOver. A block of a window the app did not see is dashed: nothing is made
 /// up for the gap.
 struct WindowStrip: View {
@@ -29,10 +29,8 @@ struct WindowStrip: View {
         let rise: Double?
     }
 
-    /// Up to this many weekly blocks, each has its figure written under it; past it, the label on pointing.
-    static let figuresUpTo = 13
-    /// Up to this many, the written figure keeps its percent sign; past it, the number alone fits a block.
-    static let percentSignUpTo = 4
+    /// Up to this many weekly blocks, each has its figure written under it, the number alone; past it, the label on pointing.
+    static let figuresUpTo = UsageStats.minimumSlots
 
     private var label: String { WindowSpec(name: stats.name, duration: 0).label }
     private var ceiling: String { "\(Int(UsageStats.ceilingUsed))%" }
@@ -80,7 +78,7 @@ struct WindowStrip: View {
                     HStack(spacing: 2) {
                         ForEach(Array(slots.enumerated()), id: \.offset) { index, slot in
                             block(slot, position: (Double(index) + 0.5) / Double(slots.count), hovers: !written)
-                                .frame(maxWidth: .infinity).frame(height: 28)
+                                .frame(maxWidth: .infinity).frame(height: 48)
                         }
                     }
                     .overlay { hoverLabel }
@@ -121,8 +119,7 @@ struct WindowStrip: View {
                 Group {
                     if let outcome = slot.outcome {
                         let percent = display.percent(remaining: outcome.leftAtMost / 100)
-                        let sign = slots.count <= Self.percentSignUpTo ? "%" : ""
-                        Text("\(outcome.approximate ? "~" : "")\(percent)\(sign)").font(.caption2.weight(.bold)).monospacedDigit()
+                        Text("\(outcome.approximate ? "~" : "")\(percent)").font(.caption2.weight(.bold)).monospacedDigit()
                     } else {
                         Text("–").font(.caption2).captionColour()
                     }
