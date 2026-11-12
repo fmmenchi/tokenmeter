@@ -208,22 +208,25 @@ public enum UsageStats {
             }
     }
 
-    /// The blocks of the strip of a window of a day or longer, oldest first: one for each window of the range, the outcome where the
+    /// The blocks of the strip of a window of a day or longer, oldest first: one for each window of the range and never fewer than
+    /// `minimumSlots`, so the weekly lines up under the 14 days of the 5 hours; the outcome where the
     /// app saw it end and nil where it did not. The newest slot is the latest boundary of the window before `now`; a window that
     /// ended a few minutes off its boundary is still the slot's. Empty when nothing was seen to end, because with no outcome there
     /// is no boundary to count from.
+    /// The fewest blocks a weekly strip has: as many as the days of the 5-hour strip, one under each.
+    public static let minimumSlots = shortWindowDays
+
     public static func slots(_ stats: WindowStats, range: StatsRange, since: Date?, now: Date) -> [WindowSlot] {
         guard stats.windowMinutes >= shortWindow, let newest = stats.outcomes.first else { return [] }
         let length = TimeInterval(stats.windowMinutes) * 60
         let anchor = newest.resetsAt.addingTimeInterval((now.timeIntervalSince(newest.resetsAt) / length).rounded(.down) * length)
         let count: Int
         switch range {
-        case .month: count = 4
-        case .quarter: count = 13
+        case .month, .quarter: count = minimumSlots
         case .year: count = 52
         case .lifetime:
             let kept = since.map { Int((now.timeIntervalSince($0) / length).rounded(.up)) } ?? stats.outcomes.count
-            count = min(104, max(kept, stats.outcomes.count, 1))
+            count = min(104, max(kept, stats.outcomes.count, minimumSlots))
         }
         var seen = [WindowOutcome?](repeating: nil, count: count)
         for outcome in stats.outcomes {
