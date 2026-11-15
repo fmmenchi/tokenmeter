@@ -124,7 +124,9 @@ struct WindowStrip: View {
                         Text("–").font(.caption2).captionColour()
                     }
                 }
+                // 14 columns leave about 18pt each: "~34" or "100" shrink to fit instead of turning into an ellipsis.
                 .lineLimit(1)
+                .minimumScaleFactor(0.6)
                 .frame(maxWidth: .infinity)
             }
         }
