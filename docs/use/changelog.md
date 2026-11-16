@@ -8,6 +8,13 @@ sidebar_position: 10
 
 What changed in each version, newest first. The update window shows the notes of the version it offers, taken from this page, and links here for the rest.
 
+## 0.13.1 {#v0-13-1}
+
+Released on 2026-11-15.
+
+- **The stats show at once after a restart.** The history already kept is drawn straight away, and what is new in the logs is added when it has been read. Only the very first time, with nothing kept yet, the stats say they are reading the logs.
+- **The weekly figures are readable again.** The figures under the weekly blocks were drawn at their smallest size, even when they fitted; they are now as large as the dates under the strip.
+
 ## 0.13.0 {#v0-13-0}
 
 Released on 2026-11-11.
