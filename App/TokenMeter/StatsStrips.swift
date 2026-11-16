@@ -124,9 +124,9 @@ struct WindowStrip: View {
                         Text("–").font(.caption2).captionColour()
                     }
                 }
-                // 14 columns leave about 18pt each: "~34" or "100" shrink to fit instead of turning into an ellipsis.
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
+                // Written at its size, never shrunk: in the panel the shrink drew every figure at its smallest, even "79" that fits.
+                // A three-character figure ("~34", "100") is about as wide as its column and may reach into the 2pt gap.
+                .fixedSize()
                 .frame(maxWidth: .infinity)
             }
         }
