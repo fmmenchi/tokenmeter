@@ -222,7 +222,20 @@ final class Meter {
         isIngesting = true
         // The figures are worked out again when something new was read, and at least every ten minutes: a window ends with time.
         let due = statsByRange.isEmpty || Date().timeIntervalSince(lastStatsAt) > 600
+        let atLaunch = statsByRange.isEmpty
         Task(priority: .utility) {
+            // After a relaunch the history is already in the store: show it at once, before the pass that reads what is new
+            // (the last two days of logs, which can take a minute). Only a store never read waits, and says it reads once.
+            if atLaunch {
+                let kept = await Task.detached(priority: .utility) { () -> [StatsRange: [ProviderStats]]? in
+                    let readBefore = Providers.standard().contains { usageStore.lastIngest(provider: $0.info.provider) != nil }
+                    return readBefore ? Self.computeStats(store: usageStore) : nil
+                }.value
+                if let kept, statsByRange.isEmpty {
+                    statsByRange = kept
+                    lastStatsAt = Date()
+                }
+            }
             let computed = await Task.detached(priority: .utility) { () -> [StatsRange: [ProviderStats]]? in
                 let read = ingestor.ingest()
                 return read.messages > 0 || due ? Self.computeStats(store: usageStore) : nil
