@@ -8,6 +8,13 @@ sidebar_position: 10
 
 What changed in each version, newest first. The update window shows the notes of the version it offers, taken from this page, and links here for the rest.
 
+## 0.15.0 {#v0-15-0}
+
+Released on 2026-11-16.
+
+- **A week ending mostly unused is said.** In the last 2 days of a week that still has 50% or more, the Weekly bar has a line under it, `Most of the week is still unused`, and a fourth notice, **Plenty left near the reset**, can tell it once ([Notifications](./notifications.md)).
+- **The stats show a cost in dollars.** Next to each model's tokens, what they would cost at the provider's API list prices, cache included, and the total for the range: `≈ $1,240`. It is an estimate of the same use billed by the token, not what a plan costs; ChatGPT's models have no price yet ([Stats](./stats.md#the-cost)).
+
 ## 0.14.0 {#v0-14-0}
 
 Released on 2026-11-16.
