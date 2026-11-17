@@ -1,6 +1,6 @@
 # ADR 0017 — A command-line tool that reads what the app already keeps
 
-Status: proposed (2026-11-16)
+Status: accepted (2026-11-16)
 
 ## Context
 
