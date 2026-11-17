@@ -62,6 +62,7 @@ extension LimitNotice {
         let left = window.remainingFraction.map { display.figure(remaining: $0) }
         let pace = kind == .willRunOut ? window.runsOutShortText(at: Date()).map { "at this pace \($0)" } : nil
         let reset = window.resetText(at: Date()).map { "resets \($0)" }
-        return [left, pace, reset].compactMap { $0 }.joined(separator: " · ")
+        let unused = kind == .plentyLeft ? "most of the week is still unused" : nil
+        return [left, pace, reset, unused].compactMap { $0 }.joined(separator: " · ")
     }
 }

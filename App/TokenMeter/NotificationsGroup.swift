@@ -11,11 +11,12 @@ struct NotificationsGroup: View {
         (.almostOut, "Almost out", "Under 10% left."),
         (.runningLow, "Running low", "Under 30% left."),
         (.willRunOut, "Will run out before the reset", "At the current pace the quota will not last until the reset."),
+        (.plentyLeft, "Plenty left near the reset", "The weekly has 50% or more left with under 2 days to go."),
     ]
 
     var body: some View {
         Section {
-            Text("Tells you when a window is running out, once for each window and each reset. Only the windows you show.")
+            Text("Tells you when a window is running out, or a week ends mostly unused, once for each window and each reset. Only the windows you show.")
                 .font(.caption).foregroundStyle(.secondary)
             if meter.noticesBlocked { blockedRow }
             ForEach(Self.kinds, id: \.kind) { item in
