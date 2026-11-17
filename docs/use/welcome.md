@@ -12,7 +12,7 @@ A short wizard that says where tokenmeter lives and how to read its panel.
 
 ## When it opens
 
-It opens by itself **once**, the first time the app runs a version that has it: on a fresh install and on the first update alike. It
+It opens by itself **once**, the first time the app runs a version that has it: on a fresh install, or on the first update of a Mac that never saw it. An update after that shows what is new in a card of the panel instead ([Updates](./updates.md)). It
 counts as seen when you reach **Done**, press **Skip** or close its window. If you quit the app in the middle, it opens again at the next
 launch.
 

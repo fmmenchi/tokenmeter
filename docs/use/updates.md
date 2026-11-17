@@ -20,6 +20,9 @@ of the app, so it updates with it.
 - **Install** quits the app, replaces it, opens it again, and the app migrates what it keeps. Your settings and your history stay,
   and the stats are not read again from nothing.
 - **What's new** opens a clean page with the notes of that version, made from the [changelog](./changelog.md), which has the rest.
+- **After the update**, if it brought new features, a card at the top of the panel says how many since the version you had, with
+  their titles, **Dismiss** and **See what's new**, which lists them. Only features: an update of fixes alone shows nothing, and the
+  fixes are in the changelog. Settings › General has **Show what's new again**.
 
 ## Settings
 
