@@ -34,6 +34,14 @@ How the [proposal](./proposal.md) is built, under [ADR 0017](../../adr/0017-a-co
 The text of a window in left and in used; a window with no figure; the JSON's keys and its version; the age of a reading and the exit
 code at 9 and 11 minutes; the stats JSON with a cost, without one, and partial.
 
+## What changed while building
+
+- **The widget's snapshot cannot be read** by another process: macOS refuses the App Group container ("Operation not permitted"). The
+  app now writes a copy beside the usage store, and the command reads that.
+- **The store opens read-only** (`UsageStore.readOnly`): the usual opening makes the file, sets a damaged one aside and migrates it.
+- **The command is in `Contents/Helpers`**, not `Contents/MacOS`: on a disk that ignores case it would be the app's own executable.
+- **The install line uses `sudo`**: `/usr/local/bin` belongs to the system.
+
 ## To verify by hand
 
 `tokenmeter` from the installed app after a release: signed, notarized (`spctl`), on the `PATH` through the copied command, with the

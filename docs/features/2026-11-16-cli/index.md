@@ -9,10 +9,10 @@ date: 2026-11-16
 
 A `tokenmeter` command prints the quota and the stats in the terminal, as text or as JSON for scripts.
 
-|        |                                  |
-| :----- | :------------------------------- |
-| Date   | 2026-11-16                       |
-| Status | plan written, waiting for review |
+|        |                                    |
+| :----- | :--------------------------------- |
+| Date   | 2026-11-16                         |
+| Status | implemented, 2026-11-16, in 0.16.0 |
 
 ## Intent
 
@@ -24,5 +24,5 @@ local tools all print theirs. The app already keeps what a command needs; the co
 | Part                | Page                                              | Status   |
 | :------------------ | :------------------------------------------------ | :------- |
 | Proposal            | [Proposal](./proposal.md)                         | approved |
-| Implementation plan | [Plan](./plan.md)                                 | written  |
-| Decisions           | [ADR 0017](../../adr/0017-a-command-line-tool.md) | proposed |
+| Implementation plan | [Plan](./plan.md)                                 | built    |
+| Decisions           | [ADR 0017](../../adr/0017-a-command-line-tool.md) | accepted |
