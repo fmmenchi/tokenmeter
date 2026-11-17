@@ -24,8 +24,9 @@ everything such a command needs: the snapshot it writes for the widget ([ADR 000
 - **The JSON is a contract with a version** (`"version": 1`): fields are added, never renamed or removed, within a version.
 - **It reads the app's own preferences** (the left or used reading, ADR 0006) from the app's defaults domain, and `--left` / `--used`
   override them.
-- **Installing it on the `PATH` is the person's step**: Settings › General shows the path and a button that copies the `ln -s` command
-  into `/usr/local/bin`. The app never writes outside its container and asks for no administrator password.
+- **Installing it on the `PATH` is the person's step**: Settings › General has a row "Command line" whose button copies
+  `sudo mkdir -p /usr/local/bin && sudo ln -sf '<path>' /usr/local/bin/tokenmeter`, to paste in Terminal. The app runs nothing with
+  privileges and never writes outside its own folders; the link follows the app through its updates.
 
 ## Consequences
 
