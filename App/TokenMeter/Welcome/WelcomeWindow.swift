@@ -55,6 +55,8 @@ final class WelcomeWindow: NSObject, NSWindowDelegate {
 /// Opens the welcome at launch. The menu-bar item and the other scenes are untouched.
 final class TokenMeterDelegate: NSObject, NSApplicationDelegate {
     @MainActor func applicationDidFinishLaunching(_ notification: Notification) {
+        // Before the welcome marks itself seen: a first launch has nothing new to tell.
+        WhatsNew.shared.atLaunch(firstLaunch: !DefaultsWelcomeSeenStore().seen)
         WelcomeWindow.shared.showIfUnseen()
     }
 }
