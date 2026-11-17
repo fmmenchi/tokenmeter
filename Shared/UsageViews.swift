@@ -156,6 +156,10 @@ struct WindowRow: View {
                 ScopedWindowRow(usage: model, showsPace: showsPace).padding(.bottom, index == models.count - 1 ? -4 : 0)
             }
             detail
+            // The last two days of a week that still has half its quota or more: the rest would be wasted. The panel only.
+            if showsPace, usage.hasPlentyLeftNearReset(at: now) {
+                Text("Most of the week is still unused").font(.caption2.weight(.medium)).foregroundStyle(skin?.accent ?? .accentColor)
+            }
         }
     }
 

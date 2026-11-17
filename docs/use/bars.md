@@ -105,6 +105,8 @@ apps, and it does not match how the plans count.
 | Orange warning about the App Group          | No signing team: the widget cannot read the snapshot.                                                                                                          |
 | The row of icons                            | Refresh (re-reads now, with a spinner while it works), the chart that opens the [stats](./stats.md), Settings, and Quit. Each has a name that a pointer shows. |
 
+In the last 2 days of a week with 50% or more left, the Weekly bar has one more line under it, in the accent colour: `Most of the week is still unused`. It is gone at the reset, and the widget does not show it.
+
 The panel also refreshes by itself whenever it opens. Before the first reading it draws its cards empty, in grey and pulsing slowly (still with Reduce Motion), instead of a spinner. The menu-bar item itself is the gauge icon.
 
 ## Related

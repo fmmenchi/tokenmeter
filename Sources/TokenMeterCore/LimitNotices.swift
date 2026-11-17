@@ -8,6 +8,8 @@ public enum NoticeKind: String, CaseIterable, Codable, Sendable {
     case willRunOut
     /// Under 30% of the window is left.
     case runningLow
+    /// The weekly window still has most of its quota with under two days to go: the rest of the week would be wasted.
+    case plentyLeft
 }
 
 /// One notice that is due: what it is about, and the identifier under which it is told once.
@@ -56,6 +58,10 @@ public enum LimitNotices {
     public static let almostOutBelow = 0.10
     /// Under this share left, a window is running low.
     public static let runningLowBelow = 0.30
+    /// At or above this share left near its reset, a weekly window is mostly unused.
+    public static let plentyLeftAtLeast = 0.50
+    /// How close to its reset a weekly window must be for its quota left to count as unused.
+    public static let plentyLeftWithin: TimeInterval = 2 * 86_400
 
     public struct Outcome: Equatable, Sendable {
         public let notices: [LimitNotice]
@@ -94,10 +100,22 @@ public enum LimitNotices {
         if left < almostOutBelow { due.insert(.almostOut) }
         if left < runningLowBelow { due.insert(.runningLow) }
         if let pace = window.pace(at: now), !pace.isStale, pace.runsOut { due.insert(.willRunOut) }
+        if window.hasPlentyLeftNearReset(at: now) { due.insert(.plentyLeft) }
         return due
     }
 
     private static func identifier(_ provider: Provider, _ window: WindowUsage, _ resetsAt: Date, _ kind: NoticeKind) -> String {
         "\(provider.rawValue)|\(window.window.id)|\(Int(resetsAt.timeIntervalSince1970))|\(kind.rawValue)"
+    }
+}
+
+extension WindowUsage {
+    /// The weekly window, with a recent reported figure, has half its quota or more left and under two days before its reset. The panel
+    /// says so on the bar, and the notice `plentyLeft` tells it once. A model's limit and the 5 hours never count: the 5 hours reset
+    /// too often for it to matter.
+    public func hasPlentyLeftNearReset(at now: Date) -> Bool {
+        guard window.scope == nil, window.name == WindowSpec.week.name, source == .reported, let left = remainingFraction,
+              let resetsAt, resetsAt > now, let observedAt, now.timeIntervalSince(observedAt) <= WindowUsage.staleAfter else { return false }
+        return left >= LimitNotices.plentyLeftAtLeast && resetsAt.timeIntervalSince(now) < LimitNotices.plentyLeftWithin
     }
 }

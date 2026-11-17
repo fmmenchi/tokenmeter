@@ -6,21 +6,22 @@ sidebar_position: 8.5
 
 # Notifications
 
-tokenmeter can tell you with a notification when a window is running out, so you do not have to open the panel to find out. They
+tokenmeter can tell you with a notification when a window is running out, or when a week is ending with most of it unused, so you do not have to open the panel to find out. They
 are **off** until you turn them on.
 
-## The three notices
+## The four notices
 
 Turn each on by itself, in the tab **Notifications** of Settings:
 
-| Notice                            | It comes when                                                                  |
-| :-------------------------------- | :----------------------------------------------------------------------------- |
-| **Almost out**                    | Under 10% of a window is left.                                                 |
-| **Running low**                   | Under 30% of a window is left.                                                 |
-| **Will run out before the reset** | At the pace you have used it, the quota will not last until the window resets. |
+| Notice                            | It comes when                                                                                                                                                   |
+| :-------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Almost out**                    | Under 10% of a window is left.                                                                                                                                  |
+| **Running low**                   | Under 30% of a window is left.                                                                                                                                  |
+| **Will run out before the reset** | At the pace you have used it, the quota will not last until the window resets.                                                                                  |
+| **Plenty left near the reset**    | The weekly window has 50% or more left with under 2 days before it resets: the rest of the week would go unused. The 5 hours and a model's limit never send it. |
 
 A notification has the provider and the window as its title and one line under it: `Claude · Weekly`, then
-`9% left · resets in 2d 6h`; with [Show on the bars](./bars.md#left-or-used) on Used it is `91% used · resets in 2d 6h`. What makes a notice due is the same in both readings: under 10% and under 30% left. For a model's limit the title ends with the model: `Claude · Weekly · Fable`.
+`9% left · resets in 2d 6h`; with [Show on the bars](./bars.md#left-or-used) on Used it is `91% used · resets in 2d 6h`. What makes a notice due is the same in both readings: under 10% and under 30% left, 50% left or more. **Plenty left near the reset** ends with `most of the week is still unused`. For a model's limit the title ends with the model: `Claude · Weekly · Fable`.
 
 ## What it does and does not do
 
