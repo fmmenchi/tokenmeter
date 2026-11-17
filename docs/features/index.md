@@ -33,6 +33,7 @@ are [ADRs](../adr), and its overview links them.
 | [Bars: left or used](./2026-11-03-bars-display/index.md): a choice in Settings says whether the bars show what is left or used                                               | 2026-11-03 | [Overview](./2026-11-03-bars-display/index.md), [Proposal](./2026-11-03-bars-display/proposal.md), [Plan](./2026-11-03-bars-display/plan.md)                                        |
 | [Accounts](./2026-11-03-accounts/index.md): several accounts of the same tool, one folder and one card each                                                                  | 2026-11-04 | [Overview](./2026-11-03-accounts/index.md), [Proposal](./2026-11-03-accounts/proposal.md), [Implementation plan](./2026-11-03-accounts/plan.md)                                     |
 | [Stats, windows as strips](./2026-11-09-stats-windows/index.md): every window as a strip of blocks, the 5 hours counted in the verdict                                       | 2026-11-09 | [Overview](./2026-11-09-stats-windows/index.md), [Proposal](./2026-11-09-stats-windows/proposal.md), [Plan](./2026-11-09-stats-windows/plan.md)                                     |
+| [Loading skeleton](./2026-11-16-loading-skeleton/index.md): empty cards in the skin's grey in place of a spinner while the data arrives                                      | 2026-11-16 | [Overview](./2026-11-16-loading-skeleton/index.md), [Proposal](./2026-11-16-loading-skeleton/proposal.md), [Plan](./2026-11-16-loading-skeleton/plan.md)                            |
 
 ## In design and build
 
