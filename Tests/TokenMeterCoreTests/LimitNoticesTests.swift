@@ -148,4 +148,36 @@ final class LimitNoticesTests: XCTestCase {
         let data = try JSONEncoder().encode(outcome.ledger)
         XCTAssertEqual(try JSONDecoder().decode(NoticeLedger.self, from: data), outcome.ledger)
     }
+
+    // MARK: Plenty left near the reset
+
+    func testAWeeklyWithHalfLeftAndUnderTwoDaysToGoIsPlentyLeft() {
+        XCTAssertEqual(evaluate([weekly(left: 0.5, resetsIn: 2 * 86_400 - 60)]).notices.map(\.kind), [.plentyLeft])
+        XCTAssertEqual(evaluate([weekly(left: 0.9, resetsIn: 3600)]).notices.map(\.kind), [.plentyLeft])
+    }
+
+    func testPlentyLeftNeedsHalfLeftAndTheLastTwoDays() {
+        XCTAssertTrue(evaluate([weekly(left: 0.49, resetsIn: 3600)]).notices.isEmpty, "under half left")
+        XCTAssertTrue(evaluate([weekly(left: 0.8, resetsIn: 2 * 86_400)]).notices.isEmpty, "two days to go is not under two days")
+    }
+
+    func testPlentyLeftIsForTheWeeklyAloneNotTheFiveHoursNorAModelLimit() {
+        let start = now.addingTimeInterval(-4 * 3600)
+        let fiveHours = WindowUsage(window: WindowSpec(name: "5h", duration: 5 * 3600), tokens: none, remainingFraction: 0.99,
+                                    source: .reported, resetsAt: start.addingTimeInterval(5 * 3600), observedAt: now.addingTimeInterval(-60))
+        XCTAssertFalse(fiveHours.hasPlentyLeftNearReset(at: now))
+        XCTAssertFalse(weekly(left: 0.9, scope: "Fable", resetsIn: 3600).hasPlentyLeftNearReset(at: now))
+    }
+
+    func testPlentyLeftIsNotToldFromAnOldOrInferredReading() {
+        XCTAssertFalse(weekly(left: 0.9, observedAgo: WindowUsage.staleAfter + 60, resetsIn: 3600).hasPlentyLeftNearReset(at: now))
+        XCTAssertFalse(weekly(left: 0.9, source: .consumptionOnly, resetsIn: 3600).hasPlentyLeftNearReset(at: now))
+    }
+
+    func testPlentyLeftIsToldOnceAndOnlyWhenOn() {
+        let first = evaluate([weekly(left: 0.7, resetsIn: 3600)])
+        XCTAssertEqual(first.notices.count, 1)
+        XCTAssertTrue(evaluate([weekly(left: 0.7, resetsIn: 3600)], ledger: first.ledger).notices.isEmpty)
+        XCTAssertTrue(evaluate([weekly(left: 0.7, resetsIn: 3600)], enabled: [.almostOut, .runningLow, .willRunOut]).notices.isEmpty)
+    }
 }
