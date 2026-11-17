@@ -91,7 +91,9 @@ In `~/Library/Application Support/TokenMeter/usage.sqlite`, a small file made by
 again: the tokens and the models come back from the logs as far as they go, the quota readings do not.
 
 The first time the app runs this version it reads every log the CLIs still keep. On the author's Mac that was 1,304 files,
-7.4 GB, and took about a minute and a half off the main thread; after that it reads only what is new.
+7.4 GB, and took about a minute and a half off the main thread; after that it reads only what is new. Meanwhile the stats draw their
+cards empty, in grey, under the line "Reading what the logs still hold. It takes a minute or two, once." After a restart they show
+what is kept at once, and add what is new when it has been read.
 
 ## Related
 

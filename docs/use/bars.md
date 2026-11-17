@@ -105,7 +105,7 @@ apps, and it does not match how the plans count.
 | Orange warning about the App Group          | No signing team: the widget cannot read the snapshot.                                                                                                          |
 | The row of icons                            | Refresh (re-reads now, with a spinner while it works), the chart that opens the [stats](./stats.md), Settings, and Quit. Each has a name that a pointer shows. |
 
-The panel also refreshes by itself whenever it opens. The menu-bar item itself is the gauge icon.
+The panel also refreshes by itself whenever it opens. Before the first reading it draws its cards empty, in grey and pulsing slowly (still with Reduce Motion), instead of a spinner. The menu-bar item itself is the gauge icon.
 
 ## Related
 

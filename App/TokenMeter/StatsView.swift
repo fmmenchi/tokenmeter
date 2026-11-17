@@ -27,22 +27,15 @@ struct StatsView: View {
             .labelsHidden()
             .controlSize(.small)
 
-            if meter.storeIsOpening {
-                HStack(spacing: 8) {
-                    ProgressView().controlSize(.small)
-                    Text("Opening the history.").font(.caption).captionColour()
-                }
-            } else if !meter.storeAvailable {
+            if !meter.storeIsOpening && !meter.storeAvailable {
                 Text("The history could not be opened, so there are no stats. The quota in the other view is not affected.")
                     .font(.caption).captionColour().fixedSize(horizontal: false, vertical: true)
-            } else if meter.isIngesting && meter.stats.isEmpty {
-                // The first pass reads every log the CLIs still keep, which takes a minute or two once: say so instead of
-                // drawing cards that claim nothing is kept.
-                HStack(spacing: 8) {
-                    ProgressView().controlSize(.small)
-                    Text("Reading what the logs still hold. It takes a minute or two, once.").font(.caption)
-                        .captionColour()
-                }
+            } else if meter.storeIsOpening || (meter.isIngesting && meter.stats.isEmpty) || meter.snapshot == nil {
+                // One skeleton for every wait, so it is not drawn again when the wait changes. The first pass reads every log the
+                // CLIs still keep, which takes a minute or two once: say so instead of drawing cards that claim nothing is kept.
+                LoadingSkeleton(kind: .stats, count: meter.snapshot?.providers.count ?? 2,
+                                caption: meter.isIngesting && !meter.storeIsOpening
+                                    ? "Reading what the logs still hold. It takes a minute or two, once." : nil)
             } else if let snapshot = meter.snapshot {
                 // One card is open at a time; until the person chooses, the first.
                 let first = snapshot.providers.first?.provider.rawValue
@@ -61,8 +54,6 @@ struct StatsView: View {
                 }
                 Text("Seen on this Mac. The quota is for the whole account; the tokens are only those this Mac counted.")
                     .font(.caption2).captionColour().fixedSize(horizontal: false, vertical: true)
-            } else {
-                ProgressView()
             }
         }
     }
