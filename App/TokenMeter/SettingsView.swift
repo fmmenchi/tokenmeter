@@ -45,6 +45,7 @@ struct SettingsView: View {
             Text("tokenmeter registers itself the first time it runs. Turning this off is respected: it will not turn itself back on.")
                 .font(.caption).foregroundStyle(.secondary)
             ClaudeSetupGroup(meter: meter)
+            CommandLineGroup()
             Button("Show the welcome again") { WelcomeWindow.shared.showAgain() }
         }
     }
