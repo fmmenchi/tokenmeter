@@ -11,7 +11,7 @@ everything such a command needs: the snapshot it writes for the widget ([ADR 000
 
 ## Decision
 
-- **A second executable, `tokenmeter`, ships inside the app bundle** (`TokenMeter.app/Contents/MacOS/tokenmeter`), built from a new
+- **A second executable, `tokenmeter`, ships inside the app bundle** (`TokenMeter.app/Contents/Helpers/tokenmeter`; not `Contents/MacOS`, where on a disk that ignores case it would be the app's own `TokenMeter`), built from a new
   Swift package target that depends on `TokenMeterCore` and on nothing else. It is signed and notarized with the app, and updated
   with it by Sparkle ([ADR 0011](./0011-updates.md)).
 - **It reads, it never collects.** The quota comes from a copy of the snapshot that the app writes beside the usage store,

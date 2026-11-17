@@ -29,7 +29,10 @@ func fail(_ message: String, _ code: Int32) -> Never {
 
 if take("--help") || take("-h") { print(usage); exit(0) }
 if take("--version") {
-    print(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "development build")
+    // The command lives in TokenMeter.app/Contents/Helpers: the version is the app's, in Contents/Info.plist.
+    let contents = Bundle.main.executableURL?.resolvingSymlinksInPath().deletingLastPathComponent().deletingLastPathComponent()
+    let info = contents.flatMap { NSDictionary(contentsOf: $0.appendingPathComponent("Info.plist")) }
+    print(info?["CFBundleShortVersionString"] as? String ?? "development build")
     exit(0)
 }
 let json = take("--json")
