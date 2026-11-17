@@ -44,6 +44,14 @@ app, and the views stay in the app.
 Versions compare as numbers; the entries between two versions, both ends right; none when nothing new; none on a first launch;
 only the installed version's own when the last seen is unknown.
 
+## What changed while building
+
+- **The welcome's rule needed no change in the core**: it opens when it was never marked seen, which on any Mac that ran 0.8 or later
+  means the first launch only. Step 2 of the table was not needed.
+- **"Show what's new again"** lists the features of the last update that had some, or the installed version's own.
+- **The release step** is written in the develop page on packaging: a version with features adds an entry each.
+
 ## Not verified at the time of writing
 
-- The card after a real update through Sparkle: it can only be seen by updating from a version that has the feature.
+- The card after a real update through Sparkle: it can only be seen by updating from a version that has the feature. The card and
+  the list were drawn offscreen, in the dark; the window's scrolling and its changelog link could not be.

@@ -9,10 +9,10 @@ date: 2026-11-16
 
 After an update that brings new features, a card at the top of the panel says how many and opens their list.
 
-|        |                                  |
-| :----- | :------------------------------- |
-| Date   | 2026-11-16                       |
-| Status | plan written, waiting for review |
+|        |                                    |
+| :----- | :--------------------------------- |
+| Date   | 2026-11-16                         |
+| Status | implemented, 2026-11-16, in 0.16.0 |
 
 ## Intent
 
