@@ -58,6 +58,8 @@ public struct ModelShare: Equatable, Sendable {
     public let name: String
     public let tokens: Int
     public let fraction: Double
+    /// What its tokens would cost at API list prices (ADR 0016); nil when one of its models has no price.
+    public var cost: Double? = nil
 }
 
 public struct ModelBreakdown: Equatable, Sendable {
@@ -70,6 +72,10 @@ public struct ModelBreakdown: Equatable, Sendable {
     public let total: Int
     /// Tokens whose source did not say the model. They are in no share.
     public let unknownTokens: Int
+    /// The cost of the models that have a price, at API list prices (ADR 0016); nil when none has one.
+    public var cost: Double? = nil
+    /// Some tokens are of a model with no price, so `cost` counts only part of them.
+    public var costIsPartial = false
 }
 
 /// The word on a provider's card, from percentages only: it never looks at tokens. Move up says the ceiling is reached often; it
@@ -261,27 +267,38 @@ public enum UsageStats {
     public static func breakdown(_ totals: [UsageStore.ModelTotal], rules: [ProviderConfig.Usage.Family],
                                  shownCount: Int = 3, otherBelow: Double = 0.02) -> ModelBreakdown {
         var byFamily: [String: Int] = [:]
+        // The cost of a family, and whether a model of it has no price: nil then, so a share is never understated.
+        var costByFamily: [String: Double?] = [:]
         var unknown = 0
+        var priced: Double?
+        var partial = false
         for item in totals {
             let tokens = item.input + item.output
+            let cost = Pricing.cost(of: item)
+            if let cost { priced = (priced ?? 0) + cost } else if tokens > 0 || item.cacheRead + item.cacheWrite > 0 { partial = true }
             guard let name = family(of: item.model, rules: rules) else {
                 if item.model == nil { unknown += tokens }
                 continue
             }
             byFamily[name, default: 0] += tokens
+            let sofar = costByFamily[name] ?? 0
+            costByFamily[name] = sofar.flatMap { sum in cost.map { sum + $0 } }
         }
         let total = byFamily.values.reduce(0, +)
         guard total > 0 else {
             return ModelBreakdown(shown: [], more: [], other: nil, total: 0, unknownTokens: unknown)
         }
-        let shares = byFamily.map { ModelShare(name: $0.key, tokens: $0.value, fraction: Double($0.value) / Double(total)) }
+        let shares = byFamily.map {
+            ModelShare(name: $0.key, tokens: $0.value, fraction: Double($0.value) / Double(total), cost: costByFamily[$0.key] ?? nil)
+        }
             .sorted { $0.tokens != $1.tokens ? $0.tokens > $1.tokens : $0.name < $1.name }
         let large = shares.filter { $0.fraction >= otherBelow }
         let small = shares.filter { $0.fraction < otherBelow }
+        let smallCost = small.reduce(Double?.some(0)) { sum, share in sum.flatMap { s in share.cost.map { s + $0 } } }
         let other = small.isEmpty ? nil : ModelShare(name: "Other", tokens: small.map(\.tokens).reduce(0, +),
-                                                     fraction: small.map(\.fraction).reduce(0, +))
+                                                     fraction: small.map(\.fraction).reduce(0, +), cost: smallCost)
         return ModelBreakdown(shown: Array(large.prefix(shownCount)), more: Array(large.dropFirst(shownCount)), other: other,
-                              total: total, unknownTokens: unknown)
+                              total: total, unknownTokens: unknown, cost: priced, costIsPartial: priced != nil && partial)
     }
 
     /// What one provider's card says, from the store.
