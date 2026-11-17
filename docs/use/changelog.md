@@ -8,6 +8,13 @@ sidebar_position: 10
 
 What changed in each version, newest first. The update window shows the notes of the version it offers, taken from this page, and links here for the rest.
 
+## 0.15.1 {#v0-15-1}
+
+Released on 2026-11-16.
+
+- **The cost is read from the providers' price pages.** The list of 0.15.0 came from an older table and priced some cache reads too high. Claude Code's cache writes now count as the one-hour writes they are, a long prompt pays its higher rates (Haiku 5.5 over 100K tokens, OpenAI over 272K), and ChatGPT's models have a price, except `codex-auto-review`, which OpenAI does not list ([Stats](./stats.md#the-cost)).
+- **The cost column no longer squeezes the list of models**: the names, the tokens and the figures are written whole.
+
 ## 0.15.0 {#v0-15-0}
 
 Released on 2026-11-16.

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>tokenmeter 0.15.1</title>
+<style>
+  /* Colours are given for both appearances: the web view of the update window does not always follow the system on its own. */
+  :root { color-scheme: light dark; --text: #1d1d1f; --back: #ffffff; --link: #0a60d6; --code: rgba(0, 0, 0, 0.07); }
+  @media (prefers-color-scheme: dark) { :root { --text: #f5f5f7; --back: #1e1e1e; --link: #4da3ff; --code: rgba(255, 255, 255, 0.14); } }
+  html { background: var(--back); }
+  body { font: 13px/1.5 -apple-system, "SF Pro", system-ui, sans-serif; margin: 0; padding: 16px 20px 24px; color: var(--text); background: var(--back); }
+  h1 { font-size: 17px; margin: 0 0 8px; }
+  p, li { margin: 0 0 8px; }
+  ul { padding-left: 20px; margin: 0 0 8px; }
+  code { font: 12px ui-monospace, "SF Mono", monospace; padding: 1px 4px; border-radius: 4px; background: var(--code); }
+  a { color: var(--link); }
+  .all { margin-top: 12px; }
+</style>
+</head>
+<body>
+<h1>tokenmeter 0.15.1</h1>
+<p>Released on 2026-11-16.</p>
+<ul><li><strong>The cost is read from the providers' price pages.</strong> The list of 0.15.0 came from an older table and priced some cache reads too high. Claude Code's cache writes now count as the one-hour writes they are, a long prompt pays its higher rates (Haiku 5.5 over 100K tokens, OpenAI over 272K), and ChatGPT's models have a price, except <code>codex-auto-review</code>, which OpenAI does not list (Stats).</li><li><strong>The cost column no longer squeezes the list of models</strong>: the names, the tokens and the figures are written whole.</li></ul>
+<p class="all"><a href="https://fmmenchi.github.io/tokenmeter/use/changelog">The whole changelog</a></p>
+</body>
+</html>
