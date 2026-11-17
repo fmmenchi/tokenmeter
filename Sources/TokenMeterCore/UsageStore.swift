@@ -64,6 +64,9 @@ public final class UsageStore: @unchecked Sendable {
         public let input: Int
         public let output: Int
         public let messages: Int
+        /// Kept apart from the token figures, which leave the cache out; the cost counts it (ADR 0016).
+        public var cacheRead = 0
+        public var cacheWrite = 0
     }
 
     public struct Failure: Error, Equatable, CustomStringConvertible {
@@ -322,12 +325,13 @@ public final class UsageStore: @unchecked Sendable {
         lock.lock()
         defer { lock.unlock() }
         return rows("""
-            SELECT model, SUM(input), SUM(output), COUNT(*) FROM messages
+            SELECT model, SUM(input), SUM(output), COUNT(*), SUM(cache_read), SUM(cache_write) FROM messages
             WHERE provider = ? AND at >= ? GROUP BY model
             """, binds: [provider.rawValue, since?.timeIntervalSince1970 ?? -1e18]) {
             ModelTotal(model: sqlite3_column_type($0, 0) == SQLITE_NULL ? nil : String(cString: sqlite3_column_text($0, 0)),
                        input: Int(sqlite3_column_int64($0, 1)), output: Int(sqlite3_column_int64($0, 2)),
-                       messages: Int(sqlite3_column_int64($0, 3)))
+                       messages: Int(sqlite3_column_int64($0, 3)), cacheRead: Int(sqlite3_column_int64($0, 4)),
+                       cacheWrite: Int(sqlite3_column_int64($0, 5)))
         }
     }
 

@@ -144,7 +144,7 @@ extension StatsCard {
         guard models.total > 0 else { return nil }
         let shown = models.shown.map { "\($0.name) \(Int(($0.fraction * 100).rounded()))%" }
         let rest = models.more.count + (models.other == nil ? 0 : 1)
-        return (shown + (rest > 0 ? ["\(rest) more"] : [])).joined(separator: " · ")
+        return (shown + (rest > 0 ? ["\(rest) more"] : []) + [models.cost.map(dollars)].compactMap { $0 }).joined(separator: " · ")
     }
 }
 
@@ -177,6 +177,16 @@ private struct ModelList: View {
                     }
                 }
                 if expanded { ForEach(rest, id: \.name) { legend($0, color: .secondary.opacity(0.5)) } }
+                if let cost = models.cost {
+                    Divider()
+                    HStack {
+                        Text(models.costIsPartial ? "At API list prices, the models with a price" : "At API list prices, in this range")
+                            .font(.caption2).captionColour()
+                        Spacer()
+                        Text(dollars(cost)).font(.caption.bold().monospacedDigit())
+                    }
+                    .help("What these tokens would cost billed by the token, cache included, at the prices of \(Pricing.listedOn). A plan is not billed this way.")
+                }
             }
         } else if models.unknownTokens > 0 {
             Text("This provider does not say which model the tokens are for.").font(.caption2).captionColour()
@@ -205,9 +215,14 @@ private struct ModelList: View {
             Text(share.name).font(.caption2.weight(.medium)).lineLimit(1).truncationMode(.middle)
             Spacer(minLength: 4)
             Text(share.tokens.compactTokens).font(.caption2).captionColour()
+            // At API list prices (ADR 0016); a dash for a model with no price, nothing when no model of the provider has one.
+            if models.cost != nil {
+                Text(share.cost.map(dollars) ?? "–").font(.caption2.monospacedDigit()).captionColour().frame(width: 52, alignment: .trailing)
+            }
             Text(percent(share.fraction)).font(.caption2.bold().monospacedDigit()).frame(width: 32, alignment: .trailing)
         }
-        .help("\(share.name): \(share.tokens.compactTokens) tokens, input plus output")
+        .help("\(share.name): \(share.tokens.compactTokens) tokens, input plus output"
+              + (share.cost.map { ", \(dollars($0)) at API list prices of \(Pricing.listedOn), cache included" } ?? ""))
     }
 }
 
@@ -371,4 +386,11 @@ private struct AllProvidersCard: View {
         }
         .padding(.leading, 12)
     }
+}
+
+/// A cost at API list prices, always marked as an estimate: "≈ $1,240", "≈ $14", "≈ $0.40".
+func dollars(_ value: Double) -> String {
+    let format = value >= 100 ? FloatingPointFormatStyle<Double>.number.precision(.fractionLength(0))
+        : value >= 1 ? .number.precision(.fractionLength(0...1)) : .number.precision(.fractionLength(2))
+    return "≈ $\(value.formatted(format))"
 }
