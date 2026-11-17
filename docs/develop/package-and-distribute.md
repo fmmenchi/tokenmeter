@@ -81,6 +81,7 @@ download the app again, so the copy matters.
 **For each release**, after the steps above:
 
 ```bash
+# 0. a version with features: one entry each in WhatsNew.entries (Sources/TokenMeterCore/WhatsNew.swift), or the panel never says them
 # 1. raise CURRENT_PROJECT_VERSION by one, set MARKETING_VERSION, write the version in docs/use/changelog.md and make its page of notes:
 ./scripts/release-notes.sh  #    apps/docusaurus/static/release-notes/v<version>.html; commit all of it, then tag v<MARKETING_VERSION>
 ./scripts/sign-release.sh   # refuses without the key or the tag

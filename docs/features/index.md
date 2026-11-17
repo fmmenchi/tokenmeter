@@ -37,6 +37,7 @@ are [ADRs](../adr), and its overview links them.
 | [Unused week](./2026-11-16-unused-week/index.md): near the end of a week with half its quota left, a line on the bar and a notice                                            | 2026-11-16 | [Overview](./2026-11-16-unused-week/index.md), [Proposal](./2026-11-16-unused-week/proposal.md), [Plan](./2026-11-16-unused-week/plan.md)                                           |
 | [Cost in USD](./2026-11-16-cost-usd/index.md): what the counted tokens would cost at API list prices, in the stats                                                           | 2026-11-16 | [Overview](./2026-11-16-cost-usd/index.md), [Proposal](./2026-11-16-cost-usd/proposal.md), [Plan](./2026-11-16-cost-usd/plan.md)                                                    |
 | [Command-line tool](./2026-11-16-cli/index.md): `tokenmeter` prints the quota and the stats in Terminal, as text or JSON                                                     | 2026-11-16 | [Overview](./2026-11-16-cli/index.md), [Proposal](./2026-11-16-cli/proposal.md), [Plan](./2026-11-16-cli/plan.md)                                                                   |
+| [What's new](./2026-11-16-whats-new/index.md): after an update with new features, a card in the panel says them and opens their list                                         | 2026-11-16 | [Overview](./2026-11-16-whats-new/index.md), [Proposal](./2026-11-16-whats-new/proposal.md), [Plan](./2026-11-16-whats-new/plan.md)                                                 |
 
 ## In design and build
 

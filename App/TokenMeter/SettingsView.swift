@@ -46,7 +46,10 @@ struct SettingsView: View {
                 .font(.caption).foregroundStyle(.secondary)
             ClaudeSetupGroup(meter: meter)
             CommandLineGroup()
-            Button("Show the welcome again") { WelcomeWindow.shared.showAgain() }
+            HStack {
+                Button("Show the welcome again") { WelcomeWindow.shared.showAgain() }
+                Button("Show what's new again") { WhatsNew.shared.showList() }
+            }
         }
     }
 }
