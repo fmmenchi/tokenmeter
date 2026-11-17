@@ -69,7 +69,7 @@ struct MenuContent: View {
                 }
                 .font(.caption2).captionColour()
             } else {
-                ProgressView()
+                LoadingSkeleton(kind: .quota)
             }
             Divider()
             HStack(spacing: 6) {
