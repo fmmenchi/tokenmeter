@@ -16,6 +16,7 @@ struct MenuContent: View {
             if case .available(let version, let notes) = meter.updater.state {
                 UpdateNotice(version: version, notes: notes) { meter.updater.checkNow() }
             }
+            if !WhatsNew.shared.pending.isEmpty { WhatsNewNotice(whatsNew: WhatsNew.shared) }
             ForEach(meter.problems) { problem in
                 ProblemBanner(
                     problem: problem, topicTitle: title(of: problem.topic), fix: meter.fixDescriptor(for: problem),
