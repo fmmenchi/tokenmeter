@@ -264,7 +264,9 @@ public enum UsageStats {
 
     /// Input plus output tokens by family, largest first: `shownCount` of them, the rest behind "more", and what is under
     /// `otherBelow` of the total added into one share.
+    /// `costs` are the totals split by size of prompt (`UsageStore.costTotals`); without them the cost is drawn from `totals`.
     public static func breakdown(_ totals: [UsageStore.ModelTotal], rules: [ProviderConfig.Usage.Family],
+                                 costs: [UsageStore.ModelTotal]? = nil,
                                  shownCount: Int = 3, otherBelow: Double = 0.02) -> ModelBreakdown {
         var byFamily: [String: Int] = [:]
         // The cost of a family, and whether a model of it has no price: nil then, so a share is never understated.
@@ -274,13 +276,17 @@ public enum UsageStats {
         var partial = false
         for item in totals {
             let tokens = item.input + item.output
-            let cost = Pricing.cost(of: item)
-            if let cost { priced = (priced ?? 0) + cost } else if tokens > 0 || item.cacheRead + item.cacheWrite > 0 { partial = true }
             guard let name = family(of: item.model, rules: rules) else {
                 if item.model == nil { unknown += tokens }
                 continue
             }
             byFamily[name, default: 0] += tokens
+        }
+        for item in costs ?? totals {
+            let cost = Pricing.cost(of: item)
+            if let cost { priced = (priced ?? 0) + cost }
+            else if item.input + item.output + item.cacheRead + item.cacheWrite > 0 { partial = true }
+            guard let name = family(of: item.model, rules: rules) else { continue }
             let sofar = costByFamily[name] ?? 0
             costByFamily[name] = sofar.flatMap { sum in cost.map { sum + $0 } }
         }
@@ -314,7 +320,8 @@ public enum UsageStats {
                                lowestLeft: all.map(\.leftAtMost).min(), approximate: all.filter(\.approximate).count)
         }
         return ProviderStats(provider: provider, windows: windowStats,
-                             models: breakdown(store.modelTotals(provider: provider, since: start), rules: families),
+                             models: breakdown(store.modelTotals(provider: provider, since: start), rules: families,
+                                              costs: store.costTotals(provider: provider, since: start)),
                              since: store.oldest(provider: provider), quotaSince: store.oldestReading(provider: provider))
     }
 }
