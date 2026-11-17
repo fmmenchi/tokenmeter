@@ -1,0 +1,35 @@
+# ADR 0017 — A command-line tool that reads what the app already keeps
+
+Status: accepted (2026-11-16)
+
+## Context
+
+The quota and the stats are seen in the panel and the widget only. Scripts, a terminal status line or another tool cannot read them;
+the local tools tokenmeter is compared with all have a command that prints the figures, often as JSON. The app already keeps
+everything such a command needs: the snapshot it writes for the widget ([ADR 0001](./0001-app-architecture.md)) and the usage store
+([ADR 0010](./0010-the-usage-store.md)).
+
+## Decision
+
+- **A second executable, `tokenmeter`, ships inside the app bundle** (`TokenMeter.app/Contents/Helpers/tokenmeter`; not `Contents/MacOS`, where on a disk that ignores case it would be the app's own `TokenMeter`), built from a new
+  Swift package target that depends on `TokenMeterCore` and on nothing else. It is signed and notarized with the app, and updated
+  with it by Sparkle ([ADR 0011](./0011-updates.md)).
+- **It reads, it never collects.** The quota comes from a copy of the snapshot that the app writes beside the usage store,
+  `~/Library/Application Support/TokenMeter/snapshot.json`, each time it writes the widget's; the stats and the cost come from
+  `usage.sqlite`, opened read-only (nothing is made, moved or migrated). It reads no log, runs no Claude Code, and makes no network
+  call, so it says exactly what the panel says and adds no second reader of the CLIs' files. The widget's own copy cannot be read:
+  macOS refuses any other process the App Group container ("Operation not permitted", seen on 2026-11-16).
+- **The app must have run.** Without a snapshot the tool says so and exits 1; with one older than 10 minutes it prints it with its age
+  and exits 2, so a script can tell a stale figure from a fresh one. 0 is a fresh reading.
+- **The JSON is a contract with a version** (`"version": 1`): fields are added, never renamed or removed, within a version.
+- **It reads the app's own preferences** (the left or used reading, ADR 0006) from the app's defaults domain, and `--left` / `--used`
+  override them.
+- **Installing it on the `PATH` is the person's step**: Settings › General has a row "Command line" whose button copies
+  `sudo mkdir -p /usr/local/bin && sudo ln -sf '<path>' /usr/local/bin/tokenmeter`, to paste in Terminal. The app runs nothing with
+  privileges and never writes outside its own folders; the link follows the app through its updates.
+
+## Consequences
+
+- The tool is only as fresh as the app: it shows the last refresh, not a new one.
+- `tokenmeter-probe` stays a development spike, not shipped.
+- The bundle gains a second signed executable, which the release scripts must sign with the hardened runtime like the app.
