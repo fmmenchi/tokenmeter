@@ -75,6 +75,13 @@ As a ring, the **first three models** by tokens, input plus output, with the res
 (`fable-5` and `fable-5-1` are Fable) and a name with no rule shows as it is; the rules are `usage.families` in
 `providers.json` ([format](./configure-providers.md)). A provider whose log does not name the model says so.
 
+## The cost
+
+Next to each model's tokens the stats write what they would cost at the provider's **API list prices**, cache writes and reads
+included, and under the list the total for the range: `≈ $1,240`. A closed card ends its line with the total. It is an estimate of
+the same use billed by the token: a plan is not billed this way, so it is not what you pay. The prices are a list in the app, dated
+([ADR 0016](../adr/0016-cost-at-api-list-prices.md)); a model it does not name shows `–`, and ChatGPT's models have no price yet.
+
 ## What it does not say
 
 - **No estimate.** There is no size of a plan in tokens, no forecast and no verdict: they would rest on a ratio between tokens
