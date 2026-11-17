@@ -8,6 +8,12 @@ sidebar_position: 10
 
 What changed in each version, newest first. The update window shows the notes of the version it offers, taken from this page, and links here for the rest.
 
+## 0.14.0 {#v0-14-0}
+
+Released on 2026-11-16.
+
+- **Empty cards in place of a spinner.** Before its first reading the panel draws its cards empty, in the grey of the skin and with the skin's own bars, pulsing slowly; the stats do the same while the history opens and while the logs are read the first time, under the line that says it takes a minute or two. No figure is shown until it is read, and with Reduce Motion the cards stand still ([Stats](./stats.md)).
+
 ## 0.13.1 {#v0-13-1}
 
 Released on 2026-11-15.
