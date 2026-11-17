@@ -80,7 +80,7 @@ As a ring, the **first three models** by tokens, input plus output, with the res
 Next to each model's tokens the stats write what they would cost at the provider's **API list prices**, cache writes and reads
 included, and under the list the total for the range: `≈ $1,240`. A closed card ends its line with the total. It is an estimate of
 the same use billed by the token: a plan is not billed this way, so it is not what you pay. The prices are a list in the app, dated
-([ADR 0016](../adr/0016-cost-at-api-list-prices.md)); a model it does not name shows `–`, and ChatGPT's models have no price yet.
+([ADR 0016](../adr/0016-cost-at-api-list-prices.md)); a model it does not name shows `–` (today `codex-auto-review`). Claude Code's cache writes are priced as one-hour writes, and a long prompt (Haiku 5.5 over 100K tokens, OpenAI over 272K) at its higher rates.
 
 ## What it does not say
 
