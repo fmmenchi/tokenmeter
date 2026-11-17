@@ -8,6 +8,13 @@ sidebar_position: 10
 
 What changed in each version, newest first. The update window shows the notes of the version it offers, taken from this page, and links here for the rest.
 
+## 0.16.0 {#v0-16-0}
+
+Released on 2026-11-16.
+
+- **A command for Terminal.** `tokenmeter` prints the quota the app last read, and `tokenmeter stats` the suggestion, the windows, the tokens and their cost; `--json` gives the same to a script. It is inside the app and updates with it; Settings › General copies the line that puts it on your PATH ([Command line](./command-line.md)).
+- **What's new after an update.** When an update brings new features, a card at the top of the panel says how many since the version you had and opens their list. Only features: the fixes stay here, in the changelog ([Updates](./updates.md)).
+
 ## 0.15.1 {#v0-15-1}
 
 Released on 2026-11-16.
