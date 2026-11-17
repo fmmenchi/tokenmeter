@@ -400,6 +400,10 @@ final class Meter {
         writer.async { [weak self] in
             var failure: String?
             do { try store.write(result) } catch { failure = error.localizedDescription }
+            // The command's copy (ADR 0017): best effort, the panel and the widget do not depend on it.
+            let command = SnapshotStore.commandStore()
+            try? FileManager.default.createDirectory(at: command.url.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try? command.write(result)
             Task { @MainActor in self?.wrote(failure: failure, path: store.url.path) }
         }
     }

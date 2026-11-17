@@ -14,9 +14,11 @@ everything such a command needs: the snapshot it writes for the widget ([ADR 000
 - **A second executable, `tokenmeter`, ships inside the app bundle** (`TokenMeter.app/Contents/MacOS/tokenmeter`), built from a new
   Swift package target that depends on `TokenMeterCore` and on nothing else. It is signed and notarized with the app, and updated
   with it by Sparkle ([ADR 0011](./0011-updates.md)).
-- **It reads, it never collects.** The quota comes from the snapshot the app wrote for the widget, at the App Group container's path;
-  the stats and the cost from `usage.sqlite`, opened read-only. It reads no log, runs no Claude Code, and makes no network call, so it
-  says exactly what the panel says and adds no second reader of the CLIs' files.
+- **It reads, it never collects.** The quota comes from a copy of the snapshot that the app writes beside the usage store,
+  `~/Library/Application Support/TokenMeter/snapshot.json`, each time it writes the widget's; the stats and the cost come from
+  `usage.sqlite`, opened read-only (nothing is made, moved or migrated). It reads no log, runs no Claude Code, and makes no network
+  call, so it says exactly what the panel says and adds no second reader of the CLIs' files. The widget's own copy cannot be read:
+  macOS refuses any other process the App Group container ("Operation not permitted", seen on 2026-11-16).
 - **The app must have run.** Without a snapshot the tool says so and exits 1; with one older than 10 minutes it prints it with its age
   and exits 2, so a script can tell a stale figure from a fresh one. 0 is a fresh reading.
 - **The JSON is a contract with a version** (`"version": 1`): fields are added, never renamed or removed, within a version.

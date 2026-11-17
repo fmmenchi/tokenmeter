@@ -21,6 +21,12 @@ public struct SnapshotStore: Sendable {
             .map { SnapshotStore(url: $0.appendingPathComponent("snapshot.json")) }
     }
 
+    /// The copy the app keeps for the `tokenmeter` command, beside the usage store (ADR 0017): macOS lets no other process read an App
+    /// Group container, so the command could not read the widget's copy.
+    public static func commandStore(home: URL = FileManager.default.homeDirectoryForCurrentUser) -> SnapshotStore {
+        SnapshotStore(url: home.appendingPathComponent("Library/Application Support/TokenMeter/snapshot.json"))
+    }
+
     public func write(_ snapshot: Snapshot) throws {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
