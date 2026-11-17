@@ -67,6 +67,9 @@ public final class UsageStore: @unchecked Sendable {
         /// Kept apart from the token figures, which leave the cache out; the cost counts it (ADR 0016).
         public var cacheRead = 0
         public var cacheWrite = 0
+        /// Every message of this total had a prompt (input and both caches) over this many tokens: 0, 100K or 272K, the sizes above
+        /// which a provider charges more (ADR 0016). Only `costTotals` sets it.
+        public var promptOver = 0
     }
 
     public struct Failure: Error, Equatable, CustomStringConvertible {
@@ -332,6 +335,24 @@ public final class UsageStore: @unchecked Sendable {
                        input: Int(sqlite3_column_int64($0, 1)), output: Int(sqlite3_column_int64($0, 2)),
                        messages: Int(sqlite3_column_int64($0, 3)), cacheRead: Int(sqlite3_column_int64($0, 4)),
                        cacheWrite: Int(sqlite3_column_int64($0, 5)))
+        }
+    }
+
+    /// The totals of `modelTotals`, split by the size of the prompt of each message, for the cost (ADR 0016): a provider charges
+    /// a long prompt more, and the split must be made message by message, before anything is added up.
+    public func costTotals(provider: Provider, since: Date? = nil) -> [ModelTotal] {
+        lock.lock()
+        defer { lock.unlock() }
+        return rows("""
+            SELECT model, SUM(input), SUM(output), COUNT(*), SUM(cache_read), SUM(cache_write),
+                   CASE WHEN input + cache_read + cache_write > 272000 THEN 272000
+                        WHEN input + cache_read + cache_write > 100000 THEN 100000 ELSE 0 END AS prompt_over
+            FROM messages WHERE provider = ? AND at >= ? GROUP BY model, prompt_over
+            """, binds: [provider.rawValue, since?.timeIntervalSince1970 ?? -1e18]) {
+            ModelTotal(model: sqlite3_column_type($0, 0) == SQLITE_NULL ? nil : String(cString: sqlite3_column_text($0, 0)),
+                       input: Int(sqlite3_column_int64($0, 1)), output: Int(sqlite3_column_int64($0, 2)),
+                       messages: Int(sqlite3_column_int64($0, 3)), cacheRead: Int(sqlite3_column_int64($0, 4)),
+                       cacheWrite: Int(sqlite3_column_int64($0, 5)), promptOver: Int(sqlite3_column_int64($0, 6)))
         }
     }
 
