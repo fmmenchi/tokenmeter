@@ -7,10 +7,12 @@ let package = Package(
     products: [
         .library(name: "TokenMeterCore", targets: ["TokenMeterCore"]),
         .executable(name: "tokenmeter-probe", targets: ["tokenmeter-probe"]),
+        .executable(name: "tokenmeter", targets: ["tokenmeter"]),
     ],
     targets: [
         .target(name: "TokenMeterCore"),
         .executableTarget(name: "tokenmeter-probe", dependencies: ["TokenMeterCore"]),
+        .executableTarget(name: "tokenmeter", dependencies: ["TokenMeterCore"]),
         .testTarget(name: "TokenMeterCoreTests", dependencies: ["TokenMeterCore"]),
     ]
 )

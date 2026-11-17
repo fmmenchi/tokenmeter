@@ -32,6 +32,14 @@ targets:
       - package: TokenMeterCore
       - package: Sparkle
       - target: TokenMeterWidget
+      # ADR 0017: the command ships in Contents/Helpers. Not in Contents/MacOS: on a disk that ignores case "tokenmeter" is the app's
+      # own "TokenMeter".
+      - target: TokenMeterCLI
+        embed: true
+        codeSign: true
+        copy:
+          destination: wrapper
+          subpath: Contents/Helpers
     entitlements:
       path: App/TokenMeter/TokenMeter.entitlements
       properties:
@@ -86,3 +94,15 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.fmmenchi.tokenmeter.app.widget
         ENABLE_HARDENED_RUNTIME: YES
+  TokenMeterCLI:
+    type: tool
+    platform: macOS
+    sources: [Sources/tokenmeter]
+    dependencies:
+      - package: TokenMeterCore
+    settings:
+      base:
+        PRODUCT_NAME: tokenmeter
+        PRODUCT_BUNDLE_IDENTIFIER: com.fmmenchi.tokenmeter.cli
+        ENABLE_HARDENED_RUNTIME: YES
+        SKIP_INSTALL: YES
