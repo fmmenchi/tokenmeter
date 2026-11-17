@@ -144,7 +144,7 @@ extension StatsCard {
         guard models.total > 0 else { return nil }
         let shown = models.shown.map { "\($0.name) \(Int(($0.fraction * 100).rounded()))%" }
         let rest = models.more.count + (models.other == nil ? 0 : 1)
-        return (shown + (rest > 0 ? ["\(rest) more"] : []) + [models.cost.map(dollars)].compactMap { $0 }).joined(separator: " · ")
+        return (shown + (rest > 0 ? ["\(rest) more"] : []) + [models.cost.map { dollars($0) }].compactMap { $0 }).joined(separator: " · ")
     }
 }
 
@@ -212,12 +212,15 @@ private struct ModelList: View {
     private func legend(_ share: ModelShare, color: Color) -> some View {
         HStack(spacing: 6) {
             RoundedRectangle(cornerRadius: 2).fill(color).frame(width: 9, height: 9)
-            Text(share.name).font(.caption2.weight(.medium)).lineLimit(1).truncationMode(.middle)
+            Text(share.name).font(.caption2.weight(.medium)).lineLimit(1).truncationMode(.middle).layoutPriority(-1)
             Spacer(minLength: 4)
-            Text(share.tokens.compactTokens).font(.caption2).captionColour()
-            // At API list prices (ADR 0016); a dash for a model with no price, nothing when no model of the provider has one.
+            // Written whole: the name is the one that gives way, cut in the middle.
+            Text(share.tokens.compactTokens).font(.caption2).captionColour().fixedSize()
+            // At API list prices (ADR 0016), without the "≈" the total under the list carries; a dash for a model with no price,
+            // nothing when no model of the provider has one.
             if models.cost != nil {
-                Text(share.cost.map(dollars) ?? "–").font(.caption2.monospacedDigit()).captionColour().frame(width: 52, alignment: .trailing)
+                Text(share.cost.map { dollars($0, approximate: false) } ?? "–").font(.caption2.monospacedDigit()).captionColour()
+                    .fixedSize()
             }
             Text(percent(share.fraction)).font(.caption2.bold().monospacedDigit()).frame(width: 32, alignment: .trailing)
         }
@@ -379,7 +382,7 @@ private struct AllProvidersCard: View {
             }
             .stroke(Color.secondary.opacity(0.6), lineWidth: 1).frame(width: 8, height: 8).offset(y: -4)
             RoundedRectangle(cornerRadius: 2).fill(color).frame(width: 9, height: 9)
-            Text(share.name).font(.caption2.weight(.medium)).lineLimit(1).truncationMode(.middle)
+            Text(share.name).font(.caption2.weight(.medium)).lineLimit(1).truncationMode(.middle).layoutPriority(-1)
             Spacer(minLength: 4)
             Text(share.tokens.compactTokens).font(.caption2).captionColour()
             Text(percent(share.fraction)).font(.caption2.bold().monospacedDigit()).frame(width: 32, alignment: .trailing)
@@ -388,9 +391,10 @@ private struct AllProvidersCard: View {
     }
 }
 
-/// A cost at API list prices, always marked as an estimate: "≈ $1,240", "≈ $14", "≈ $0.40".
-func dollars(_ value: Double) -> String {
+/// A cost at API list prices, marked as an estimate where it stands alone: "≈ $1,240", "≈ $14", "≈ $0.40". The space after "≈" does
+/// not break, so the mark never ends a line without its figure.
+func dollars(_ value: Double, approximate: Bool = true) -> String {
     let format = value >= 100 ? FloatingPointFormatStyle<Double>.number.precision(.fractionLength(0))
         : value >= 1 ? .number.precision(.fractionLength(0...1)) : .number.precision(.fractionLength(2))
-    return "≈ $\(value.formatted(format))"
+    return "\(approximate ? "≈\u{00A0}" : "")$\(value.formatted(format))"
 }
