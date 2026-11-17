@@ -118,6 +118,22 @@ public final class UsageStore: @unchecked Sendable {
         }
     }
 
+    /// Opens an existing file to read it only, for the command (ADR 0017): it makes nothing, moves nothing and changes no schema.
+    /// A missing file, one of another schema, or one it cannot read is thrown.
+    public static func readOnly(url: URL) throws -> UsageStore {
+        try UsageStore(readingOnly: url)
+    }
+
+    private init(readingOnly url: URL) throws {
+        self.url = url
+        busyMilliseconds = 2000
+        let opened = sqlite3_open_v2(url.path, &db, SQLITE_OPEN_READONLY | SQLITE_OPEN_FULLMUTEX, nil)
+        guard opened == SQLITE_OK else { throw Failure(description: "open: \(message)", code: opened) }
+        sqlite3_busy_timeout(db, busyMilliseconds)
+        let version = try scalarInt("PRAGMA user_version")
+        guard version == Self.schemaVersion else { throw Failure(description: "schema \(version), expected \(Self.schemaVersion)") }
+    }
+
     deinit { close() }
 
     private func close() {
