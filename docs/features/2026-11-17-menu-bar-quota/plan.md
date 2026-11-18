@@ -29,7 +29,8 @@ app. Nothing is read from outside the app and no boundary moves.
 - **A crowded bar**: macOS hides an item that does not fit and does not say so to the app, so it cannot be detected. With more
   than three cards the bar shows one figure, the tightest of all, and the tooltip says "the tightest". The number three is a
   guess, to be checked on a real bar.
-- **When it redraws**: with every new snapshot, as the gauge does, and once a minute, so "~" appears when a reading turns old.
+- **When it redraws**: with every new snapshot, as the gauge does. A `TimelineView` that redrew it every minute left the
+  menu-bar item empty (seen on the author's Mac, 2026-11-18), so "~" appears with the next snapshot after a reading turns old.
 
 ## Where each thing goes
 
