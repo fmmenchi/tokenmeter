@@ -6,7 +6,9 @@ sidebar_position: 2
 
 # Quota in the menu bar, proposal
 
-The design that was chosen: variant D, a figure per provider in the order of the panel, named by a tooltip. It was drawn as a
+The design that was chosen: variant D, a figure per provider in the order of the panel, named by a tooltip. The tooltip and the
+red figure were dropped while building, and the choice is on at first: see the [plan](./plan.md#what-changed-while-building). It
+was drawn as a
 canvas in Claude, which is deleted once the feature is implemented; this page is what stays.
 
 ![The menu bar in light and dark: the gauge followed by the figures 31% and 99%, then the same with the order swapped, a stale figure with a tilde, a dash in place of a missing figure, a running-low figure in plain text and in red, the gauge with its dot, a crowded bar with one figure, and three tooltips that name each figure](./proposal-menu-bar.png)

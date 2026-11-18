@@ -7,7 +7,7 @@ date: 2026-11-17
 
 # Quota in the menu bar
 
-Beside the gauge, one figure per provider, in the order of the panel's cards; a hover names them.
+Beside the gauge, one figure per provider, in the order of the panel's cards.
 
 |        |                   |
 | :----- | :---------------- |
