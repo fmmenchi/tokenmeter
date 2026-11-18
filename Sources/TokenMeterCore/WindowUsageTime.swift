@@ -13,6 +13,13 @@ extension WindowUsage {
     /// True when the figure is old or inferred rather than a fresh provider reading.
     public func isApproximate(at now: Date) -> Bool { isStale(at: now) || source == .reset }
 
+    /// The figure of a window in the reading the person chose: `25%` of what is left, or `75%` of what is used; "~" before an
+    /// old or inferred one, "—" when there is none. The panel, the widget and the menu bar say it the same way.
+    public func figureText(_ display: BarsDisplay, at now: Date) -> String {
+        guard let remainingFraction else { return "—" }
+        return "\(isApproximate(at: now) ? "~" : "")\(display.percent(remaining: remainingFraction))%"
+    }
+
     /// "3h ago" style; nil when the figure was never observed.
     public func observedAgoText(at now: Date) -> String? {
         guard let observedAt else { return nil }

@@ -17,6 +17,16 @@ final class WindowUsageTimeTests: XCTestCase {
         XCTAssertTrue(usage.isApproximate(at: seen.addingTimeInterval(11 * 60)))
     }
 
+    func testTheFigureReadsAsTheBarsDoWithATildeWhenOld() {
+        let usage = window()
+        XCTAssertEqual(usage.figureText(.left, at: seen), "50%")
+        XCTAssertEqual(usage.figureText(.used, at: seen), "50%")
+        XCTAssertEqual(usage.figureText(.left, at: seen.addingTimeInterval(11 * 60)), "~50%")
+        let none = WindowUsage(window: WindowSpec(name: "5h", duration: 18000), tokens: TokenCounts(), remainingFraction: nil,
+                               source: .consumptionOnly, resetsAt: nil, observedAt: nil)
+        XCTAssertEqual(none.figureText(.left, at: seen), "—")
+    }
+
     func testAResetWindowIsApproximateAtAnyMoment() {
         XCTAssertTrue(window(source: .reset).isApproximate(at: seen))
     }
