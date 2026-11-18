@@ -15,12 +15,6 @@ extension EnvironmentValues {
 }
 
 extension WindowUsage {
-    /// The figure of a window in the reading the person chose: `25%` of what is left, or `75%` of what is used.
-    func figureText(_ display: BarsDisplay, at now: Date) -> String {
-        guard let remainingFraction else { return "—" }
-        return "\(isApproximate(at: now) ? "~" : "")\(display.percent(remaining: remainingFraction))%"
-    }
-
     /// Input + output tokens seen in the window. Cache reads are left out: they are ~98% of the
     /// raw total and say nothing about plan use.
     var tokensText: String { "\((tokens.input + tokens.output).compactTokens) tokens" }

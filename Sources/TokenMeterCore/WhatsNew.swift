@@ -12,6 +12,8 @@ public struct WhatsNewEntry: Equatable, Sendable {
 /// has features is released.
 public enum WhatsNew {
     public static let entries: [WhatsNewEntry] = [
+        WhatsNewEntry(version: "0.17.0", title: "The quota in the menu bar",
+                      detail: "Beside the gauge, a figure for each card, in the panel's order: the window with the least left. Settings › General turns it off."),
         WhatsNewEntry(version: "0.16.0", title: "A command for Terminal",
                       detail: "tokenmeter prints the quota and the stats in Terminal, as text or JSON. Settings › General copies the line that installs it."),
         WhatsNewEntry(version: "0.15.0", title: "The cost in dollars",

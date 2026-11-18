@@ -88,6 +88,12 @@ final class Meter {
         }
     }
 
+    /// Whether the menu bar writes the quota beside the gauge, chosen in Settings and on at first
+    /// (docs/features/2026-11-17-menu-bar-quota). Kept in the defaults; the widget does not show it.
+    var showsMenuBarFigures = UserDefaults.standard.object(forKey: Meter.menuBarFiguresKey) as? Bool ?? true {
+        didSet { UserDefaults.standard.set(showsMenuBarFigures, forKey: Self.menuBarFiguresKey) }
+    }
+
     var statsRange = StatsRange(rawValue: UserDefaults.standard.string(forKey: Meter.statsRangeKey) ?? "") ?? .quarter {
         didSet { UserDefaults.standard.set(statsRange.rawValue, forKey: Meter.statsRangeKey) }
     }
@@ -107,6 +113,7 @@ final class Meter {
     private static let statsRangeKey = "statsRange"
     private static let skinKey = "skin"
     private static let barsDisplayKey = "barsDisplay"
+    private static let menuBarFiguresKey = "menuBarFigures"
     private static let openStatsCardKey = "statsOpenCard"
     /// The id of the card for all providers, next to the ids of the providers.
     static let allProvidersCard = "all-providers"
