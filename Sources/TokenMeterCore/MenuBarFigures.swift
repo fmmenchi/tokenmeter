@@ -6,7 +6,7 @@ public struct MenuBarFigure: Equatable, Sendable {
     public let title: String
     /// What the bar writes: `31%`, `~31%`, or `—` when the card has no figure.
     public let text: String
-    /// What the tooltip and VoiceOver say: `Claude 31% left`, `Claude about 31% left, 25m ago`, `Claude no figure yet`.
+    /// What VoiceOver says: `Claude 31% left`, `Claude about 31% left, 25m ago`, `Claude no figure yet`.
     public let spoken: String
     /// What is left of the tightest window, 0 to 1; nil when the card has no figure.
     public let remaining: Double?
@@ -51,18 +51,18 @@ public enum MenuBarFigures {
         return [tightest ?? figures[0]]
     }
 
-    /// The text of the tooltip: every figure, in order, the one the bar writes alone named "the tightest"; "needs attention" first
-    /// when the dot is on the gauge.
-    public static func tooltip(_ figures: [MenuBarFigure], needsAttention: Bool) -> String {
+    /// The figures in words: every one, in order, the one the bar writes alone named "the tightest"; "needs attention" first when
+    /// the dot is on the gauge.
+    public static func names(_ figures: [MenuBarFigure], needsAttention: Bool) -> String {
         let alone = figures.count > crowdedAfter ? shown(figures).first : nil
         let parts = figures.map { $0 == alone ? "\($0.spoken), the tightest" : $0.spoken }
         return ((needsAttention ? ["needs attention"] : []) + [parts.joined(separator: " · ")])
             .filter { !$0.isEmpty }.joined(separator: " · ")
     }
 
-    /// What VoiceOver says for the item: the app's name, then the tooltip's text, with commas where the tooltip has dots.
+    /// What VoiceOver says for the item: the app's name, then the figures in words, with commas.
     public static func accessibilityLabel(_ figures: [MenuBarFigure], needsAttention: Bool) -> String {
-        let text = tooltip(figures, needsAttention: needsAttention).replacingOccurrences(of: " · ", with: ", ")
+        let text = names(figures, needsAttention: needsAttention).replacingOccurrences(of: " · ", with: ", ")
         return text.isEmpty ? "tokenmeter" : "tokenmeter, \(text)"
     }
 }

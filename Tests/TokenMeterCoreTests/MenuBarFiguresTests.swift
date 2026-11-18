@@ -1,7 +1,7 @@
 import XCTest
 @testable import TokenMeterCore
 
-/// The quota in the menu bar: one figure per card, in the panel's order, each its tightest window, said in words by the tooltip.
+/// The quota in the menu bar: one figure per card, in the panel's order, each its tightest window, said in words to VoiceOver.
 final class MenuBarFiguresTests: XCTestCase {
     private let now = Date(timeIntervalSince1970: 2_000_000)
 
@@ -67,11 +67,11 @@ final class MenuBarFiguresTests: XCTestCase {
         XCTAssertEqual(shown.map(\.text), ["99%", "31%"])
     }
 
-    func testACrowdedBarShowsTheTightestOfAllAndTheTooltipNamesIt() {
+    func testACrowdedBarShowsTheTightestOfAllAndTheWordsNameIt() {
         let all = figures([card("a", "Claude", [window("5h", left: 0.5)]), card("b", "Claude work", [window("5h", left: 0.2)]),
                            card("c", "ChatGPT", [window("5h", left: 0.9)]), card("d", "Codex work", [window("5h", left: nil)])])
         XCTAssertEqual(MenuBarFigures.shown(all).map(\.text), ["20%"])
-        XCTAssertEqual(MenuBarFigures.tooltip(all, needsAttention: false),
+        XCTAssertEqual(MenuBarFigures.names(all, needsAttention: false),
                        "Claude 50% left · Claude work 20% left, the tightest · ChatGPT 90% left · Codex work no figure yet")
     }
 
@@ -83,7 +83,7 @@ final class MenuBarFiguresTests: XCTestCase {
 
     func testTheTextNamesEveryCardAndPutsAttentionFirst() {
         let all = figures([card("claude", "Claude", [window("5h", left: 0.31)]), card("chatgpt", "ChatGPT", [window("5h", left: 0.99)])])
-        XCTAssertEqual(MenuBarFigures.tooltip(all, needsAttention: false), "Claude 31% left · ChatGPT 99% left")
+        XCTAssertEqual(MenuBarFigures.names(all, needsAttention: false), "Claude 31% left · ChatGPT 99% left")
         XCTAssertEqual(MenuBarFigures.accessibilityLabel(all, needsAttention: true),
                        "tokenmeter, needs attention, Claude 31% left, ChatGPT 99% left")
     }
