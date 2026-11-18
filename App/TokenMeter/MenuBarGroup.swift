@@ -10,7 +10,7 @@ struct MenuBarGroup: View {
             Toggle("Show the quota in the menu bar", isOn: Binding(
                 get: { meter.showsMenuBarFigures },
                 set: { meter.showsMenuBarFigures = $0 }))
-            Text("A figure for each card, in the panel's order: the window with the least left. Point at it to see the names.")
+            Text("A figure for each card, in the order of the panel: the window with the least left. The panel shows the cards in the same order.")
                 .font(.caption).foregroundStyle(.secondary)
         }
     }

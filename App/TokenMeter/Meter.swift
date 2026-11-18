@@ -88,9 +88,9 @@ final class Meter {
         }
     }
 
-    /// Whether the menu bar writes the quota beside the gauge, chosen in Settings and off at first
+    /// Whether the menu bar writes the quota beside the gauge, chosen in Settings and on at first
     /// (docs/features/2026-11-17-menu-bar-quota). Kept in the defaults; the widget does not show it.
-    var showsMenuBarFigures = UserDefaults.standard.bool(forKey: Meter.menuBarFiguresKey) {
+    var showsMenuBarFigures = UserDefaults.standard.object(forKey: Meter.menuBarFiguresKey) as? Bool ?? true {
         didSet { UserDefaults.standard.set(showsMenuBarFigures, forKey: Self.menuBarFiguresKey) }
     }
 
