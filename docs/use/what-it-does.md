@@ -11,9 +11,10 @@ A small Mac app that shows, in the menu bar, how much of your **Claude** and **C
 ## What you see
 
 - A **gauge icon** in the menu bar. A **dot** on its corner says that the panel lists a problem worth a look.
-- If you turn it on in Settings › General, **the quota beside the gauge**: a figure for each card, in the panel's order, the
+- **The quota beside the gauge**: a figure for each card, in the panel's order, the
   window with the least left (`31%  99%`). A `~` marks a reading older than 10 minutes, `—` a card with no figure yet; with more
-  than three cards, only the lowest is shown. Point at the item to see which card each figure is.
+  than three cards, only the lowest is shown. The cards in the panel are in the same order. You can turn it off in Settings ›
+  General.
 - A **panel** when you click it: for each provider, a bar for the **5-hour window** and one for the
   **weekly window**, with the time to reset and the tokens used.
 - **Notifications**, if you turn them on, when a window is running out ([Notifications](./notifications.md)).
