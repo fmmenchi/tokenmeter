@@ -23,11 +23,11 @@ several providers that did not say which plan it was about.
 
 ## The nucleus
 
-| Part                | Page                      | Status            |
-| :------------------ | :------------------------ | :---------------- |
-| Proposal            | [Proposal](./proposal.md) | chosen: variant D |
-| Implementation plan | not written yet           |                   |
-| Decisions           | not decided yet           |                   |
+| Part                | Page                      | Status                               |
+| :------------------ | :------------------------ | :----------------------------------- |
+| Proposal            | [Proposal](./proposal.md) | chosen: variant D                    |
+| Implementation plan | [Plan](./plan.md)         | written, to be approved              |
+| Decisions           | none                      | nothing structural, as the plan says |
 
 ## Related
 

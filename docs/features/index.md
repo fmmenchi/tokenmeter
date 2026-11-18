@@ -41,9 +41,9 @@ are [ADRs](../adr), and its overview links them.
 
 ## In design and build
 
-| Feature                                                                                                                     | Date       | Pages                                                                                                 |
-| :-------------------------------------------------------------------------------------------------------------------------- | :--------- | :---------------------------------------------------------------------------------------------------- |
-| [Quota in the menu bar](./2026-11-17-menu-bar-quota/index.md): a figure per provider beside the gauge, in the panel's order | 2026-11-17 | [Overview](./2026-11-17-menu-bar-quota/index.md), [Proposal](./2026-11-17-menu-bar-quota/proposal.md) |
+| Feature                                                                                                                     | Date       | Pages                                                                                                                                              |
+| :-------------------------------------------------------------------------------------------------------------------------- | :--------- | :------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Quota in the menu bar](./2026-11-17-menu-bar-quota/index.md): a figure per provider beside the gauge, in the panel's order | 2026-11-17 | [Overview](./2026-11-17-menu-bar-quota/index.md), [Proposal](./2026-11-17-menu-bar-quota/proposal.md), [Plan](./2026-11-17-menu-bar-quota/plan.md) |
 
 ## The pattern: from idea to implemented
 
