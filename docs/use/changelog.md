@@ -8,6 +8,12 @@ sidebar_position: 10
 
 What changed in each version, newest first. The update window shows the notes of the version it offers, taken from this page, and links here for the rest.
 
+## 0.17.0 {#v0-17-0}
+
+Released on 2026-11-18.
+
+- **The quota in the menu bar.** Beside the gauge, a figure for each card of the panel, in the same order: the window with the least left, read as left or used as the bars are. `~` marks a reading older than 10 minutes, `—` a card with no figure yet; with more than three cards, only the lowest is shown. It is on at first, and Settings › General turns it off ([What it does](./what-it-does.md#what-you-see)).
+
 ## 0.16.0 {#v0-16-0}
 
 Released on 2026-11-16.
