@@ -7,12 +7,12 @@ date: 2026-11-17
 
 # Quota in the menu bar
 
-Beside the gauge, one figure per provider, in the order of the panel's cards.
+Beside the gauge, one figure per card, in the order of the panel's cards.
 
-|        |                   |
-| :----- | :---------------- |
-| Date   | 2026-11-17        |
-| Status | in design, chosen |
+|        |                                    |
+| :----- | :--------------------------------- |
+| Date   | 2026-11-17                         |
+| Status | implemented, 2026-11-18, in 0.17.0 |
 
 ## Intent
 
