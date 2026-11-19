@@ -38,12 +38,11 @@ are [ADRs](../adr), and its overview links them.
 | [Cost in USD](./2026-11-16-cost-usd/index.md): what the counted tokens would cost at API list prices, in the stats                                                           | 2026-11-16 | [Overview](./2026-11-16-cost-usd/index.md), [Proposal](./2026-11-16-cost-usd/proposal.md), [Plan](./2026-11-16-cost-usd/plan.md)                                                    |
 | [Command-line tool](./2026-11-16-cli/index.md): `tokenmeter` prints the quota and the stats in Terminal, as text or JSON                                                     | 2026-11-16 | [Overview](./2026-11-16-cli/index.md), [Proposal](./2026-11-16-cli/proposal.md), [Plan](./2026-11-16-cli/plan.md)                                                                   |
 | [What's new](./2026-11-16-whats-new/index.md): after an update with new features, a card in the panel says them and opens their list                                         | 2026-11-16 | [Overview](./2026-11-16-whats-new/index.md), [Proposal](./2026-11-16-whats-new/proposal.md), [Plan](./2026-11-16-whats-new/plan.md)                                                 |
+| [Quota in the menu bar](./2026-11-17-menu-bar-quota/index.md): a figure per card beside the gauge, in the panel's order                                                      | 2026-11-18 | [Overview](./2026-11-17-menu-bar-quota/index.md), [Proposal](./2026-11-17-menu-bar-quota/proposal.md), [Plan](./2026-11-17-menu-bar-quota/plan.md)                                  |
 
 ## In design and build
 
-| Feature                                                                                                                     | Date       | Pages                                                                                                                                              |
-| :-------------------------------------------------------------------------------------------------------------------------- | :--------- | :------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Quota in the menu bar](./2026-11-17-menu-bar-quota/index.md): a figure per provider beside the gauge, in the panel's order | 2026-11-17 | [Overview](./2026-11-17-menu-bar-quota/index.md), [Proposal](./2026-11-17-menu-bar-quota/proposal.md), [Plan](./2026-11-17-menu-bar-quota/plan.md) |
+No features are currently in design or build.
 
 ## The pattern: from idea to implemented
 
