@@ -19,10 +19,10 @@
     "docs:build": "pnpm --dir apps/docusaurus build"
   },
   "devDependencies": {
-    "@commitlint/cli": "^21.2.3",
-    "@commitlint/config-conventional": "^21.2.3",
+    "@commitlint/cli": "^21.2.4",
+    "@commitlint/config-conventional": "^21.2.4",
     "cz-conventional-changelog": "^3.3.0",
     "husky": "^9.1.7",
-    "prettier": "^3.8.0"
+    "prettier": "^3.10.1"
   }
 }
