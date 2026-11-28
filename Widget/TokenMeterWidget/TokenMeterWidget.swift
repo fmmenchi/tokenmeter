@@ -5,44 +5,48 @@ import WidgetKit
 struct UsageEntry: TimelineEntry {
     let date: Date
     let snapshot: Snapshot?
+    /// The account chosen with Edit; nil when none was, and the widget shows the first card (ADR 0018).
+    let accountID: String?
 }
 
-struct UsageProvider: TimelineProvider {
-    func placeholder(in context: Context) -> UsageEntry { UsageEntry(date: .now, snapshot: nil) }
+struct UsageProvider: AppIntentTimelineProvider {
+    func placeholder(in context: Context) -> UsageEntry { UsageEntry(date: .now, snapshot: nil, accountID: nil) }
 
-    func getSnapshot(in context: Context, completion: @escaping (UsageEntry) -> Void) {
-        completion(entry())
+    func snapshot(for configuration: ChooseAccountIntent, in context: Context) async -> UsageEntry {
+        entry(for: configuration)
     }
 
-    func getTimeline(in context: Context, completion: @escaping (Timeline<UsageEntry>) -> Void) {
-        let current = entry()
-        // One extra entry at each reset time, so a bar flips to "reset" when its window ends
+    func timeline(for configuration: ChooseAccountIntent, in context: Context) async -> Timeline<UsageEntry> {
+        let current = entry(for: configuration)
+        // One extra entry at each reset time, so a gauge flips to "reset" when its window ends
         // instead of waiting for the next refresh.
         let resets = (current.snapshot?.providers.flatMap(\.windows).compactMap(\.resetsAt) ?? [])
             .filter { $0 > .now && $0 < .now.addingTimeInterval(24 * 3600) }
-        let later = Set(resets).sorted().map { UsageEntry(date: $0, snapshot: current.snapshot) }
-        completion(Timeline(entries: [current] + later, policy: .after(.now.addingTimeInterval(15 * 60))))
+        let later = Set(resets).sorted().map { UsageEntry(date: $0, snapshot: current.snapshot, accountID: current.accountID) }
+        return Timeline(entries: [current] + later, policy: .after(.now.addingTimeInterval(15 * 60)))
     }
 
-    private func entry() -> UsageEntry {
-        UsageEntry(date: .now, snapshot: SnapshotStore.appGroupStore()?.read())
+    private func entry(for configuration: ChooseAccountIntent) -> UsageEntry {
+        UsageEntry(date: .now, snapshot: SnapshotStore.appGroupStore()?.read(), accountID: configuration.account?.id)
     }
 }
 
 struct UsageWidgetView: View {
     let entry: UsageEntry
+    @Environment(\.widgetFamily) private var family
 
     var body: some View {
         if let snapshot = entry.snapshot {
-            VStack(alignment: .leading, spacing: 8) {
-                ForEach(snapshot.providers, id: \.provider) {
-                    ProviderCard(snapshot: $0, problemCount: snapshot.problemCount(for: $0), showsRunOut: true)
-                }
-                Spacer(minLength: 0)
-                Text(snapshot.generatedAt, style: .relative).font(.caption2).captionColour()
+            if let card = WidgetGauges.card(withID: entry.accountID, in: snapshot) {
+                GaugeWidgetView(card: card, size: family == .systemSmall ? .small : .medium,
+                                problemCount: snapshot.problemCount(for: card))
+            } else {
+                // The account was removed or hidden: say so rather than show another one (ADR 0018).
+                Text("This account is no longer in the panel. Right-click the widget and choose Edit to pick another.")
+                    .font(.system(size: 11)).captionColour()
             }
         } else {
-            Text("Open tokenmeter once to publish usage.").font(.caption).captionColour()
+            Text("Open tokenmeter once to publish usage.").font(.system(size: 11)).captionColour()
         }
     }
 }
@@ -64,16 +68,17 @@ struct WidgetFill: View {
 @main
 struct TokenMeterWidget: Widget {
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: "TokenMeterWidget", provider: UsageProvider()) { entry in
+        // The kind keeps its name, so a widget already on the desktop stays there after the update (ADR 0018).
+        AppIntentConfiguration(kind: "TokenMeterWidget", intent: ChooseAccountIntent.self, provider: UsageProvider()) { entry in
             UsageWidgetView(entry: entry)
-                // Each entry is drawn for its own date: the bar of a window flips to reset at its entry, and the countdowns move.
+                // Each entry is drawn for its own date: the gauge of a window flips to reset at its entry, and the countdowns move.
                 .environment(\.renderDate, entry.date)
                 .skinned(entry.snapshot?.skin ?? .system)
                 .environment(\.barsDisplay, entry.snapshot?.barsDisplay ?? .left)
                 .containerBackground(for: .widget) { WidgetFill(skin: entry.snapshot?.skin ?? .system) }
         }
         .configurationDisplayName("AI quota")
-        .description("Remaining Claude and ChatGPT quota.")
+        .description("How much is left of one account's plan. Edit the widget to choose the account.")
         .supportedFamilies([.systemSmall, .systemMedium])
     }
 }
