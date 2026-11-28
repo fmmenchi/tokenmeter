@@ -11,16 +11,16 @@ How the pieces fit, where each file goes and which rules keep it that way. The r
 
 ## The pieces
 
-| Path                        | What it is                                                                                                                                  |
-| :-------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------ |
-| `Sources/TokenMeterCore`    | A Swift package target: log reading, window maths, the `Snapshot`, the problems and their fixes, the usage store and the statistics. No UI. |
-| `Sources/tokenmeter-probe`  | A terminal tool that prints each provider's windows. Not a product surface.                                                                 |
-| `App/TokenMeter`            | The host app: menu-bar item, panel, Settings, refresh loop, launch at login.                                                                |
-| `Widget/TokenMeterWidget`   | The WidgetKit extension. It only draws a `Snapshot`.                                                                                        |
-| `Tests/TokenMeterCoreTests` | XCTest; fixtures go to a temp directory, never to real logs.                                                                                |
-| `project.yml`               | XcodeGen spec for the app and widget; `TokenMeter.xcodeproj` is generated.                                                                  |
-| `scripts/`                  | Installer, status-line script, signing and notarization ([commands](./commands.md)).                                                        |
-| `docs/`, `apps/docusaurus`  | This site: content in `docs/`, the Docusaurus app in `apps/docusaurus`.                                                                     |
+| Path                        | What it is                                                                                                                                    |
+| :-------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Sources/TokenMeterCore`    | A Swift package target: log reading, window maths, the `Snapshot`, the problems and their fixes, the usage store and the statistics. No UI.   |
+| `Sources/tokenmeter-probe`  | A terminal tool that prints each provider's windows. Not a product surface.                                                                   |
+| `App/TokenMeter`            | The host app: menu-bar item, panel, Settings, refresh loop, launch at login.                                                                  |
+| `Widget/TokenMeterWidget`   | The WidgetKit extension. It only draws a `Snapshot`, one card per widget, chosen with Edit ([ADR 0018](../adr/0018-a-widget-per-account.md)). |
+| `Tests/TokenMeterCoreTests` | XCTest; fixtures go to a temp directory, never to real logs.                                                                                  |
+| `project.yml`               | XcodeGen spec for the app and widget; `TokenMeter.xcodeproj` is generated.                                                                    |
+| `scripts/`                  | Installer, status-line script, signing and notarization ([commands](./commands.md)).                                                          |
+| `docs/`, `apps/docusaurus`  | This site: content in `docs/`, the Docusaurus app in `apps/docusaurus`.                                                                       |
 
 ## Data flow
 
