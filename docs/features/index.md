@@ -42,7 +42,9 @@ are [ADRs](../adr), and its overview links them.
 
 ## In design and build
 
-No features are currently in design or build.
+| Feature                                                                                                          | Date       | Pages                                                                                                   |
+| :--------------------------------------------------------------------------------------------------------------- | :--------- | :------------------------------------------------------------------------------------------------------ |
+| [Provider widget](./2026-11-28-provider-widget/index.md): one widget per provider or account, at most two gauges | 2026-11-28 | [Overview](./2026-11-28-provider-widget/index.md), [Proposal](./2026-11-28-provider-widget/proposal.md) |
 
 ## The pattern: from idea to implemented
 
