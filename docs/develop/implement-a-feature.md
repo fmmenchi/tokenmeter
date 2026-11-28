@@ -99,8 +99,8 @@ branch.
 - **Review** the diff against the ADR and the plan: one concern per commit, three files at most, nothing the plan does not
   name.
 - **Preview** the branch without installing it: `./scripts/preview.sh` builds it, quits the TokenMeter that is running and
-  opens the build, with your own data. Look at the menu bar, the panel and Settings. The widget needs
-  [the install](./build-and-run.md#step-4-install-it-and-let-it-start-at-login).
+  opens the build from `~/Applications`, with your own data. Look at the menu bar, the panel, Settings and the widget
+  (remove it from the desktop and add it again if it stays grey).
 - A visual change that was not seen is reported as not seen. A defect found here is fixed on the branch.
 
 ## Step 8: Merge
