@@ -15,12 +15,13 @@ final class WelcomeTests: XCTestCase {
         XCTAssertTrue(WelcomeState.atLaunch(seen: fresh.seen).isShowing)
     }
 
-    func testThereAreEightPagesInTheOrderOfTheDesign() {
+    func testThereAreNinePagesInTheOrderOfTheDesign() {
         XCTAssertEqual(WelcomeState.Page.allCases,
-                       [.whereItLives, .bars, .tick, .buttons, .stats, .suggestion, .accounts, .settings])
+                       [.whereItLives, .bars, .tick, .buttons, .stats, .suggestion, .accounts, .widget, .settings])
         XCTAssertEqual(WelcomeState.showing(.suggestion).applying(.next), .showing(.accounts), "the accounts come seventh")
-        XCTAssertEqual(WelcomeState.showing(.accounts).applying(.next), .showing(.settings), "and Settings is last")
-        XCTAssertTrue(WelcomeState.showing(.settings).endedBy(.next), "Done is on the eighth page")
+        XCTAssertEqual(WelcomeState.showing(.accounts).applying(.next), .showing(.widget), "the widget eighth")
+        XCTAssertEqual(WelcomeState.showing(.widget).applying(.next), .showing(.settings), "and Settings is last")
+        XCTAssertTrue(WelcomeState.showing(.settings).endedBy(.next), "Done is on the ninth page")
     }
 
     func testNextGoesThroughEveryPageAndThenEnds() {
