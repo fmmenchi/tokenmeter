@@ -9,10 +9,10 @@ date: 2026-11-28
 
 One widget per provider or account, with at most two gauges: what is left of each window, and when it resets.
 
-|        |                   |
-| :----- | :---------------- |
-| Date   | 2026-11-28        |
-| Status | building          |
+|        |            |
+| :----- | :--------- |
+| Date   | 2026-11-28 |
+| Status | building   |
 
 ## Intent
 
