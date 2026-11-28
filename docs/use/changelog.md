@@ -8,7 +8,9 @@ sidebar_position: 10
 
 What changed in each version, newest first. The update window shows the notes of the version it offers, taken from this page, and links here for the rest.
 
-## Unreleased {#unreleased}
+## 0.18.0 {#v0-18-0}
+
+Released on 2026-11-28.
 
 - **A widget for each account.** The widget shows one account, chosen with Edit on the widget, instead of every card one under the other, which did not fit. Its windows are two gauges, a model's own limit is a thin ring inside its window, and the skin's colours and typeface apply. A widget already on the desktop shows the first card until you choose. The welcome has a page about it ([Add the Widget](./add-the-widget.md)).
 
