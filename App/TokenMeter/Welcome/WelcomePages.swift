@@ -47,6 +47,7 @@ extension WelcomeState.Page {
         case .stats: "The stats"
         case .suggestion: "The suggestion"
         case .accounts: "An account is a folder"
+        case .widget: "A widget for each account"
         case .settings: "Settings has five tabs"
         }
     }
@@ -67,6 +68,8 @@ extension WelcomeState.Page {
             "The word at the top of a provider's card is the app's suggestion: Wait, Stay, Move up or Move down. It comes from the quota percentages only, the 5-hour windows and the weekly ones, and never looks at tokens. Move up says 95% is reached often; it does not say which plan to take."
         case .accounts:
             "A work account and a personal one? Each is a folder that Claude Code or the Codex CLI reads. Name it in providers.json and it gets a card of its own, with its own bars and history. When a folder nobody named is found, the panel says so, and Add it gives it a card."
+        case .widget:
+            "Put tokenmeter on the desktop or in Notification Center: one widget for each account, with how much is left of its windows as two gauges. A thin inner ring is a model's own limit inside its window. Right-click the desktop, choose Edit Widgets and search tokenmeter; to pick the account, right-click the widget and choose Edit."
         case .settings:
             "General, Accounts, Skin, Notifications and Updates. In General you choose whether the bars show how much is left or how much is used, and the Claude quota for each account. Accounts is where an account is added, renamed or removed. Choose a skin and turn on notifications there. The daily check for updates is in Updates, where you can turn it off. You can see this tour again from General."
         }
@@ -107,6 +110,7 @@ private struct WelcomePicture: View {
             }
             .frame(maxWidth: .infinity)
         case .accounts: AccountsPicture()
+        case .widget: WidgetPicture()
         case .settings:
             SettingsTabs(selection: .constant(.general))
                 .frame(width: 460)
@@ -185,6 +189,58 @@ private struct AccountsPicture: View {
         .overlay(RoundedRectangle(cornerRadius: 10).stroke(.quaternary, lineWidth: 1))
         .frame(maxWidth: .infinity)
         .accessibilityLabel(Text("Two Claude cards, a work account and a personal one"))
+    }
+}
+
+/// Two small widgets on a desktop, ringed: the widget's own view drawn with invented figures, a Claude account with a model's limit
+/// inside its week and a ChatGPT one (ADR 0018). Nothing here is read from the Mac.
+private struct WidgetPicture: View {
+    private static let now = Date()
+    @Environment(\.colorScheme) private var colorScheme
+
+    private static func window(_ spec: WindowSpec, left: Double, resetsIn: TimeInterval) -> WindowUsage {
+        WindowUsage(window: spec, tokens: TokenCounts(), remainingFraction: left, source: .reported,
+                    resetsAt: now.addingTimeInterval(resetsIn), observedAt: now)
+    }
+
+    private static let claude = ProviderSnapshot(
+        provider: Provider(rawValue: "claude"), title: "Claude",
+        windows: [window(.session, left: 0.62, resetsIn: 3 * 3600 + 20 * 60), window(.week, left: 0.4, resetsIn: 4 * 86_400),
+                  window(WindowSpec(name: WindowSpec.week.name, duration: WindowSpec.week.duration, scope: "Fable"), left: 0.06,
+                         resetsIn: 2 * 86_400)],
+        plan: "Max", quotaUpdatedAt: now)
+
+    private static let chatgpt = ProviderSnapshot(
+        provider: Provider(rawValue: "chatgpt"), title: "ChatGPT",
+        windows: [window(.session, left: 0.81, resetsIn: 2 * 3600), window(.week, left: 0.12, resetsIn: 2 * 86_400)],
+        plan: "Plus", quotaUpdatedAt: now)
+
+    private var desktop: LinearGradient {
+        let colors: [Color] = colorScheme == .dark
+            ? [Color(red: 0.165, green: 0.114, blue: 0.561), Color(red: 0.29, green: 0.227, blue: 0.659)]
+            : [Color(red: 0.247, green: 0.165, blue: 0.816), Color(red: 0.424, green: 0.333, blue: 0.918)]
+        return LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing)
+    }
+
+    var body: some View {
+        HStack(spacing: 12) {
+            widget(Self.claude)
+            widget(Self.chatgpt)
+        }
+        .padding(10)
+        .background(RoundedRectangle(cornerRadius: 8).fill(desktop))
+        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.accentColor, lineWidth: 3))
+        .environment(\.renderDate, Self.now)
+        .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(Text("Two small widgets, a Claude account and a ChatGPT one"))
+    }
+
+    private func widget(_ card: ProviderSnapshot) -> some View {
+        GaugeWidgetView(card: card, size: .small)
+            .padding(16)
+            .frame(width: 170, height: 170, alignment: .topLeading)
+            .background(RoundedRectangle(cornerRadius: 22, style: .continuous).fill(.background))
     }
 }
 

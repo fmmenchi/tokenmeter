@@ -8,7 +8,7 @@ sidebar_position: 2.5
 
 A short wizard that says where tokenmeter lives and how to read its panel.
 
-![The welcome wizard: the picture shows the seven pages of 0.8.0; the eighth, An account is a folder, came after it](../assets/welcome.png)
+![The welcome wizard: the picture shows the seven pages of 0.8.0; the eighth, An account is a folder, and the ninth, A widget for each account, came after it](../assets/welcome.png)
 
 ## When it opens
 
@@ -29,9 +29,10 @@ To see it again, open Settings from the gear in the panel and press **Show the w
 | The stats                         | The windows as strips of blocks, what the colours mean and that a point shows the figure, and the tokens by model.                                                 |
 | The suggestion                    | The word at the top of a card, Wait, Stay, Move up or Move down, from percentages only, the 5 hours included.                                                      |
 | An account is a folder            | A work account and a personal one are two folders, each with a card; the panel says when it finds one nobody named ([accounts](./accounts.md)).                    |
+| A widget for each account         | One widget per account, its windows as two gauges, and how to add it and pick its account ([the widget](./add-the-widget.md)).                                     |
 | Settings has five tabs            | General, Accounts, Skin, Notifications and Updates, that General chooses left or used, and where the daily check for updates can be turned off.                    |
 
-The pictures of the panel, the stats and the two accounts are the app's own views drawn with invented sample data: the figures
+The pictures of the panel, the stats, the two accounts and the two widgets are the app's own views drawn with invented sample data: the figures
 and the names in them are not yours.
 
 ## Related

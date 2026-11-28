@@ -201,13 +201,27 @@ The state of the welcome wizard, in `Sources/TokenMeterCore/Welcome/` and in `We
 | Type                  | What it is                                                                                                                                  |
 | :-------------------- | :------------------------------------------------------------------------------------------------------------------------------------------ |
 | `WelcomeState`        | `idle` or `showing(Page)`. `atLaunch(seen:)` opens at the first page when it was never seen; `applying(_:)` is the transition of an action. |
-| `WelcomeState.Page`   | The eight pages in order: `whereItLives`, `bars`, `tick`, `buttons`, `stats`, `suggestion`, `accounts`, `settings`.                         |
+| `WelcomeState.Page`   | The nine pages in order: `whereItLives`, `bars`, `tick`, `buttons`, `stats`, `suggestion`, `accounts`, `widget`, `settings`.                |
 | `WelcomeState.Action` | `back`, `next` (Done on the last page), `skip` and `close`. `endedBy(_:)` says whether an action counts as seen.                            |
 | `WelcomeSeenStore`    | Whether it was seen: `DefaultsWelcomeSeenStore` in the app, `MemoryWelcomeSeenStore` in tests.                                              |
 
 The window and the pages are in `App/TokenMeter/Welcome/`: an `NSWindow` hosting a SwiftUI view, opened by the app delegate, that uses
 nothing of the `Meter`. The pictures are two screenshots of the docs in `Assets.xcassets`; keep them in step with `docs/assets`. The
-accounts page draws two of the app's own cards with sample data instead.
+accounts page draws two of the app's own cards with sample data instead, and the widget page two of its own widgets.
+
+## The widget
+
+What a widget draws, in `Sources/TokenMeterCore/WidgetGauges.swift` and in `WidgetGaugesTests.swift`
+([ADR 0018](../adr/0018-a-widget-per-account.md), [plan](../features/2026-11-28-provider-widget/plan.md)).
+
+| Type                            | What it is                                                                                                                               |
+| :------------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------- |
+| `WidgetGauges.card(withID:in:)` | The card a widget shows: the account chosen with Edit, the first card when none was, nil when the account is no longer a card.           |
+| `WidgetGauges.gauges(of:at:)`   | At most `most` (two) gauges: the first windows of the card that are not a model's limit, in its order, resolved at the moment asked for. |
+| `WidgetGauge`                   | A window and the limits of the models that are part of it; `lowestModel` is the one the inner ring draws.                                |
+
+The view is `Shared/GaugeWidgetView.swift`, shared by the widget and the welcome; the intent that offers the accounts is
+`Widget/TokenMeterWidget/AccountIntent.swift`, and reads the same snapshot as the widget.
 
 ## Model limits
 
